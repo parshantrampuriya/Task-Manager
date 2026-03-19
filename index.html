@@ -33,14 +33,10 @@ body {
 .select-buttons button {
     padding: 15px 30px;
     font-size: 18px;
-    background: linear-gradient(45deg, #ff9f2f, #e07b12);
     border-radius: 10px;
-    border: none;
-    color: white;
-    cursor: pointer;
 }
 
-/* MAIN TITLE */
+/* TITLE */
 h1 {
     text-align: center;
     padding: 15px;
@@ -53,17 +49,21 @@ h1 {
     display: flex;
     justify-content: center;
     gap: 20px;
+    align-items: center;
 }
 
 .tab {
     padding: 10px 20px;
-    cursor: pointer;
     color: #88cfff;
 }
 
 .tab.active {
     color: #ff9f2f;
     border-bottom: 2px solid #ff9f2f;
+}
+
+.tabs button {
+    padding: 6px 12px;
 }
 
 /* INPUT */
@@ -94,7 +94,7 @@ button {
 /* GRID */
 .grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     padding: 20px;
 }
@@ -104,10 +104,8 @@ button {
 }
 
 @media (max-width: 600px) {
-    .grid { grid-template-columns: repeat(1, 1fr); }
-
+    .grid { grid-template-columns: 1fr; }
     .input-box { flex-direction: column; }
-    input, select, button { width: 100%; }
 }
 
 /* CARD */
@@ -150,13 +148,13 @@ button {
 
 <h1>🔱 TASK MANAGER 🔱</h1>
 
-<!-- USER TABS -->
+<!-- USER NAME + BACK -->
 <div class="tabs">
-    <div id="Parshant" class="tab">Parshant</div>
-    <div id="Tanu" class="tab">Tanu</div>
+    <div id="currentUserName" class="tab active"></div>
+    <button onclick="goBack()">⬅ Back</button>
 </div>
 
-<!-- FILTER TABS -->
+<!-- FILTER -->
 <div class="tabs">
     <div class="tab filter active" onclick="switchFilter('pending')">Pending</div>
     <div class="tab filter" onclick="switchFilter('completed')">Completed</div>
@@ -186,9 +184,9 @@ import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
-  authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -199,25 +197,26 @@ let currentUser = "";
 let allTasks = [];
 let currentFilter = "pending";
 
-/* 🔥 ENTER APP */
+/* ENTER */
 window.enterApp = function(user){
     currentUser = user;
-
     document.getElementById("selectPage").style.display = "none";
     document.getElementById("mainApp").style.display = "block";
-
-    document.getElementById(user).classList.add("active");
-
+    document.getElementById("currentUserName").innerText = user;
     render(allTasks);
+}
+
+/* BACK */
+window.goBack = function(){
+    document.getElementById("mainApp").style.display = "none";
+    document.getElementById("selectPage").style.display = "flex";
 }
 
 /* FILTER */
 window.switchFilter = function(filter){
     currentFilter = filter;
-
     document.querySelectorAll('.filter').forEach(t=>t.classList.remove('active'));
     event.target.classList.add('active');
-
     render(allTasks);
 }
 
@@ -255,7 +254,7 @@ window.add = async function(){
     document.getElementById("taskInput").value="";
 }
 
-/* REAL TIME */
+/* REALTIME */
 onSnapshot(tasksRef, (snapshot)=>{
     allTasks = [];
     snapshot.forEach(docu=>{
@@ -278,36 +277,26 @@ window.del = async function(id){
 
 /* RENDER */
 function render(tasks){
-
     let today = new Date().toISOString().split("T")[0];
 
     tasks = tasks.filter(t => t.user === currentUser);
 
-    if(currentFilter === "pending"){
-        tasks = tasks.filter(t => !t.completed && t.date >= today);
-    }
-    else if(currentFilter === "completed"){
-        tasks = tasks.filter(t => t.completed);
-    }
-    else if(currentFilter === "due"){
-        tasks = tasks.filter(t => !t.completed && t.date < today);
-    }
+    if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
+    else if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
+    else if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
-    let grouped = {};
+    let grouped={};
 
     tasks.forEach(t=>{
         if(!grouped[t.date]) grouped[t.date]=[];
         grouped[t.date].push(t);
     });
 
-    let sortedDates = Object.keys(grouped).sort((a,b)=>new Date(a)-new Date(b));
-
     let html="";
-
-    sortedDates.forEach(date=>{
-        html += `<div class="card"><h3>${date}</h3>`;
+    Object.keys(grouped).sort().forEach(date=>{
+        html+=`<div class="card"><h3>${date}</h3>`;
         grouped[date].forEach(task=>{
-            html += `
+            html+=`
             <div class="task ${task.completed?'completed':''}">
                 ${task.text}
                 <div>
@@ -316,7 +305,7 @@ function render(tasks){
                 </div>
             </div>`;
         });
-        html += `</div>`;
+        html+=`</div>`;
     });
 
     document.getElementById("grid").innerHTML = html;
