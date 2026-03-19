@@ -15,6 +15,32 @@ body {
     background-size: cover;
 }
 
+/* 🔥 SELECT PAGE */
+.center-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.select-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.select-buttons button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background: linear-gradient(45deg, #ff9f2f, #e07b12);
+    border-radius: 10px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* MAIN TITLE */
 h1 {
     text-align: center;
     padding: 15px;
@@ -22,7 +48,7 @@ h1 {
     text-shadow: 0 0 10px #00cfff, 0 0 10px #ff9f2f;
 }
 
-/* USER TABS */
+/* TABS */
 .tabs {
     display: flex;
     justify-content: center;
@@ -66,7 +92,6 @@ button {
 }
 
 /* GRID */
-/* GRID - DESKTOP */
 .grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -74,18 +99,15 @@ button {
     padding: 20px;
 }
 
-/* TABLET */
 @media (max-width: 1000px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* MOBILE */
 @media (max-width: 600px) {
-    .grid {
-        grid-template-columns: repeat(1, 1fr);
-    }
+    .grid { grid-template-columns: repeat(1, 1fr); }
+
+    .input-box { flex-direction: column; }
+    input, select, button { width: 100%; }
 }
 
 /* CARD */
@@ -109,29 +131,38 @@ button {
     text-decoration: line-through;
     opacity: 0.5;
 }
-
-.divider {
-    border-top: 1px dashed #00cfff33;
-    margin: 10px 0;
-}
 </style>
 </head>
 
 <body>
 
+<!-- 🔥 SELECT PAGE -->
+<div id="selectPage" class="center-screen">
+    <h1>🔱 Choose Your Path 🔱</h1>
+    <div class="select-buttons">
+        <button onclick="enterApp('Parshant')">Parshant</button>
+        <button onclick="enterApp('Tanu')">Tanu</button>
+    </div>
+</div>
+
+<!-- 🔥 MAIN APP -->
+<div id="mainApp" style="display:none;">
+
 <h1>🔱 TASK MANAGER 🔱</h1>
 
-<!-- USER SWITCH -->
+<!-- USER TABS -->
 <div class="tabs">
-    <div id="Parshant" class="tab active" onclick="switchUser('Parshant')">Parshant</div>
-    <div id="Tanu" class="tab" onclick="switchUser('Tanu')">Tanu</div>
+    <div id="Parshant" class="tab">Parshant</div>
+    <div id="Tanu" class="tab">Tanu</div>
 </div>
+
 <!-- FILTER TABS -->
 <div class="tabs">
     <div class="tab filter active" onclick="switchFilter('pending')">Pending</div>
     <div class="tab filter" onclick="switchFilter('completed')">Completed</div>
     <div class="tab filter" onclick="switchFilter('due')">Due</div>
 </div>
+
 <!-- INPUT -->
 <div class="input-box">
     <input id="taskInput" placeholder="Enter mission...">
@@ -144,10 +175,10 @@ button {
     <button onclick="add()">Add</button>
 </div>
 
-<!-- ✅ ADD HERE -->
 <div class="grid" id="grid"></div>
 
-<!-- SCRIPT -->
+</div>
+
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -157,39 +188,35 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc",
-  storageBucket: "task-manager-c32bc.firebasestorage.app",
-  messagingSenderId: "686414095912",
-  appId: "1:686414095912:web:158882cd292ccbaaccb71d"
+  projectId: "task-manager-c32bc"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const tasksRef = collection(db, "tasks");
 
-let currentUser = "Parshant";
+let currentUser = "";
 let allTasks = [];
 let currentFilter = "pending";
 
-/* 🔥 FILTER SWITCH FIXED */
+/* 🔥 ENTER APP */
+window.enterApp = function(user){
+    currentUser = user;
+
+    document.getElementById("selectPage").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+
+    document.getElementById(user).classList.add("active");
+
+    render(allTasks);
+}
+
+/* FILTER */
 window.switchFilter = function(filter){
     currentFilter = filter;
 
     document.querySelectorAll('.filter').forEach(t=>t.classList.remove('active'));
     event.target.classList.add('active');
-
-    render(allTasks);
-}
-
-/* 🔥 USER SWITCH FIXED */
-window.switchUser = function(user){
-    currentUser = user;
-
-    document.querySelectorAll('.tab').forEach(t=>{
-        if(!t.classList.contains('filter')) t.classList.remove('active');
-    });
-
-    document.getElementById(user).classList.add('active');
 
     render(allTasks);
 }
@@ -201,7 +228,7 @@ document.getElementById("category").addEventListener("change", function(){
     else {d.disabled=true; d.value="";}
 });
 
-/* ADD TASK */
+/* ADD */
 window.add = async function(){
     let t=document.getElementById("taskInput").value;
     let c=document.getElementById("category").value;
@@ -249,14 +276,13 @@ window.del = async function(id){
     await deleteDoc(doc(db,"tasks",id));
 }
 
-/* 🔥 RENDER WITH FILTER LOGIC */
+/* RENDER */
 function render(tasks){
 
     let today = new Date().toISOString().split("T")[0];
 
     tasks = tasks.filter(t => t.user === currentUser);
 
-    /* FILTER LOGIC */
     if(currentFilter === "pending"){
         tasks = tasks.filter(t => !t.completed && t.date >= today);
     }
@@ -274,35 +300,13 @@ function render(tasks){
         grouped[t.date].push(t);
     });
 
-    let todayDate = new Date().toISOString().split("T")[0];
-    let tomorrowDate = new Date();
-    tomorrowDate.setDate(new Date().getDate()+1);
-    let tomorrow = tomorrowDate.toISOString().split("T")[0];
-
-    let sortedDates = Object.keys(grouped).sort((a,b)=>{
-        if(a===todayDate) return -1;
-        if(b===todayDate) return 1;
-        if(a===tomorrow) return -1;
-        if(b===tomorrow) return 1;
-        return new Date(a)-new Date(b);
-    });
+    let sortedDates = Object.keys(grouped).sort((a,b)=>new Date(a)-new Date(b));
 
     let html="";
 
     sortedDates.forEach(date=>{
-
-        let tasksList = grouped[date];
-
-        let label = formatDate(date);
-        let day = new Date(date).toLocaleDateString('en-US',{weekday:'long'});
-
-        html += `
-        <div class="card">
-            <h3>${label}</h3>
-            <small style="color:#aaa">${day}</small>
-        `;
-
-        tasksList.forEach(task=>{
+        html += `<div class="card"><h3>${date}</h3>`;
+        grouped[date].forEach(task=>{
             html += `
             <div class="task ${task.completed?'completed':''}">
                 ${task.text}
@@ -312,29 +316,10 @@ function render(tasks){
                 </div>
             </div>`;
         });
-
         html += `</div>`;
     });
 
     document.getElementById("grid").innerHTML = html;
-}
-
-/* DATE FORMAT */
-function formatDate(dateStr){
-    let today = new Date();
-    let tomorrow = new Date();
-    tomorrow.setDate(today.getDate()+1);
-
-    let t = today.toISOString().split("T")[0];
-    let tm = tomorrow.toISOString().split("T")[0];
-
-    let d = new Date(dateStr);
-    let formatted = d.toLocaleDateString("en-GB");
-
-    if(dateStr === t) return `Today (${formatted})`;
-    if(dateStr === tm) return `Tomorrow (${formatted})`;
-
-    return d.toDateString();
 }
 
 </script>
