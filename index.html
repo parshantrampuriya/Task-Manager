@@ -230,7 +230,23 @@ function render(tasks){
     });
 
     /* 🔥 SORT DATES */
-    let sortedDates = Object.keys(grouped).sort((a,b)=> new Date(a) - new Date(b));
+    let today = new Date().toISOString().split("T")[0];
+
+let tomorrowDate = new Date();
+tomorrowDate.setDate(new Date().getDate() + 1);
+let tomorrow = tomorrowDate.toISOString().split("T")[0];
+
+let sortedDates = Object.keys(grouped).sort((a, b) => {
+
+    if (a === today) return -1;
+    if (b === today) return 1;
+
+    if (a === tomorrow) return -1;
+    if (b === tomorrow) return 1;
+
+    return new Date(a) - new Date(b);
+});
+   
 
     let html="";
 
