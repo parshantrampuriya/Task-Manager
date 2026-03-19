@@ -229,14 +229,24 @@ function render(tasks){
         grouped[t.date].push(t);
     });
 
+    /* 🔥 SORT DATES */
+    let sortedDates = Object.keys(grouped).sort((a,b)=> new Date(a) - new Date(b));
+
     let html="";
 
-    for(let date in grouped){
+    sortedDates.forEach(date => {
 
         let pending = grouped[date].filter(t=>!t.completed);
         let completed = grouped[date].filter(t=>t.completed);
 
-        html += `<div class="card"><h3>${formatDate(date)}</h3>`;
+        let label = formatDate(date);
+        let day = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+
+        html += `
+        <div class="card">
+            <h3>${label}</h3>
+            <small style="color:#aaa">${day}</small>
+        `;
 
         pending.forEach(task=>{
             html += `
@@ -265,13 +275,14 @@ function render(tasks){
         });
 
         html += `</div>`;
-    }
+    });
 
     document.getElementById("grid").innerHTML = html;
 }
 
 /* DATE FORMAT */
 function formatDate(dateStr){
+
     let today = new Date();
     let tomorrow = new Date();
     tomorrow.setDate(today.getDate()+1);
@@ -279,10 +290,13 @@ function formatDate(dateStr){
     let t = today.toISOString().split("T")[0];
     let tm = tomorrow.toISOString().split("T")[0];
 
-    if(dateStr === t) return "Today";
-    if(dateStr === tm) return "Tomorrow";
+    let d = new Date(dateStr);
+    let formatted = d.toLocaleDateString("en-GB"); // dd/mm/yyyy
 
-    return new Date(dateStr).toDateString();
+    if(dateStr === t) return `Today (${formatted})`;
+    if(dateStr === tm) return `Tomorrow (${formatted})`;
+
+    return d.toDateString();
 }
 
 </script>
