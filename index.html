@@ -71,8 +71,11 @@ button {
 <!-- 🔐 AUTH PAGE -->
 <div id="authPage" class="center">
     <h2>🔱 Sign In / Sign Up 🔱</h2>
+
+    <input id="name" placeholder="Full Name (for signup only)">
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
+
     <button onclick="signup()">Sign Up</button>
     <button onclick="login()">Sign In</button>
 </div>
@@ -140,21 +143,36 @@ window.logout = async ()=>{
 }
 
 /* AUTH STATE */
-onAuthStateChanged(auth, (user)=>{
-    if(user){
-        currentUser = user;
-        tasksRef = collection(db, "tasks");
+import { setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        document.getElementById("authPage").style.display="none";
-        document.getElementById("app").style.display="block";
-        document.getElementById("userEmail").innerText=user.email;
+/* 🔥 SIGN UP */
+window.signup = async ()=>{
+    let name = document.getElementById("name").value;
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
 
-        loadTasks();
-    }else{
-        document.getElementById("authPage").style.display="flex";
-        document.getElementById("app").style.display="none";
-    }
-});
+    if(!name || !email || !pass) return alert("Fill all fields");
+
+    let userCred = await createUserWithEmailAndPassword(auth, email, pass);
+
+    /* Save name in Firestore */
+    await setDoc(doc(db, "users", userCred.user.uid), {
+        name: name,
+        email: email
+    });
+
+    alert("Account created! Now login");
+}
+
+/* 🔥 LOGIN */
+window.login = async ()=>{
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+
+    if(!email || !pass) return alert("Enter email & password");
+
+    await signInWithEmailAndPassword(auth, email, pass);
+}
 
 /* LOAD TASKS */
 function loadTasks(){
