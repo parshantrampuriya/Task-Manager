@@ -4,6 +4,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* 🔥 YOUR FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
@@ -13,17 +14,30 @@ const firebaseConfig = {
   appId: "1:686414095912:web:158882cd292ccbaaccb71d",
   measurementId: "G-TLD8JJGETS"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const tasksRef = collection(db, "tasks");
 
-/* ADD TASK */
+/* 👤 CURRENT USER */
+let currentUser = "Parshant";
+
+/* 🔄 SWITCH USER */
+window.switchUser = function(user){
+    currentUser = user;
+
+    document.querySelectorAll('.user-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById(user).classList.add('active');
+
+    render(window.allTasks || []);
+}
+
+/* ➕ ADD TASK */
 window.add = async function(){
     let t=document.getElementById("taskInput").value;
     let c=document.getElementById("category").value;
     let d=document.getElementById("date").value;
+
+    if(!t) return alert("Enter task");
 
     let today=new Date();
 
@@ -37,35 +51,43 @@ window.add = async function(){
     await addDoc(tasksRef, {
         text: t,
         date: d,
-        completed: false
+        completed: false,
+        user: currentUser   // 🔥 important
     });
 
     document.getElementById("taskInput").value="";
 }
 
-/* REAL TIME */
+/* 🔄 REAL TIME */
 onSnapshot(tasksRef, (snapshot)=>{
     let tasks = [];
+
     snapshot.forEach(docu=>{
         tasks.push({id: docu.id, ...docu.data()});
     });
+
+    window.allTasks = tasks;
     render(tasks);
 });
 
-/* TOGGLE */
+/* ✅ TOGGLE */
 window.toggle = async function(id, current){
     await updateDoc(doc(db,"tasks",id), {
         completed: !current
     });
 }
 
-/* DELETE */
+/* ❌ DELETE */
 window.del = async function(id){
     await deleteDoc(doc(db,"tasks",id));
 }
 
-/* RENDER */
+/* 🎯 RENDER */
 function render(tasks){
+
+    /* 👤 FILTER USER */
+    tasks = tasks.filter(t => t.user === currentUser);
+
     let grouped = {};
 
     tasks.forEach(t=>{
@@ -114,7 +136,7 @@ function render(tasks){
     document.getElementById("grid").innerHTML = html;
 }
 
-/* DATE LABEL */
+/* 📅 DATE LABEL */
 function formatDateLabel(dateStr){
     let today = new Date();
     let tomorrow = new Date();
