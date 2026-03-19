@@ -143,7 +143,7 @@ window.logout = async ()=>{
 }
 
 /* AUTH STATE */
-import { setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* 🔥 SIGN UP */
 window.signup = async ()=>{
@@ -241,7 +241,12 @@ function render(tasks){
         </div>`;
     });
 
-    document.getElementById("grid").innerHTML=html;
+    import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+let userDoc = await getDoc(doc(db, "users", user.uid));
+let name = userDoc.data()?.name || user.email;
+
+document.getElementById("userEmail").innerText = "👤 " + name;
 }
 
 </script>
