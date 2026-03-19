@@ -126,7 +126,12 @@ button {
     <div id="Parshant" class="tab active" onclick="switchUser('Parshant')">Parshant</div>
     <div id="Tanu" class="tab" onclick="switchUser('Tanu')">Tanu</div>
 </div>
-
+<!-- FILTER TABS -->
+<div class="tabs">
+    <div class="tab filter active" onclick="switchFilter('pending')">Pending</div>
+    <div class="tab filter" onclick="switchFilter('completed')">Completed</div>
+    <div class="tab filter" onclick="switchFilter('due')">Due</div>
+</div>
 <!-- INPUT -->
 <div class="input-box">
     <input id="taskInput" placeholder="Enter mission...">
@@ -166,6 +171,14 @@ const tasksRef = collection(db, "tasks");
 
 let currentUser = "Parshant";
 let allTasks = [];
+
+/* ✅ ADD HERE */
+let currentFilter = "pending";
+
+function switchFilter(filter){
+    currentFilter = filter;
+    render(allTasks);
+}
 
 /* SWITCH USER */
 window.switchUser = function(user){
