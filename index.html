@@ -15,163 +15,83 @@ body {
     background-size: cover;
 }
 
-/* 🔥 SELECT PAGE */
-.center-screen {
+/* AUTH PAGE */
+.center {
     height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
 }
 
-.select-buttons {
-    display: flex;
-    gap: 20px;
-}
-
-.select-buttons button {
-    padding: 15px 30px;
-    font-size: 18px;
-    border-radius: 10px;
-}
-
-/* TITLE */
-h1 {
-    text-align: center;
-    padding: 15px;
-    color: #00cfff;
-    text-shadow: 0 0 10px #00cfff, 0 0 10px #ff9f2f;
-}
-
-/* TABS */
-.tabs {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    align-items: center;
-}
-
-.tab {
-    padding: 10px 20px;
-    color: #88cfff;
-}
-
-.tab.active {
-    color: #ff9f2f;
-    border-bottom: 2px solid #ff9f2f;
-}
-
-.tabs button {
-    padding: 6px 12px;
-}
-
-/* INPUT */
-.input-box {
-    display: flex;
-    gap: 10px;
-    margin: 20px;
-}
-
-input, select {
-    flex: 1;
-    padding: 10px;
+input {
+    padding:10px;
+    width:250px;
     background: rgba(0,20,40,0.7);
-    border: 1px solid #00cfff;
-    color: white;
-    border-radius: 6px;
+    border:1px solid #00cfff;
+    color:white;
 }
 
 button {
-    background: linear-gradient(45deg, #ff9f2f, #e07b12);
-    border: none;
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
+    padding:10px;
+    background:#ff9f2f;
+    border:none;
+    color:white;
+    cursor:pointer;
 }
 
 /* GRID */
 .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 20px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    padding:20px;
 }
 
-@media (max-width: 1000px) {
-    .grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 600px) {
-    .grid { grid-template-columns: 1fr; }
-    .input-box { flex-direction: column; }
-}
-
-/* CARD */
 .card {
-    background: rgba(0,20,40,0.7);
-    padding: 15px;
-    border-radius: 12px;
+    background:rgba(0,20,40,0.7);
+    padding:10px;
 }
 
-/* TASK */
 .task {
-    background: rgba(0,0,0,0.5);
-    margin: 8px 0;
-    padding: 8px;
-    display: flex;
-    justify-content: space-between;
-    border-radius: 6px;
+    display:flex;
+    justify-content:space-between;
+    margin:5px 0;
 }
 
 .completed {
-    text-decoration: line-through;
-    opacity: 0.5;
+    text-decoration:line-through;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 SELECT PAGE -->
-<div id="selectPage" class="center-screen">
-    <h1>🔱 Choose Your Path 🔱</h1>
-    <div class="select-buttons">
-        <button onclick="enterApp('Parshant')">Parshant</button>
-        <button onclick="enterApp('Tanu')">Tanu</button>
-    </div>
+<!-- 🔐 AUTH PAGE -->
+<div id="authPage" class="center">
+    <h2>🔱 Sign In / Sign Up 🔱</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="signup()">Sign Up</button>
+    <button onclick="login()">Sign In</button>
 </div>
 
-<!-- 🔥 MAIN APP -->
-<div id="mainApp" style="display:none;">
+<!-- MAIN APP -->
+<div id="app" style="display:none">
 
-<h1>🔱 TASK MANAGER 🔱</h1>
+<h2 id="userEmail"></h2>
+<button onclick="logout()">Logout</button>
 
-<!-- USER NAME + BACK -->
-<div class="tabs">
-    <div id="currentUserName" class="tab active"></div>
-    <button onclick="goBack()">⬅ Back</button>
+<div>
+    <button onclick="switchFilter('pending')">Pending</button>
+    <button onclick="switchFilter('completed')">Completed</button>
+    <button onclick="switchFilter('due')">Due</button>
 </div>
 
-<!-- FILTER -->
-<div class="tabs">
-    <div class="tab filter active" onclick="switchFilter('pending')">Pending</div>
-    <div class="tab filter" onclick="switchFilter('completed')">Completed</div>
-    <div class="tab filter" onclick="switchFilter('due')">Due</div>
-</div>
-
-<!-- INPUT -->
-<div class="input-box">
-    <input id="taskInput" placeholder="Enter mission...">
-    <select id="category">
-        <option value="Today">Today</option>
-        <option value="Tomorrow">Tomorrow</option>
-        <option value="Future">Future</option>
-    </select>
-    <input type="date" id="date" disabled>
-    <button onclick="add()">Add</button>
-</div>
+<input id="taskInput" placeholder="Task">
+<input type="date" id="date">
+<button onclick="add()">Add</button>
 
 <div class="grid" id="grid"></div>
 
@@ -180,6 +100,8 @@ button {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -190,125 +112,118 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth();
 const db = getFirestore(app);
-const tasksRef = collection(db, "tasks");
 
-let currentUser = "";
+let currentUser = null;
+let tasksRef = null;
 let allTasks = [];
 let currentFilter = "pending";
 
-/* ENTER */
-window.enterApp = function(user){
-    currentUser = user;
-    document.getElementById("selectPage").style.display = "none";
-    document.getElementById("mainApp").style.display = "block";
-    document.getElementById("currentUserName").innerText = user;
-    render(allTasks);
+/* SIGNUP */
+window.signup = async ()=>{
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+    await createUserWithEmailAndPassword(auth, email, pass);
 }
 
-/* BACK */
-window.goBack = function(){
-    document.getElementById("mainApp").style.display = "none";
-    document.getElementById("selectPage").style.display = "flex";
+/* LOGIN */
+window.login = async ()=>{
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+    await signInWithEmailAndPassword(auth, email, pass);
+}
+
+/* LOGOUT */
+window.logout = async ()=>{
+    await signOut(auth);
+}
+
+/* AUTH STATE */
+onAuthStateChanged(auth, (user)=>{
+    if(user){
+        currentUser = user;
+        tasksRef = collection(db, "tasks");
+
+        document.getElementById("authPage").style.display="none";
+        document.getElementById("app").style.display="block";
+        document.getElementById("userEmail").innerText=user.email;
+
+        loadTasks();
+    }else{
+        document.getElementById("authPage").style.display="flex";
+        document.getElementById("app").style.display="none";
+    }
+});
+
+/* LOAD TASKS */
+function loadTasks(){
+    onSnapshot(tasksRef, (snap)=>{
+        allTasks=[];
+        snap.forEach(d=>{
+            let t=d.data();
+            if(t.user===currentUser.uid){
+                allTasks.push({id:d.id,...t});
+            }
+        });
+        render(allTasks);
+    });
+}
+
+/* ADD */
+window.add = async ()=>{
+    let text=document.getElementById("taskInput").value;
+    let date=document.getElementById("date").value;
+
+    if(!text || !date) return alert("Fill all");
+
+    await addDoc(tasksRef,{
+        text,
+        date,
+        completed:false,
+        user:currentUser.uid
+    });
 }
 
 /* FILTER */
-window.switchFilter = function(filter){
-    currentFilter = filter;
-    document.querySelectorAll('.filter').forEach(t=>t.classList.remove('active'));
-    event.target.classList.add('active');
+window.switchFilter = function(f){
+    currentFilter=f;
     render(allTasks);
 }
-
-/* DATE CONTROL */
-document.getElementById("category").addEventListener("change", function(){
-    let d=document.getElementById("date");
-    if(this.value==="Future") d.disabled=false;
-    else {d.disabled=true; d.value="";}
-});
-
-/* ADD */
-window.add = async function(){
-    let t=document.getElementById("taskInput").value;
-    let c=document.getElementById("category").value;
-    let d=document.getElementById("date").value;
-
-    if(!t) return alert("Enter task");
-
-    let today=new Date();
-
-    if(c==="Today") d=today.toISOString().split("T")[0];
-    else if(c==="Tomorrow"){
-        today.setDate(today.getDate()+1);
-        d=today.toISOString().split("T")[0];
-    }
-    else if(!d) return alert("Select date");
-
-    await addDoc(tasksRef, {
-        text: t,
-        date: d,
-        completed: false,
-        user: currentUser
-    });
-
-    document.getElementById("taskInput").value="";
-}
-
-/* REALTIME */
-onSnapshot(tasksRef, (snapshot)=>{
-    allTasks = [];
-    snapshot.forEach(docu=>{
-        allTasks.push({id: docu.id, ...docu.data()});
-    });
-    render(allTasks);
-});
 
 /* TOGGLE */
-window.toggle = async function(id, current){
-    await updateDoc(doc(db,"tasks",id), {
-        completed: !current
-    });
+window.toggle = async (id,current)=>{
+    await updateDoc(doc(db,"tasks",id),{completed:!current});
 }
 
 /* DELETE */
-window.del = async function(id){
+window.del = async (id)=>{
     await deleteDoc(doc(db,"tasks",id));
 }
 
 /* RENDER */
 function render(tasks){
-    let today = new Date().toISOString().split("T")[0];
-
-    tasks = tasks.filter(t => t.user === currentUser);
+    let today=new Date().toISOString().split("T")[0];
 
     if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
-    else if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
-    else if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
-
-    let grouped={};
-
-    tasks.forEach(t=>{
-        if(!grouped[t.date]) grouped[t.date]=[];
-        grouped[t.date].push(t);
-    });
+    if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
+    if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
     let html="";
-    Object.keys(grouped).sort().forEach(date=>{
-        html+=`<div class="card"><h3>${date}</h3>`;
-        grouped[date].forEach(task=>{
-            html+=`
-            <div class="task ${task.completed?'completed':''}">
-                ${task.text}
+    tasks.forEach(t=>{
+        html+=`
+        <div class="card">
+            <div class="task ${t.completed?'completed':''}">
+                ${t.text}
                 <div>
-                    <button onclick="toggle('${task.id}', ${task.completed})">✔</button>
-                    <button onclick="del('${task.id}')">❌</button>
+                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                    <button onclick="del('${t.id}')">❌</button>
                 </div>
-            </div>`;
-        });
-        html+=`</div>`;
+            </div>
+        </div>`;
     });
 
-    document.getElementById("grid").innerHTML = html;
+    document.getElementById("grid").innerHTML=html;
 }
 
 </script>
