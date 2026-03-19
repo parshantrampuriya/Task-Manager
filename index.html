@@ -1,180 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mahadev System</title>
+<script type="module">
 
-<style>
-body {
-    margin: 0;
-    font-family: "Segoe Print", "Comic Sans MS", cursive;
-    color: #e6f7ff;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    background: 
-        linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),
-        url("mahadev.png") no-repeat center center fixed;
-    background-size: cover;
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
+  authDomain: "task-manager-c32bc.firebaseapp.com",
+  projectId: "task-manager-c32bc",
+  storageBucket: "task-manager-c32bc.firebasestorage.app",
+  messagingSenderId: "686414095912",
+  appId: "1:686414095912:web:158882cd292ccbaaccb71d",
+  measurementId: "G-TLD8JJGETS"
+};
 
-/* HEADER */
-h1 {
-    text-align: center;
-    padding: 20px;
-    color: #00cfff;
-    text-shadow: 0 0 10px #00cfff, 0 0 12px #ff9f2f;
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-/* TABS */
-.tabs {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    border-bottom: 1px solid #00cfff33;
-}
+const tasksRef = collection(db, "tasks");
 
-.tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    color: #88cfff;
-}
-
-.tab.active {
-    color: #00cfff;
-    border-bottom: 2px solid #ff9f2f;
-}
-
-/* INPUT */
-.input-box {
-    display: flex;
-    gap: 10px;
-    margin: 20px;
-}
-
-input, select {
-    flex: 1;
-    padding: 10px;
-    background: rgba(0,20,40,0.7);
-    border: 1px solid #00cfff;
-    color: #e6f7ff;
-    border-radius: 6px;
-}
-
-/* 🔥 Brighter Orange */
-button {
-    padding: 10px;
-    background: linear-gradient(45deg, #ff9f2f, #e07b12);
-    border: none;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: linear-gradient(45deg, #ffb347, #ff8c1a);
-}
-
-/* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-/* CARD */
-.card {
-    background: rgba(0, 20, 40, 0.75);
-    border: 1px solid #00cfff22;
-    border-radius: 12px;
-    padding: 15px;
-    backdrop-filter: blur(10px);
-    transition: 0.3s;
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 20px #00cfff33;
-}
-
-.card h3 {
-    color: #00cfff;
-    text-shadow: 0 0 6px #00cfff;
-}
-
-/* TASK */
-.task {
-    background: rgba(0,0,0,0.5);
-    margin: 8px 0;
-    padding: 8px;
-    display: flex;
-    justify-content: space-between;
-    border-radius: 6px;
-}
-
-.completed {
-    text-decoration: line-through;
-    opacity: 0.5;
-}
-
-/* DIVIDER */
-.divider {
-    border-top: 1px dashed #00cfff33;
-    margin: 10px 0;
-}
-</style>
-</head>
-
-<body>
-
-<h1>🔱 TAPASYA SYSTEM 🔱</h1>
-
-<div class="tabs">
-    <div class="tab active" onclick="changeTab('all', this)">All</div>
-    <div class="tab" onclick="changeTab('completed', this)">Completed</div>
-    <div class="tab" onclick="changeTab('pending', this)">Pending</div>
-</div>
-
-<div class="input-box">
-    <input id="taskInput" placeholder="Enter mission...">
-    <select id="category">
-        <option value="Today">Today</option>
-        <option value="Tomorrow">Tomorrow</option>
-        <option value="Future">Future</option>
-    </select>
-    <input type="date" id="date" disabled>
-    <button onclick="add()">Add</button>
-</div>
-
-<div class="grid" id="grid"></div>
-
-<script>
-
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-let currentTab = "all";
-
-document.getElementById("category").addEventListener("change", function(){
-    let d=document.getElementById("date");
-    if(this.value==="Future") d.disabled=false;
-    else {d.disabled=true; d.value="";}
-});
-
-function changeTab(tab, el){
-    currentTab = tab;
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    el.classList.add('active');
-    render();
-}
-
-function save(){localStorage.setItem("tasks", JSON.stringify(tasks));}
-
-function add(){
+/* ADD TASK */
+window.add = async function(){
     let t=document.getElementById("taskInput").value;
     let c=document.getElementById("category").value;
     let d=document.getElementById("date").value;
-
-    if(!t) return alert("Enter task");
 
     let today=new Date();
 
@@ -185,43 +34,43 @@ function add(){
     }
     else if(!d) return alert("Select date");
 
-    tasks.push({text:t,date:d,completed:false});
-    save(); render();
+    await addDoc(tasksRef, {
+        text: t,
+        date: d,
+        completed: false
+    });
 
     document.getElementById("taskInput").value="";
 }
 
-/* 🔥 DATE LABEL LOGIC */
-function formatDateLabel(dateStr){
-    let today = new Date();
-    let tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
+/* REAL TIME */
+onSnapshot(tasksRef, (snapshot)=>{
+    let tasks = [];
+    snapshot.forEach(docu=>{
+        tasks.push({id: docu.id, ...docu.data()});
+    });
+    render(tasks);
+});
 
-    let d = new Date(dateStr);
+/* TOGGLE */
+window.toggle = async function(id, current){
+    await updateDoc(doc(db,"tasks",id), {
+        completed: !current
+    });
+}
 
-    let todayStr = today.toISOString().split("T")[0];
-    let tomorrowStr = tomorrow.toISOString().split("T")[0];
-
-    if(dateStr === todayStr) return "Today";
-    if(dateStr === tomorrowStr) return "Tomorrow";
-
-    return d.toDateString();
+/* DELETE */
+window.del = async function(id){
+    await deleteDoc(doc(db,"tasks",id));
 }
 
 /* RENDER */
-function render(){
-
-    let filtered = tasks.filter(t=>{
-        if(currentTab==="completed") return t.completed;
-        if(currentTab==="pending") return !t.completed;
-        return true;
-    });
-
+function render(tasks){
     let grouped = {};
 
-    filtered.forEach((t,i)=>{
+    tasks.forEach(t=>{
         if(!grouped[t.date]) grouped[t.date]=[];
-        grouped[t.date].push({...t, index:i});
+        grouped[t.date].push(t);
     });
 
     let html="";
@@ -233,13 +82,31 @@ function render(){
 
         html += `<div class="card"><h3>${formatDateLabel(date)}</h3>`;
 
-        pending.forEach(task=> html += taskHTML(task));
+        pending.forEach(task=>{
+            html += `
+            <div class="task">
+                <div>${task.text}</div>
+                <div>
+                    <button onclick="toggle('${task.id}', ${task.completed})">✔</button>
+                    <button onclick="del('${task.id}')">❌</button>
+                </div>
+            </div>`;
+        });
 
         if(pending.length && completed.length){
             html += `<div class="divider"></div>`;
         }
 
-        completed.forEach(task=> html += taskHTML(task));
+        completed.forEach(task=>{
+            html += `
+            <div class="task completed">
+                <div>${task.text}</div>
+                <div>
+                    <button onclick="toggle('${task.id}', ${task.completed})">✔</button>
+                    <button onclick="del('${task.id}')">❌</button>
+                </div>
+            </div>`;
+        });
 
         html += `</div>`;
     }
@@ -247,23 +114,19 @@ function render(){
     document.getElementById("grid").innerHTML = html;
 }
 
-function taskHTML(task){
-    return `
-    <div class="task ${task.completed?"completed":""}">
-        <div>${task.text}</div>
-        <div>
-            <button onclick="toggle(${task.index})">✔</button>
-            <button onclick="del(${task.index})">❌</button>
-        </div>
-    </div>`;
+/* DATE LABEL */
+function formatDateLabel(dateStr){
+    let today = new Date();
+    let tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    let todayStr = today.toISOString().split("T")[0];
+    let tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+    if(dateStr === todayStr) return "Today";
+    if(dateStr === tomorrowStr) return "Tomorrow";
+
+    return new Date(dateStr).toDateString();
 }
 
-function toggle(i){tasks[i].completed=!tasks[i].completed; save(); render();}
-function del(i){tasks.splice(i,1); save(); render();}
-
-render();
-
 </script>
-
-</body>
-</html>
