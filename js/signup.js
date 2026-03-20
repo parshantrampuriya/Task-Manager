@@ -16,20 +16,28 @@ async function signup() {
     emailError.innerText = "";
     passwordError.innerText = "";
 
+    /* EMAIL CHECK */
     if (!email.includes("@")) {
         emailError.innerText = "Please enter valid email";
         return;
     }
 
-    if (password.length < 6) {
-        passwordError.innerText = "Weak password";
+    /* PASSWORD STRENGTH CHECK */
+    let strength = 0;
+
+    if (password.length >= 6) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    if (strength <= 1) {
+        passwordError.innerText = "Password too weak";
         return;
     }
 
     try {
         let userCred = await createUserWithEmailAndPassword(auth, email, password);
 
-        /* 🔥 SEND VERIFICATION EMAIL */
         await sendEmailVerification(userCred.user);
 
         alert("Verification email sent! Please check your inbox 📩");
@@ -46,10 +54,12 @@ async function signup() {
 
 /* BUTTON CONNECT */
 document.getElementById("signupBtn").addEventListener("click", signup);
+
 document.getElementById("goLoginBtn").addEventListener("click", () => {
     window.location.href = "index.html";
 });
-/* PASSWORD STRENGTH CHECK */
+
+/* PASSWORD STRENGTH BAR */
 document.getElementById("password").addEventListener("input", () => {
 
     let password = document.getElementById("password").value;
@@ -73,13 +83,9 @@ document.getElementById("password").addEventListener("input", () => {
         bar.style.background = "orange";
         text.innerText = "Medium Password";
     }
-    else if (strength >= 3) {
+    else {
         bar.style.width = "100%";
         bar.style.background = "lime";
         text.innerText = "Strong Password";
     }
 });
-if (strength <= 1) {
-    passwordError.innerText = "Password too weak";
-    return;
-}
