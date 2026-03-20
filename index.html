@@ -90,9 +90,7 @@ button {
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
     <button onclick="login()">Sign In</button>
-
     <button onclick="resendVerification()">Resend Verification Email</button>
-
     <p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
 </div>
 
@@ -116,8 +114,6 @@ button {
 
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
-
-<!-- VERIFY BUTTON -->
 <button onclick="checkVerification()">I Verified My Email</button>
 
 <div class="filter-bar">
@@ -135,7 +131,7 @@ button {
         <option value="Future">Future</option>
     </select>
 
-    <input type="date" id="date">
+    <input type="date" id="dateInput">
     <button onclick="add()">Add</button>
 </div>
 
@@ -179,7 +175,7 @@ onAuthStateChanged(auth, async(user)=>{
         app.style.display="block";
 
         if(!user.emailVerified){
-            alert("⚠ Verify email from Gmail then click 'I Verified'");
+            alert("Verify email then click button");
         }
 
         let userDoc=await getDoc(doc(db,"users",user.uid));
@@ -204,7 +200,7 @@ window.signup=async()=>{
         email:email.value
     });
 
-    alert("Verification email sent. Check Gmail.");
+    alert("Check Gmail for verification");
     goLogin();
 }
 
@@ -213,24 +209,17 @@ window.login=async()=>{
     await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
 }
 
-/* VERIFY CHECK */
+/* VERIFY */
 window.checkVerification=async()=>{
     await auth.currentUser.reload();
-
-    if(auth.currentUser.emailVerified){
-        alert("Email verified successfully!");
-    }else{
-        alert("Still not verified. Check Gmail.");
-    }
+    alert(auth.currentUser.emailVerified ? "Verified!" : "Not verified yet");
 }
 
 /* RESEND */
 window.resendVerification=async()=>{
     if(auth.currentUser){
         await sendEmailVerification(auth.currentUser);
-        alert("Verification email sent again!");
-    }else{
-        alert("Login first");
+        alert("Email sent again");
     }
 }
 
@@ -251,23 +240,32 @@ function loadTasks(){
     });
 }
 
-/* ADD */
+/* ADD (FIXED VARIABLE ISSUE) */
 window.add=async()=>{
-    let text=taskInput.value;
-    let date=date.value;
+    let textVal = document.getElementById("taskInput").value;
+    let dateVal = document.getElementById("dateInput").value;
+    let cat = document.getElementById("category").value;
+
     let today=new Date();
 
-    if(category.value==="Today") date=today.toISOString().split("T")[0];
-    if(category.value==="Tomorrow"){
+    if(cat==="Today"){
+        dateVal = today.toISOString().split("T")[0];
+    }
+    else if(cat==="Tomorrow"){
         today.setDate(today.getDate()+1);
-        date=today.toISOString().split("T")[0];
+        dateVal = today.toISOString().split("T")[0];
     }
 
+    if(!textVal || !dateVal) return alert("Fill all");
+
     await addDoc(collection(db,"tasks"),{
-        text,date,completed:false,user:currentUser.uid
+        text:textVal,
+        date:dateVal,
+        completed:false,
+        user:currentUser.uid
     });
 
-    taskInput.value="";
+    document.getElementById("taskInput").value="";
 }
 
 /* FILTER */
