@@ -25,7 +25,12 @@
     <div class="task-input">
         <input id="searchInput" placeholder="Search task..." oninput="renderTasks()">
     </div>
-
+<!-- TABS -->
+<div class="tabs-buttons">
+    <button onclick="setTab('due')">🔥 Due</button>
+    <button onclick="setTab('pending')">📌 Pending</button>
+    <button onclick="setTab('completed')">✅ Completed</button>
+</div>
     <!-- ADD TASK -->
     <div class="task-input">
         <input id="taskInput" placeholder="Enter task">
