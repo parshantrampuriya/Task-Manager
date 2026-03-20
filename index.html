@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Task Manager</title>
+<title>Ultimate Task Manager</title>
 
 <link rel="icon" href="data:,">
 
@@ -12,16 +12,44 @@ body{
 margin:0;
 font-family:"Segoe Print",cursive;
 color:#e6f7ff;
-background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),
-url("mahadev.png") no-repeat center/cover;
+background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),url("mahadev.png") no-repeat center/cover;
 }
 
-/* PAGES */
+/* MENU */
+.menu-btn{
+position:fixed;
+top:10px;
+right:10px;
+background:#ff9f2f;
+padding:10px;
+cursor:pointer;
+}
+
+.menu{
+position:fixed;
+right:-250px;
+top:0;
+width:250px;
+height:100%;
+background:#001f2f;
+padding:20px;
+transition:0.3s;
+}
+
+.menu.open{right:0;}
+
+.menu div{
+margin:10px 0;
+cursor:pointer;
+}
+
+/* PAGE */
 .page{display:none;}
-.active{display:flex;}
+.active{display:block;}
 
 .center{
 height:100vh;
+display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
@@ -43,41 +71,7 @@ border:none;
 cursor:pointer;
 }
 
-/* MENU */
-.menu-btn{
-position:fixed;
-top:10px;
-right:10px;
-background:#ff9f2f;
-padding:10px;
-cursor:pointer;
-display:none;
-}
-
-.menu{
-position:fixed;
-right:-250px;
-top:0;
-width:250px;
-height:100%;
-background:#001f2f;
-padding:20px;
-transition:0.3s;
-}
-.menu.open{right:0;}
-.menu div{margin:10px 0;cursor:pointer;}
-
-/* TASK */
-.filter-bar{display:flex;justify-content:center;gap:10px;}
-
-.input-row{
-display:flex;
-justify-content:center;
-gap:10px;
-flex-wrap:wrap;
-margin:20px;
-}
-
+/* GRID */
 .grid{
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -85,8 +79,9 @@ gap:10px;
 padding:10px;
 }
 
-.card{background:#012;padding:10px;border-radius:8px;}
-.completed{text-decoration:line-through;opacity:0.6;}
+.card{background:#012;padding:10px;}
+
+.completed{text-decoration:line-through;}
 
 .stats{
 text-align:center;
@@ -99,230 +94,220 @@ margin:10px;
 
 <body>
 
-<!-- MENU -->
-<div id="menuBtn" class="menu-btn" onclick="toggleMenu()">☰</div>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
 <div id="menu" class="menu">
-<div onclick="goHome()">🏠 Home</div>
+<div onclick="showPage('app')">🏠 Home</div>
+<div onclick="showPage('profile')">👤 Profile</div>
+<div onclick="showPage('leaderboard')">🏆 Leaderboard</div>
+<div onclick="showPage('learning')">📚 Learning</div>
 <div onclick="logout()">🚪 Logout</div>
 </div>
 
 <!-- LOGIN -->
 <div id="loginPage" class="page active center">
-<h2>🔱 Sign In 🔱</h2>
-<input id="loginEmail" placeholder="Email">
-<input id="loginPassword" type="password" placeholder="Password">
-<button onclick="login()">Sign In</button>
-<p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
+<h2>Login</h2>
+<input id="loginEmail">
+<input id="loginPassword" type="password">
+<button onclick="login()">Login</button>
+<button onclick="showPage('signupPage')">Signup</button>
 </div>
 
 <!-- SIGNUP -->
 <div id="signupPage" class="page center">
-<h2>Create Account</h2>
 <input id="name" placeholder="Name">
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input id="email">
+<input id="password" type="password">
 <button onclick="signup()">Create</button>
-<p onclick="goLogin()">Back</p>
+<button onclick="showPage('loginPage')">Back</button>
 </div>
 
 <!-- APP -->
-<div id="appPage" class="page">
+<div id="app" class="page">
 
-<h2 id="userEmail"></h2>
+<div class="stats" id="statsBox"></div>
 
-<div id="statsBox" class="stats"></div>
-
-<input id="search" placeholder="Search..." oninput="render(allTasks)">
-<button onclick="render(allTasks)">Search</button>
-
-<div class="filter-bar">
-<button onclick="switchFilter('pending')">Pending</button>
-<button onclick="switchFilter('completed')">Completed</button>
-<button onclick="switchFilter('due')">Due</button>
-</div>
-
-<div class="input-row">
-<input id="taskInput" placeholder="Task">
-
-<select id="category">
-<option value="Today">Today</option>
-<option value="Tomorrow">Tomorrow</option>
-<option value="Future">Future</option>
-</select>
-
+<input id="taskInput">
 <input type="date" id="dateInput">
-
 <button onclick="add()">Add</button>
-</div>
 
 <div id="grid" class="grid"></div>
+</div>
 
+<!-- PROFILE -->
+<div id="profile" class="page center">
+<h2>Profile</h2>
+<div id="profileData"></div>
+<button onclick="showPage('app')">Back</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard" class="page center">
+<h2>Leaderboard</h2>
+<div id="leaderData"></div>
+<button onclick="showPage('app')">Back</button>
+</div>
+
+<!-- LEARNING -->
+<div id="learning" class="page center">
+<h2>Learning Planner</h2>
+<input id="subject" placeholder="Subject">
+<input id="target" placeholder="Target">
+<button onclick="addLearning()">Add</button>
+<div id="learningData"></div>
+<button onclick="showPage('app')">Back</button>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔥 YOUR CORRECT CONFIG */
 const firebaseConfig = {
-  apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
-  authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc",
-  storageBucket: "task-manager-c32bc.firebasestorage.app",
-  messagingSenderId: "686414095912",
-  appId: "1:686414095912:web:158882cd292ccbaaccb71d"
+apiKey:"AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
+authDomain:"task-manager-c32bc.firebaseapp.com",
+projectId:"task-manager-c32bc"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-/* GLOBAL */
 let currentUser=null;
-let allTasks=[];
-let currentFilter="pending";
-
-/* PAGE SWITCH */
-function show(id){
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
+let tasks=[];
 
 /* MENU */
-window.toggleMenu=()=>menu.classList.toggle("open");
+window.toggleMenu=()=>{
+document.getElementById("menu").classList.toggle("open");
+}
 
-/* NAV */
-window.goSignup=()=>show("signupPage");
-window.goLogin=()=>show("loginPage");
-window.goHome=()=>show("appPage");
+/* PAGE SWITCH */
+window.showPage=(id)=>{
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+toggleMenu();
+}
 
-/* AUTH STATE */
-onAuthStateChanged(auth, async user=>{
+/* AUTH */
+onAuthStateChanged(auth,user=>{
 if(user){
 currentUser=user;
-menuBtn.style.display="block";
-show("appPage");
-
-let userDoc=await getDoc(doc(db,"users",user.uid));
-userEmail.innerText="👤 "+(userDoc.data()?.name || user.email);
-
+showPage("app");
 loadTasks();
-
+loadProfile();
+loadLeaderboard();
+loadLearning();
 }else{
-menuBtn.style.display="none";
-show("loginPage");
+showPage("loginPage");
 }
 });
 
 /* LOGIN */
-window.login = async ()=>{
-let email=document.getElementById("loginEmail").value;
-let pass=document.getElementById("loginPassword").value;
-
-if(!email||!pass){alert("Enter email & password");return;}
-
-try{
-await signInWithEmailAndPassword(auth,email,pass);
-}catch(e){alert(e.message);}
+window.login=()=>{
+signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
 }
 
 /* SIGNUP */
-window.signup = async ()=>{
-let name=document.getElementById("name").value;
-let email=document.getElementById("email").value;
-let pass=document.getElementById("password").value;
-
-if(!name||!email||!pass){alert("Fill all");return;}
-if(pass.length<6){alert("Password min 6 chars");return;}
-
-try{
-let u=await createUserWithEmailAndPassword(auth,email,pass);
-await setDoc(doc(db,"users",u.user.uid),{name,email});
-alert("Account created");
-goLogin();
-}catch(e){alert(e.message);}
+window.signup=async()=>{
+let u=await createUserWithEmailAndPassword(auth,email.value,password.value);
+await setDoc(doc(db,"users",u.user.uid),{name:name.value});
 }
 
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* LOAD TASK */
+/* TASK */
 function loadTasks(){
 onSnapshot(collection(db,"tasks"),snap=>{
-allTasks=[];
+tasks=[];
 snap.forEach(d=>{
 let t=d.data();
-if(t.user===currentUser.uid){
-allTasks.push({id:d.id,...t});
-}
+if(t.user===currentUser.uid) tasks.push(t);
 });
-render(allTasks);
+render();
 });
 }
 
-/* ADD */
 window.add=async()=>{
-let text=taskInput.value;
-let date=dateInput.value;
-let cat=category.value;
-
-let today=new Date();
-
-if(cat==="Today") date=today.toISOString().split("T")[0];
-if(cat==="Tomorrow"){
-today.setDate(today.getDate()+1);
-date=today.toISOString().split("T")[0];
-}
-
-if(!text||!date){alert("Fill all");return;}
-
 await addDoc(collection(db,"tasks"),{
-text,date,completed:false,user:currentUser.uid
+text:taskInput.value,
+date:dateInput.value,
+completed:false,
+user:currentUser.uid
 });
-
-taskInput.value="";
-};
-
-/* FILTER */
-window.switchFilter=(f)=>{currentFilter=f;render(allTasks);};
-
-/* TOGGLE */
-window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
-
-/* DELETE */
-window.del=(id)=>deleteDoc(doc(db,"tasks",id));
+}
 
 /* RENDER */
-window.render=(tasks)=>{
-
+function render(){
 let today=new Date().toISOString().split("T")[0];
 
 let todayTasks=tasks.filter(t=>t.date===today);
 let done=todayTasks.filter(t=>t.completed).length;
-statsBox.innerText=`Today ${done}/${todayTasks.length}`;
 
-let searchVal=document.getElementById("search").value.toLowerCase();
-if(searchVal) tasks=tasks.filter(t=>t.text.toLowerCase().includes(searchVal));
-
-if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
-if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
-if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
+statsBox.innerText=`Today: ${done}/${todayTasks.length}`;
 
 let html="";
 tasks.forEach(t=>{
-html+=`
-<div class="card">
+html+=`<div class="card">
 <div class="${t.completed?'completed':''}">${t.text}</div>
-<button onclick="toggle('${t.id}',${t.completed})">✔</button>
+<button onclick="toggle('${t.text}')">✔</button>
 </div>`;
 });
-
 grid.innerHTML=html;
-};
+}
+
+window.toggle=(text)=>{
+tasks.forEach(async t=>{
+if(t.text===text){
+t.completed=!t.completed;
+}
+});
+}
+
+/* PROFILE */
+async function loadProfile(){
+let docSnap=await getDocs(collection(db,"users"));
+docSnap.forEach(d=>{
+if(d.id===currentUser.uid){
+profileData.innerText=JSON.stringify(d.data());
+}
+});
+}
+
+/* LEADERBOARD */
+async function loadLeaderboard(){
+let snap=await getDocs(collection(db,"tasks"));
+let count={};
+snap.forEach(d=>{
+let t=d.data();
+if(t.completed){
+count[t.user]=(count[t.user]||0)+1;
+}
+});
+leaderData.innerText=JSON.stringify(count);
+}
+
+/* LEARNING */
+window.addLearning=async()=>{
+await addDoc(collection(db,"learning"),{
+user:currentUser.uid,
+subject:subject.value,
+target:target.value
+});
+}
+
+async function loadLearning(){
+let snap=await getDocs(collection(db,"learning"));
+let html="";
+snap.forEach(d=>{
+let t=d.data();
+if(t.user===currentUser.uid){
+html+=`<div>${t.subject} - ${t.target}</div>`;
+}
+});
+learningData.innerHTML=html;
+}
 
 </script>
 
