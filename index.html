@@ -124,8 +124,8 @@ button {
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
 
-<input id="search" placeholder="Search..." oninput="render(allTasks)">
-<button onclick="render(allTasks)">Search</button>
+<input id="search" placeholder="Search..." oninput="render(window.allTasks)">
+<button onclick="render(window.allTasks)">Search</button>
 
 <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
 
@@ -177,6 +177,8 @@ const db = getFirestore(appFirebase);
 
 let currentUser=null;
 let allTasks=[];
+window.allTasks = [];
+
 let currentFilter="pending";
 
 window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
@@ -226,7 +228,9 @@ function loadTasks(){
                 allTasks.push({id:d.id,...t});
             }
         });
-        window.render(allTasks);
+
+        window.allTasks = allTasks;   // 🔥 FIX
+        window.render(window.allTasks);
     });
 }
 
@@ -259,7 +263,7 @@ window.add=async()=>{
 }
 
 /* FILTER */
-window.switchFilter=(f)=>{currentFilter=f;window.render(allTasks);}
+window.switchFilter=(f)=>{currentFilter=f;window.render(window.allTasks);}
 
 /* TOGGLE */
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
@@ -275,7 +279,7 @@ window.editTask=(id,text)=>{
     }
 }
 
-/* 🔥 FIXED RENDER GLOBAL */
+/* RENDER */
 window.render = function(tasks){
 
     let searchVal = document.getElementById("search").value.toLowerCase().trim();
