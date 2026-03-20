@@ -80,12 +80,10 @@ button {
     opacity:0.6;
 }
 
-/* PRIORITY COLORS */
 .high { border-left:5px solid red; }
 .medium { border-left:5px solid orange; }
 .low { border-left:5px solid green; }
 
-/* PROGRESS BAR */
 .progress {
     width:80%;
     height:10px;
@@ -101,69 +99,58 @@ button {
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage" class="center">
     <h2>🔱 Sign In 🔱</h2>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
+    <input id="loginEmail">
+    <input id="loginPassword" type="password">
     <button onclick="login()">Sign In</button>
-    <button onclick="resendVerification()">Resend Verification Email</button>
-    <p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
+    <p onclick="goSignup()">Create Account</p>
 </div>
 
-<!-- SIGNUP -->
 <div id="signupPage" class="center" style="display:none">
     <h2>🔱 Create Account 🔱</h2>
-    <input id="name" placeholder="Full Name">
-    <select id="gender">
-        <option>Male</option>
-        <option>Female</option>
-    </select>
+    <input id="name">
+    <select id="gender"><option>Male</option><option>Female</option></select>
     <input type="date" id="dob">
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+    <input id="email">
+    <input id="password" type="password">
     <button onclick="signup()">Create Account</button>
     <div id="signupMessage"></div>
-    <p onclick="goLogin()" style="cursor:pointer;color:#ff9f2f">Back to Sign In</p>
+    <p onclick="goLogin()">Back</p>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none">
 
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
 
-<!-- SEARCH -->
-<input id="search" placeholder="Search task..." oninput="render(allTasks)">
+<input id="search" placeholder="Search..." oninput="render(allTasks)">
 <button onclick="render(allTasks)">Search</button>
 
-<!-- PROGRESS -->
 <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
 
 <div class="filter-bar">
-    <button onclick="switchFilter('pending')">Pending</button>
-    <button onclick="switchFilter('completed')">Completed</button>
-    <button onclick="switchFilter('due')">Due</button>
+<button onclick="switchFilter('pending')">Pending</button>
+<button onclick="switchFilter('completed')">Completed</button>
+<button onclick="switchFilter('due')">Due</button>
 </div>
 
 <div class="input-row">
-    <input id="taskInput" placeholder="Enter mission...">
+<input id="taskInput">
+<select id="category">
+<option value="Today">Today</option>
+<option value="Tomorrow">Tomorrow</option>
+<option value="Future">Future</option>
+</select>
+<input type="date" id="dateInput">
 
-    <select id="category">
-        <option value="Today">Today</option>
-        <option value="Tomorrow">Tomorrow</option>
-        <option value="Future">Future</option>
-    </select>
+<select id="priority">
+<option value="low">Low</option>
+<option value="medium">Medium</option>
+<option value="high">High</option>
+</select>
 
-    <input type="date" id="dateInput">
-
-    <select id="priority">
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-    </select>
-
-    <button onclick="add()">Add</button>
+<button onclick="add()">Add</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -173,7 +160,7 @@ button {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, setDoc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -215,16 +202,10 @@ onAuthStateChanged(auth, async(user)=>{
 /* SIGNUP */
 window.signup=async()=>{
     let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
-    await sendEmailVerification(user.user);
-
     await setDoc(doc(db,"users",user.user.uid),{
-        name:name.value,
-        gender:gender.value,
-        dob:dob.value,
-        email:email.value
+        name:name.value, gender:gender.value, dob:dob.value, email:email.value
     });
-
-    signupMessage.innerText="📧 We sent a verification email. Check Gmail.";
+    signupMessage.innerText="Account Created";
 }
 
 /* LOGIN */
@@ -245,7 +226,7 @@ function loadTasks(){
                 allTasks.push({id:d.id,...t});
             }
         });
-        render(allTasks);
+        window.render(allTasks);
     });
 }
 
@@ -266,8 +247,6 @@ window.add=async()=>{
         dateVal = today.toISOString().split("T")[0];
     }
 
-    if(!textVal || !dateVal) return alert("Fill all");
-
     await addDoc(collection(db,"tasks"),{
         text:textVal,
         date:dateVal,
@@ -280,7 +259,7 @@ window.add=async()=>{
 }
 
 /* FILTER */
-window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
+window.switchFilter=(f)=>{currentFilter=f;window.render(allTasks);}
 
 /* TOGGLE */
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
@@ -296,8 +275,8 @@ window.editTask=(id,text)=>{
     }
 }
 
-/* RENDER */
-function render(tasks){
+/* 🔥 FIXED RENDER GLOBAL */
+window.render = function(tasks){
 
     let searchVal = document.getElementById("search").value.toLowerCase().trim();
 
