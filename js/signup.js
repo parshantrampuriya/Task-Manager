@@ -46,3 +46,6 @@ async function signup() {
 
 /* BUTTON CONNECT */
 document.getElementById("signupBtn").addEventListener("click", signup);
+document.getElementById("goLoginBtn").addEventListener("click", () => {
+    window.location.href = "index.html";
+});
