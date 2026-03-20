@@ -3,20 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced Task Manager</title>
+<title>Advanced Task Manager (Firebase)</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
 body {margin:0;font-family:Arial;background:#f4f6f9;}
 .hidden {display:none;}
 .container {max-width:400px;margin:60px auto;background:white;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);} 
-input, button {width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;}
+input, button, select {width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;}
 button {background:#007bff;color:white;border:none;cursor:pointer;}
 .error {color:red;font-size:14px;}
 .navbar {background:#007bff;color:white;padding:10px;display:flex;justify-content:space-between;}
 .menu {cursor:pointer;font-size:20px;}
-.sidebar {position:fixed;top:0;right:-200px;width:200px;height:100%;background:#333;color:white;padding:20px;transition:0.3s;}
+.sidebar {position:fixed;top:0;right:-220px;width:220px;height:100%;background:#333;color:white;padding:20px;transition:0.3s;}
 .sidebar a {display:block;color:white;margin:10px 0;text-decoration:none;}
-.task {background:white;margin:10px;padding:10px;border-radius:5px;}
+.task {background:white;margin:10px;padding:10px;border-radius:5px;border-left:4px solid #007bff;}
+.tabs {display:flex;gap:6px;overflow:auto;margin-top:10px;}
+.tab {padding:6px 10px;background:#e9eef6;border-radius:6px;cursor:pointer;white-space:nowrap;}
+.tab.active {background:#007bff;color:#fff;}
 </style>
 </head>
 <body>
@@ -28,7 +36,7 @@ button {background:#007bff;color:white;border:none;cursor:pointer;}
 
 <div class="sidebar" id="sidebar">
 <a href="#" onclick="showPage('profile')">Profile</a>
-<a href="#" onclick="showPage('home')">Home</a>
+<a href="#" onclick="showPage('profile')">Home</a>
 <a href="#">Leaderboard</a>
 <a href="#">Learning</a>
 <a href="#" onclick="logout()">Logout</a>
@@ -50,7 +58,7 @@ button {background:#007bff;color:white;border:none;cursor:pointer;}
 <h2>Create Account</h2>
 <input type="text" id="name" placeholder="Full Name">
 <input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
+<input type="password" id="password" placeholder="Password (min 6 chars)">
 <div class="error" id="registerError"></div>
 <button onclick="register()">Create Account</button>
 <p onclick="showPage('login')" style="cursor:pointer;color:blue">Back to Login</p>
@@ -60,7 +68,8 @@ button {background:#007bff;color:white;border:none;cursor:pointer;}
 <div class="container hidden" id="forgotPage">
 <h2>Reset Password</h2>
 <input type="email" id="forgotEmail" placeholder="Enter Email">
-<button onclick="resetPassword()">Reset</button>
+<div class="error" id="forgotError"></div>
+<button onclick="resetPassword()">Send Reset Link</button>
 <p onclick="showPage('login')">Back</p>
 </div>
 
@@ -76,11 +85,29 @@ button {background:#007bff;color:white;border:none;cursor:pointer;}
 <option value="name">Sort by Name</option>
 </select>
 
+<div class="tabs" id="dateTabs"></div>
 <div id="taskList"></div>
 </div>
 
 <script>
+// 🔥 YOUR FIREBASE CONFIG (ADDED)
+const firebaseConfig = {
+  apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
+  authDomain: "task-manager-c32bc.firebaseapp.com",
+  projectId: "task-manager-c32bc",
+  storageBucket: "task-manager-c32bc.firebasestorage.app",
+  messagingSenderId: "686414095912",
+  appId: "1:686414095912:web:158882cd292ccbaaccb71d",
+  measurementId: "G-TLD8JJGETS"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 let currentUser = null;
+let currentTabDate = null;
 
 function showPage(page) {
  document.querySelectorAll('.container').forEach(e=>e.classList.add('hidden'));
@@ -92,75 +119,118 @@ function showPage(page) {
 
 function toggleMenu(){
  let sidebar=document.getElementById('sidebar');
- sidebar.style.right = sidebar.style.right==='0px' ? '-200px':'0px';
+ sidebar.style.right = sidebar.style.right==='0px' ? '-220px':'0px';
 }
 
+// AUTH
 function register(){
- let users = JSON.parse(localStorage.getItem('users'))||[];
- let email=document.getElementById('email').value;
- let password=document.getElementById('password').value;
- if(users.find(u=>u.email===email)){
- document.getElementById('registerError').innerText='Email already exists';return;
- }
- users.push({email,password,tasks:[]});
- localStorage.setItem('users',JSON.stringify(users));
- alert('Account Created');
- showPage('login');
+ const email=document.getElementById('email').value.trim();
+ const password=document.getElementById('password').value;
+ const name=document.getElementById('name').value.trim();
+ registerError.innerText='';
+ if(password.length < 6){ registerError.innerText='Password must be at least 6 characters'; return; }
+ auth.createUserWithEmailAndPassword(email, password)
+ .then(cred=>{
+   return db.collection('users').doc(cred.user.uid).set({name, email});
+ })
+ .then(()=>{ alert('Account Created'); showPage('login'); })
+ .catch(err=>{ registerError.innerText = err.message; });
 }
 
 function login(){
- let users=JSON.parse(localStorage.getItem('users'))||[];
- let email=loginEmail.value;
- let password=loginPassword.value;
- let user=users.find(u=>u.email===email && u.password===password);
- if(!user){
- document.getElementById('loginError').innerText='Invalid credentials';return;
- }
- currentUser=email;
- navbar.classList.remove('hidden');
- showPage('profile');
- loadTasks();
+ const email=loginEmail.value.trim();
+ const password=loginPassword.value;
+ loginError.innerText='';
+ auth.signInWithEmailAndPassword(email, password)
+ .then(cred=>{
+   currentUser = cred.user;
+   navbar.classList.remove('hidden');
+   showPage('profile');
+   subscribeTasks();
+ })
+ .catch(err=>{ loginError.innerText = 'Invalid credentials'; });
 }
 
 function logout(){
+ auth.signOut();
  currentUser=null;
  navbar.classList.add('hidden');
  showPage('login');
 }
 
 function resetPassword(){
- alert('Password reset link (simulated)');
+ const email = forgotEmail.value.trim();
+ forgotError.innerText='';
+ auth.sendPasswordResetEmail(email)
+ .then(()=> alert('Reset email sent'))
+ .catch(err=> forgotError.innerText = err.message);
+}
+
+// TASKS (Firestore)
+let tasksCache = [];
+let unsubscribe = null;
+
+function subscribeTasks(){
+ if(unsubscribe) unsubscribe();
+ unsubscribe = db.collection('tasks')
+ .where('uid','==', currentUser.uid)
+ .onSnapshot(snap=>{
+   tasksCache = [];
+   snap.forEach(doc=> tasksCache.push({id: doc.id, ...doc.data()}));
+   buildDateTabs();
+   renderTasks();
+ });
 }
 
 function addTask(){
- let users=JSON.parse(localStorage.getItem('users'));
- let user=users.find(u=>u.email===currentUser);
- user.tasks.push({
- name:taskInput.value,
- date:taskDate.value
+ const name = taskInput.value.trim();
+ const date = taskDate.value;
+ if(!name || !date) return alert('Enter task and date');
+ db.collection('tasks').add({
+   uid: currentUser.uid,
+   name, date,
+   createdAt: firebase.firestore.FieldValue.serverTimestamp()
  });
- localStorage.setItem('users',JSON.stringify(users));
- loadTasks();
-}
-
-function loadTasks(){
- let users=JSON.parse(localStorage.getItem('users'));
- let user=users.find(u=>u.email===currentUser);
- let list=document.getElementById('taskList');
- list.innerHTML='';
- user.tasks.forEach(t=>{
- list.innerHTML+=`<div class='task'>${t.name} - ${t.date}</div>`;
- });
+ taskInput.value=''; taskDate.value='';
 }
 
 function sortTasks(type){
- let users=JSON.parse(localStorage.getItem('users'));
- let user=users.find(u=>u.email===currentUser);
- if(type==='date') user.tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
- if(type==='name') user.tasks.sort((a,b)=>a.name.localeCompare(b.name));
- localStorage.setItem('users',JSON.stringify(users));
- loadTasks();
+ if(type==='date') tasksCache.sort((a,b)=> new Date(a.date)-new Date(b.date));
+ if(type==='name') tasksCache.sort((a,b)=> a.name.localeCompare(b.name));
+ renderTasks();
 }
+
+function buildDateTabs(){
+ const tabs = document.getElementById('dateTabs');
+ const uniqueDates = [...new Set(tasksCache.map(t=>t.date))].sort();
+ tabs.innerHTML='';
+ uniqueDates.forEach(d=>{
+   const el = document.createElement('div');
+   el.className = 'tab' + (d===currentTabDate ? ' active':'');
+   el.innerText = d;
+   el.onclick = ()=>{ currentTabDate = d; buildDateTabs(); renderTasks(); };
+   tabs.appendChild(el);
+ });
+ if(!currentTabDate && uniqueDates.length){ currentTabDate = uniqueDates[0]; buildDateTabs(); }
+}
+
+function renderTasks(){
+ const list=document.getElementById('taskList');
+ list.innerHTML='';
+ const data = currentTabDate ? tasksCache.filter(t=>t.date===currentTabDate) : tasksCache;
+ data.forEach(t=>{
+   const div = document.createElement('div');
+   div.className='task';
+   div.innerHTML = `<b>${t.name}</b><br><small>${t.date}</small>`;
+   list.appendChild(div);
+ });
+}
+
+// Auto session
+firebase.auth().onAuthStateChanged(user=>{
+ if(user){ currentUser=user; navbar.classList.remove('hidden'); showPage('profile'); subscribeTasks(); }
+ else { navbar.classList.add('hidden'); showPage('login'); }
+});
 </script>
 
 </body>
