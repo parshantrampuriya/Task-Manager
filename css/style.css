@@ -90,3 +90,30 @@ body {
 .delete {
     background:#ff4d4d;
 }
+.tabs-container {
+    margin-top:20px;
+}
+
+.tab {
+    margin-bottom:30px;
+}
+
+.tab h3 {
+    margin-bottom:10px;
+}
+
+.task-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.task-card {
+    background:#111;
+    padding:15px;
+    border-radius:10px;
+}
+
+.task-actions button {
+    margin:5px;
+}
