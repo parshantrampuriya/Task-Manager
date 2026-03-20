@@ -176,6 +176,16 @@ const firebaseConfig = {
   authDomain: "task-manager-c32bc.firebaseapp.com",
   projectId: "task-manager-c32bc"
 };
+    /* PAGE SWITCH */
+window.goSignup = function(){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("signupPage").style.display="flex";
+}
+
+window.goLogin = function(){
+    document.getElementById("signupPage").style.display="none";
+    document.getElementById("loginPage").style.display="flex";
+}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -193,24 +203,22 @@ window.signup = async ()=>{
     let email = document.getElementById("email").value;
     let pass = document.getElementById("password").value;
 
-    if(!name || !email || !pass){
-        alert("Fill all fields");
-        return;
+    if(!name || !gender || !dob || !email || !pass){
+        return alert("Fill all fields");
     }
 
-    try{
-        let userCred = await createUserWithEmailAndPassword(auth, email, pass);
+    let userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-        await setDoc(doc(db,"users",userCred.user.uid),{
-            name, gender, dob, email
-        });
+    await setDoc(doc(db, "users", userCred.user.uid), {
+        name,
+        gender,
+        dob,
+        email
+    });
 
-        alert("✅ Account created successfully!");
+    alert("✅ Account created successfully!");
 
-        goLogin(); // go back to login page
-    }catch(err){
-        alert(err.message);
-    }
+    goLogin(); // go back to login page
 }
 
 /* LOGIN */
