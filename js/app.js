@@ -1,3 +1,4 @@
+
 import { auth, db } from "./firebase.js";
 
 import {
@@ -9,7 +10,7 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let currentUser = null;
 let allTasks = [];
-
+let currentTab = "pending";
 /* AUTH */
 onAuthStateChanged(auth, user => {
     if (!user) window.location.href = "index.html";
