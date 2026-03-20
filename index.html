@@ -273,149 +273,185 @@ let allTasks=[];
 window.allTasks = [];
 let currentFilter="pending";
 
-/* NAV */
-function hideAll(){
-app.style.display="none";
-profilePage.style.display="none";
-leaderboardPage.style.display="none";
-learningPage.style.display="none";
+/* 🔒 COOLDOWN SYSTEM */
+let lastAttempt = 0;
+function canProceed(){
+    let now = Date.now();
+    if(now - lastAttempt < 2000){
+        alert("⏳ Please wait 2 seconds before retrying");
+        return false;
+    }
+    lastAttempt = now;
+    return true;
 }
 
-window.showHome=()=>{hideAll();app.style.display="block";}
-window.openProfile=async()=>{
-hideAll();profilePage.style.display="flex";
-
-let userDoc=await getDoc(doc(db,"users",currentUser.uid));
-let d=userDoc.data();
-
-pName.innerText="Name: "+d.name;
-pGender.innerText="Gender: "+d.gender;
-pDob.innerText="DOB: "+d.dob;
-pEmail.innerText="Email: "+d.email;
-}
-
-window.openLeaderboard=()=>{hideAll();leaderboardPage.style.display="flex";}
-window.openLearning=()=>{hideAll();learningPage.style.display="flex";}
-
-/* MENU */
-window.toggleMenu=()=>sidebar.classList.toggle("open");
-window.closeMenu=()=>sidebar.classList.remove("open");
-
-/* AUTH */
-window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
-window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
-
+/* AUTH STATE */
 onAuthStateChanged(auth, async(user)=>{
-if(user){
-currentUser=user;
-loginPage.style.display="none";
-signupPage.style.display="none";
-app.style.display="block";
+    if(user){
+        currentUser=user;
+        loginPage.style.display="none";
+        signupPage.style.display="none";
+        app.style.display="block";
 
-let userDoc=await getDoc(doc(db,"users",user.uid));
-userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
+        let userDoc=await getDoc(doc(db,"users",user.uid));
+        userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
 
-loadTasks();
-}else{
-loginPage.style.display="flex";
-app.style.display="none";
-}
+        loadTasks();
+    }else{
+        loginPage.style.display="flex";
+        app.style.display="none";
+    }
 });
+
+/* VALIDATION */
+function validateEmail(email){
+    return email.includes("@") && email.includes(".");
+}
 
 /* SIGNUP */
 window.signup=async()=>{
-let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
-await setDoc(doc(db,"users",user.user.uid),{
-name:name.value, gender:gender.value, dob:dob.value, email:email.value
-});
-signupMessage.innerText="Account Created";
+    try{
+        if(!email.value || !password.value){
+            alert("⚠ Fill all fields");
+            return;
+        }
+
+        if(!validateEmail(email.value)){
+            alert("❌ Invalid Email");
+            return;
+        }
+
+        if(password.value.length < 6){
+            alert("❌ Password must be 6+ characters");
+            return;
+        }
+
+        if(!canProceed()) return;
+
+        let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
+
+        await setDoc(doc(db,"users",user.user.uid),{
+            name:name.value,
+            gender:gender.value,
+            dob:dob.value,
+            email:email.value
+        });
+
+        signupMessage.innerText="✅ Account Created";
+    }
+    catch(e){
+        alert("❌ "+e.message);
+    }
 }
 
 /* LOGIN */
 window.login=async()=>{
-await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
+    try{
+        if(!loginEmail.value || !loginPassword.value){
+            alert("⚠ Enter email & password");
+            return;
+        }
+
+        if(!canProceed()) return;
+
+        await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
+    }
+    catch(e){
+        if(e.code==="auth/too-many-requests"){
+            alert("🚫 Too many attempts. Wait 30-60 seconds");
+        }
+        else if(e.code==="auth/invalid-credential"){
+            alert("❌ Wrong email or password");
+        }
+        else{
+            alert("❌ "+e.message);
+        }
+    }
 }
 
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* TASKS */
+/* LOAD TASKS */
 function loadTasks(){
-onSnapshot(collection(db,"tasks"),snap=>{
-allTasks=[];
-snap.forEach(d=>{
-let t=d.data();
-if(t.user===currentUser.uid){
-allTasks.push({id:d.id,...t});
-}
-});
-window.allTasks=allTasks;
-render(allTasks);
-});
+    onSnapshot(collection(db,"tasks"),snap=>{
+        allTasks=[];
+        snap.forEach(d=>{
+            let t=d.data();
+            if(t.user===currentUser.uid){
+                allTasks.push({id:d.id,...t});
+            }
+        });
+        window.allTasks = allTasks;
+        render(allTasks);
+    });
 }
 
+/* ADD TASK */
 window.add=async()=>{
-await addDoc(collection(db,"tasks"),{
-text:taskInput.value,
-date:dateInput.value,
-completed:false,
-user:currentUser.uid,
-priority:priority.value
-});
-taskInput.value="";
+    if(!taskInput.value){
+        alert("⚠ Enter task");
+        return;
+    }
+
+    await addDoc(collection(db,"tasks"),{
+        text:taskInput.value,
+        date:dateInput.value,
+        completed:false,
+        user:currentUser.uid,
+        priority:priority.value
+    });
+
+    taskInput.value="";
 }
 
+/* FILTER */
 window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
+
+/* TOGGLE */
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
+
+/* DELETE */
 window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
+/* RENDER */
 window.render=function(tasks){
 
-let today=new Date().toISOString().split("T")[0];
+    let today=new Date().toISOString().split("T")[0];
 
-let todayTasks = tasks.filter(t => t.date === today);
-let done = todayTasks.filter(t => t.completed).length;
-let total = todayTasks.length;
+    let todayTasks = tasks.filter(t => t.date === today);
+    let done = todayTasks.filter(t => t.completed).length;
+    let total = todayTasks.length;
 
-let statsHTML = `Today Progress: ${done} / ${total}`;
+    let statsHTML = `Today Progress: ${done} / ${total}`;
 
-if(total > 0 && done === total){
-statsHTML += `<div class="congrats">🎉 All tasks completed!</div>`;
-}
+    if(total > 0 && done === total){
+        statsHTML += `<div class="congrats">🎉 All tasks completed!</div>`;
+    }
 
-statsBox.innerHTML = statsHTML;
+    statsBox.innerHTML = statsHTML;
 
-if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
-if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
-if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
+    if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed);
+    if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
 
-let html="";
-tasks.forEach(t=>{
-html+=`
-<div class="card ${t.priority}">
-<div class="task ${t.completed?'completed':''}">
-${t.text}
-<div>
-<button onclick="toggle('${t.id}',${t.completed})">✔</button>
-<button onclick="del('${t.id}')">❌</button>
-</div>
-</div>
-<small>${t.date}</small>
-</div>`;
-});
-grid.innerHTML=html;
-}
+    let html="";
+    tasks.forEach(t=>{
+        html+=`
+        <div class="card ${t.priority}">
+        <div class="task ${t.completed?'completed':''}">
+        ${t.text}
+        <div>
+        <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+        <button onclick="del('${t.id}')">❌</button>
+        </div>
+        </div>
+        <small>${t.date}</small>
+        </div>`;
+    });
 
-/* EXTRA */
-window.inviteFriend=()=>{
-leaderboardList.innerHTML+=`<p>${inviteEmail.value} invited</p>`;
-}
-
-window.addLearning=()=>{
-learningList.innerHTML+=`<p>${subjectInput.value} → ${targetInput.value}</p>`;
+    grid.innerHTML=html;
 }
 
 </script>
-
 </body>
 </html>
