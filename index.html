@@ -114,10 +114,8 @@ margin:10px;
 
 <body>
 
-<!-- MENU BUTTON -->
 <div id="menuBtn" class="menu-btn" onclick="toggleMenu()">☰</div>
 
-<!-- MENU -->
 <div id="menu" class="menu">
 <div onclick="goHome()">🏠 Home</div>
 <div onclick="showProfile()">👤 Profile</div>
@@ -213,13 +211,17 @@ margin:10px;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, getDocs } 
+import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig={
-apiKey:"AIzaSy...",
-authDomain:"task-manager-c32bc.firebaseapp.com",
-projectId:"task-manager-c32bc"
+/* ✅ FULL CORRECT CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
+  authDomain: "task-manager-c32bc.firebaseapp.com",
+  projectId: "task-manager-c32bc",
+  storageBucket: "task-manager-c32bc.firebasestorage.app",
+  messagingSenderId: "686414095912",
+  appId: "1:686414095912:web:158882cd292ccbaaccb71d"
 };
 
 const app=initializeApp(firebaseConfig);
@@ -229,7 +231,6 @@ const db=getFirestore(app);
 let currentUser=null;
 let allTasks=[];
 window.allTasks=[];
-
 let currentFilter="pending";
 
 /* MENU */
@@ -253,9 +254,7 @@ window.showLearning=()=>show("learningPage");
 onAuthStateChanged(auth,async user=>{
 if(user){
 currentUser=user;
-
-document.getElementById("menuBtn").style.display="block";
-
+menuBtn.style.display="block";
 show("appPage");
 
 let userDoc=await getDoc(doc(db,"users",user.uid));
@@ -267,7 +266,7 @@ loadLeaderboard();
 loadLearning();
 
 }else{
-document.getElementById("menuBtn").style.display="none";
+menuBtn.style.display="none";
 show("loginPage");
 }
 });
@@ -286,7 +285,7 @@ show("loginPage");
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* TASK LOAD */
+/* LOAD TASKS */
 function loadTasks(){
 onSnapshot(collection(db,"tasks"),snap=>{
 allTasks=[];
@@ -324,6 +323,12 @@ taskInput.value="";
 /* FILTER */
 window.switchFilter=f=>{currentFilter=f;render(allTasks);};
 
+/* TOGGLE */
+window.toggle=async(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
+
+/* DELETE */
+window.del=id=>deleteDoc(doc(db,"tasks",id));
+
 /* RENDER */
 window.render=tasks=>{
 
@@ -334,9 +339,8 @@ let done=todayTasks.filter(t=>t.completed).length;
 
 statsBox.innerText=`Today ${done}/${todayTasks.length}`;
 
-let search=search.value.toLowerCase();
-
-if(search) tasks=tasks.filter(t=>t.text.toLowerCase().includes(search));
+let searchVal=search.value.toLowerCase();
+if(searchVal) tasks=tasks.filter(t=>t.text.toLowerCase().includes(searchVal));
 
 if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
 if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
@@ -352,11 +356,6 @@ html+=`
 });
 
 grid.innerHTML=html;
-};
-
-/* TOGGLE */
-window.toggle=async(id,c)=>{
-await updateDoc(doc(db,"tasks",id),{completed:!c});
 };
 
 /* PROFILE */
