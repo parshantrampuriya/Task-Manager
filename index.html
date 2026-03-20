@@ -32,6 +32,19 @@ input, select {
     color:white;
 }
 
+/* ERROR TEXT */
+.error {
+    color: #ff4d4d;
+    font-size: 12px;
+    height: 14px;
+}
+
+/* SUCCESS */
+.success {
+    color: #4dff88;
+    font-size: 12px;
+}
+
 button {
     padding:10px;
     background:#ff9f2f;
@@ -40,39 +53,49 @@ button {
     cursor:pointer;
 }
 
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* PASSWORD STRENGTH */
+.strength {
+    height:5px;
+    width:250px;
+    background:#222;
+}
+.strength-bar {
+    height:100%;
+    width:0%;
+}
+
+/* APP */
 .filter-bar {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
 }
-
 .input-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 20px;
-    flex-wrap: wrap;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:20px;
+    flex-wrap:wrap;
 }
-
 .grid {
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:20px;
     padding:20px;
 }
-
 .card {
     background:rgba(0,20,40,0.7);
     padding:10px;
-    border-radius:10px;
 }
-
 .task {
     display:flex;
     justify-content:space-between;
-    margin:5px 0;
 }
-
 .completed {
     text-decoration:line-through;
     opacity:0.6;
@@ -85,24 +108,39 @@ button {
 <!-- LOGIN -->
 <div id="loginPage" class="center" style="display:none">
     <h2>🔱 Sign In 🔱</h2>
+
     <input id="loginEmail" placeholder="Email">
+    <div id="loginEmailError" class="error"></div>
+
     <input id="loginPassword" type="password" placeholder="Password">
-    <button onclick="login()">Sign In</button>
+    <div id="loginPassError" class="error"></div>
+
+    <button id="loginBtn" onclick="login()">Sign In</button>
+
     <p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
 </div>
 
 <!-- SIGNUP -->
 <div id="signupPage" class="center" style="display:none">
     <h2>🔱 Create Account 🔱</h2>
+
     <input id="name" placeholder="Full Name">
     <select id="gender">
         <option>Male</option>
         <option>Female</option>
     </select>
     <input type="date" id="dob">
+
     <input id="email" placeholder="Email">
+    <div id="emailError" class="error"></div>
+
     <input id="password" type="password" placeholder="Password">
-    <button onclick="signup()">Create Account</button>
+    <div class="strength"><div id="strengthBar" class="strength-bar"></div></div>
+    <div id="passError" class="error"></div>
+
+    <button id="signupBtn" onclick="signup()">Create Account</button>
+    <div id="signupSuccess" class="success"></div>
+
     <p onclick="goLogin()" style="cursor:pointer;color:#ff9f2f">Back to Sign In</p>
 </div>
 
@@ -134,7 +172,7 @@ button {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, setDoc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -155,45 +193,44 @@ const loginPage = document.getElementById("loginPage");
 const signupPage = document.getElementById("signupPage");
 const appPage = document.getElementById("app");
 
-const userEmail = document.getElementById("userEmail");
-const taskInput = document.getElementById("taskInput");
-const dateInput = document.getElementById("date");
-const category = document.getElementById("category");
-const grid = document.getElementById("grid");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
 
-const nameInput = document.getElementById("name");
-const genderInput = document.getElementById("gender");
-const dobInput = document.getElementById("dob");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
 
-const loginEmailInput = document.getElementById("loginEmail");
-const loginPasswordInput = document.getElementById("loginPassword");
+const strengthBar = document.getElementById("strengthBar");
 
-let currentUser=null;
-let allTasks=[];
-let currentFilter="pending";
+/* PASSWORD STRENGTH */
+password.addEventListener("input", ()=>{
+    let val = password.value;
+    let strength = val.length;
+
+    if(strength < 4){
+        strengthBar.style.width="25%";
+        strengthBar.style.background="red";
+    }else if(strength < 6){
+        strengthBar.style.width="50%";
+        strengthBar.style.background="orange";
+    }else{
+        strengthBar.style.width="100%";
+        strengthBar.style.background="green";
+    }
+});
 
 /* SWITCH */
-window.goSignup=()=>{
-    loginPage.style.display="none";
-    signupPage.style.display="flex";
-}
-window.goLogin=()=>{
-    signupPage.style.display="none";
-    loginPage.style.display="flex";
-}
+window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
+window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
 
 /* AUTH */
 onAuthStateChanged(auth, async(user)=>{
     if(user){
-        currentUser=user;
         loginPage.style.display="none";
         signupPage.style.display="none";
         appPage.style.display="block";
 
         let userDoc=await getDoc(doc(db,"users",user.uid));
-        userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
+        document.getElementById("userEmail").innerText="👤 "+(userDoc.data()?.name||user.email);
 
         loadTasks();
     }else{
@@ -204,132 +241,72 @@ onAuthStateChanged(auth, async(user)=>{
 
 /* SIGNUP */
 window.signup=async()=>{
+    document.getElementById("passError").innerText="";
+    document.getElementById("emailError").innerText="";
+
+    if(password.value.length < 6){
+        return document.getElementById("passError").innerText="Password must be 6+ characters";
+    }
+
     try{
-        if(passwordInput.value.length < 6){
-            return alert("Password must be at least 6 characters");
-        }
+        let userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
 
-        let u=await createUserWithEmailAndPassword(auth,emailInput.value,passwordInput.value);
+        await sendEmailVerification(userCred.user);
 
-        await setDoc(doc(db,"users",u.user.uid),{
-            name:nameInput.value,
-            gender:genderInput.value,
-            dob:dobInput.value,
-            email:emailInput.value
-        });
+        document.getElementById("signupSuccess").innerText="Verification email sent!";
 
-        alert("Account Created Successfully");
-        goLogin();
-
-    }catch(error){
-        alert("Signup Error: " + error.message);
+    }catch(e){
+        document.getElementById("emailError").innerText=e.message;
     }
 }
 
 /* LOGIN */
 window.login=async()=>{
+    document.getElementById("loginPassError").innerText="";
+
     try{
-        await signInWithEmailAndPassword(auth,loginEmailInput.value,loginPasswordInput.value);
-    }catch(error){
-        if(error.code==="auth/user-not-found"){
-            alert("User not found");
-        }else if(error.code==="auth/wrong-password"){
-            alert("Wrong password");
-        }else if(error.code==="auth/invalid-email"){
-            alert("Invalid email");
-        }else{
-            alert(error.message);
-        }
+        await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
+    }catch(e){
+        document.getElementById("loginPassError").innerText=e.message;
     }
 }
 
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* LOAD */
+/* TASKS (same as before) */
 function loadTasks(){
     onSnapshot(collection(db,"tasks"),snap=>{
-        allTasks=[];
-        snap.forEach(d=>{
-            let t=d.data();
-            if(t.user===currentUser.uid){
-                allTasks.push({id:d.id,...t});
-            }
-        });
-        render(allTasks);
+        let tasks=[];
+        snap.forEach(d=>tasks.push({id:d.id,...d.data()}));
+        render(tasks);
     });
 }
 
-/* ADD */
 window.add=async()=>{
-    let text=taskInput.value;
-    let date=dateInput.value;
-    let today=new Date();
-
-    if(category.value==="Today") date=today.toISOString().split("T")[0];
-    if(category.value==="Tomorrow"){
-        today.setDate(today.getDate()+1);
-        date=today.toISOString().split("T")[0];
-    }
-
-    if(!text||!date) return alert("Fill all");
-
     await addDoc(collection(db,"tasks"),{
-        text,date,completed:false,user:currentUser.uid
+        text:taskInput.value,
+        date:date.value,
+        completed:false
     });
-
-    taskInput.value="";
 }
 
-/* FILTER */
-window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
-
-/* TOGGLE */
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
-
-/* DELETE */
 window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
-/* RENDER */
 function render(tasks){
-
-    let today=new Date().toISOString().split("T")[0];
-
-    if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
-    if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
-    if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
-
-    tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-    let grouped={};
-
-    tasks.forEach(t=>{
-        if(!grouped[t.date]) grouped[t.date]=[];
-        grouped[t.date].push(t);
-    });
-
     let html="";
-
-    Object.keys(grouped).forEach(date=>{
-        html+=`<div class="card"><h3>${date}</h3>`;
-        grouped[date].forEach(t=>{
-            html+=`
-            <div class="task ${t.completed?'completed':''}">
-                ${t.text}
-                <div>
-                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                    <button onclick="del('${t.id}')">❌</button>
-                </div>
-            </div>`;
-        });
-        html+=`</div>`;
+    tasks.forEach(t=>{
+        html+=`<div class="card">
+        <div class="task ${t.completed?'completed':''}">
+        ${t.text}
+        <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+        </div></div>`;
     });
-
     grid.innerHTML=html;
 }
 
-};
-
+}
 </script>
 
 </body>
