@@ -43,10 +43,10 @@ button {
 
 /* GRID */
 .grid {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:20px;
-    padding:20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
 }
 
 .card {
@@ -238,8 +238,37 @@ function loadTasks(){
 
 /* ADD */
 window.add = async ()=>{
-    let text=document.getElementById("taskInput").value;
-    let date=document.getElementById("date").value;
+    let text = document.getElementById("taskInput").value;
+let category = document.getElementById("category").value;
+let dateInput = document.getElementById("date").value;
+
+let today = new Date();
+let date;
+
+if(category === "Today"){
+    date = today.toISOString().split("T")[0];
+}
+else if(category === "Tomorrow"){
+    today.setDate(today.getDate() + 1);
+    date = today.toISOString().split("T")[0];
+}
+else{
+    if(!dateInput){
+        alert("Select date");
+        return;
+    }
+    date = dateInput;
+}
+    document.getElementById("category").addEventListener("change", function(){
+    let d = document.getElementById("date");
+
+    if(this.value === "Future"){
+        d.disabled = false;
+    } else {
+        d.disabled = true;
+        d.value = "";
+    }
+});
 
     if(!text || !date){
         alert("Fill all");
@@ -274,27 +303,68 @@ window.del = async (id)=>{
 
 /* RENDER */
 function render(tasks){
-    let today=new Date().toISOString().split("T")[0];
 
+    let today = new Date().toISOString().split("T")[0];
+
+    // FILTER (keep your existing feature)
     if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
     if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
     if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
-    let html="";
+    // GROUP BY DATE
+    let grouped = {};
     tasks.forEach(t=>{
-        html+=`
+        if(!grouped[t.date]) grouped[t.date]=[];
+        grouped[t.date].push(t);
+    });
+
+    // SORT DATES
+    let dates = Object.keys(grouped).sort((a,b)=> new Date(a)-new Date(b));
+
+    let html="";
+
+    dates.forEach(date=>{
+
+        let label = formatDate(date);
+        let day = new Date(date).toLocaleDateString('en-US',{weekday:'long'});
+
+        html += `
         <div class="card">
-            <div class="task ${t.completed?'completed':''}">
-                ${t.text}
+            <h3>${label}</h3>
+            <small>${day}</small>
+        `;
+
+        grouped[date].forEach(task=>{
+            html += `
+            <div class="task ${task.completed?'completed':''}">
+                ${task.text}
                 <div>
-                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                    <button onclick="del('${t.id}')">❌</button>
+                    <button onclick="toggle('${task.id}',${task.completed})">✔</button>
+                    <button onclick="del('${task.id}')">❌</button>
                 </div>
-            </div>
-        </div>`;
+            </div>`;
+        });
+
+        html += `</div>`;
     });
 
     document.getElementById("grid").innerHTML = html;
+}
+    function formatDate(dateStr){
+
+    let today = new Date();
+    let tomorrow = new Date();
+    tomorrow.setDate(today.getDate()+1);
+
+    let t = today.toISOString().split("T")[0];
+    let tm = tomorrow.toISOString().split("T")[0];
+
+    let d = new Date(dateStr);
+
+    if(dateStr === t) return "Today";
+    if(dateStr === tm) return "Tomorrow";
+
+    return d.toDateString();
 }
 
 </script>
