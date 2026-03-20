@@ -28,20 +28,47 @@ body {
 
 /* TITLE */
 .login-box h2 {
+    margin-bottom:5px;
+}
+
+.subtitle {
+    font-size:13px;
+    color:#aaa;
     margin-bottom:20px;
+}
+
+/* LABEL */
+.login-box label {
+    display:block;
+    text-align:left;
+    margin-top:10px;
+    font-size:14px;
+    color:#ccc;
 }
 
 /* INPUT */
 .login-box input {
     width:100%;
     padding:12px;
-    margin:10px 0;
+    margin:8px 0;
 
     border-radius:8px;
     border:1px solid #00cfff;
 
     background:rgba(255,255,255,0.1);
     color:white;
+}
+
+/* FORGOT PASSWORD */
+.forgot {
+    text-align:right;
+    margin-top:5px;
+}
+
+.forgot span {
+    font-size:13px;
+    color:#00cfff;
+    cursor:pointer;
 }
 
 /* BUTTON */
@@ -66,7 +93,9 @@ body {
 }
 
 /* LINK */
-.login-box span {
+.link {
     color:#00cfff;
     cursor:pointer;
+    display:block;
+    margin-top:10px;
 }
