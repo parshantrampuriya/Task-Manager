@@ -49,3 +49,37 @@ document.getElementById("signupBtn").addEventListener("click", signup);
 document.getElementById("goLoginBtn").addEventListener("click", () => {
     window.location.href = "index.html";
 });
+/* PASSWORD STRENGTH CHECK */
+document.getElementById("password").addEventListener("input", () => {
+
+    let password = document.getElementById("password").value;
+    let bar = document.getElementById("strengthBar");
+    let text = document.getElementById("strengthText");
+
+    let strength = 0;
+
+    if (password.length >= 6) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    if (strength <= 1) {
+        bar.style.width = "25%";
+        bar.style.background = "red";
+        text.innerText = "Weak Password";
+    }
+    else if (strength == 2) {
+        bar.style.width = "50%";
+        bar.style.background = "orange";
+        text.innerText = "Medium Password";
+    }
+    else if (strength >= 3) {
+        bar.style.width = "100%";
+        bar.style.background = "lime";
+        text.innerText = "Strong Password";
+    }
+});
+if (strength <= 1) {
+    passwordError.innerText = "Password too weak";
+    return;
+}
