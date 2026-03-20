@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Account</title>
 
-<!-- LINK YOUR CSS -->
 <link rel="stylesheet" href="css/signup.css">
-
 </head>
 
 <body>
@@ -20,28 +18,48 @@
 
         <!-- NAME -->
         <label>Full Name</label>
-        <input type="text" placeholder="Enter Name">
+        <input id="name" type="text" placeholder="Enter Name">
+        <small id="nameError"></small>
+
+        <!-- GENDER -->
+        <label>Gender</label>
+        <select id="gender">
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+
+        <!-- DOB -->
+        <label>Date of Birth</label>
+        <input id="dob" type="date">
 
         <!-- EMAIL -->
         <label>Email</label>
-        <input type="email" placeholder="Enter Email">
+        <input id="email" type="email" placeholder="Enter Email">
+        <small id="emailError"></small>
 
         <!-- PASSWORD -->
         <label>Password</label>
-        <input type="password" placeholder="Enter Password">
+        <input id="password" type="password" placeholder="Enter Password">
+        <small id="passwordError"></small>
 
         <!-- BUTTON -->
-        <button>Create Account</button>
+        <button onclick="signup()">Create Account</button>
 
-        <!-- BACK TO LOGIN -->
         <p>Already have an account?</p>
         <span class="link" onclick="goLogin()">Sign In</span>
     </div>
 
 </div>
 
-<!-- JS FILE -->
-<script src="js/signup.js"></script>
+<!-- OTP BOX -->
+<div id="otpBox" class="otp-box" style="display:none;">
+    <h3>Enter OTP</h3>
+    <input id="otpInput" placeholder="Enter OTP">
+    <button onclick="verifyOTP()">Verify</button>
+</div>
+
+<script type="module" src="js/signup.js"></script>
 
 </body>
 </html>
