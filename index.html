@@ -19,29 +19,42 @@
 
         <!-- EMAIL -->
         <label>Email</label>
-        <input type="email" placeholder="Enter Email">
+        <input id="email" type="email" placeholder="Enter Email">
 
         <!-- PASSWORD -->
         <label>Password</label>
-        <input type="password" placeholder="Enter Password">
+        <input id="password" type="password" placeholder="Enter Password">
 
         <!-- FORGOT PASSWORD -->
         <div class="forgot">
             <span id="forgotBtn">Forgot Password?</span>
         </div>
-        
 
         <!-- BUTTON -->
-        <button>Sign In</button>
+        <button id="loginBtn">Sign In</button>
 
         <!-- SIGNUP -->
         <p>Don't have an account?</p>
-        <span class="link" onclick="goSignup()">Create Account</span>
+        <span class="link" id="goSignupBtn">Create Account</span>
     </div>
 
 </div>
 
-<script src="js/login.js"></script>
+<!-- FORGOT PASSWORD POPUP -->
+<div id="forgotPopup" class="popup" style="display:none;">
+    <div class="popup-box">
+        <h3>Reset Password</h3>
+
+        <input id="resetEmail" type="email" placeholder="Enter your email">
+
+        <button id="resetBtn">Get Reset Link</button>
+
+        <span id="closePopup" class="close">✖</span>
+    </div>
+</div>
+
+<!-- IMPORTANT: MODULE -->
+<script type="module" src="js/login.js"></script>
 
 </body>
 </html>
