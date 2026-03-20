@@ -79,6 +79,23 @@ button {
     text-decoration:line-through;
     opacity:0.6;
 }
+
+/* PRIORITY COLORS */
+.high { border-left:5px solid red; }
+.medium { border-left:5px solid orange; }
+.low { border-left:5px solid green; }
+
+/* PROGRESS BAR */
+.progress {
+    width:80%;
+    height:10px;
+    background:#333;
+    margin:10px auto;
+}
+.progress-bar {
+    height:100%;
+    background:#00ffcc;
+}
 </style>
 </head>
 
@@ -106,6 +123,7 @@ button {
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="signup()">Create Account</button>
+    <div id="signupMessage"></div>
     <p onclick="goLogin()" style="cursor:pointer;color:#ff9f2f">Back to Sign In</p>
 </div>
 
@@ -114,7 +132,12 @@ button {
 
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
-<button onclick="checkVerification()">I Verified My Email</button>
+
+<!-- SEARCH -->
+<input id="search" placeholder="Search task..." oninput="render(allTasks)">
+
+<!-- PROGRESS -->
+<div class="progress"><div id="progressBar" class="progress-bar"></div></div>
 
 <div class="filter-bar">
     <button onclick="switchFilter('pending')">Pending</button>
@@ -132,6 +155,14 @@ button {
     </select>
 
     <input type="date" id="dateInput">
+
+    <!-- NEW PRIORITY -->
+    <select id="priority">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+    </select>
+
     <button onclick="add()">Add</button>
 </div>
 
@@ -161,15 +192,12 @@ let currentUser=null;
 let allTasks=[];
 let currentFilter="pending";
 
-/* SWITCH */
 window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
 window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
 
-/* AUTH */
 onAuthStateChanged(auth, async(user)=>{
     if(user){
         currentUser=user;
-
         loginPage.style.display="none";
         signupPage.style.display="none";
         app.style.display="block";
@@ -196,27 +224,12 @@ window.signup=async()=>{
         email:email.value
     });
 
-    alert("Check Gmail for verification");
-    goLogin();
+    signupMessage.innerText="📧 Verification email sent!";
 }
 
 /* LOGIN */
 window.login=async()=>{
     await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
-}
-
-/* VERIFY */
-window.checkVerification=async()=>{
-    await auth.currentUser.reload();
-    alert(auth.currentUser.emailVerified ? "Verified!" : "Not verified yet");
-}
-
-/* RESEND */
-window.resendVerification=async()=>{
-    if(auth.currentUser){
-        await sendEmailVerification(auth.currentUser);
-        alert("Email sent again");
-    }
 }
 
 /* LOGOUT */
@@ -236,11 +249,12 @@ function loadTasks(){
     });
 }
 
-/* ADD (FINAL FIX) */
+/* ADD */
 window.add=async()=>{
-    let textVal = document.getElementById("taskInput").value;
-    let dateVal = document.getElementById("dateInput").value;
-    let catVal = document.getElementById("category").value;
+    let textVal = taskInput.value;
+    let dateVal = dateInput.value;
+    let catVal = category.value;
+    let priorityVal = priority.value;
 
     let today=new Date();
 
@@ -252,16 +266,15 @@ window.add=async()=>{
         dateVal = today.toISOString().split("T")[0];
     }
 
-    if(!textVal || !dateVal) return alert("Fill all");
-
     await addDoc(collection(db,"tasks"),{
         text:textVal,
         date:dateVal,
         completed:false,
-        user:currentUser.uid
+        user:currentUser.uid,
+        priority:priorityVal
     });
 
-    document.getElementById("taskInput").value="";
+    taskInput.value="";
 }
 
 /* FILTER */
@@ -273,8 +286,20 @@ window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
 /* DELETE */
 window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
+/* EDIT */
+window.editTask=(id,text)=>{
+    let newText=prompt("Edit Task",text);
+    if(newText){
+        updateDoc(doc(db,"tasks",id),{text:newText});
+    }
+}
+
 /* RENDER */
 function render(tasks){
+
+    let searchVal = document.getElementById("search").value.toLowerCase();
+
+    tasks = tasks.filter(t=>t.text.toLowerCase().includes(searchVal));
 
     let today=new Date().toISOString().split("T")[0];
 
@@ -282,29 +307,26 @@ function render(tasks){
     if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
     if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
+    let completedCount = tasks.filter(t=>t.completed).length;
+    let percent = tasks.length ? (completedCount/tasks.length)*100 : 0;
+    document.getElementById("progressBar").style.width = percent+"%";
+
     tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-    let grouped={};
-
-    tasks.forEach(t=>{
-        if(!grouped[t.date]) grouped[t.date]=[];
-        grouped[t.date].push(t);
-    });
-
     let html="";
-    Object.keys(grouped).forEach(date=>{
-        html+=`<div class="card"><h3>${date}</h3>`;
-        grouped[date].forEach(t=>{
-            html+=`
+    tasks.forEach(t=>{
+        html+=`
+        <div class="card ${t.priority}">
             <div class="task ${t.completed?'completed':''}">
                 ${t.text}
                 <div>
                     <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                    <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
                     <button onclick="del('${t.id}')">❌</button>
                 </div>
-            </div>`;
-        });
-        html+=`</div>`;
+            </div>
+            <small>${t.date}</small>
+        </div>`;
     });
 
     grid.innerHTML=html;
