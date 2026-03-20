@@ -174,10 +174,6 @@ onAuthStateChanged(auth, async(user)=>{
         signupPage.style.display="none";
         app.style.display="block";
 
-        if(!user.emailVerified){
-            alert("Verify email then click button");
-        }
-
         let userDoc=await getDoc(doc(db,"users",user.uid));
         userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
 
@@ -240,18 +236,18 @@ function loadTasks(){
     });
 }
 
-/* ADD (FIXED VARIABLE ISSUE) */
+/* ADD (FINAL FIX) */
 window.add=async()=>{
     let textVal = document.getElementById("taskInput").value;
     let dateVal = document.getElementById("dateInput").value;
-    let cat = document.getElementById("category").value;
+    let catVal = document.getElementById("category").value;
 
     let today=new Date();
 
-    if(cat==="Today"){
+    if(catVal==="Today"){
         dateVal = today.toISOString().split("T")[0];
     }
-    else if(cat==="Tomorrow"){
+    else if(catVal==="Tomorrow"){
         today.setDate(today.getDate()+1);
         dateVal = today.toISOString().split("T")[0];
     }
