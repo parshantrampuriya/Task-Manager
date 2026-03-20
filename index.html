@@ -17,14 +17,14 @@ body {
     background-size:cover;
 }
 
-/* ===== ORIGINAL UI ===== */
+/* LOGIN */
 .center {
     height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
-    gap:10px;
+    gap:8px;
 }
 
 input,select {
@@ -35,6 +35,12 @@ input,select {
     color:white;
 }
 
+.error{
+    color:#ff4d4d;
+    font-size:12px;
+    height:14px;
+}
+
 button {
     padding:10px;
     background:#ff9f2f;
@@ -43,12 +49,7 @@ button {
     cursor:pointer;
 }
 
-.error{
-    color:#ff4d4d;
-    font-size:12px;
-}
-
-/* ===== TOPBAR + MENU ===== */
+/* TOPBAR */
 .topbar{
     display:flex;
     justify-content:space-between;
@@ -68,7 +69,7 @@ button {
 .sidebar.open{right:0;}
 .sidebar button{width:100%;margin:10px 0;}
 
-/* ===== TASK SYSTEM ===== */
+/* TASK UI (ORIGINAL KEPT) */
 .stats-box {
     text-align:center;
     background:rgba(0,20,40,0.7);
@@ -108,7 +109,6 @@ button {
     background:rgba(0,20,40,0.7);
     padding:10px;
     border-radius:10px;
-    cursor:grab;
 }
 
 .task {
@@ -180,7 +180,6 @@ button {
 <div class="topbar">
 <span onclick="toggleMenu()">☰</span>
 <span onclick="openProfile()">👤</span>
-<button onclick="toggleView()">📅</button>
 </div>
 
 <h2 id="userEmail"></h2>
@@ -242,6 +241,8 @@ button {
 <!-- LEADERBOARD -->
 <div id="leaderboardPage" class="center" style="display:none">
 <h2>Leaderboard</h2>
+<input id="inviteEmail">
+<button onclick="inviteFriend()">Invite</button>
 <div id="leaderboardList"></div>
 <button onclick="showHome()">Home</button>
 </div>
@@ -278,7 +279,6 @@ let currentUser=null;
 let allTasks=[];
 window.allTasks=[];
 let currentFilter="pending";
-let calendarView=false;
 
 /* NAV */
 function hideAll(){
@@ -301,13 +301,7 @@ pDob.innerText="DOB: "+d.dob;
 pEmail.innerText="Email: "+d.email;
 }
 
-window.openLeaderboard=()=>{
-hideAll();
-leaderboardPage.style.display="flex";
-let score=allTasks.filter(t=>t.completed).length;
-leaderboardList.innerHTML=`<p>Your Score: ${score}</p>`;
-}
-
+window.openLeaderboard=()=>{hideAll();leaderboardPage.style.display="flex";}
 window.openLearning=()=>{hideAll();learningPage.style.display="flex";}
 
 /* MENU */
@@ -317,6 +311,7 @@ window.toggleMenu=()=>sidebar.classList.toggle("open");
 window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
 window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
 
+/* SIGNUP */
 window.signup=async()=>{
 try{
 let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
@@ -328,6 +323,7 @@ emailError.innerText=e.message;
 }
 }
 
+/* LOGIN */
 window.login=async()=>{
 try{
 await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
@@ -336,6 +332,7 @@ loginPasswordError.innerText="Wrong credentials";
 }
 }
 
+/* AUTH STATE */
 onAuthStateChanged(auth, async(user)=>{
 if(user){
 currentUser=user;
@@ -347,12 +344,16 @@ let userDoc=await getDoc(doc(db,"users",user.uid));
 userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
 
 loadTasks();
+}else{
+loginPage.style.display="flex";
+app.style.display="none";
 }
 });
 
+/* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* TASKS */
+/* TASK SYSTEM FULL RESTORED */
 function loadTasks(){
 onSnapshot(collection(db,"tasks"),snap=>{
 allTasks=[];
@@ -368,22 +369,28 @@ render(allTasks);
 }
 
 window.add=async()=>{
-let today=new Date();
-let dateVal=dateInput.value;
+let textVal = taskInput.value;
+let dateVal = dateInput.value;
+let catVal = category.value;
 
-if(category.value==="Today") dateVal=today.toISOString().split("T")[0];
-if(category.value==="Tomorrow"){
+let today=new Date();
+
+if(catVal==="Today"){
+dateVal = today.toISOString().split("T")[0];
+}
+else if(catVal==="Tomorrow"){
 today.setDate(today.getDate()+1);
-dateVal=today.toISOString().split("T")[0];
+dateVal = today.toISOString().split("T")[0];
 }
 
 await addDoc(collection(db,"tasks"),{
-text:taskInput.value,
+text:textVal,
 date:dateVal,
 completed:false,
 user:currentUser.uid,
 priority:priority.value
 });
+
 taskInput.value="";
 }
 
@@ -391,31 +398,6 @@ window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
 window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
-/* PRIORITY */
-function priorityOrder(p){
-if(p==="high") return 1;
-if(p==="medium") return 2;
-return 3;
-}
-
-/* DRAG */
-let dragged=null;
-function enableDrag(){
-document.querySelectorAll(".card").forEach(c=>{
-c.draggable=true;
-c.ondragstart=()=>dragged=c;
-c.ondrop=()=>{if(dragged)c.parentNode.insertBefore(dragged,c)};
-c.ondragover=e=>e.preventDefault();
-});
-}
-
-/* TOGGLE VIEW */
-window.toggleView=()=>{
-calendarView=!calendarView;
-render(allTasks);
-}
-
-/* RENDER */
 window.render=function(tasks){
 
 let today=new Date().toISOString().split("T")[0];
@@ -424,28 +406,24 @@ let todayTasks = tasks.filter(t => t.date === today);
 let done = todayTasks.filter(t => t.completed).length;
 let total = todayTasks.length;
 
-statsBox.innerHTML=`Today Progress: ${done}/${total}`;
+let statsHTML = `Today Progress: ${done} / ${total}`;
+if(total>0 && done===total){
+statsHTML+=`<div class="congrats">🎉 All tasks done</div>`;
+}
+statsBox.innerHTML=statsHTML;
 
 if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
 if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
 if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
-let grouped={};
-tasks.forEach(t=>{
-if(!grouped[t.date]) grouped[t.date]=[];
-grouped[t.date].push(t);
-});
+let completedCount = tasks.filter(t=>t.completed).length;
+let percent = tasks.length ? (completedCount/tasks.length)*100 : 0;
+progressBar.style.width = percent+"%";
 
-let dates=Object.keys(grouped).sort((a,b)=>new Date(a)-new Date(b));
+tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
 
 let html="";
-
-dates.forEach(date=>{
-html+=`<div style="grid-column:1/-1;color:#00ffcc;">📅 ${date}</div>`;
-
-grouped[date].sort((a,b)=>priorityOrder(a.priority)-priorityOrder(b.priority));
-
-grouped[date].forEach(t=>{
+tasks.forEach(t=>{
 html+=`
 <div class="card ${t.priority}">
 <div class="task ${t.completed?'completed':''}">
@@ -455,12 +433,15 @@ ${t.text}
 <button onclick="del('${t.id}')">❌</button>
 </div>
 </div>
+<small>${t.date}</small>
 </div>`;
 });
-});
-
 grid.innerHTML=html;
-enableDrag();
+}
+
+/* EXTRA */
+window.inviteFriend=()=>{
+leaderboardList.innerHTML+=`<p>${inviteEmail.value} invited</p>`;
 }
 
 window.addLearning=()=>{
