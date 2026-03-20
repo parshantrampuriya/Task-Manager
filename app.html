@@ -1,23 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Task Manager</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-
 <body>
 
-<h2 id="userEmail"></h2>
-<button onclick="logout()">Logout</button>
+<div class="app-container">
 
-<div id="statsBox"></div>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <h2>🚀 Task Manager</h2>
+        <button onclick="logout()">Logout</button>
+    </div>
 
-<input id="taskInput">
-<button onclick="add()">Add</button>
+    <!-- INPUT -->
+    <div class="task-input">
+        <input id="taskInput" placeholder="Enter your task">
+        <button onclick="add()">Add</button>
+    </div>
 
-<div id="grid"></div>
+    <!-- TASK GRID -->
+    <div id="grid" class="task-grid"></div>
+
+</div>
 
 <script type="module" src="js/app.js"></script>
 
 </body>
-</html>
