@@ -135,6 +135,7 @@ button {
 
 <!-- SEARCH -->
 <input id="search" placeholder="Search task..." oninput="render(allTasks)">
+<button onclick="render(allTasks)">Search</button>
 
 <!-- PROGRESS -->
 <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
@@ -156,7 +157,6 @@ button {
 
     <input type="date" id="dateInput">
 
-    <!-- NEW PRIORITY -->
     <select id="priority">
         <option value="low">Low</option>
         <option value="medium">Medium</option>
@@ -224,7 +224,7 @@ window.signup=async()=>{
         email:email.value
     });
 
-    signupMessage.innerText="📧 Verification email sent!";
+    signupMessage.innerText="📧 We sent a verification email. Check Gmail.";
 }
 
 /* LOGIN */
@@ -266,6 +266,8 @@ window.add=async()=>{
         dateVal = today.toISOString().split("T")[0];
     }
 
+    if(!textVal || !dateVal) return alert("Fill all");
+
     await addDoc(collection(db,"tasks"),{
         text:textVal,
         date:dateVal,
@@ -297,9 +299,11 @@ window.editTask=(id,text)=>{
 /* RENDER */
 function render(tasks){
 
-    let searchVal = document.getElementById("search").value.toLowerCase();
+    let searchVal = document.getElementById("search").value.toLowerCase().trim();
 
-    tasks = tasks.filter(t=>t.text.toLowerCase().includes(searchVal));
+    if(searchVal){
+        tasks = tasks.filter(t => t.text.toLowerCase().includes(searchVal));
+    }
 
     let today=new Date().toISOString().split("T")[0];
 
@@ -314,6 +318,11 @@ function render(tasks){
     tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
 
     let html="";
+
+    if(tasks.length === 0){
+        html = `<div style="text-align:center;width:100%">❌ No tasks found</div>`;
+    }
+
     tasks.forEach(t=>{
         html+=`
         <div class="card ${t.priority}">
