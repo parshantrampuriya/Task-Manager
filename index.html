@@ -8,132 +8,180 @@
 <link rel="icon" href="data:,">
 
 <style>
-body{
-margin:0;
-font-family:"Segoe Print",cursive;
-color:#e6f7ff;
-background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),
-url("mahadev.png") no-repeat center/cover;
+body {
+    margin:0;
+    font-family:"Segoe Print",cursive;
+    color:#e6f7ff;
+    background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),
+    url("mahadev.png") no-repeat center center fixed;
+    background-size:cover;
 }
 
-/* PAGES */
-.page{display:none;}
-.active{display:flex;}
-
-.center{
-height:100vh;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:10px;
+.center {
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
 }
 
-input,select{
-padding:10px;
-width:250px;
-background:#012;
-border:1px solid #00cfff;
-color:white;
+input,select {
+    padding:10px;
+    width:250px;
+    background:rgba(0,20,40,0.7);
+    border:1px solid #00cfff;
+    color:white;
 }
 
-button{
-padding:10px;
-background:#ff9f2f;
-border:none;
-cursor:pointer;
+button {
+    padding:10px;
+    background:#ff9f2f;
+    border:none;
+    color:white;
+    cursor:pointer;
 }
 
-/* MENU */
-.menu-btn{
-position:fixed;
-top:10px;
-right:10px;
-background:#ff9f2f;
-padding:10px;
-cursor:pointer;
-display:none;
+/* NEW TOPBAR */
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 20px;
 }
 
-.menu{
-position:fixed;
-right:-250px;
-top:0;
-width:250px;
-height:100%;
-background:#001f2f;
-padding:20px;
-transition:0.3s;
-}
-.menu.open{right:0;}
-.menu div{margin:10px 0;cursor:pointer;}
-
-/* TASK */
-.filter-bar{display:flex;justify-content:center;gap:10px;}
-
-.input-row{
-display:flex;
-justify-content:center;
-gap:10px;
-flex-wrap:wrap;
-margin:20px;
+.sidebar{
+    position:fixed;
+    right:-260px;
+    top:0;
+    width:250px;
+    height:100%;
+    background:#001f3f;
+    padding:20px;
+    transition:0.3s;
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-padding:10px;
+.sidebar.open{
+    right:0;
 }
 
-.card{background:#012;padding:10px;border-radius:8px;}
-.completed{text-decoration:line-through;opacity:0.6;}
+.sidebar button{
+    width:100%;
+    margin:10px 0;
+}
 
-.stats{
-text-align:center;
-background:#012;
-padding:10px;
-margin:10px;
+/* EXISTING */
+.stats-box {
+    text-align:center;
+    background:rgba(0,20,40,0.7);
+    padding:10px;
+    margin:10px auto;
+    width:60%;
+    border-radius:10px;
+}
+
+.congrats {
+    color:#00ffcc;
+    font-weight:bold;
+}
+
+.filter-bar {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.input-row {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:20px;
+    flex-wrap:wrap;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    padding:20px;
+}
+
+.card {
+    background:rgba(0,20,40,0.7);
+    padding:10px;
+    border-radius:10px;
+}
+
+.task {
+    display:flex;
+    justify-content:space-between;
+    margin:5px 0;
+}
+
+.completed {
+    text-decoration:line-through;
+    opacity:0.6;
+}
+
+.high { border-left:5px solid red; }
+.medium { border-left:5px solid orange; }
+.low { border-left:5px solid green; }
+
+.progress {
+    width:80%;
+    height:10px;
+    background:#333;
+    margin:10px auto;
+}
+.progress-bar {
+    height:100%;
+    background:#00ffcc;
 }
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
-<div id="menuBtn" class="menu-btn" onclick="toggleMenu()">☰</div>
-<div id="menu" class="menu">
-<div onclick="goHome()">🏠 Home</div>
-<div onclick="logout()">🚪 Logout</div>
-</div>
-
 <!-- LOGIN -->
-<div id="loginPage" class="page active center">
+<div id="loginPage" class="center">
 <h2>🔱 Sign In 🔱</h2>
-<input id="loginEmail" placeholder="Email">
-<input id="loginPassword" type="password" placeholder="Password">
+<input id="loginEmail">
+<input id="loginPassword" type="password">
 <button onclick="login()">Sign In</button>
-<p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
+<p onclick="goSignup()">Create Account</p>
 </div>
 
 <!-- SIGNUP -->
-<div id="signupPage" class="page center">
-<h2>Create Account</h2>
-<input id="name" placeholder="Name">
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="signup()">Create</button>
+<div id="signupPage" class="center" style="display:none">
+<h2>🔱 Create Account 🔱</h2>
+<input id="name">
+<select id="gender"><option>Male</option><option>Female</option></select>
+<input type="date" id="dob">
+<input id="email">
+<input id="password" type="password">
+<button onclick="signup()">Create Account</button>
+<div id="signupMessage"></div>
 <p onclick="goLogin()">Back</p>
 </div>
 
 <!-- APP -->
-<div id="appPage" class="page">
+<div id="app" style="display:none">
+
+<!-- 🔥 TOP BAR -->
+<div class="topbar">
+<span onclick="toggleMenu()" style="cursor:pointer;">☰</span>
+<span onclick="openProfile()" style="cursor:pointer;">👤</span>
+</div>
 
 <h2 id="userEmail"></h2>
 
-<div id="statsBox" class="stats"></div>
+<button onclick="logout()">Logout</button>
 
-<input id="search" placeholder="Search..." oninput="render(allTasks)">
-<button onclick="render(allTasks)">Search</button>
+<div id="statsBox" class="stats-box"></div>
+
+<input id="search" placeholder="Search..." oninput="render(window.allTasks)">
+<button onclick="render(window.allTasks)">Search</button>
+
+<div class="progress"><div id="progressBar" class="progress-bar"></div></div>
 
 <div class="filter-bar">
 <button onclick="switchFilter('pending')">Pending</button>
@@ -142,21 +190,64 @@ margin:10px;
 </div>
 
 <div class="input-row">
-<input id="taskInput" placeholder="Task">
-
+<input id="taskInput">
 <select id="category">
 <option value="Today">Today</option>
 <option value="Tomorrow">Tomorrow</option>
 <option value="Future">Future</option>
 </select>
-
 <input type="date" id="dateInput">
+
+<select id="priority">
+<option value="low">Low</option>
+<option value="medium">Medium</option>
+<option value="high">High</option>
+</select>
 
 <button onclick="add()">Add</button>
 </div>
 
-<div id="grid" class="grid"></div>
+<div class="grid" id="grid"></div>
 
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+<button onclick="closeMenu()">❌ Close</button>
+<button onclick="showHome()">🏠 Home</button>
+<button onclick="openProfile()">👤 Profile</button>
+<button onclick="openLeaderboard()">🏆 Leaderboard</button>
+<button onclick="openLearning()">📚 Learning</button>
+<button onclick="logout()">🚪 Logout</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profilePage" class="center" style="display:none">
+<h2>👤 Profile</h2>
+<p id="pName"></p>
+<p id="pGender"></p>
+<p id="pDob"></p>
+<p id="pEmail"></p>
+<button onclick="showHome()">🏠 Home</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboardPage" class="center" style="display:none">
+<h2>🏆 Leaderboard</h2>
+<input id="inviteEmail" placeholder="Invite email">
+<button onclick="inviteFriend()">Invite</button>
+<div id="leaderboardList"></div>
+<button onclick="showHome()">🏠 Home</button>
+</div>
+
+<!-- LEARNING -->
+<div id="learningPage" class="center" style="display:none">
+<h2>📚 Learning Planner</h2>
+<input id="subjectInput">
+<input id="targetInput">
+<button onclick="addLearning()">Add</button>
+<div id="learningList"></div>
+<button onclick="showHome()">🏠 Home</button>
 </div>
 
 <script type="module">
@@ -164,93 +255,91 @@ margin:10px;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc } 
+import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, setDoc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔥 YOUR CORRECT CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc",
-  storageBucket: "task-manager-c32bc.firebasestorage.app",
-  messagingSenderId: "686414095912",
-  appId: "1:686414095912:web:158882cd292ccbaaccb71d"
+  projectId: "task-manager-c32bc"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const appFirebase = initializeApp(firebaseConfig);
+const auth = getAuth(appFirebase);
+const db = getFirestore(appFirebase);
 
-/* GLOBAL */
 let currentUser=null;
 let allTasks=[];
+window.allTasks = [];
 let currentFilter="pending";
 
-/* PAGE SWITCH */
-function show(id){
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+/* NAV */
+function hideAll(){
+app.style.display="none";
+profilePage.style.display="none";
+leaderboardPage.style.display="none";
+learningPage.style.display="none";
 }
 
+window.showHome=()=>{hideAll();app.style.display="block";}
+window.openProfile=async()=>{
+hideAll();profilePage.style.display="flex";
+
+let userDoc=await getDoc(doc(db,"users",currentUser.uid));
+let d=userDoc.data();
+
+pName.innerText="Name: "+d.name;
+pGender.innerText="Gender: "+d.gender;
+pDob.innerText="DOB: "+d.dob;
+pEmail.innerText="Email: "+d.email;
+}
+
+window.openLeaderboard=()=>{hideAll();leaderboardPage.style.display="flex";}
+window.openLearning=()=>{hideAll();learningPage.style.display="flex";}
+
 /* MENU */
-window.toggleMenu=()=>menu.classList.toggle("open");
+window.toggleMenu=()=>sidebar.classList.toggle("open");
+window.closeMenu=()=>sidebar.classList.remove("open");
 
-/* NAV */
-window.goSignup=()=>show("signupPage");
-window.goLogin=()=>show("loginPage");
-window.goHome=()=>show("appPage");
+/* AUTH */
+window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
+window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
 
-/* AUTH STATE */
-onAuthStateChanged(auth, async user=>{
+onAuthStateChanged(auth, async(user)=>{
 if(user){
 currentUser=user;
-menuBtn.style.display="block";
-show("appPage");
+loginPage.style.display="none";
+signupPage.style.display="none";
+app.style.display="block";
 
 let userDoc=await getDoc(doc(db,"users",user.uid));
-userEmail.innerText="👤 "+(userDoc.data()?.name || user.email);
+userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
 
 loadTasks();
-
 }else{
-menuBtn.style.display="none";
-show("loginPage");
+loginPage.style.display="flex";
+app.style.display="none";
 }
 });
 
-/* LOGIN */
-window.login = async ()=>{
-let email=document.getElementById("loginEmail").value;
-let pass=document.getElementById("loginPassword").value;
-
-if(!email||!pass){alert("Enter email & password");return;}
-
-try{
-await signInWithEmailAndPassword(auth,email,pass);
-}catch(e){alert(e.message);}
+/* SIGNUP */
+window.signup=async()=>{
+let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
+await setDoc(doc(db,"users",user.user.uid),{
+name:name.value, gender:gender.value, dob:dob.value, email:email.value
+});
+signupMessage.innerText="Account Created";
 }
 
-/* SIGNUP */
-window.signup = async ()=>{
-let name=document.getElementById("name").value;
-let email=document.getElementById("email").value;
-let pass=document.getElementById("password").value;
-
-if(!name||!email||!pass){alert("Fill all");return;}
-if(pass.length<6){alert("Password min 6 chars");return;}
-
-try{
-let u=await createUserWithEmailAndPassword(auth,email,pass);
-await setDoc(doc(db,"users",u.user.uid),{name,email});
-alert("Account created");
-goLogin();
-}catch(e){alert(e.message);}
+/* LOGIN */
+window.login=async()=>{
+await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
 }
 
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* LOAD TASK */
+/* TASKS */
 function loadTasks(){
 onSnapshot(collection(db,"tasks"),snap=>{
 allTasks=[];
@@ -260,53 +349,41 @@ if(t.user===currentUser.uid){
 allTasks.push({id:d.id,...t});
 }
 });
+window.allTasks=allTasks;
 render(allTasks);
 });
 }
 
-/* ADD */
 window.add=async()=>{
-let text=taskInput.value;
-let date=dateInput.value;
-let cat=category.value;
-
-let today=new Date();
-
-if(cat==="Today") date=today.toISOString().split("T")[0];
-if(cat==="Tomorrow"){
-today.setDate(today.getDate()+1);
-date=today.toISOString().split("T")[0];
+await addDoc(collection(db,"tasks"),{
+text:taskInput.value,
+date:dateInput.value,
+completed:false,
+user:currentUser.uid,
+priority:priority.value
+});
+taskInput.value="";
 }
 
-if(!text||!date){alert("Fill all");return;}
-
-await addDoc(collection(db,"tasks"),{
-text,date,completed:false,user:currentUser.uid
-});
-
-taskInput.value="";
-};
-
-/* FILTER */
-window.switchFilter=(f)=>{currentFilter=f;render(allTasks);};
-
-/* TOGGLE */
+window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
-
-/* DELETE */
 window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
-/* RENDER */
-window.render=(tasks)=>{
+window.render=function(tasks){
 
 let today=new Date().toISOString().split("T")[0];
 
-let todayTasks=tasks.filter(t=>t.date===today);
-let done=todayTasks.filter(t=>t.completed).length;
-statsBox.innerText=`Today ${done}/${todayTasks.length}`;
+let todayTasks = tasks.filter(t => t.date === today);
+let done = todayTasks.filter(t => t.completed).length;
+let total = todayTasks.length;
 
-let searchVal=document.getElementById("search").value.toLowerCase();
-if(searchVal) tasks=tasks.filter(t=>t.text.toLowerCase().includes(searchVal));
+let statsHTML = `Today Progress: ${done} / ${total}`;
+
+if(total > 0 && done === total){
+statsHTML += `<div class="congrats">🎉 All tasks completed!</div>`;
+}
+
+statsBox.innerHTML = statsHTML;
 
 if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
 if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
@@ -315,14 +392,28 @@ if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 let html="";
 tasks.forEach(t=>{
 html+=`
-<div class="card">
-<div class="${t.completed?'completed':''}">${t.text}</div>
+<div class="card ${t.priority}">
+<div class="task ${t.completed?'completed':''}">
+${t.text}
+<div>
 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+<button onclick="del('${t.id}')">❌</button>
+</div>
+</div>
+<small>${t.date}</small>
 </div>`;
 });
-
 grid.innerHTML=html;
-};
+}
+
+/* EXTRA */
+window.inviteFriend=()=>{
+leaderboardList.innerHTML+=`<p>${inviteEmail.value} invited</p>`;
+}
+
+window.addLearning=()=>{
+learningList.innerHTML+=`<p>${subjectInput.value} → ${targetInput.value}</p>`;
+}
 
 </script>
 
