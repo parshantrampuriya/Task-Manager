@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Task Manager</title>
 
-<link rel="icon" href="data:,"> <!-- remove favicon error -->
+<link rel="icon" href="data:,">
 
 <style>
 body {
@@ -90,6 +90,9 @@ button {
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
     <button onclick="login()">Sign In</button>
+
+    <button onclick="resendVerification()">Resend Verification Email</button>
+
     <p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
 </div>
 
@@ -113,6 +116,9 @@ button {
 
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
+
+<!-- VERIFY BUTTON -->
+<button onclick="checkVerification()">I Verified My Email</button>
 
 <div class="filter-bar">
     <button onclick="switchFilter('pending')">Pending</button>
@@ -145,100 +151,86 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, setDoc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-window.onload = function(){
-
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
   projectId: "task-manager-c32bc"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const appFirebase = initializeApp(firebaseConfig);
+const auth = getAuth(appFirebase);
+const db = getFirestore(appFirebase);
 
 let currentUser=null;
 let allTasks=[];
 let currentFilter="pending";
 
 /* SWITCH */
-window.goSignup=()=>{
-    loginPage.style.display="none";
-    signupPage.style.display="flex";
-}
-window.goLogin=()=>{
-    signupPage.style.display="none";
-    loginPage.style.display="flex";
-}
+window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
+window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
 
 /* AUTH */
 onAuthStateChanged(auth, async(user)=>{
     if(user){
-
-        if(!user.emailVerified){
-            alert("Verify email first");
-            signOut(auth);
-            return;
-        }
-
         currentUser=user;
 
         loginPage.style.display="none";
         signupPage.style.display="none";
         app.style.display="block";
 
-        let userDoc=await getDoc(doc(db,"users",user.uid));
-        let name=userDoc.data()?.name || user.email;
+        if(!user.emailVerified){
+            alert("⚠ Verify email from Gmail then click 'I Verified'");
+        }
 
-        userEmail.innerText="👤 "+name;
+        let userDoc=await getDoc(doc(db,"users",user.uid));
+        userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
 
         loadTasks();
-
     }else{
         loginPage.style.display="flex";
-        signupPage.style.display="none";
         app.style.display="none";
     }
 });
 
 /* SIGNUP */
 window.signup=async()=>{
-    let nameVal=document.getElementById("name").value;
-    let genderVal=document.getElementById("gender").value;
-    let dobVal=document.getElementById("dob").value;
-    let emailVal=document.getElementById("email").value;
-    let passVal=document.getElementById("password").value;
+    let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
+    await sendEmailVerification(user.user);
 
-    if(passVal.length<6){
-        return alert("Password must be 6+ characters");
-    }
+    await setDoc(doc(db,"users",user.user.uid),{
+        name:name.value,
+        gender:gender.value,
+        dob:dob.value,
+        email:email.value
+    });
 
-    try{
-        let userCred=await createUserWithEmailAndPassword(auth,emailVal,passVal);
-
-        await sendEmailVerification(userCred.user);
-
-        await setDoc(doc(db,"users",userCred.user.uid),{
-            name:nameVal,
-            gender:genderVal,
-            dob:dobVal,
-            email:emailVal
-        });
-
-        alert("Account created! Verify email.");
-        goLogin();
-
-    }catch(e){
-        alert(e.message);
-    }
+    alert("Verification email sent. Check Gmail.");
+    goLogin();
 }
 
 /* LOGIN */
 window.login=async()=>{
-    try{
-        await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
-    }catch(e){
-        alert(e.message);
+    await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
+}
+
+/* VERIFY CHECK */
+window.checkVerification=async()=>{
+    await auth.currentUser.reload();
+
+    if(auth.currentUser.emailVerified){
+        alert("Email verified successfully!");
+    }else{
+        alert("Still not verified. Check Gmail.");
+    }
+}
+
+/* RESEND */
+window.resendVerification=async()=>{
+    if(auth.currentUser){
+        await sendEmailVerification(auth.currentUser);
+        alert("Verification email sent again!");
+    }else{
+        alert("Login first");
     }
 }
 
@@ -263,60 +255,38 @@ function loadTasks(){
 window.add=async()=>{
     let text=taskInput.value;
     let date=date.value;
-    let cat=category.value;
-
     let today=new Date();
 
-    if(cat==="Today"){
-        date=today.toISOString().split("T")[0];
-    }
-    else if(cat==="Tomorrow"){
+    if(category.value==="Today") date=today.toISOString().split("T")[0];
+    if(category.value==="Tomorrow"){
         today.setDate(today.getDate()+1);
         date=today.toISOString().split("T")[0];
     }
 
-    if(!text||!date) return alert("Fill all");
-
     await addDoc(collection(db,"tasks"),{
-        text,
-        date,
-        completed:false,
-        user:currentUser.uid
+        text,date,completed:false,user:currentUser.uid
     });
 
     taskInput.value="";
 }
 
 /* FILTER */
-window.switchFilter=(f)=>{
-    currentFilter=f;
-    render(allTasks);
-}
+window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
 
 /* TOGGLE */
-window.toggle=(id,c)=>{
-    updateDoc(doc(db,"tasks",id),{completed:!c});
-}
+window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
 
 /* DELETE */
-window.del=(id)=>{
-    deleteDoc(doc(db,"tasks",id));
-}
+window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
 /* RENDER */
 function render(tasks){
 
     let today=new Date().toISOString().split("T")[0];
 
-    if(currentFilter==="pending"){
-        tasks=tasks.filter(t=>!t.completed && t.date>=today);
-    }
-    else if(currentFilter==="completed"){
-        tasks=tasks.filter(t=>t.completed);
-    }
-    else if(currentFilter==="due"){
-        tasks=tasks.filter(t=>!t.completed && t.date<today);
-    }
+    if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
+    if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
+    if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
     tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
 
@@ -328,9 +298,8 @@ function render(tasks){
     });
 
     let html="";
-
     Object.keys(grouped).forEach(date=>{
-        html+=`<div class="card"><h3>${getLabel(date)}</h3>`;
+        html+=`<div class="card"><h3>${date}</h3>`;
         grouped[date].forEach(t=>{
             html+=`
             <div class="task ${t.completed?'completed':''}">
@@ -347,22 +316,6 @@ function render(tasks){
     grid.innerHTML=html;
 }
 
-/* LABEL */
-function getLabel(date){
-    let today=new Date();
-    let tomorrow=new Date();
-    tomorrow.setDate(today.getDate()+1);
-
-    let t=today.toISOString().split("T")[0];
-    let tm=tomorrow.toISOString().split("T")[0];
-
-    if(date===t) return "Today";
-    if(date===tm) return "Tomorrow";
-
-    return new Date(date).toDateString();
-}
-
-}
 </script>
 
 </body>
