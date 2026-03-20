@@ -1,90 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Task Manager</title>
-
-<link rel="icon" href="data:,">
+<title>Login</title>
 <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginPage" class="center">
-    <h2>🔱 Sign In 🔱</h2>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button onclick="login()">Sign In</button>
-    <p onclick="goSignup()">Create Account</p>
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>🔱 Sign In</h2>
+
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <p>Don't have account?</p>
+        <span class="link" onclick="goSignup()">Create Account</span>
+    </div>
 </div>
 
-<!-- SIGNUP -->
-<div id="signupPage" class="center" style="display:none">
-    <h2>🔱 Create Account 🔱</h2>
-    <input id="name" placeholder="Name">
-    <select id="gender">
-        <option>Male</option>
-        <option>Female</option>
-    </select>
-    <input type="date" id="dob">
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="signup()">Create Account</button>
-    <div id="signupMessage"></div>
-    <p onclick="goLogin()">Back</p>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none">
-
-<h2 id="userEmail"></h2>
-
-<button onclick="logout()">Logout</button>
-<button onclick="goDashboard()">Dashboard</button>
-
-<div id="statsBox" class="stats-box"></div>
-
-<input id="search" placeholder="Search..." oninput="render(window.allTasks)">
-<button onclick="render(window.allTasks)">Search</button>
-
-<div class="progress">
-    <div id="progressBar" class="progress-bar"></div>
-</div>
-
-<div class="filter-bar">
-<button onclick="switchFilter('pending')">Pending</button>
-<button onclick="switchFilter('completed')">Completed</button>
-<button onclick="switchFilter('due')">Due</button>
-</div>
-
-<div class="input-row">
-<input id="taskInput" placeholder="Enter task">
-
-<select id="category">
-<option value="Today">Today</option>
-<option value="Tomorrow">Tomorrow</option>
-<option value="Future">Future</option>
-</select>
-
-<input type="date" id="dateInput">
-
-<select id="priority">
-<option value="low">Low</option>
-<option value="medium">Medium</option>
-<option value="high">High</option>
-</select>
-
-<button onclick="add()">Add</button>
-</div>
-
-<div class="grid" id="grid"></div>
-
-</div>
-
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/auth.js"></script>
 
 </body>
 </html>
