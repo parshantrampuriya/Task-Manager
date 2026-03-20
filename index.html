@@ -17,7 +17,6 @@ body {
     background-size:cover;
 }
 
-/* LOGIN */
 .center {
     height:100vh;
     display:flex;
@@ -49,7 +48,6 @@ button {
     cursor:pointer;
 }
 
-/* TOPBAR */
 .topbar{
     display:flex;
     justify-content:space-between;
@@ -69,7 +67,6 @@ button {
 .sidebar.open{right:0;}
 .sidebar button{width:100%;margin:10px 0;}
 
-/* TASK UI (ORIGINAL KEPT) */
 .stats-box {
     text-align:center;
     background:rgba(0,20,40,0.7);
@@ -353,7 +350,7 @@ app.style.display="none";
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* TASK SYSTEM FULL RESTORED */
+/* TASKS */
 function loadTasks(){
 onSnapshot(collection(db,"tasks"),snap=>{
 allTasks=[];
@@ -398,6 +395,7 @@ window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
 window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
 window.del=(id)=>deleteDoc(doc(db,"tasks",id));
 
+/* 🔥 UPDATED RENDER WITH DATE GROUPING */
 window.render=function(tasks){
 
 let today=new Date().toISOString().split("T")[0];
@@ -416,14 +414,26 @@ if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=toda
 if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
 if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
 
+/* GROUP BY DATE */
+let grouped={};
+tasks.forEach(t=>{
+if(!grouped[t.date]) grouped[t.date]=[];
+grouped[t.date].push(t);
+});
+
+/* SORT DATES */
+let sortedDates=Object.keys(grouped).sort((a,b)=>new Date(a)-new Date(b));
+
 let completedCount = tasks.filter(t=>t.completed).length;
 let percent = tasks.length ? (completedCount/tasks.length)*100 : 0;
 progressBar.style.width = percent+"%";
 
-tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
-
 let html="";
-tasks.forEach(t=>{
+
+sortedDates.forEach(date=>{
+html+=`<div style="grid-column:1/-1;color:#00ffcc;font-size:18px;">📅 ${date}</div>`;
+
+grouped[date].forEach(t=>{
 html+=`
 <div class="card ${t.priority}">
 <div class="task ${t.completed?'completed':''}">
@@ -433,9 +443,10 @@ ${t.text}
 <button onclick="del('${t.id}')">❌</button>
 </div>
 </div>
-<small>${t.date}</small>
 </div>`;
 });
+});
+
 grid.innerHTML=html;
 }
 
