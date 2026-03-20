@@ -54,3 +54,4 @@ window.verifyOTP = () => {
     alert("Account Verified ✅");
     window.location.href = "index.html";
 };
+document.getElementById("signupBtn").addEventListener("click", signup);
