@@ -3,235 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced Task Manager (Firebase)</title>
+<title>Mahadev Task Manager ⚡</title>
 
-<!-- Firebase SDK -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
-body {margin:0;font-family:Arial;background:#f4f6f9;}
-.hidden {display:none;}
-.container {max-width:400px;margin:60px auto;background:white;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);} 
-input, button, select {width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;}
-button {background:#007bff;color:white;border:none;cursor:pointer;}
-.error {color:red;font-size:14px;}
-.navbar {background:#007bff;color:white;padding:10px;display:flex;justify-content:space-between;}
-.menu {cursor:pointer;font-size:20px;}
-.sidebar {position:fixed;top:0;right:-220px;width:220px;height:100%;background:#333;color:white;padding:20px;transition:0.3s;}
-.sidebar a {display:block;color:white;margin:10px 0;text-decoration:none;}
-.task {background:white;margin:10px;padding:10px;border-radius:5px;border-left:4px solid #007bff;}
-.tabs {display:flex;gap:6px;overflow:auto;margin-top:10px;}
-.tab {padding:6px 10px;background:#e9eef6;border-radius:6px;cursor:pointer;white-space:nowrap;}
-.tab.active {background:#007bff;color:#fff;}
+body{
+margin:0;
+font-family:"Segoe Print",cursive;
+color:#e6f7ff;
+background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)), url("mahadev.png") no-repeat center center fixed;
+background-size:cover;
+}
+
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:10px;}
+
+input,select{
+padding:10px;width:260px;background:rgba(0,20,40,0.7);border:1px solid #00cfff;color:white;border-radius:6px;
+}
+
+button{padding:10px;background:#ff9f2f;border:none;color:white;cursor:pointer;border-radius:6px;}
+
+.error{color:#ff4d4d;font-size:12px;height:14px;}
+
+.topbar{display:flex;justify-content:space-between;padding:15px;font-size:20px;}
+
+.sidebar{position:fixed;right:-260px;top:0;width:250px;height:100%;background:#001f3f;padding:20px;transition:0.3s;}
+.sidebar.open{right:0;}
+.sidebar button{width:100%;margin:10px 0;}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:20px;}
+
+.card{background:rgba(0,20,40,0.7);padding:10px;border-radius:10px;}
+
+.task{display:flex;justify-content:space-between;}
+.completed{text-decoration:line-through;opacity:0.6;}
+.high{border-left:5px solid red;}
+.medium{border-left:5px solid orange;}
+.low{border-left:5px solid green;}
+
+.progress{width:80%;height:10px;background:#333;margin:10px auto;}
+.progress-bar{height:100%;background:#00ffcc;}
+
 </style>
 </head>
+
 <body>
 
-<div class="navbar hidden" id="navbar">
-<span>Task Manager</span>
-<span class="menu" onclick="toggleMenu()">☰</span>
-</div>
-
-<div class="sidebar" id="sidebar">
-<a href="#" onclick="showPage('profile')">Profile</a>
-<a href="#" onclick="showPage('profile')">Home</a>
-<a href="#">Leaderboard</a>
-<a href="#">Learning</a>
-<a href="#" onclick="logout()">Logout</a>
-</div>
-
 <!-- LOGIN -->
-<div class="container" id="loginPage">
-<h2>Login</h2>
-<input type="email" id="loginEmail" placeholder="Email">
-<input type="password" id="loginPassword" placeholder="Password">
-<div class="error" id="loginError"></div>
+<div id="loginPage" class="center">
+<h2>🔱 Sign In 🔱</h2>
+<input id="loginEmail" placeholder="Email">
+<div id="loginError" class="error"></div>
+<input id="loginPassword" type="password" placeholder="Password">
 <button onclick="login()">Sign In</button>
-<p onclick="showPage('forgot')" style="cursor:pointer;color:blue">Forgot Password?</p>
-<p onclick="showPage('register')" style="cursor:pointer;color:blue">Create Account</p>
+<p onclick="showSignup()">Create Account</p>
+<p onclick="resetPassword()">Forgot Password</p>
 </div>
 
-<!-- REGISTER -->
-<div class="container hidden" id="registerPage">
+<!-- SIGNUP -->
+<div id="signupPage" class="center" style="display:none">
 <h2>Create Account</h2>
-<input type="text" id="name" placeholder="Full Name">
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password (min 6 chars)">
-<div class="error" id="registerError"></div>
-<button onclick="register()">Create Account</button>
-<p onclick="showPage('login')" style="cursor:pointer;color:blue">Back to Login</p>
+<input id="name" placeholder="Name">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<div id="signupError" class="error"></div>
+<button onclick="signup()">Create</button>
+<p onclick="showLogin()">Back</p>
 </div>
 
-<!-- FORGOT -->
-<div class="container hidden" id="forgotPage">
-<h2>Reset Password</h2>
-<input type="email" id="forgotEmail" placeholder="Enter Email">
-<div class="error" id="forgotError"></div>
-<button onclick="resetPassword()">Send Reset Link</button>
-<p onclick="showPage('login')">Back</p>
+<!-- APP -->
+<div id="app" style="display:none">
+
+<div class="topbar">
+<span onclick="toggleMenu()">☰</span>
+<span id="userEmail"></span>
 </div>
 
-<!-- PROFILE -->
-<div class="container hidden" id="profilePage">
-<h2>Your Tasks</h2>
-<input type="text" id="taskInput" placeholder="New Task">
+<div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+
+<div style="text-align:center">
+<input id="taskInput" placeholder="New Task">
 <input type="date" id="taskDate">
-<button onclick="addTask()">Add Task</button>
-
-<select onchange="sortTasks(this.value)">
-<option value="date">Sort by Date</option>
-<option value="name">Sort by Name</option>
+<select id="priority">
+<option value="low">Low</option>
+<option value="medium">Medium</option>
+<option value="high">High</option>
 </select>
+<button onclick="addTask()">Add</button>
+</div>
 
-<div class="tabs" id="dateTabs"></div>
-<div id="taskList"></div>
+<div class="grid" id="grid"></div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+<button onclick="logout()">Logout</button>
 </div>
 
 <script>
-// 🔥 YOUR FIREBASE CONFIG (ADDED)
+
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc",
-  storageBucket: "task-manager-c32bc.firebasestorage.app",
-  messagingSenderId: "686414095912",
-  appId: "1:686414095912:web:158882cd292ccbaaccb71d",
-  measurementId: "G-TLD8JJGETS"
+  projectId: "task-manager-c32bc"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser = null;
-let currentTabDate = null;
+let currentUser=null;
 
-function showPage(page) {
- document.querySelectorAll('.container').forEach(e=>e.classList.add('hidden'));
- if(page==='login') loginPage.classList.remove('hidden');
- if(page==='register') registerPage.classList.remove('hidden');
- if(page==='forgot') forgotPage.classList.remove('hidden');
- if(page==='profile') profilePage.classList.remove('hidden');
-}
+function showSignup(){loginPage.style.display='none';signupPage.style.display='flex';}
+function showLogin(){signupPage.style.display='none';loginPage.style.display='flex';}
+function toggleMenu(){sidebar.classList.toggle('open');}
 
-function toggleMenu(){
- let sidebar=document.getElementById('sidebar');
- sidebar.style.right = sidebar.style.right==='0px' ? '-220px':'0px';
-}
-
-// AUTH
-function register(){
- const email=document.getElementById('email').value.trim();
- const password=document.getElementById('password').value;
- const name=document.getElementById('name').value.trim();
- registerError.innerText='';
- if(password.length < 6){ registerError.innerText='Password must be at least 6 characters'; return; }
- auth.createUserWithEmailAndPassword(email, password)
- .then(cred=>{
-   return db.collection('users').doc(cred.user.uid).set({name, email});
- })
- .then(()=>{ alert('Account Created'); showPage('login'); })
- .catch(err=>{ registerError.innerText = err.message; });
+function signup(){
+ auth.createUserWithEmailAndPassword(email.value,password.value)
+ .then(()=>alert('Account Created'))
+ .catch(e=>signupError.innerText=e.message);
 }
 
 function login(){
- const email=loginEmail.value.trim();
- const password=loginPassword.value;
- loginError.innerText='';
- auth.signInWithEmailAndPassword(email, password)
- .then(cred=>{
-   currentUser = cred.user;
-   navbar.classList.remove('hidden');
-   showPage('profile');
-   subscribeTasks();
- })
- .catch(err=>{ loginError.innerText = 'Invalid credentials'; });
+ auth.signInWithEmailAndPassword(loginEmail.value,loginPassword.value)
+ .catch(()=>loginError.innerText='Invalid credentials');
 }
 
-function logout(){
- auth.signOut();
- currentUser=null;
- navbar.classList.add('hidden');
- showPage('login');
-}
+function logout(){auth.signOut();}
 
 function resetPassword(){
- const email = forgotEmail.value.trim();
- forgotError.innerText='';
- auth.sendPasswordResetEmail(email)
- .then(()=> alert('Reset email sent'))
- .catch(err=> forgotError.innerText = err.message);
+ auth.sendPasswordResetEmail(loginEmail.value)
+ .then(()=>alert('Reset email sent'));
 }
 
-// TASKS (Firestore)
-let tasksCache = [];
-let unsubscribe = null;
-
-function subscribeTasks(){
- if(unsubscribe) unsubscribe();
- unsubscribe = db.collection('tasks')
- .where('uid','==', currentUser.uid)
- .onSnapshot(snap=>{
-   tasksCache = [];
-   snap.forEach(doc=> tasksCache.push({id: doc.id, ...doc.data()}));
-   buildDateTabs();
-   renderTasks();
- });
-}
+firebase.auth().onAuthStateChanged(user=>{
+ if(user){
+ currentUser=user;
+ loginPage.style.display='none';
+ app.style.display='block';
+ userEmail.innerText=user.email;
+ loadTasks();
+ }else{
+ loginPage.style.display='flex';
+ app.style.display='none';
+ }
+});
 
 function addTask(){
- const name = taskInput.value.trim();
- const date = taskDate.value;
- if(!name || !date) return alert('Enter task and date');
  db.collection('tasks').add({
-   uid: currentUser.uid,
-   name, date,
-   createdAt: firebase.firestore.FieldValue.serverTimestamp()
+ text:taskInput.value,
+ date:taskDate.value,
+ priority:priority.value,
+ completed:false,
+ user:currentUser.uid
  });
- taskInput.value=''; taskDate.value='';
+ taskInput.value='';
 }
 
-function sortTasks(type){
- if(type==='date') tasksCache.sort((a,b)=> new Date(a.date)-new Date(b.date));
- if(type==='name') tasksCache.sort((a,b)=> a.name.localeCompare(b.name));
- renderTasks();
-}
-
-function buildDateTabs(){
- const tabs = document.getElementById('dateTabs');
- const uniqueDates = [...new Set(tasksCache.map(t=>t.date))].sort();
- tabs.innerHTML='';
- uniqueDates.forEach(d=>{
-   const el = document.createElement('div');
-   el.className = 'tab' + (d===currentTabDate ? ' active':'');
-   el.innerText = d;
-   el.onclick = ()=>{ currentTabDate = d; buildDateTabs(); renderTasks(); };
-   tabs.appendChild(el);
+function loadTasks(){
+ db.collection('tasks').onSnapshot(snap=>{
+ let tasks=[];
+ snap.forEach(doc=>{
+ let t=doc.data();
+ if(t.user===currentUser.uid) tasks.push({...t,id:doc.id});
  });
- if(!currentTabDate && uniqueDates.length){ currentTabDate = uniqueDates[0]; buildDateTabs(); }
-}
-
-function renderTasks(){
- const list=document.getElementById('taskList');
- list.innerHTML='';
- const data = currentTabDate ? tasksCache.filter(t=>t.date===currentTabDate) : tasksCache;
- data.forEach(t=>{
-   const div = document.createElement('div');
-   div.className='task';
-   div.innerHTML = `<b>${t.name}</b><br><small>${t.date}</small>`;
-   list.appendChild(div);
+ render(tasks);
  });
 }
 
-// Auto session
-firebase.auth().onAuthStateChanged(user=>{
- if(user){ currentUser=user; navbar.classList.remove('hidden'); showPage('profile'); subscribeTasks(); }
- else { navbar.classList.add('hidden'); showPage('login'); }
-});
+function render(tasks){
+ let html="";
+ let done=tasks.filter(t=>t.completed).length;
+ let percent=tasks.length?(done/tasks.length)*100:0;
+ progressBar.style.width=percent+"%";
+
+ tasks.forEach(t=>{
+ html+=`<div class="card ${t.priority}">
+ <div class="task ${t.completed?'completed':''}">
+ ${t.text}
+ <div>
+ <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+ <button onclick="del('${t.id}')">❌</button>
+ </div>
+ </div>
+ </div>`;
+ });
+ grid.innerHTML=html;
+}
+
+function toggle(id,c){db.collection('tasks').doc(id).update({completed:!c});}
+function del(id){db.collection('tasks').doc(id).delete();}
+
 </script>
-
 </body>
 </html>
