@@ -3,470 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Task Manager</title>
-
-<link rel="icon" href="data:,">
+<title>Advanced Task Manager</title>
 
 <style>
-body {
-    margin:0;
-    font-family:"Segoe Print",cursive;
-    color:#e6f7ff;
-    background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),
-    url("mahadev.png") no-repeat center center fixed;
-    background-size:cover;
-}
-
-/* ===== ORIGINAL UI ===== */
-.center {
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:10px;
-}
-
-input,select {
-    padding:10px;
-    width:250px;
-    background:rgba(0,20,40,0.7);
-    border:1px solid #00cfff;
-    color:white;
-}
-
-button {
-    padding:10px;
-    background:#ff9f2f;
-    border:none;
-    color:white;
-    cursor:pointer;
-}
-
-.error{
-    color:#ff4d4d;
-    font-size:12px;
-}
-
-/* ===== TOPBAR + MENU ===== */
-.topbar{
-    display:flex;
-    justify-content:space-between;
-    padding:10px 20px;
-}
-
-.sidebar{
-    position:fixed;
-    right:-260px;
-    top:0;
-    width:250px;
-    height:100%;
-    background:#001f3f;
-    padding:20px;
-    transition:0.3s;
-}
-.sidebar.open{right:0;}
-.sidebar button{width:100%;margin:10px 0;}
-
-/* ===== TASK SYSTEM ===== */
-.stats-box {
-    text-align:center;
-    background:rgba(0,20,40,0.7);
-    padding:10px;
-    margin:10px auto;
-    width:60%;
-    border-radius:10px;
-}
-
-.congrats {
-    color:#00ffcc;
-    font-weight:bold;
-}
-
-.filter-bar {
-    display:flex;
-    justify-content:center;
-    gap:10px;
-}
-
-.input-row {
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin:20px;
-    flex-wrap:wrap;
-}
-
-.grid {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:20px;
-    padding:20px;
-}
-
-.card {
-    background:rgba(0,20,40,0.7);
-    padding:10px;
-    border-radius:10px;
-    cursor:grab;
-}
-
-.task {
-    display:flex;
-    justify-content:space-between;
-}
-
-.completed {
-    text-decoration:line-through;
-    opacity:0.6;
-}
-
-.high { border-left:5px solid red; }
-.medium { border-left:5px solid orange; }
-.low { border-left:5px solid green; }
-
-.progress {
-    width:80%;
-    height:10px;
-    background:#333;
-    margin:10px auto;
-}
-.progress-bar {
-    height:100%;
-    background:#00ffcc;
-}
+body {margin:0;font-family:Arial;background:#f4f6f9;}
+.hidden {display:none;}
+.container {max-width:400px;margin:60px auto;background:white;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);} 
+input, button {width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;}
+button {background:#007bff;color:white;border:none;cursor:pointer;}
+.error {color:red;font-size:14px;}
+.navbar {background:#007bff;color:white;padding:10px;display:flex;justify-content:space-between;}
+.menu {cursor:pointer;font-size:20px;}
+.sidebar {position:fixed;top:0;right:-200px;width:200px;height:100%;background:#333;color:white;padding:20px;transition:0.3s;}
+.sidebar a {display:block;color:white;margin:10px 0;text-decoration:none;}
+.task {background:white;margin:10px;padding:10px;border-radius:5px;}
 </style>
 </head>
-
 <body>
 
+<div class="navbar hidden" id="navbar">
+<span>Task Manager</span>
+<span class="menu" onclick="toggleMenu()">☰</span>
+</div>
+
+<div class="sidebar" id="sidebar">
+<a href="#" onclick="showPage('profile')">Profile</a>
+<a href="#" onclick="showPage('home')">Home</a>
+<a href="#">Leaderboard</a>
+<a href="#">Learning</a>
+<a href="#" onclick="logout()">Logout</a>
+</div>
+
 <!-- LOGIN -->
-<div id="loginPage" class="center">
-<h2>🔱 Sign In 🔱</h2>
-
-<input id="loginEmail" placeholder="Enter Email">
-<div id="loginEmailError" class="error"></div>
-
-<input id="loginPassword" type="password" placeholder="Enter Password">
-<div id="loginPasswordError" class="error"></div>
-
+<div class="container" id="loginPage">
+<h2>Login</h2>
+<input type="email" id="loginEmail" placeholder="Email">
+<input type="password" id="loginPassword" placeholder="Password">
+<div class="error" id="loginError"></div>
 <button onclick="login()">Sign In</button>
-<p onclick="goSignup()">Create Account</p>
+<p onclick="showPage('forgot')" style="cursor:pointer;color:blue">Forgot Password?</p>
+<p onclick="showPage('register')" style="cursor:pointer;color:blue">Create Account</p>
 </div>
 
-<!-- SIGNUP -->
-<div id="signupPage" class="center" style="display:none">
+<!-- REGISTER -->
+<div class="container hidden" id="registerPage">
 <h2>Create Account</h2>
-
-<input id="name" placeholder="Name">
-<div id="nameError" class="error"></div>
-
-<select id="gender"><option>Male</option><option>Female</option></select>
-<input type="date" id="dob">
-
-<input id="email" placeholder="Email">
-<div id="emailError" class="error"></div>
-
-<input id="password" type="password" placeholder="Password">
-<div id="passwordError" class="error"></div>
-
-<button onclick="signup()">Create</button>
-<p onclick="goLogin()">Back</p>
+<input type="text" id="name" placeholder="Full Name">
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<div class="error" id="registerError"></div>
+<button onclick="register()">Create Account</button>
+<p onclick="showPage('login')" style="cursor:pointer;color:blue">Back to Login</p>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none">
-
-<div class="topbar">
-<span onclick="toggleMenu()">☰</span>
-<span onclick="openProfile()">👤</span>
-<button onclick="toggleView()">📅</button>
-</div>
-
-<h2 id="userEmail"></h2>
-
-<div id="statsBox" class="stats-box"></div>
-
-<input id="search" placeholder="Search..." oninput="render(window.allTasks)">
-<button onclick="render(window.allTasks)">Search</button>
-
-<div class="progress"><div id="progressBar" class="progress-bar"></div></div>
-
-<div class="filter-bar">
-<button onclick="switchFilter('pending')">Pending</button>
-<button onclick="switchFilter('completed')">Completed</button>
-<button onclick="switchFilter('due')">Due</button>
-</div>
-
-<div class="input-row">
-<input id="taskInput">
-<select id="category">
-<option value="Today">Today</option>
-<option value="Tomorrow">Tomorrow</option>
-<option value="Future">Future</option>
-</select>
-<input type="date" id="dateInput">
-
-<select id="priority">
-<option value="low">Low</option>
-<option value="medium">Medium</option>
-<option value="high">High</option>
-</select>
-
-<button onclick="add()">Add</button>
-</div>
-
-<div class="grid" id="grid"></div>
-
-</div>
-
-<!-- SIDEBAR -->
-<div id="sidebar" class="sidebar">
-<button onclick="showHome()">🏠 Home</button>
-<button onclick="openProfile()">👤 Profile</button>
-<button onclick="openLeaderboard()">🏆 Leaderboard</button>
-<button onclick="openLearning()">📚 Learning</button>
-<button onclick="logout()">🚪 Logout</button>
+<!-- FORGOT -->
+<div class="container hidden" id="forgotPage">
+<h2>Reset Password</h2>
+<input type="email" id="forgotEmail" placeholder="Enter Email">
+<button onclick="resetPassword()">Reset</button>
+<p onclick="showPage('login')">Back</p>
 </div>
 
 <!-- PROFILE -->
-<div id="profilePage" class="center" style="display:none">
-<h2>Profile</h2>
-<p id="pName"></p>
-<p id="pGender"></p>
-<p id="pDob"></p>
-<p id="pEmail"></p>
-<button onclick="showHome()">Home</button>
+<div class="container hidden" id="profilePage">
+<h2>Your Tasks</h2>
+<input type="text" id="taskInput" placeholder="New Task">
+<input type="date" id="taskDate">
+<button onclick="addTask()">Add Task</button>
+
+<select onchange="sortTasks(this.value)">
+<option value="date">Sort by Date</option>
+<option value="name">Sort by Name</option>
+</select>
+
+<div id="taskList"></div>
 </div>
 
-<!-- LEADERBOARD -->
-<div id="leaderboardPage" class="center" style="display:none">
-<h2>Leaderboard</h2>
-<div id="leaderboardList"></div>
-<button onclick="showHome()">Home</button>
-</div>
+<script>
+let currentUser = null;
 
-<!-- LEARNING -->
-<div id="learningPage" class="center" style="display:none">
-<h2>Learning</h2>
-<input id="subjectInput">
-<input id="targetInput">
-<button onclick="addLearning()">Add</button>
-<div id="learningList"></div>
-<button onclick="showHome()">Home</button>
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, setDoc, getDoc } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
-  authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc"
-};
-
-const appFirebase = initializeApp(firebaseConfig);
-const auth = getAuth(appFirebase);
-const db = getFirestore(appFirebase);
-
-let currentUser=null;
-let allTasks=[];
-window.allTasks=[];
-let currentFilter="pending";
-let calendarView=false;
-
-/* NAV */
-function hideAll(){
-app.style.display="none";
-profilePage.style.display="none";
-leaderboardPage.style.display="none";
-learningPage.style.display="none";
+function showPage(page) {
+ document.querySelectorAll('.container').forEach(e=>e.classList.add('hidden'));
+ if(page==='login') loginPage.classList.remove('hidden');
+ if(page==='register') registerPage.classList.remove('hidden');
+ if(page==='forgot') forgotPage.classList.remove('hidden');
+ if(page==='profile') profilePage.classList.remove('hidden');
 }
 
-window.showHome=()=>{hideAll();app.style.display="block";}
-window.openProfile=async()=>{
-hideAll();profilePage.style.display="flex";
-
-let userDoc=await getDoc(doc(db,"users",currentUser.uid));
-let d=userDoc.data();
-
-pName.innerText="Name: "+d.name;
-pGender.innerText="Gender: "+d.gender;
-pDob.innerText="DOB: "+d.dob;
-pEmail.innerText="Email: "+d.email;
+function toggleMenu(){
+ let sidebar=document.getElementById('sidebar');
+ sidebar.style.right = sidebar.style.right==='0px' ? '-200px':'0px';
 }
 
-window.openLeaderboard=()=>{
-hideAll();
-leaderboardPage.style.display="flex";
-let score=allTasks.filter(t=>t.completed).length;
-leaderboardList.innerHTML=`<p>Your Score: ${score}</p>`;
+function register(){
+ let users = JSON.parse(localStorage.getItem('users'))||[];
+ let email=document.getElementById('email').value;
+ let password=document.getElementById('password').value;
+ if(users.find(u=>u.email===email)){
+ document.getElementById('registerError').innerText='Email already exists';return;
+ }
+ users.push({email,password,tasks:[]});
+ localStorage.setItem('users',JSON.stringify(users));
+ alert('Account Created');
+ showPage('login');
 }
 
-window.openLearning=()=>{hideAll();learningPage.style.display="flex";}
-
-/* MENU */
-window.toggleMenu=()=>sidebar.classList.toggle("open");
-
-/* AUTH */
-window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
-window.goLogin=()=>{signupPage.style.display="none";loginPage.style.display="flex";}
-
-window.signup=async()=>{
-try{
-let user=await createUserWithEmailAndPassword(auth,email.value,password.value);
-await setDoc(doc(db,"users",user.user.uid),{
-name:name.value, gender:gender.value, dob:dob.value, email:email.value
-});
-}catch(e){
-emailError.innerText=e.message;
-}
+function login(){
+ let users=JSON.parse(localStorage.getItem('users'))||[];
+ let email=loginEmail.value;
+ let password=loginPassword.value;
+ let user=users.find(u=>u.email===email && u.password===password);
+ if(!user){
+ document.getElementById('loginError').innerText='Invalid credentials';return;
+ }
+ currentUser=email;
+ navbar.classList.remove('hidden');
+ showPage('profile');
+ loadTasks();
 }
 
-window.login=async()=>{
-try{
-await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
-}catch(e){
-loginPasswordError.innerText="Wrong credentials";
-}
+function logout(){
+ currentUser=null;
+ navbar.classList.add('hidden');
+ showPage('login');
 }
 
-onAuthStateChanged(auth, async(user)=>{
-if(user){
-currentUser=user;
-loginPage.style.display="none";
-signupPage.style.display="none";
-app.style.display="block";
-
-let userDoc=await getDoc(doc(db,"users",user.uid));
-userEmail.innerText="👤 "+(userDoc.data()?.name||user.email);
-
-loadTasks();
+function resetPassword(){
+ alert('Password reset link (simulated)');
 }
-});
 
-window.logout=()=>signOut(auth);
+function addTask(){
+ let users=JSON.parse(localStorage.getItem('users'));
+ let user=users.find(u=>u.email===currentUser);
+ user.tasks.push({
+ name:taskInput.value,
+ date:taskDate.value
+ });
+ localStorage.setItem('users',JSON.stringify(users));
+ loadTasks();
+}
 
-/* TASKS */
 function loadTasks(){
-onSnapshot(collection(db,"tasks"),snap=>{
-allTasks=[];
-snap.forEach(d=>{
-let t=d.data();
-if(t.user===currentUser.uid){
-allTasks.push({id:d.id,...t});
-}
-});
-window.allTasks=allTasks;
-render(allTasks);
-});
+ let users=JSON.parse(localStorage.getItem('users'));
+ let user=users.find(u=>u.email===currentUser);
+ let list=document.getElementById('taskList');
+ list.innerHTML='';
+ user.tasks.forEach(t=>{
+ list.innerHTML+=`<div class='task'>${t.name} - ${t.date}</div>`;
+ });
 }
 
-window.add=async()=>{
-let today=new Date();
-let dateVal=dateInput.value;
-
-if(category.value==="Today") dateVal=today.toISOString().split("T")[0];
-if(category.value==="Tomorrow"){
-today.setDate(today.getDate()+1);
-dateVal=today.toISOString().split("T")[0];
+function sortTasks(type){
+ let users=JSON.parse(localStorage.getItem('users'));
+ let user=users.find(u=>u.email===currentUser);
+ if(type==='date') user.tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
+ if(type==='name') user.tasks.sort((a,b)=>a.name.localeCompare(b.name));
+ localStorage.setItem('users',JSON.stringify(users));
+ loadTasks();
 }
-
-await addDoc(collection(db,"tasks"),{
-text:taskInput.value,
-date:dateVal,
-completed:false,
-user:currentUser.uid,
-priority:priority.value
-});
-taskInput.value="";
-}
-
-window.switchFilter=(f)=>{currentFilter=f;render(allTasks);}
-window.toggle=(id,c)=>updateDoc(doc(db,"tasks",id),{completed:!c});
-window.del=(id)=>deleteDoc(doc(db,"tasks",id));
-
-/* PRIORITY */
-function priorityOrder(p){
-if(p==="high") return 1;
-if(p==="medium") return 2;
-return 3;
-}
-
-/* DRAG */
-let dragged=null;
-function enableDrag(){
-document.querySelectorAll(".card").forEach(c=>{
-c.draggable=true;
-c.ondragstart=()=>dragged=c;
-c.ondrop=()=>{if(dragged)c.parentNode.insertBefore(dragged,c)};
-c.ondragover=e=>e.preventDefault();
-});
-}
-
-/* TOGGLE VIEW */
-window.toggleView=()=>{
-calendarView=!calendarView;
-render(allTasks);
-}
-
-/* RENDER */
-window.render=function(tasks){
-
-let today=new Date().toISOString().split("T")[0];
-
-let todayTasks = tasks.filter(t => t.date === today);
-let done = todayTasks.filter(t => t.completed).length;
-let total = todayTasks.length;
-
-statsBox.innerHTML=`Today Progress: ${done}/${total}`;
-
-if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
-if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
-if(currentFilter==="due") tasks=tasks.filter(t=>!t.completed && t.date<today);
-
-let grouped={};
-tasks.forEach(t=>{
-if(!grouped[t.date]) grouped[t.date]=[];
-grouped[t.date].push(t);
-});
-
-let dates=Object.keys(grouped).sort((a,b)=>new Date(a)-new Date(b));
-
-let html="";
-
-dates.forEach(date=>{
-html+=`<div style="grid-column:1/-1;color:#00ffcc;">📅 ${date}</div>`;
-
-grouped[date].sort((a,b)=>priorityOrder(a.priority)-priorityOrder(b.priority));
-
-grouped[date].forEach(t=>{
-html+=`
-<div class="card ${t.priority}">
-<div class="task ${t.completed?'completed':''}">
-${t.text}
-<div>
-<button onclick="toggle('${t.id}',${t.completed})">✔</button>
-<button onclick="del('${t.id}')">❌</button>
-</div>
-</div>
-</div>`;
-});
-});
-
-grid.innerHTML=html;
-enableDrag();
-}
-
-window.addLearning=()=>{
-learningList.innerHTML+=`<p>${subjectInput.value} → ${targetInput.value}</p>`;
-}
-
 </script>
 
 </body>
