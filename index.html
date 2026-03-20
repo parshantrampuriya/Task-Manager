@@ -61,13 +61,6 @@ button {
     padding:20px;
 }
 
-@media(max-width:900px){
-    .grid{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:500px){
-    .grid{grid-template-columns:repeat(1,1fr);}
-}
-
 .card {
     background:rgba(0,20,40,0.7);
     padding:10px;
@@ -156,7 +149,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* WAIT FOR DOM */
 window.onload = ()=>{
 
 const loginPage = document.getElementById("loginPage");
@@ -187,7 +179,6 @@ window.goSignup=()=>{
     loginPage.style.display="none";
     signupPage.style.display="flex";
 }
-
 window.goLogin=()=>{
     signupPage.style.display="none";
     loginPage.style.display="flex";
@@ -197,7 +188,6 @@ window.goLogin=()=>{
 onAuthStateChanged(auth, async(user)=>{
     if(user){
         currentUser=user;
-
         loginPage.style.display="none";
         signupPage.style.display="none";
         appPage.style.display="block";
@@ -214,26 +204,43 @@ onAuthStateChanged(auth, async(user)=>{
 
 /* SIGNUP */
 window.signup=async()=>{
-    if(!nameInput.value||!emailInput.value||!passwordInput.value){
-        return alert("Fill all fields");
+    try{
+        if(passwordInput.value.length < 6){
+            return alert("Password must be at least 6 characters");
+        }
+
+        let u=await createUserWithEmailAndPassword(auth,emailInput.value,passwordInput.value);
+
+        await setDoc(doc(db,"users",u.user.uid),{
+            name:nameInput.value,
+            gender:genderInput.value,
+            dob:dobInput.value,
+            email:emailInput.value
+        });
+
+        alert("Account Created Successfully");
+        goLogin();
+
+    }catch(error){
+        alert("Signup Error: " + error.message);
     }
-
-    let u=await createUserWithEmailAndPassword(auth,emailInput.value,passwordInput.value);
-
-    await setDoc(doc(db,"users",u.user.uid),{
-        name:nameInput.value,
-        gender:genderInput.value,
-        dob:dobInput.value,
-        email:emailInput.value
-    });
-
-    alert("Account Created");
-    goLogin();
 }
 
 /* LOGIN */
 window.login=async()=>{
-    await signInWithEmailAndPassword(auth,loginEmailInput.value,loginPasswordInput.value);
+    try{
+        await signInWithEmailAndPassword(auth,loginEmailInput.value,loginPasswordInput.value);
+    }catch(error){
+        if(error.code==="auth/user-not-found"){
+            alert("User not found");
+        }else if(error.code==="auth/wrong-password"){
+            alert("Wrong password");
+        }else if(error.code==="auth/invalid-email"){
+            alert("Invalid email");
+        }else{
+            alert(error.message);
+        }
+    }
 }
 
 /* LOGOUT */
@@ -321,7 +328,7 @@ function render(tasks){
     grid.innerHTML=html;
 }
 
-}; // END WINDOW LOAD
+};
 
 </script>
 
