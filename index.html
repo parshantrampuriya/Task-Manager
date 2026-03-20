@@ -105,83 +105,94 @@ button {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } 
+import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, setDoc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
-  projectId: "task-manager-c32bc",
-  storageBucket: "task-manager-c32bc.firebasestorage.app",
-  messagingSenderId: "686414095912",
-  appId: "1:686414095912:web:158882cd292ccbaaccb71d",
-  measurementId: "G-TLD8JJGETS"
+  projectId: "task-manager-c32bc"
 };
 
-
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
-let tasksRef = null;
 let allTasks = [];
 let currentFilter = "pending";
 
 /* SIGNUP */
 window.signup = async ()=>{
+    let name = document.getElementById("name").value;
     let email = document.getElementById("email").value;
     let pass = document.getElementById("password").value;
-    await createUserWithEmailAndPassword(auth, email, pass);
-}
+
+    if(!name || !email || !pass){
+        alert("Fill all fields");
+        return;
+    }
+
+    try{
+        let userCred = await createUserWithEmailAndPassword(auth, email, pass);
+
+        await setDoc(doc(db, "users", userCred.user.uid), {
+            name: name,
+            email: email
+        });
+
+        alert("✅ Account created! Now login");
+    }catch(err){
+        alert(err.message);
+    }
+};
 
 /* LOGIN */
 window.login = async ()=>{
     let email = document.getElementById("email").value;
     let pass = document.getElementById("password").value;
-    await signInWithEmailAndPassword(auth, email, pass);
-}
+
+    if(!email || !pass){
+        alert("Enter email & password");
+        return;
+    }
+
+    try{
+        await signInWithEmailAndPassword(auth, email, pass);
+    }catch(err){
+        alert(err.message);
+    }
+};
 
 /* LOGOUT */
 window.logout = async ()=>{
     await signOut(auth);
-}
+};
 
-/* AUTH STATE */
-import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+/* AUTH STATE (VERY IMPORTANT) */
+onAuthStateChanged(auth, async(user)=>{
+    if(user){
+        currentUser = user;
 
-/* 🔥 SIGN UP */
-window.signup = async ()=>{
-    let name = document.getElementById("name").value;
-    let email = document.getElementById("email").value;
-    let pass = document.getElementById("password").value;
+        document.getElementById("authPage").style.display="none";
+        document.getElementById("app").style.display="block";
 
-    if(!name || !email || !pass) return alert("Fill all fields");
+        let userDoc = await getDoc(doc(db, "users", user.uid));
+        let name = userDoc.data()?.name || user.email;
 
-    let userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        document.getElementById("userEmail").innerText = "👤 " + name;
 
-    /* Save name in Firestore */
-    await setDoc(doc(db, "users", userCred.user.uid), {
-        name: name,
-        email: email
-    });
-
-    alert("Account created! Now login");
-}
-
-/* 🔥 LOGIN */
-window.login = async ()=>{
-    let email = document.getElementById("email").value;
-    let pass = document.getElementById("password").value;
-
-    if(!email || !pass) return alert("Enter email & password");
-
-    await signInWithEmailAndPassword(auth, email, pass);
-}
+        loadTasks();
+    } else {
+        document.getElementById("authPage").style.display="flex";
+        document.getElementById("app").style.display="none";
+    }
+});
 
 /* LOAD TASKS */
 function loadTasks(){
-    onSnapshot(tasksRef, (snap)=>{
+    onSnapshot(collection(db,"tasks"), (snap)=>{
         allTasks=[];
         snap.forEach(d=>{
             let t=d.data();
@@ -198,31 +209,36 @@ window.add = async ()=>{
     let text=document.getElementById("taskInput").value;
     let date=document.getElementById("date").value;
 
-    if(!text || !date) return alert("Fill all");
+    if(!text || !date){
+        alert("Fill all");
+        return;
+    }
 
-    await addDoc(tasksRef,{
+    await addDoc(collection(db,"tasks"),{
         text,
         date,
         completed:false,
         user:currentUser.uid
     });
-}
+
+    document.getElementById("taskInput").value="";
+};
 
 /* FILTER */
 window.switchFilter = function(f){
     currentFilter=f;
     render(allTasks);
-}
+};
 
 /* TOGGLE */
 window.toggle = async (id,current)=>{
     await updateDoc(doc(db,"tasks",id),{completed:!current});
-}
+};
 
 /* DELETE */
 window.del = async (id)=>{
     await deleteDoc(doc(db,"tasks",id));
-}
+};
 
 /* RENDER */
 function render(tasks){
@@ -246,15 +262,9 @@ function render(tasks){
         </div>`;
     });
 
-    import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-let userDoc = await getDoc(doc(db, "users", user.uid));
-let name = userDoc.data()?.name || user.email;
-
-document.getElementById("userEmail").innerText = "👤 " + name;
+    document.getElementById("grid").innerHTML = html;
 }
 
 </script>
-
 </body>
 </html>
