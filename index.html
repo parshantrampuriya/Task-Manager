@@ -1,3 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager</title>
+
+<style>
+body {
+    margin:0;
+    font-family:"Segoe Print",cursive;
+    color:#e6f7ff;
+    background:linear-gradient(rgba(0,10,20,0.92), rgba(0,10,20,0.97)),
+    url("mahadev.png") no-repeat center center fixed;
+    background-size:cover;
+}
+
+.center {
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+}
+
+input,select {
+    padding:10px;
+    width:250px;
+    background:rgba(0,20,40,0.7);
+    border:1px solid #00cfff;
+    color:white;
+}
+
+button {
+    padding:10px;
+    background:#ff9f2f;
+    border:none;
+    color:white;
+    cursor:pointer;
+}
+
+.filter-bar {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.input-row {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:20px;
+    flex-wrap:wrap;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    padding:20px;
+}
+
+.card {
+    background:rgba(0,20,40,0.7);
+    padding:10px;
+    border-radius:10px;
+}
+
+.task {
+    display:flex;
+    justify-content:space-between;
+    margin:5px 0;
+}
+
+.completed {
+    text-decoration:line-through;
+    opacity:0.6;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="center" style="display:none">
+    <h2>🔱 Sign In 🔱</h2>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button onclick="login()">Sign In</button>
+    <p onclick="goSignup()" style="cursor:pointer;color:#ff9f2f">Create Account</p>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupPage" class="center" style="display:none">
+    <h2>🔱 Create Account 🔱</h2>
+    <input id="name" placeholder="Full Name">
+    <select id="gender">
+        <option>Male</option>
+        <option>Female</option>
+    </select>
+    <input type="date" id="dob">
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="signup()">Create Account</button>
+    <p onclick="goLogin()" style="cursor:pointer;color:#ff9f2f">Back to Sign In</p>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<h2 id="userEmail"></h2>
+<button onclick="logout()">Logout</button>
+
+<div class="filter-bar">
+    <button onclick="switchFilter('pending')">Pending</button>
+    <button onclick="switchFilter('completed')">Completed</button>
+    <button onclick="switchFilter('due')">Due</button>
+</div>
+
+<div class="input-row">
+    <input id="taskInput" placeholder="Enter mission...">
+
+    <select id="category">
+        <option value="Today">Today</option>
+        <option value="Tomorrow">Tomorrow</option>
+        <option value="Future">Future</option>
+    </select>
+
+    <input type="date" id="date">
+    <button onclick="add()">Add</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+</div>
+
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -30,24 +167,12 @@ window.goLogin=()=>{
     loginPage.style.display="flex";
 }
 
-/* PASSWORD STRENGTH */
-document.getElementById("password").addEventListener("input",(e)=>{
-    let val=e.target.value;
-    let bar=document.getElementById("strengthBar");
-
-    if(!bar) return;
-
-    if(val.length<4){bar.style.width="30%";bar.style.background="red";}
-    else if(val.length<6){bar.style.width="60%";bar.style.background="orange";}
-    else{bar.style.width="100%";bar.style.background="green";}
-});
-
-/* AUTH STATE */
+/* AUTH */
 onAuthStateChanged(auth, async(user)=>{
     if(user){
 
         if(!user.emailVerified){
-            alert("Please verify your email first");
+            alert("Verify email first");
             signOut(auth);
             return;
         }
@@ -72,28 +197,32 @@ onAuthStateChanged(auth, async(user)=>{
     }
 });
 
-/* SIGNUP */
+/* SIGNUP (FIXED) */
 window.signup=async()=>{
-    let name=document.getElementById("name").value;
-    let email=document.getElementById("email").value;
-    let pass=document.getElementById("password").value;
-    let gender=document.getElementById("gender").value;
-    let dob=document.getElementById("dob").value;
 
-    if(pass.length<6){
-        return alert("Password must be at least 6 characters");
+    let nameVal = document.getElementById("name").value;
+    let genderVal = document.getElementById("gender").value;
+    let dobVal = document.getElementById("dob").value;
+    let emailVal = document.getElementById("email").value;
+    let passVal = document.getElementById("password").value;
+
+    if(passVal.length < 6){
+        return alert("Password must be 6+ characters");
     }
 
     try{
-        let userCred=await createUserWithEmailAndPassword(auth,email,pass);
+        let userCred = await createUserWithEmailAndPassword(auth,emailVal,passVal);
 
         await sendEmailVerification(userCred.user);
 
         await setDoc(doc(db,"users",userCred.user.uid),{
-            name,gender,dob,email
+            name:nameVal,
+            gender:genderVal,
+            dob:dobVal,
+            email:emailVal
         });
 
-        alert("Account created! Verify email then login.");
+        alert("Account created! Verify email.");
         goLogin();
 
     }catch(e){
@@ -113,7 +242,7 @@ window.login=async()=>{
 /* LOGOUT */
 window.logout=()=>signOut(auth);
 
-/* LOAD TASKS (ORIGINAL LOGIC SAME) */
+/* LOAD */
 function loadTasks(){
     onSnapshot(collection(db,"tasks"),snap=>{
         allTasks=[];
@@ -127,10 +256,10 @@ function loadTasks(){
     });
 }
 
-/* ADD TASK (ORIGINAL LOGIC RESTORED) */
+/* ADD */
 window.add=async()=>{
     let text=taskInput.value;
-    let date=dateInput.value;
+    let date=date.value;
     let cat=category.value;
 
     let today=new Date();
@@ -155,7 +284,7 @@ window.add=async()=>{
     taskInput.value="";
 }
 
-/* FILTER (ORIGINAL) */
+/* FILTER */
 window.switchFilter=(f)=>{
     currentFilter=f;
     render(allTasks);
@@ -171,7 +300,7 @@ window.del=(id)=>{
     deleteDoc(doc(db,"tasks",id));
 }
 
-/* 🔥 ORIGINAL GROUPING + SORTING RESTORED */
+/* RENDER */
 function render(tasks){
 
     let today=new Date().toISOString().split("T")[0];
@@ -198,11 +327,7 @@ function render(tasks){
     let html="";
 
     Object.keys(grouped).forEach(date=>{
-
-        let label=getLabel(date);
-
-        html+=`<div class="card"><h3>${label}</h3>`;
-
+        html+=`<div class="card"><h3>${getLabel(date)}</h3>`;
         grouped[date].forEach(t=>{
             html+=`
             <div class="task ${t.completed?'completed':''}">
@@ -213,14 +338,13 @@ function render(tasks){
                 </div>
             </div>`;
         });
-
         html+=`</div>`;
     });
 
     grid.innerHTML=html;
 }
 
-/* LABEL (ORIGINAL) */
+/* LABEL */
 function getLabel(date){
     let today=new Date();
     let tomorrow=new Date();
@@ -236,3 +360,6 @@ function getLabel(date){
 }
 
 </script>
+
+</body>
+</html>
