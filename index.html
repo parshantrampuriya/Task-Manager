@@ -63,6 +63,28 @@ button {
 .completed {
     text-decoration:line-through;
 }
+    /* ✅ PASTE BELOW THIS */
+.filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.input-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 20px;
+    flex-wrap: wrap;
+}
+
+.input-row input,
+.input-row select {
+    padding: 10px;
+    min-width: 150px;
+}
 </style>
 </head>
 
@@ -86,15 +108,25 @@ button {
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
 
-<div>
+<div class="filter-bar">
     <button onclick="switchFilter('pending')">Pending</button>
     <button onclick="switchFilter('completed')">Completed</button>
     <button onclick="switchFilter('due')">Due</button>
 </div>
 
-<input id="taskInput" placeholder="Task">
-<input type="date" id="date">
-<button onclick="add()">Add</button>
+<div class="input-row">
+    <input id="taskInput" placeholder="Enter mission...">
+
+    <select id="category">
+        <option value="Today">Today</option>
+        <option value="Tomorrow">Tomorrow</option>
+        <option value="Future">Future</option>
+    </select>
+
+    <input type="date" id="date">
+
+    <button onclick="add()">Add</button>
+</div>
 
 <div class="grid" id="grid"></div>
 
