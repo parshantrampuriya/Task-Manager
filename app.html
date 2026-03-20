@@ -21,14 +21,20 @@
         <button onclick="logout()">Logout</button>
     </div>
 
-    <!-- INPUT -->
+    <!-- SEARCH -->
     <div class="task-input">
-        <input id="taskInput" placeholder="Enter your task">
+        <input id="searchInput" placeholder="Search task..." oninput="renderTasks()">
+    </div>
+
+    <!-- ADD TASK -->
+    <div class="task-input">
+        <input id="taskInput" placeholder="Enter task">
+        <input type="date" id="dateInput">
         <button onclick="add()">Add</button>
     </div>
 
-    <!-- TASK GRID -->
-    <div id="grid" class="task-grid"></div>
+    <!-- TABS -->
+    <div id="tabs"></div>
 
 </div>
 
