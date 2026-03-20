@@ -42,6 +42,22 @@ button {
     cursor:pointer;
 }
 
+/* TOP STATS BOX */
+.stats-box {
+    text-align:center;
+    background:rgba(0,20,40,0.7);
+    padding:10px;
+    margin:10px auto;
+    width:60%;
+    border-radius:10px;
+    font-size:18px;
+}
+
+.congrats {
+    color:#00ffcc;
+    font-weight:bold;
+}
+
 .filter-bar {
     display:flex;
     justify-content:center;
@@ -99,6 +115,7 @@ button {
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginPage" class="center">
     <h2>🔱 Sign In 🔱</h2>
     <input id="loginEmail">
@@ -107,6 +124,7 @@ button {
     <p onclick="goSignup()">Create Account</p>
 </div>
 
+<!-- SIGNUP -->
 <div id="signupPage" class="center" style="display:none">
     <h2>🔱 Create Account 🔱</h2>
     <input id="name">
@@ -119,10 +137,14 @@ button {
     <p onclick="goLogin()">Back</p>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none">
 
 <h2 id="userEmail"></h2>
 <button onclick="logout()">Logout</button>
+
+<!-- 🔥 NEW STATS BOX -->
+<div id="statsBox" class="stats-box"></div>
 
 <input id="search" placeholder="Search..." oninput="render(window.allTasks)">
 <button onclick="render(window.allTasks)">Search</button>
@@ -178,7 +200,6 @@ const db = getFirestore(appFirebase);
 let currentUser=null;
 let allTasks=[];
 window.allTasks = [];
-
 let currentFilter="pending";
 
 window.goSignup=()=>{loginPage.style.display="none";signupPage.style.display="flex";}
@@ -229,7 +250,7 @@ function loadTasks(){
             }
         });
 
-        window.allTasks = allTasks;   // 🔥 FIX
+        window.allTasks = allTasks;
         window.render(window.allTasks);
     });
 }
@@ -282,13 +303,26 @@ window.editTask=(id,text)=>{
 /* RENDER */
 window.render = function(tasks){
 
+    let today=new Date().toISOString().split("T")[0];
+
+    /* 🔥 TODAY STATS */
+    let todayTasks = tasks.filter(t => t.date === today);
+    let done = todayTasks.filter(t => t.completed).length;
+    let total = todayTasks.length;
+
+    let statsHTML = `Today Progress: ${done} / ${total}`;
+
+    if(total > 0 && done === total){
+        statsHTML += `<div class="congrats">🎉 Congratulations! All tasks completed!</div>`;
+    }
+
+    document.getElementById("statsBox").innerHTML = statsHTML;
+
     let searchVal = document.getElementById("search").value.toLowerCase().trim();
 
     if(searchVal){
         tasks = tasks.filter(t => t.text.toLowerCase().includes(searchVal));
     }
-
-    let today=new Date().toISOString().split("T")[0];
 
     if(currentFilter==="pending") tasks=tasks.filter(t=>!t.completed && t.date>=today);
     if(currentFilter==="completed") tasks=tasks.filter(t=>t.completed);
@@ -301,10 +335,6 @@ window.render = function(tasks){
     tasks.sort((a,b)=>new Date(a.date)-new Date(b.date));
 
     let html="";
-
-    if(tasks.length === 0){
-        html = `<div style="text-align:center;width:100%">❌ No tasks found</div>`;
-    }
 
     tasks.forEach(t=>{
         html+=`
