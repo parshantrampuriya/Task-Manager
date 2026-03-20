@@ -1,7 +1,3 @@
-
-window.goSignup = () => {
-    window.location.href = "signup.html";
-};
 import { auth } from "./firebase.js";
 
 import {
@@ -10,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* LOGIN */
-async function login() {
+document.getElementById("loginBtn").addEventListener("click", async () => {
 
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
@@ -18,30 +14,43 @@ async function login() {
     try {
         await signInWithEmailAndPassword(auth, email, password);
         alert("Login Successful ✅");
-
         window.location.href = "app.html";
 
     } catch (error) {
         alert(error.message);
     }
-}
+});
 
-/* CONNECT LOGIN BUTTON */
-document.querySelector("button").addEventListener("click", login);
+/* GO TO SIGNUP */
+document.getElementById("goSignupBtn").addEventListener("click", () => {
+    window.location.href = "signup.html";
+});
 
-/* FORGOT PASSWORD */
-document.getElementById("forgotBtn").addEventListener("click", async () => {
+/* OPEN POPUP */
+document.getElementById("forgotBtn").addEventListener("click", () => {
+    document.getElementById("forgotPopup").style.display = "flex";
+});
 
-    let email = document.getElementById("email").value;
+/* CLOSE POPUP */
+document.getElementById("closePopup").addEventListener("click", () => {
+    document.getElementById("forgotPopup").style.display = "none";
+});
+
+/* SEND RESET LINK */
+document.getElementById("resetBtn").addEventListener("click", async () => {
+
+    let email = document.getElementById("resetEmail").value;
 
     if (!email) {
-        alert("Please enter your email first");
+        alert("Please enter your email");
         return;
     }
 
     try {
         await sendPasswordResetEmail(auth, email);
-        alert("Password reset link sent to your email 📩");
+        alert("Reset link sent to your email 📩");
+
+        document.getElementById("forgotPopup").style.display = "none";
 
     } catch (error) {
         alert(error.message);
