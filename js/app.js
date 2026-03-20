@@ -1,22 +1,21 @@
 import { auth, db } from "./firebase.js";
 
-import { 
-  collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc 
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  updateDoc,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { signOut, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let currentUser = null;
-let allTasks = [];
 
-/* LOGOUT */
-window.logout = () => {
-    signOut(auth);
-    window.location.href = "index.html";
-};
-
-/* CHECK USER */
-auth.onAuthStateChanged(user => {
+/* CHECK LOGIN */
+onAuthStateChanged(auth, user => {
     if (!user) {
         window.location.href = "index.html";
     } else {
@@ -25,27 +24,35 @@ auth.onAuthStateChanged(user => {
     }
 });
 
+/* LOGOUT */
+window.logout = () => {
+    signOut(auth);
+    window.location.href = "index.html";
+};
+
 /* LOAD TASKS */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
-        allTasks = [];
+
+        let tasks = [];
 
         snap.forEach(d => {
             let t = d.data();
             if (t.user === currentUser.uid) {
-                allTasks.push({ id: d.id, ...t });
+                tasks.push({ id: d.id, ...t });
             }
         });
 
-        render(allTasks);
+        render(tasks);
     });
 }
 
-/* ADD */
+/* ADD TASK */
 window.add = async () => {
+    if (!taskInput.value.trim()) return;
+
     await addDoc(collection(db, "tasks"), {
         text: taskInput.value,
-        date: new Date().toISOString().split("T")[0],
         completed: false,
         user: currentUser.uid
     });
@@ -54,12 +61,16 @@ window.add = async () => {
 };
 
 /* TOGGLE */
-window.toggle = (id, c) => {
-    updateDoc(doc(db, "tasks", id), { completed: !c });
+window.toggle = (id, completed) => {
+    updateDoc(doc(db, "tasks", id), {
+        completed: !completed
+    });
 };
 
 /* DELETE */
-window.del = (id) => deleteDoc(doc(db, "tasks", id));
+window.del = (id) => {
+    deleteDoc(doc(db, "tasks", id));
+};
 
 /* RENDER */
 function render(tasks) {
@@ -67,12 +78,17 @@ function render(tasks) {
 
     tasks.forEach(t => {
         html += `
-        <div>
-            ${t.text}
-            <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-            <button onclick="del('${t.id}')">❌</button>
+        <div class="task-card">
+            <div class="task-text ${t.completed ? 'completed' : ''}">
+                ${t.text}
+            </div>
+
+            <div class="task-actions">
+                <button class="complete" onclick="toggle('${t.id}',${t.completed})">✔</button>
+                <button class="delete" onclick="del('${t.id}')">❌</button>
+            </div>
         </div>`;
     });
 
-    grid.innerHTML = html;
+    document.getElementById("grid").innerHTML = html;
 }
