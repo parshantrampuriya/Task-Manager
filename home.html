@@ -17,7 +17,7 @@
 
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button> <!-- 🔥 ADDED -->
+    <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goProfile()">👤 Profile</button>
     <button id="logoutBtn">🚪 Logout</button>
 
@@ -32,16 +32,23 @@
         <h2 id="username">👤 Loading...</h2>
     </div>
 
-    <!-- CONTENT -->
+    <!-- DASHBOARD -->
     <div class="container">
 
-        <!-- TASKS -->
-        <div class="content" id="homeContent"></div>
+        <div class="dashboard">
 
-        <!-- 🔥 GOALS SECTION -->
-        <div id="goalsHomeSection">
-            <h2>🎯 Goals Progress</h2>
-            <div id="goalsHomeContainer"></div>
+            <!-- LEFT PANEL (TASKS) -->
+            <div class="left-panel">
+                <h2>📅 Today's Tasks</h2>
+                <div id="homeContent"></div>
+            </div>
+
+            <!-- RIGHT PANEL (GOALS) -->
+            <div class="right-panel">
+                <h2>🎯 Goals Progress</h2>
+                <div id="goalsHomeContainer"></div>
+            </div>
+
         </div>
 
     </div>
