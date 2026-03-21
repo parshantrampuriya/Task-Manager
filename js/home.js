@@ -16,7 +16,7 @@ import {
 
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "task.html";
+window.goTasks = () => window.location.href = "tasks.html";
 window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR TOGGLE */
