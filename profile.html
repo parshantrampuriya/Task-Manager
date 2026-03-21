@@ -30,12 +30,6 @@
 
     <div class="profile-box">
 
-        <!-- IMAGE -->
-        <div class="image-box">
-            <img id="profileImg" src="https://via.placeholder.com/100">
-            <input type="file" id="imgUpload">
-        </div>
-
         <h2>My Profile</h2>
 
         <label>Name</label>
@@ -54,12 +48,19 @@
         <input type="date" id="dob">
 
         <!-- PASSWORD -->
-        <label>Password</label>
-        <input type="password" id="password" placeholder="••••••">
-        <button onclick="togglePassword()">👁 Show</button>
+        <label>New Password</label>
+        <input type="password" id="password" placeholder="Enter new password">
 
-        <!-- RESET -->
-        <button onclick="resetPassword()">Reset Password</button>
+        <div class="strength">
+            <div id="strengthBar"></div>
+        </div>
+        <small id="strengthText"></small>
+
+        <small style="color:#aaa;">Leave blank to keep current password</small>
+
+        <button onclick="togglePassword()">👁 Show / Hide</button>
+
+        <button onclick="resetPassword()">Reset via Email</button>
 
         <button onclick="saveProfile()">Save Changes</button>
 
