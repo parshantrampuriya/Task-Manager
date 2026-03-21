@@ -258,3 +258,39 @@ body {
     border-radius:10px;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
+/* ================= DASHBOARD SPLIT ================= */
+
+.dashboard {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:20px;
+    margin-top:20px;
+}
+
+/* PANELS */
+.left-panel,
+.right-panel {
+    background: rgba(0,0,0,0.6);
+    padding:15px;
+    border-radius:12px;
+
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
+}
+
+/* SCROLL IF CONTENT BIG */
+.left-panel {
+    max-height:80vh;
+    overflow:auto;
+}
+
+.right-panel {
+    max-height:80vh;
+    overflow:auto;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width:768px) {
+    .dashboard {
+        grid-template-columns: 1fr; /* stack */
+    }
+}
