@@ -3,7 +3,8 @@ import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
   signOut,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  updatePassword
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
@@ -40,10 +41,6 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById("email").value = user.email;
         document.getElementById("gender").value = data.gender || "Male";
         document.getElementById("dob").value = data.dob || "";
-
-        if (data.img) {
-            document.getElementById("profileImg").src = data.img;
-        }
     }
 });
 
@@ -55,50 +52,72 @@ window.saveProfile = async () => {
     let name = document.getElementById("name").value;
     let gender = document.getElementById("gender").value;
     let dob = document.getElementById("dob").value;
+    let newPassword = document.getElementById("password").value;
 
-    /* IMAGE */
-    let file = document.getElementById("imgUpload").files[0];
-    let imgBase64 = null;
+    await updateDoc(doc(db, "users", user.uid), {
+        name, gender, dob
+    });
 
-    if (file) {
-        let reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onload = async () => {
-            imgBase64 = reader.result;
-
-            await updateDoc(doc(db, "users", user.uid), {
-                name, gender, dob, img: imgBase64
-            });
-
-            alert("Profile Updated ✅");
-        };
-
-    } else {
-        await updateDoc(doc(db, "users", user.uid), {
-            name, gender, dob
-        });
-
-        alert("Profile Updated ✅");
+    if (newPassword) {
+        try {
+            await updatePassword(user, newPassword);
+            alert("Password Updated ✅");
+        } catch {
+            alert("Please login again to change password");
+        }
     }
+
+    alert("Profile Updated ✅");
 };
 
-/* PASSWORD SHOW */
+/* PASSWORD TOGGLE */
 window.togglePassword = () => {
     let p = document.getElementById("password");
-
     p.type = p.type === "password" ? "text" : "password";
 };
 
 /* RESET PASSWORD */
 window.resetPassword = async () => {
-
-    let email = auth.currentUser.email;
-
-    await sendPasswordResetEmail(auth, email);
-
+    await sendPasswordResetEmail(auth, auth.currentUser.email);
     alert("Reset link sent 📩");
 };
+
+/* STRENGTH CHECK */
+document.getElementById("password").addEventListener("input", () => {
+
+    let p = document.getElementById("password").value;
+    let bar = document.getElementById("strengthBar");
+    let text = document.getElementById("strengthText");
+
+    let s = 0;
+
+    if (p.length >= 6) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+
+    if (!p) {
+        bar.style.width = "0%";
+        text.innerText = "";
+        return;
+    }
+
+    if (s <= 1) {
+        bar.style.width = "25%";
+        bar.style.background = "red";
+        text.innerText = "Weak Password";
+    }
+    else if (s === 2) {
+        bar.style.width = "50%";
+        bar.style.background = "orange";
+        text.innerText = "Medium Password";
+    }
+    else {
+        bar.style.width = "100%";
+        bar.style.background = "lime";
+        text.innerText = "Strong Password";
+    }
+});
 
 /* LOGOUT */
 document.getElementById("logoutBtn").addEventListener("click", async () => {
