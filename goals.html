@@ -11,7 +11,6 @@
 
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
     <button class="menu-btn" onclick="goHome()">🏠</button>
     <h2>🎯 Goals Tracker</h2>
@@ -19,34 +18,33 @@
 
 <div class="container">
 
-    <!-- INPUT CARD -->
+    <!-- SET GOAL -->
     <div class="card">
+        <h3>Set / Edit Goal</h3>
 
-        <h3>Set Your Goal</h3>
-
-        <label>Type</label>
         <select id="type">
             <option>Pages</option>
             <option>Study Hours</option>
             <option>Custom</option>
         </select>
 
-        <label>Total Target</label>
-        <input id="total" type="number" placeholder="Enter target">
-
-        <label>Completed</label>
-        <input id="done" type="number" placeholder="Enter completed">
-
-        <label>Deadline (optional)</label>
+        <input id="total" type="number" placeholder="Total Target">
         <input id="deadline" type="date">
 
-        <button onclick="calculate()">Save & Show</button>
+        <button onclick="saveGoal()">Save Goal</button>
+    </div>
 
+    <!-- UPDATE PROGRESS -->
+    <div class="card">
+        <h3>Update Progress</h3>
+
+        <input id="done" type="number" placeholder="Enter completed value">
+
+        <button onclick="updateProgress()">Update</button>
     </div>
 
     <!-- RESULT -->
     <div class="card" id="result" style="display:none;">
-
         <h3>📊 Progress</h3>
 
         <div class="progress-bar">
@@ -57,6 +55,7 @@
         <p id="remaining"></p>
         <p id="daily"></p>
 
+        <button onclick="resetGoal()">Reset Goal</button>
     </div>
 
 </div>
