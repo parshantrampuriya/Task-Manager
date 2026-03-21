@@ -1,130 +1,165 @@
-import { auth, db } from "./firebase.js";
-
-import {
-  onAuthStateChanged,
-  signOut,
-  sendPasswordResetEmail,
-  updatePassword
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-  doc,
-  getDoc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* NAV */
-window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "task.html"; // fixed
-window.goProfile = () => window.location.href = "profile.html";
+body {
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+                url("../mahadev.png") no-repeat center center;
+    background-size:cover;
+    color:white;
+}
 
 /* SIDEBAR */
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
-};
+.sidebar {
+    position:fixed;
+    top:0;
+    left:0;
+    width:220px;
+    height:100vh;
+    padding:20px;
 
-/* LOAD USER */
-onAuthStateChanged(auth, async (user) => {
+    background: rgba(0,0,0,0.9);
+    transform:translateX(-100%);
+    transition:0.3s;
+}
 
-    if (!user) {
-        window.location.href = "index.html";
-        return;
-    }
+.sidebar.active {
+    transform:translateX(0);
+}
 
-    let refDoc = doc(db, "users", user.uid);
-    let snap = await getDoc(refDoc);
+.sidebar h2 {
+    margin-bottom:20px;
+}
 
-    if (snap.exists()) {
-        let data = snap.data();
+.sidebar button {
+    width:100%;
+    margin:10px 0;
+    padding:10px;
 
-        document.getElementById("name").value = data.name || "";
-        document.getElementById("email").value = user.email;
-        document.getElementById("gender").value = data.gender || "Male";
-        document.getElementById("dob").value = data.dob || "";
-    }
-});
+    background:#1e2a38;
+    color:white;
 
-/* SAVE PROFILE */
-window.saveProfile = async () => {
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
 
-    let user = auth.currentUser;
+.sidebar button:hover {
+    background:#00cfff;
+    color:black;
+}
 
-    let name = document.getElementById("name").value;
-    let gender = document.getElementById("gender").value;
-    let dob = document.getElementById("dob").value;
-    let newPassword = document.getElementById("password").value;
+/* MAIN */
+.main {
+    padding:20px;
+}
 
-    /* UPDATE USER DATA */
-    await updateDoc(doc(db, "users", user.uid), {
-        name,
-        gender,
-        dob
-    });
+/* NAVBAR */
+.navbar {
+    display:flex;
+    align-items:center;
+    gap:15px;
 
-    /* PASSWORD CHANGE (ONLY IF ENTERED) */
-    if (newPassword) {
-        try {
-            await updatePassword(user, newPassword);
-            alert("Password Updated ✅");
-        } catch (error) {
-            alert("Login again to change password ❗");
-        }
-    }
+    background: rgba(0,0,0,0.6);
+    padding:15px;
 
-    alert("Profile Updated ✅");
-};
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,255,255,0.2);
+}
 
-/* PASSWORD SHOW/HIDE */
-window.togglePassword = () => {
-    let p = document.getElementById("password");
-    p.type = p.type === "password" ? "text" : "password";
-};
+/* MENU BUTTON */
+.menu-btn {
+    padding:8px 12px;
+    background:#00cfff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
 
-/* RESET PASSWORD */
-window.resetPassword = async () => {
-    await sendPasswordResetEmail(auth, auth.currentUser.email);
-    alert("Reset link sent 📩");
-};
+/* PROFILE BOX */
+.profile-box {
+    max-width:400px;
+    margin:40px auto;
+    padding:30px;
+
+    background: rgba(0,0,0,0.7);
+    border-radius:15px;
+
+    box-shadow:0 0 25px rgba(0,255,255,0.3);
+}
+
+/* TITLE */
+.profile-box h2 {
+    margin-bottom:20px;
+    text-align:center;
+}
+
+/* LABEL */
+.profile-box label {
+    display:block;
+    margin-top:12px;
+    color:#ccc;
+}
+
+/* INPUT */
+.profile-box input,
+.profile-box select {
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+
+    border-radius:8px;
+    border:1px solid #00cfff;
+
+    background:rgba(255,255,255,0.1);
+    color:white;
+}
+
+/* BUTTON */
+.profile-box button {
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+
+    border:none;
+    border-radius:8px;
+
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.profile-box button:hover {
+    transform:scale(1.05);
+}
 
 /* PASSWORD STRENGTH */
-document.getElementById("password").addEventListener("input", () => {
+.strength {
+    width:100%;
+    height:10px;
+    background:#111;
+    border-radius:10px;
+    margin-top:8px;
+}
 
-    let p = document.getElementById("password").value;
-    let bar = document.getElementById("strengthBar");
-    let text = document.getElementById("strengthText");
+#strengthBar {
+    height:100%;
+    width:0%;
+    border-radius:10px;
+}
 
-    let s = 0;
+/* HINT */
+.hint {
+    color:#aaa;
+    font-size:12px;
+    display:block;
+    margin-top:5px;
+}
 
-    if (p.length >= 6) s++;
-    if (/[A-Z]/.test(p)) s++;
-    if (/[0-9]/.test(p)) s++;
-    if (/[^A-Za-z0-9]/.test(p)) s++;
-
-    if (!p) {
-        bar.style.width = "0%";
-        text.innerText = "";
-        return;
+/* MOBILE */
+@media (max-width:768px) {
+    .profile-box {
+        margin:20px;
     }
-
-    if (s <= 1) {
-        bar.style.width = "25%";
-        bar.style.background = "red";
-        text.innerText = "Weak Password";
-    }
-    else if (s === 2) {
-        bar.style.width = "50%";
-        bar.style.background = "orange";
-        text.innerText = "Medium Password";
-    }
-    else {
-        bar.style.width = "100%";
-        bar.style.background = "lime";
-        text.innerText = "Strong Password";
-    }
-});
-
-/* LOGOUT */
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "index.html";
-});
+}
