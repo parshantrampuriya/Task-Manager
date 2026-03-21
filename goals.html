@@ -12,51 +12,21 @@
 <body>
 
 <div class="navbar">
-    <button class="menu-btn" onclick="goHome()">🏠</button>
-    <h2>🎯 Goals Tracker</h2>
+    <button class="menu-btn" onclick="goHome()">☰</button>
+    <h2>🎯 Goals</h2>
 </div>
 
 <div class="container">
 
-    <!-- SET GOAL -->
-    <div class="card">
-        <h3>Set / Edit Goal</h3>
-
-        <select id="type">
-            <option>Pages</option>
-            <option>Study Hours</option>
-            <option>Custom</option>
-        </select>
-
-        <input id="total" type="number" placeholder="Total Target">
-        <input id="deadline" type="date">
-
-        <button onclick="saveGoal()">Save Goal</button>
+    <!-- ADD GOAL -->
+    <div class="add-box">
+        <input id="goalName" placeholder="Goal name (e.g. GATE Study)">
+        <input id="goalTotal" type="number" placeholder="Total target">
+        <button onclick="addGoal()">Add Goal</button>
     </div>
 
-    <!-- UPDATE PROGRESS -->
-    <div class="card">
-        <h3>Update Progress</h3>
-
-        <input id="done" type="number" placeholder="Enter completed value">
-
-        <button onclick="updateProgress()">Update</button>
-    </div>
-
-    <!-- RESULT -->
-    <div class="card" id="result" style="display:none;">
-        <h3>📊 Progress</h3>
-
-        <div class="progress-bar">
-            <div id="progressFill"></div>
-        </div>
-
-        <p id="percent"></p>
-        <p id="remaining"></p>
-        <p id="daily"></p>
-
-        <button onclick="resetGoal()">Reset Goal</button>
-    </div>
+    <!-- GOALS LIST -->
+    <div id="goalContainer"></div>
 
 </div>
 
