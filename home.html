@@ -10,64 +10,22 @@
 
 <body>
 
-<div class="app">
+<!-- NAVBAR -->
+<div class="navbar">
+    <h2 id="username">👤 Loading...</h2>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
-
-        <!-- 🔥 TOGGLE BUTTON (NEW) -->
-        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-        <h2>⚡ Task Manager</h2>
-
-        <button onclick="showPage('home')">🏠 Home</button>
-        <button onclick="showPage('tasks')">📋 Tasks</button>
+    <div class="menu">
+        <button onclick="goHome()">🏠 Home</button>
+        <button onclick="goTasks()">📋 Tasks</button>
         <button id="logoutBtn">🚪 Logout</button>
     </div>
+</div>
 
-    <!-- MAIN -->
-    <div class="main">
-
-        <!-- NAVBAR -->
-        <div class="navbar">
-            <h2 id="username">👤 Loading...</h2>
-        </div>
-
-        <!-- HOME PAGE -->
-        <div id="homePage" class="page">
-            <div class="content">
-                <h1>Welcome to Task Manager 🚀</h1>
-                <p>Your productivity dashboard</p>
-            </div>
-        </div>
-
-        <!-- TASK PAGE -->
-        <div id="taskPage" class="page" style="display:none;">
-
-            <!-- SEARCH -->
-            <input id="searchInput" placeholder="Search tasks...">
-
-            <!-- TABS -->
-            <div class="tabs">
-                <button onclick="switchTab('pending')">📌 Pending</button>
-                <button onclick="switchTab('due')">🔥 Due</button>
-                <button onclick="switchTab('completed')">✅ Completed</button>
-            </div>
-
-            <!-- ADD TASK -->
-            <div class="add-task">
-                <input id="taskInput" placeholder="New task...">
-                <input type="date" id="dateInput">
-                <button onclick="addTask()">Add</button>
-            </div>
-
-            <!-- TASK GRID -->
-            <div id="taskContainer" class="task-grid"></div>
-
-        </div>
-
+<!-- CONTENT -->
+<div class="container">
+    <div class="content" id="homeContent">
+        <!-- Today tasks will load here -->
     </div>
-
 </div>
 
 <script type="module" src="js/home.js"></script>
