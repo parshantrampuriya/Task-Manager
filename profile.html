@@ -23,6 +23,7 @@
 
 <div class="main">
 
+    <!-- NAVBAR -->
     <div class="navbar">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <h2>👤 Profile</h2>
@@ -31,14 +32,22 @@
     <div class="profile-box">
 
         <h2>My Profile</h2>
-<!-- PROFILE IMAGE -->
-<div class="profile-img-box">
-    <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile">
 
-    <input type="file" id="imgInput" accept="image/*">
+        <!-- 🔥 PROFILE IMAGE (UPDATED) -->
+        <div class="profile-img-box">
 
-    <button onclick="uploadImage()">Upload Image</button>
-</div>
+            <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile">
+
+            <input type="file" id="imgInput" accept="image/*">
+
+            <!-- PREVIEW AUTO -->
+            <small style="color:#aaa;">Preview will appear instantly</small>
+
+            <button onclick="uploadImage()">Upload Image</button>
+
+        </div>
+
+        <!-- FORM -->
         <label>Name</label>
         <input id="name">
 
@@ -58,6 +67,7 @@
         <label>New Password</label>
         <input type="password" id="password" placeholder="Enter new password">
 
+        <!-- STRENGTH -->
         <div class="strength">
             <div id="strengthBar"></div>
         </div>
