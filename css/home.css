@@ -281,3 +281,68 @@ button {
     font-size:18px;
     letter-spacing:1px;
 }
+/* ================= LIST STYLE TASK ================= */
+
+.task-list {
+    list-style: decimal;
+    padding-left:20px;
+    margin-top:10px;
+}
+
+/* EACH TASK ROW */
+.task-item {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    background: rgba(0,0,0,0.6);
+    padding:12px 15px;
+    border-radius:8px;
+
+    margin-bottom:10px;
+
+    box-shadow:0 0 8px rgba(0,255,255,0.2);
+    transition:0.3s;
+}
+
+/* HOVER */
+.task-item:hover {
+    transform:translateX(5px);
+}
+
+/* TEXT */
+.task-item span {
+    flex:1;
+    text-align:left;
+}
+
+/* BUTTON GROUP */
+.task-actions {
+    display:flex;
+    gap:8px;
+}
+
+/* BUTTON SIZE */
+.task-actions button {
+    padding:6px 10px;
+    font-size:13px;
+    border-radius:6px;
+}
+
+/* COLORS */
+.task-actions button:nth-child(1) {
+    background:#00ffcc;
+}
+
+.task-actions button:nth-child(2) {
+    background:#ffc107;
+}
+
+.task-actions button:nth-child(3) {
+    background:#ff4d4d;
+}
+
+/* REMOVE OLD GRID EFFECT (OPTIONAL CLEAN) */
+.task-grid {
+    display:block;
+}
