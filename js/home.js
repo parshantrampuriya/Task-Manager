@@ -99,6 +99,7 @@ window.switchTab = (tab) => {
 };
 
 /* RENDER */
+/* RENDER (UPDATED: GROUP BY DATE) */
 function render() {
 
     let today = new Date().toISOString().split("T")[0];
@@ -120,24 +121,45 @@ function render() {
         filtered = filtered.filter(t => t.completed);
     }
 
-    let html = "";
-
-    filtered.sort((a,b)=> new Date(a.date)-new Date(b.date));
+    /* 🔥 GROUP BY DATE */
+    let grouped = {};
 
     filtered.forEach(t => {
-        html += `
-        <div class="task-card">
-            <b>${t.text}</b><br>
-            <small>${t.date || ""}</small>
-            <br><br>
-            <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-            <button onclick="del('${t.id}')">❌</button>
-        </div>`;
+        if (!grouped[t.date]) grouped[t.date] = [];
+        grouped[t.date].push(t);
     });
+
+    let html = "";
+
+    Object.keys(grouped)
+        .sort((a,b)=> new Date(a) - new Date(b))
+        .forEach(date => {
+
+            let dayName = new Date(date).toLocaleDateString("en-US", {
+                weekday: "long"
+            });
+
+            html += `
+            <div class="date-group">
+                <h3>📅 ${dayName} (${date})</h3>
+                <div class="task-grid">
+            `;
+
+            grouped[date].forEach(t => {
+                html += `
+                <div class="task-card">
+                    <b>${t.text}</b><br><br>
+
+                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                    <button onclick="del('${t.id}')">❌</button>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+        });
 
     document.getElementById("taskContainer").innerHTML = html;
 }
-
 /* TOGGLE */
 window.toggle = (id, c) => {
     updateDoc(doc(db, "tasks", id), {
