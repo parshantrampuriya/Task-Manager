@@ -1,91 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile</title>
+import { auth, db } from "./firebase.js";
 
-<link rel="stylesheet" href="css/profile.css">
-</head>
+import {
+  onAuthStateChanged,
+  signOut,
+  sendPasswordResetEmail,
+  updatePassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<body>
+import {
+  doc,
+  getDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<div id="sidebar" class="sidebar">
+/* NAV */
+window.goHome = () => window.location.href = "home.html";
+window.goTasks = () => window.location.href = "task.html"; // fixed
+window.goProfile = () => window.location.href = "profile.html";
 
-    <h2>⚡ Menu</h2>
+/* SIDEBAR */
+window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("active");
+};
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goProfile()">👤 Profile</button>
-    <button id="logoutBtn">🚪 Logout</button>
+/* LOAD USER */
+onAuthStateChanged(auth, async (user) => {
 
-</div>
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
 
-<div class="main">
+    let refDoc = doc(db, "users", user.uid);
+    let snap = await getDoc(refDoc);
 
-    <!-- NAVBAR -->
-    <div class="navbar">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-        <h2>👤 Profile</h2>
-    </div>
+    if (snap.exists()) {
+        let data = snap.data();
 
-    <div class="profile-box">
+        document.getElementById("name").value = data.name || "";
+        document.getElementById("email").value = user.email;
+        document.getElementById("gender").value = data.gender || "Male";
+        document.getElementById("dob").value = data.dob || "";
+    }
+});
 
-        <h2>My Profile</h2>
+/* SAVE PROFILE */
+window.saveProfile = async () => {
 
-        <!-- 🔥 PROFILE IMAGE (UPDATED) -->
-        <div class="profile-img-box">
+    let user = auth.currentUser;
 
-            <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile">
+    let name = document.getElementById("name").value;
+    let gender = document.getElementById("gender").value;
+    let dob = document.getElementById("dob").value;
+    let newPassword = document.getElementById("password").value;
 
-            <input type="file" id="imgInput" accept="image/*">
+    /* UPDATE USER DATA */
+    await updateDoc(doc(db, "users", user.uid), {
+        name,
+        gender,
+        dob
+    });
 
-            <!-- PREVIEW AUTO -->
-            <small style="color:#aaa;">Preview will appear instantly</small>
+    /* PASSWORD CHANGE (ONLY IF ENTERED) */
+    if (newPassword) {
+        try {
+            await updatePassword(user, newPassword);
+            alert("Password Updated ✅");
+        } catch (error) {
+            alert("Login again to change password ❗");
+        }
+    }
 
-            <button onclick="uploadImage()">Upload Image</button>
+    alert("Profile Updated ✅");
+};
 
-        </div>
+/* PASSWORD SHOW/HIDE */
+window.togglePassword = () => {
+    let p = document.getElementById("password");
+    p.type = p.type === "password" ? "text" : "password";
+};
 
-        <!-- FORM -->
-        <label>Name</label>
-        <input id="name">
+/* RESET PASSWORD */
+window.resetPassword = async () => {
+    await sendPasswordResetEmail(auth, auth.currentUser.email);
+    alert("Reset link sent 📩");
+};
 
-        <label>Email</label>
-        <input id="email" disabled>
+/* PASSWORD STRENGTH */
+document.getElementById("password").addEventListener("input", () => {
 
-        <label>Gender</label>
-        <select id="gender">
-            <option>Male</option>
-            <option>Female</option>
-        </select>
+    let p = document.getElementById("password").value;
+    let bar = document.getElementById("strengthBar");
+    let text = document.getElementById("strengthText");
 
-        <label>Date of Birth</label>
-        <input type="date" id="dob">
+    let s = 0;
 
-        <!-- PASSWORD -->
-        <label>New Password</label>
-        <input type="password" id="password" placeholder="Enter new password">
+    if (p.length >= 6) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
 
-        <!-- STRENGTH -->
-        <div class="strength">
-            <div id="strengthBar"></div>
-        </div>
-        <small id="strengthText"></small>
+    if (!p) {
+        bar.style.width = "0%";
+        text.innerText = "";
+        return;
+    }
 
-        <small style="color:#aaa;">Leave blank to keep current password</small>
+    if (s <= 1) {
+        bar.style.width = "25%";
+        bar.style.background = "red";
+        text.innerText = "Weak Password";
+    }
+    else if (s === 2) {
+        bar.style.width = "50%";
+        bar.style.background = "orange";
+        text.innerText = "Medium Password";
+    }
+    else {
+        bar.style.width = "100%";
+        bar.style.background = "lime";
+        text.innerText = "Strong Password";
+    }
+});
 
-        <button onclick="togglePassword()">👁 Show / Hide</button>
-
-        <button onclick="resetPassword()">Reset via Email</button>
-
-        <button onclick="saveProfile()">Save Changes</button>
-
-    </div>
-
-</div>
-
-<script type="module" src="js/profile.js"></script>
-
-</body>
-</html>
+/* LOGOUT */
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+});
