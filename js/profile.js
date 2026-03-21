@@ -1,10 +1,10 @@
-
 import {
   getStorage,
   ref,
   uploadBytes,
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
 import { auth, db } from "./firebase.js";
 
 import {
@@ -19,6 +19,9 @@ import {
   getDoc,
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* STORAGE */
+const storage = getStorage();
 
 /* NAV */
 window.goHome = () => window.location.href = "home.html";
@@ -38,8 +41,8 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    let ref = doc(db, "users", user.uid);
-    let snap = await getDoc(ref);
+    let refDoc = doc(db, "users", user.uid);
+    let snap = await getDoc(refDoc);
 
     if (snap.exists()) {
         let data = snap.data();
@@ -48,10 +51,15 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById("email").value = user.email;
         document.getElementById("gender").value = data.gender || "Male";
         document.getElementById("dob").value = data.dob || "";
+
+        /* LOAD IMAGE */
+        if (data.photoURL) {
+            document.getElementById("profileImg").src = data.photoURL;
+        }
     }
 });
 
-/* SAVE */
+/* SAVE PROFILE */
 window.saveProfile = async () => {
 
     let user = auth.currentUser;
@@ -61,10 +69,12 @@ window.saveProfile = async () => {
     let dob = document.getElementById("dob").value;
     let newPassword = document.getElementById("password").value;
 
+    /* UPDATE FIRESTORE */
     await updateDoc(doc(db, "users", user.uid), {
         name, gender, dob
     });
 
+    /* PASSWORD CHANGE (OPTIONAL) */
     if (newPassword) {
         try {
             await updatePassword(user, newPassword);
@@ -75,6 +85,39 @@ window.saveProfile = async () => {
     }
 
     alert("Profile Updated ✅");
+};
+
+/* IMAGE UPLOAD */
+window.uploadImage = async () => {
+
+    let file = document.getElementById("imgInput").files[0];
+    let user = auth.currentUser;
+
+    if (!file) {
+        alert("Please select an image");
+        return;
+    }
+
+    try {
+        let storageRef = ref(storage, "profileImages/" + user.uid);
+
+        await uploadBytes(storageRef, file);
+
+        let url = await getDownloadURL(storageRef);
+
+        /* SAVE URL IN FIRESTORE */
+        await updateDoc(doc(db, "users", user.uid), {
+            photoURL: url
+        });
+
+        /* UPDATE UI */
+        document.getElementById("profileImg").src = url;
+
+        alert("Image uploaded successfully ✅");
+
+    } catch (error) {
+        alert(error.message);
+    }
 };
 
 /* PASSWORD TOGGLE */
@@ -89,7 +132,7 @@ window.resetPassword = async () => {
     alert("Reset link sent 📩");
 };
 
-/* STRENGTH CHECK */
+/* PASSWORD STRENGTH */
 document.getElementById("password").addEventListener("input", () => {
 
     let p = document.getElementById("password").value;
