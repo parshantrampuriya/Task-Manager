@@ -11,6 +11,7 @@
 
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
     <button class="menu-btn" onclick="goHome()">🏠</button>
     <h2>🎯 Goals</h2>
@@ -20,23 +21,33 @@
 
     <!-- ADD GOAL -->
     <div class="add-box">
-        <input id="goalName" placeholder="Goal name">
+        <input id="goalName" placeholder="Goal name (e.g. GATE Study)">
         <input id="goalTotal" type="number" placeholder="Total target">
+        <input id="goalDeadline" type="date">
         <button id="addBtn">Add Goal</button>
     </div>
 
-    <!-- LIST -->
+    <!-- GOALS LIST -->
     <div id="goalContainer"></div>
 
 </div>
-<!-- MODAL -->
+
+<!-- ================= MODAL ================= -->
+
 <div id="modal" class="modal">
 
     <div class="modal-box">
 
-        <h3 id="modalTitle">Edit</h3>
+        <h3 id="modalTitle">Edit Goal</h3>
 
-        <input id="modalInput" type="number" placeholder="Enter value">
+        <!-- NAME -->
+        <input id="modalName" placeholder="Goal name">
+
+        <!-- TOTAL / PROGRESS -->
+        <input id="modalInput" type="number" placeholder="Value">
+
+        <!-- DEADLINE -->
+        <input id="modalDate" type="date">
 
         <div class="modal-actions">
             <button onclick="saveModal()">Save</button>
@@ -46,7 +57,8 @@
     </div>
 
 </div>
-<!-- IMPORTANT: load JS at bottom -->
+
+<!-- SCRIPT -->
 <script src="js/goals.js"></script>
 
 </body>
