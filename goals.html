@@ -12,7 +12,7 @@
 <body>
 
 <div class="navbar">
-    <button class="menu-btn" onclick="goHome()">☰</button>
+    <button class="menu-btn" onclick="goHome()">🏠</button>
     <h2>🎯 Goals</h2>
 </div>
 
@@ -20,16 +20,17 @@
 
     <!-- ADD GOAL -->
     <div class="add-box">
-        <input id="goalName" placeholder="Goal name (e.g. GATE Study)">
+        <input id="goalName" placeholder="Goal name">
         <input id="goalTotal" type="number" placeholder="Total target">
-        <button onclick="addGoal()">Add Goal</button>
+        <button id="addBtn">Add Goal</button>
     </div>
 
-    <!-- GOALS LIST -->
+    <!-- LIST -->
     <div id="goalContainer"></div>
 
 </div>
 
+<!-- IMPORTANT: load JS at bottom -->
 <script src="js/goals.js"></script>
 
 </body>
