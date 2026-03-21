@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+
+<link rel="stylesheet" href="css/profile.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+    <h2>⚡ Menu</h2>
+
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2>👤 Profile</h2>
+    </div>
+
+    <!-- PROFILE BOX -->
+    <div class="profile-box">
+
+        <h2>My Profile</h2>
+
+        <label>Name</label>
+        <input id="name">
+
+        <label>Email</label>
+        <input id="email" disabled>
+
+        <label>Gender</label>
+        <select id="gender">
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
+
+        <button onclick="saveProfile()">Save Changes</button>
+
+    </div>
+
+</div>
+
+<script type="module" src="js/profile.js"></script>
+
+</body>
+</html>
