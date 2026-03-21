@@ -1,14 +1,13 @@
 body {
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+    background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
                 url("../mahadev.png") no-repeat center center;
     background-size:cover;
     color:white;
 }
 
-/* ================= SIDEBAR ================= */
-
+/* SIDEBAR */
 .sidebar {
     position:fixed;
     top:0;
@@ -17,11 +16,10 @@ body {
     height:100vh;
     padding:20px;
 
-    background: rgba(0,0,0,0.9);
+    background: rgba(0,0,0,0.95);
     backdrop-filter: blur(10px);
 
     box-shadow:0 0 20px rgba(0,255,255,0.3);
-
     transition:0.3s;
     z-index:1000;
 }
@@ -30,30 +28,17 @@ body {
     transform:translateX(-100%);
 }
 
-.sidebar h2 {
-    margin-bottom:20px;
-}
-
 .sidebar button {
     width:100%;
     margin:10px 0;
     padding:10px;
-
     border:none;
     border-radius:8px;
-
     background:#1e2a38;
     color:white;
-    cursor:pointer;
 }
 
-.sidebar button:hover {
-    background:#00cfff;
-    color:black;
-}
-
-/* ================= MAIN ================= */
-
+/* MAIN */
 .main {
     margin-left:220px;
     padding:20px;
@@ -64,19 +49,14 @@ body {
     margin-left:0;
 }
 
-/* ================= NAVBAR ================= */
-
+/* NAVBAR */
 .navbar {
     display:flex;
     align-items:center;
     gap:15px;
-
-    padding:15px 20px;
-
+    padding:15px;
     background: rgba(0,0,0,0.6);
     border-radius:10px;
-
-    box-shadow:0 0 15px rgba(0,255,255,0.2);
 }
 
 /* MENU BUTTON */
@@ -85,85 +65,72 @@ body {
     padding:8px 12px;
     border:none;
     border-radius:8px;
-
     background:#00cfff;
-    color:black;
-    cursor:pointer;
 }
 
-/* ================= CONTENT ================= */
-
-.container {
-    margin-top:20px;
+/* TOP BAR */
+.top-bar {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin:20px 0;
 }
 
-/* ================= SEARCH ================= */
-
+/* SEARCH */
 #searchInput {
-    width:100%;
+    flex:1;
     padding:12px;
-    margin-bottom:15px;
-
     border-radius:8px;
     border:1px solid #00cfff;
-
     background:rgba(255,255,255,0.1);
     color:white;
 }
 
-/* ================= TABS ================= */
-
-.tabs {
-    margin-bottom:15px;
-}
-
+/* TABS */
 .tabs button {
-    margin-right:10px;
-    padding:8px 15px;
-
+    padding:10px;
     border:none;
-    border-radius:20px;
-
+    border-radius:8px;
     background:#1e2a38;
-    color:white;
     cursor:pointer;
 }
 
 .tabs button:hover {
     background:#00cfff;
-    color:black;
 }
 
-/* ================= ADD TASK ================= */
-
+/* ADD TASK */
 .add-task {
+    display:flex;
+    gap:10px;
     margin-bottom:20px;
 }
 
 .add-task input {
     padding:10px;
-    margin-right:10px;
-
     border-radius:6px;
     border:1px solid #00cfff;
-
     background:rgba(255,255,255,0.1);
     color:white;
 }
 
-/* ================= DATE GROUP ================= */
+.add-task button {
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    background:#00cfff;
+}
 
+/* DATE GROUP */
 .date-group {
     margin-bottom:25px;
 }
 
 .date-group h3 {
     color:#00cfff;
-    margin-bottom:10px;
 }
 
-/* ================= TASK LIST ================= */
-
+/* LIST */
 .task-list {
     list-style: decimal;
     padding-left:20px;
@@ -174,23 +141,16 @@ body {
     display:flex;
     justify-content:space-between;
     align-items:center;
-
-    background: rgba(0,0,0,0.6);
-    padding:12px 15px;
-
-    border-radius:8px;
+    padding:12px;
     margin-bottom:10px;
 
+    background: rgba(0,0,0,0.6);
+    border-radius:8px;
+
     box-shadow:0 0 8px rgba(0,255,255,0.2);
-    transition:0.3s;
 }
 
-.task-item:hover {
-    transform:translateX(5px);
-}
-
-/* ================= ACTIONS ================= */
-
+/* ACTIONS */
 .task-actions {
     display:flex;
     gap:8px;
@@ -198,26 +158,43 @@ body {
 
 .task-actions button {
     padding:6px 10px;
-    border-radius:6px;
     border:none;
-    cursor:pointer;
+    border-radius:6px;
 }
 
 /* COLORS */
-.task-actions button:nth-child(1) {
-    background:#00ffcc;
-}
+.task-actions button:nth-child(1){background:#00ffcc;}
+.task-actions button:nth-child(2){background:#ffc107;}
+.task-actions button:nth-child(3){background:#ff4d4d;}
 
-.task-actions button:nth-child(2) {
-    background:#ffc107;
-}
+/* ================= MOBILE RESPONSIVE ================= */
 
-.task-actions button:nth-child(3) {
-    background:#ff4d4d;
-}
+@media (max-width: 768px) {
 
-/* HOVER */
-.task-actions button:hover {
-    transform:scale(1.05);
-    opacity:0.9;
+    .main {
+        margin-left:0;
+        padding:10px;
+    }
+
+    .sidebar {
+        transform:translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform:translateX(0);
+    }
+
+    .top-bar {
+        flex-direction:column;
+    }
+
+    .add-task {
+        flex-direction:column;
+    }
+
+    .tabs {
+        display:flex;
+        justify-content:space-between;
+        width:100%;
+    }
 }
