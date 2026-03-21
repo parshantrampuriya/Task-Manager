@@ -23,12 +23,26 @@ let currentTab = "pending";
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
+window.goGoals = () => window.location.href = "goals.html"; // 🔥 ADDED
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR TOGGLE */
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
+/* SIDEBAR (FIXED) */
+window.toggleSidebar = function () {
+    document.getElementById("sidebar").classList.toggle("collapsed");
 };
+
+/* CLICK OUTSIDE TO CLOSE */
+document.addEventListener("click", function(e) {
+
+    let sidebar = document.getElementById("sidebar");
+    let menuBtn = document.querySelector(".menu-btn");
+
+    if (!sidebar || !menuBtn) return;
+
+    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.add("collapsed");
+    }
+});
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
@@ -87,15 +101,14 @@ window.addTask = async () => {
 };
 
 /* SWITCH TAB */
-window.switchTab = (tab) => {
+window.switchTab = (tab, e) => {
     currentTab = tab;
 
-    // highlight active tab
     document.querySelectorAll(".tabs button").forEach(btn => {
         btn.classList.remove("active");
     });
 
-    event.target.classList.add("active");
+    if (e) e.target.classList.add("active");
 
     render();
 };
@@ -122,7 +135,6 @@ function render() {
         filtered = filtered.filter(t => t.completed);
     }
 
-    /* GROUP BY DATE */
     let grouped = {};
 
     filtered.forEach(t => {
@@ -193,4 +205,3 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
-
