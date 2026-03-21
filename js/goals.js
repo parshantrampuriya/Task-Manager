@@ -1,16 +1,59 @@
-let goals = JSON.parse(localStorage.getItem("goals")) || [];
+import { auth, db } from "./firebase.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+let currentUser = null;
+let goals = [];
 
 let currentIndex = null;
 let currentMode = null;
 
 /* INIT */
-window.onload = () => {
+onAuthStateChanged(auth, (user) => {
+
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    currentUser = user;
+
     document.getElementById("addBtn").addEventListener("click", addGoal);
-    render();
-};
+
+    loadGoals();
+});
+
+/* LOAD FROM FIREBASE */
+function loadGoals() {
+
+    onSnapshot(collection(db, "goals"), snap => {
+
+        goals = [];
+
+        snap.forEach(d => {
+            let g = d.data();
+            if (g.user === currentUser.uid) {
+                goals.push({ id: d.id, ...g });
+            }
+        });
+
+        render();
+    });
+}
 
 /* ADD GOAL */
-function addGoal() {
+async function addGoal() {
 
     let name = document.getElementById("goalName").value;
     let total = Number(document.getElementById("goalTotal").value);
@@ -21,18 +64,17 @@ function addGoal() {
         return;
     }
 
-    goals.push({
+    await addDoc(collection(db, "goals"), {
         name,
         total,
         done: 0,
-        deadline: deadline || null
+        deadline: deadline || null,
+        user: currentUser.uid
     });
 
-    document.getElementById("goalName").value = "";
-    document.getElementById("goalTotal").value = "";
-    document.getElementById("goalDeadline").value = "";
-
-    save();
+    goalName.value = "";
+    goalTotal.value = "";
+    goalDeadline.value = "";
 }
 
 /* RENDER */
@@ -63,7 +105,7 @@ function render() {
             <div class="actions">
                 <button onclick="openModal('progress', ${i})">+ Progress</button>
                 <button onclick="openModal('edit', ${i})">Edit</button>
-                <button onclick="deleteGoal(${i})">Delete</button>
+                <button onclick="deleteGoal('${g.id}')">Delete</button>
             </div>
 
         </div>`;
@@ -73,7 +115,7 @@ function render() {
 }
 
 /* OPEN MODAL */
-function openModal(mode, index) {
+window.openModal = (mode, index) => {
 
     currentIndex = index;
     currentMode = mode;
@@ -108,23 +150,27 @@ function openModal(mode, index) {
         totalInput.value = g.total;
         dateInput.value = g.deadline || "";
     }
-}
+};
 
 /* CLOSE */
-function closeModal() {
+window.closeModal = () => {
     document.getElementById("modal").classList.remove("active");
-}
+};
 
 /* SAVE MODAL */
-function saveModal() {
+window.saveModal = async () => {
 
-    let totalInput = document.getElementById("modalInput").value;
+    let val = document.getElementById("modalInput").value;
 
-    if (!totalInput) return;
+    if (!val) return;
+
+    let g = goals[currentIndex];
 
     if (currentMode === "progress") {
 
-        goals[currentIndex].done += Number(totalInput);
+        await updateDoc(doc(db, "goals", g.id), {
+            done: g.done + Number(val)
+        });
     }
 
     if (currentMode === "edit") {
@@ -133,31 +179,21 @@ function saveModal() {
         let total = Number(document.getElementById("modalInput").value);
         let deadline = document.getElementById("modalDate").value;
 
-        goals[currentIndex].name = name;
-        goals[currentIndex].total = total;
-        goals[currentIndex].deadline = deadline || null;
+        await updateDoc(doc(db, "goals", g.id), {
+            name,
+            total,
+            deadline: deadline || null
+        });
     }
 
-    save();
     closeModal();
-}
+};
 
 /* DELETE */
-function deleteGoal(i) {
-    goals.splice(i, 1);
-    save();
-}
+window.deleteGoal = async (id) => {
+    await deleteDoc(doc(db, "goals", id));
+};
 
-/* SAVE */
-function save() {
-    localStorage.setItem("goals", JSON.stringify(goals));
-    render();
-}
-
-/* NAV */
-function goHome() {
-    window.location.href = "home.html";
-}
 /* SIDEBAR */
 window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("collapsed");
@@ -169,7 +205,7 @@ window.goTasks = () => window.location.href = "tasks.html";
 window.goGoals = () => window.location.href = "goals.html";
 window.goProfile = () => window.location.href = "profile.html";
 
-/* LOGOUT (optional if using firebase) */
+/* LOGOUT */
 window.logout = () => {
     window.location.href = "index.html";
 };
