@@ -17,6 +17,7 @@ import {
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
+window.goGoals = () => window.location.href = "goals.html"; // 🔥 ADDED
 window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR TOGGLE */
@@ -57,6 +58,7 @@ function loadTasks(uid) {
         });
 
         renderHome(tasks);
+        renderGoalsHome(); // 🔥 ADDED
 
         setTimeout(enableDragDrop, 0);
     });
@@ -88,7 +90,6 @@ function renderHome(tasks) {
         <ol class="task-list">
     `;
 
-    /* 🔥 NO MANUAL NUMBERING */
     todayTasks.forEach((t) => {
 
         html += `
@@ -110,7 +111,44 @@ function renderHome(tasks) {
     document.getElementById("homeContent").innerHTML = html;
 }
 
-/* DRAG & DROP */
+/* ================= GOALS ON HOME ================= */
+
+function renderGoalsHome() {
+
+    let goals = JSON.parse(localStorage.getItem("goals")) || [];
+
+    let container = document.getElementById("goalsHomeContainer");
+
+    if (!container) return;
+
+    if (goals.length === 0) {
+        container.innerHTML = "<p>No goals added yet</p>";
+        return;
+    }
+
+    let html = "";
+
+    goals.forEach(g => {
+
+        let percent = g.total ? Math.round((g.done / g.total) * 100) : 0;
+
+        html += `
+        <div class="goal-home-card">
+
+            <b>${g.name}</b> → ${percent}%
+
+            <div class="goal-home-bar">
+                <div class="goal-home-fill" style="width:${percent}%"></div>
+            </div>
+
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+/* ================= DRAG & DROP ================= */
+
 function enableDragDrop() {
 
     let items = document.querySelectorAll(".task-item");
@@ -154,7 +192,8 @@ function enableDragDrop() {
     });
 }
 
-/* ACTIONS */
+/* ================= ACTIONS ================= */
+
 window.toggle = (id, completed) => {
     updateDoc(doc(db, "tasks", id), {
         completed: !completed
