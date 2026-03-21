@@ -158,3 +158,18 @@ function save() {
 function goHome() {
     window.location.href = "home.html";
 }
+/* SIDEBAR */
+window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+};
+
+/* NAVIGATION */
+window.goHome = () => window.location.href = "home.html";
+window.goTasks = () => window.location.href = "tasks.html";
+window.goGoals = () => window.location.href = "goals.html";
+window.goProfile = () => window.location.href = "profile.html";
+
+/* LOGOUT (optional if using firebase) */
+window.logout = () => {
+    window.location.href = "index.html";
+};
