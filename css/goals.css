@@ -1,7 +1,7 @@
 body {
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background: linear-gradient(black, #001f2f);
+    background: linear-gradient(black,#001f2f);
     color:white;
 }
 
@@ -11,9 +11,10 @@ body {
     align-items:center;
     gap:10px;
     padding:15px;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.6);
 }
 
+/* BUTTON */
 .menu-btn {
     padding:8px 12px;
     background:#00cfff;
@@ -26,54 +27,70 @@ body {
     padding:20px;
 }
 
-/* CARD */
-.card {
-    max-width:400px;
-    margin:20px auto;
-    padding:20px;
-
-    background: rgba(0,0,0,0.6);
-    border-radius:15px;
-
-    box-shadow:0 0 20px rgba(0,255,255,0.2);
+/* ADD BOX */
+.add-box {
+    max-width:500px;
+    margin:auto;
+    display:flex;
+    gap:10px;
 }
 
-/* INPUT */
-input, select {
-    width:100%;
+.add-box input {
+    flex:1;
     padding:10px;
-    margin:10px 0;
-
     border-radius:8px;
     border:1px solid #00cfff;
-
     background:rgba(255,255,255,0.1);
     color:white;
 }
 
-/* BUTTON */
-button {
-    width:100%;
-    padding:12px;
+.add-box button {
+    padding:10px;
     border:none;
     border-radius:8px;
+    background:#00cfff;
+}
 
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-    font-weight:bold;
+/* CARD */
+.goal-card {
+    max-width:500px;
+    margin:20px auto;
+    padding:15px;
+
+    background: rgba(0,0,0,0.6);
+    border-radius:12px;
+
+    box-shadow:0 0 10px rgba(0,255,255,0.3);
 }
 
 /* PROGRESS */
 .progress-bar {
-    width:100%;
-    height:15px;
+    height:12px;
     background:#111;
     border-radius:10px;
-    margin:15px 0;
+    margin:10px 0;
 }
 
-#progressFill {
+.fill {
     height:100%;
-    width:0%;
     background:linear-gradient(#00cfff,#00ffcc);
     border-radius:10px;
 }
+
+/* ACTIONS */
+.actions {
+    display:flex;
+    gap:10px;
+}
+
+.actions button {
+    flex:1;
+    padding:8px;
+    border:none;
+    border-radius:8px;
+}
+
+/* COLORS */
+.actions button:nth-child(1){background:#00ffcc;}
+.actions button:nth-child(2){background:#ffc107;}
+.actions button:nth-child(3){background:#ff4d4d;}
