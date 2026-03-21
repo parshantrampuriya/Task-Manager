@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals</title>
+
+<link rel="stylesheet" href="css/goals.css">
+<link rel="icon" href="data:,">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <button class="menu-btn" onclick="goHome()">🏠</button>
+    <h2>🎯 Goals Tracker</h2>
+</div>
+
+<div class="container">
+
+    <!-- INPUT CARD -->
+    <div class="card">
+
+        <h3>Set Your Goal</h3>
+
+        <label>Type</label>
+        <select id="type">
+            <option>Pages</option>
+            <option>Study Hours</option>
+            <option>Custom</option>
+        </select>
+
+        <label>Total Target</label>
+        <input id="total" type="number" placeholder="Enter target">
+
+        <label>Completed</label>
+        <input id="done" type="number" placeholder="Enter completed">
+
+        <label>Deadline (optional)</label>
+        <input id="deadline" type="date">
+
+        <button onclick="calculate()">Save & Show</button>
+
+    </div>
+
+    <!-- RESULT -->
+    <div class="card" id="result" style="display:none;">
+
+        <h3>📊 Progress</h3>
+
+        <div class="progress-bar">
+            <div id="progressFill"></div>
+        </div>
+
+        <p id="percent"></p>
+        <p id="remaining"></p>
+        <p id="daily"></p>
+
+    </div>
+
+</div>
+
+<script src="js/goals.js"></script>
+
+</body>
+</html>
