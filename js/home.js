@@ -48,7 +48,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     window.location.href = "index.html";
 });
 
-/* SIDEBAR TOGGLE */
+/* SIDEBAR */
 window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("collapsed");
 };
@@ -62,7 +62,7 @@ window.showPage = (page) => {
     if (page === "tasks") document.getElementById("taskPage").style.display = "block";
 };
 
-/* LOAD TASKS */
+/* LOAD */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
         tasks = [];
@@ -75,11 +75,11 @@ function loadTasks() {
         });
 
         render();
-        renderHome(); // 🔥 NEW
+        renderHome();
     });
 }
 
-/* ADD TASK */
+/* ADD */
 window.addTask = async () => {
 
     let text = document.getElementById("taskInput").value;
@@ -88,13 +88,13 @@ window.addTask = async () => {
     if (!text) return;
 
     await addDoc(collection(db, "tasks"), {
-        text: text,
-        date: date,
-        completed: false,
+        text,
+        date,
+        completed:false,
         user: currentUser.uid
     });
 
-    document.getElementById("taskInput").value = "";
+    taskInput.value = "";
 };
 
 /* SWITCH TAB */
@@ -103,7 +103,7 @@ window.switchTab = (tab) => {
     render();
 };
 
-/* RENDER TASK PAGE */
+/* ================= TASK PAGE ================= */
 function render() {
 
     let today = new Date().toISOString().split("T")[0];
@@ -135,39 +135,37 @@ function render() {
     let html = "";
 
     Object.keys(grouped)
-        .sort((a,b)=> new Date(a) - new Date(b))
-        .forEach(date => {
+    .sort((a,b)=> new Date(a)-new Date(b))
+    .forEach(date => {
 
-            let dayName = new Date(date).toLocaleDateString("en-US", {
-                weekday: "long"
-            });
+        let dayName = new Date(date).toLocaleDateString("en-US",{weekday:"long"});
 
+        html += `
+        <div class="date-group">
+            <h3>📅 ${dayName} (${date})</h3>
+            <ol class="task-list">
+        `;
+
+        grouped[date].forEach((t,index) => {
             html += `
-            <div class="date-group">
-                <h3>📅 ${dayName} (${date})</h3>
-                <div class="task-grid">
-            `;
+            <li class="task-item">
+                <span>${t.text}</span>
 
-            grouped[date].forEach(t => {
-                html += `
-                <div class="task-card">
-                    <b>${t.text}</b><br><br>
-
-                    <div class="task-actions">
-                        <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                        <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
-                        <button onclick="del('${t.id}')">❌</button>
-                    </div>
-                </div>`;
-            });
-
-            html += `</div></div>`;
+                <div class="task-actions">
+                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                    <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
+                    <button onclick="del('${t.id}')">❌</button>
+                </div>
+            </li>`;
         });
+
+        html += `</ol></div>`;
+    });
 
     document.getElementById("taskContainer").innerHTML = html;
 }
 
-/* HOME PAGE (TODAY + PROGRESS) */
+/* ================= HOME PAGE ================= */
 function renderHome() {
 
     let today = new Date().toISOString().split("T")[0];
@@ -177,7 +175,7 @@ function renderHome() {
     let completed = todayTasks.filter(t => t.completed).length;
     let total = todayTasks.length;
 
-    let percent = total ? Math.round((completed / total) * 100) : 0;
+    let percent = total ? Math.round((completed/total)*100) : 0;
 
     let html = `
         <h2>📅 Today's Tasks</h2>
@@ -187,48 +185,42 @@ function renderHome() {
         </div>
         <p>${completed} / ${total} completed</p>
 
-        <div class="task-grid">
+        <ol class="task-list">
     `;
 
-    todayTasks.forEach(t => {
+    todayTasks.forEach(t=>{
         html += `
-        <div class="task-card">
-            <b>${t.text}</b><br><br>
+        <li class="task-item">
+            <span>${t.text}</span>
 
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
                 <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
                 <button onclick="del('${t.id}')">❌</button>
             </div>
-        </div>`;
+        </li>`;
     });
 
-    html += `</div>`;
+    html += `</ol>`;
 
     document.querySelector("#homePage .content").innerHTML = html;
 }
 
 /* EDIT */
-window.editTask = (id, oldText) => {
-    let newText = prompt("Edit task", oldText);
-    if (newText) {
-        updateDoc(doc(db, "tasks", id), {
-            text: newText
-        });
+window.editTask = (id,text)=>{
+    let newText = prompt("Edit task",text);
+    if(newText){
+        updateDoc(doc(db,"tasks",id),{text:newText});
     }
 };
 
 /* TOGGLE */
-window.toggle = (id, c) => {
-    updateDoc(doc(db, "tasks", id), {
-        completed: !c
-    });
+window.toggle = (id,c)=>{
+    updateDoc(doc(db,"tasks",id),{completed:!c});
 };
 
 /* DELETE */
-window.del = (id) => {
-    deleteDoc(doc(db, "tasks", id));
-};
+window.del = (id)=> deleteDoc(doc(db,"tasks",id));
 
 /* SEARCH */
 document.getElementById("searchInput").addEventListener("input", render);
