@@ -15,13 +15,27 @@ import {
 
 /* NAV */
 window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html"; // fixed
+window.goTasks = () => window.location.href = "tasks.html";
+window.goGoals = () => window.location.href = "goals.html"; // 🔥 ADDED
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR */
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
+/* SIDEBAR (FIXED) */
+window.toggleSidebar = function () {
+    document.getElementById("sidebar").classList.toggle("collapsed");
 };
+
+/* CLICK OUTSIDE TO CLOSE */
+document.addEventListener("click", function(e) {
+
+    let sidebar = document.getElementById("sidebar");
+    let menuBtn = document.querySelector(".menu-btn");
+
+    if (!sidebar || !menuBtn) return;
+
+    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.add("collapsed");
+    }
+});
 
 /* LOAD USER */
 onAuthStateChanged(auth, async (user) => {
@@ -54,14 +68,12 @@ window.saveProfile = async () => {
     let dob = document.getElementById("dob").value;
     let newPassword = document.getElementById("password").value;
 
-    /* UPDATE USER DATA */
     await updateDoc(doc(db, "users", user.uid), {
         name,
         gender,
         dob
     });
 
-    /* PASSWORD CHANGE (ONLY IF ENTERED) */
     if (newPassword) {
         try {
             await updatePassword(user, newPassword);
