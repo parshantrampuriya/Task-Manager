@@ -26,9 +26,16 @@ window.goTasks = () => window.location.href = "tasks.html";
 window.goGoals = () => window.location.href = "goals.html"; // 🔥 ADDED
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR (FIXED) */
+/* SIDEBAR (FIXED USING active) */
 window.toggleSidebar = function () {
-    document.getElementById("sidebar").classList.toggle("collapsed");
+
+    let sidebar = document.getElementById("sidebar");
+
+    if (sidebar.classList.contains("active")) {
+        sidebar.classList.remove("active");
+    } else {
+        sidebar.classList.add("active");
+    }
 };
 
 /* CLICK OUTSIDE TO CLOSE */
@@ -40,7 +47,7 @@ document.addEventListener("click", function(e) {
     if (!sidebar || !menuBtn) return;
 
     if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.add("collapsed");
+        sidebar.classList.remove("active");
     }
 });
 
