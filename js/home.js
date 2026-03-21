@@ -16,12 +16,12 @@ import {
 
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html";
+window.goTasks = () => window.location.href = "task.html"; // fixed
 window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR TOGGLE */
 window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("collapsed");
+    document.getElementById("sidebar").classList.toggle("active");
 };
 
 /* AUTH */
@@ -57,6 +57,9 @@ function loadTasks(uid) {
         });
 
         renderHome(tasks);
+
+        /* 🔥 ENABLE DRAG AFTER RENDER */
+        setTimeout(enableDragDrop, 0);
     });
 }
 
@@ -67,7 +70,7 @@ function renderHome(tasks) {
 
     let todayTasks = tasks.filter(t => t.date === today);
 
-    /* 🔥 SORT → incomplete first, completed last */
+    /* SORT */
     todayTasks.sort((a, b) => a.completed - b.completed);
 
     let completed = todayTasks.filter(t => t.completed).length;
@@ -89,11 +92,9 @@ function renderHome(tasks) {
     todayTasks.forEach((t, index) => {
 
         html += `
-        <li class="task-item ${t.completed ? 'done' : ''}">
-            
-            <span>
-                ${index + 1}. ${t.text}
-            </span>
+        <li class="task-item ${t.completed ? 'done' : ''}" draggable="true">
+
+            <span>${index + 1}. ${t.text}</span>
 
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
@@ -107,6 +108,50 @@ function renderHome(tasks) {
     html += `</ol>`;
 
     document.getElementById("homeContent").innerHTML = html;
+}
+
+/* DRAG & DROP */
+function enableDragDrop() {
+
+    let items = document.querySelectorAll(".task-item");
+
+    let dragItem = null;
+
+    items.forEach(item => {
+
+        item.addEventListener("dragstart", () => {
+            dragItem = item;
+            item.style.opacity = "0.5";
+        });
+
+        item.addEventListener("dragend", () => {
+            item.style.opacity = "1";
+        });
+
+        item.addEventListener("dragover", (e) => {
+            e.preventDefault();
+        });
+
+        item.addEventListener("drop", (e) => {
+            e.preventDefault();
+
+            if (dragItem !== item) {
+
+                let list = item.parentNode;
+                let itemsArr = [...list.children];
+
+                let dragIndex = itemsArr.indexOf(dragItem);
+                let dropIndex = itemsArr.indexOf(item);
+
+                if (dragIndex < dropIndex) {
+                    list.insertBefore(dragItem, item.nextSibling);
+                } else {
+                    list.insertBefore(dragItem, item);
+                }
+            }
+        });
+
+    });
 }
 
 /* ACTIONS */
