@@ -10,7 +10,6 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
@@ -22,17 +21,20 @@
 
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-    <!-- NAVBAR -->
     <div class="navbar">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <h2>👤 Profile</h2>
     </div>
 
-    <!-- PROFILE BOX -->
     <div class="profile-box">
+
+        <!-- IMAGE -->
+        <div class="image-box">
+            <img id="profileImg" src="https://via.placeholder.com/100">
+            <input type="file" id="imgUpload">
+        </div>
 
         <h2>My Profile</h2>
 
@@ -50,6 +52,14 @@
 
         <label>Date of Birth</label>
         <input type="date" id="dob">
+
+        <!-- PASSWORD -->
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••">
+        <button onclick="togglePassword()">👁 Show</button>
+
+        <!-- RESET -->
+        <button onclick="resetPassword()">Reset Password</button>
 
         <button onclick="saveProfile()">Save Changes</button>
 
