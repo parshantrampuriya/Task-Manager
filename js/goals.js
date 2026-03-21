@@ -5,9 +5,7 @@ let currentMode = null;
 
 /* INIT */
 window.onload = () => {
-
     document.getElementById("addBtn").addEventListener("click", addGoal);
-
     render();
 };
 
@@ -16,20 +14,23 @@ function addGoal() {
 
     let name = document.getElementById("goalName").value;
     let total = Number(document.getElementById("goalTotal").value);
+    let deadline = document.getElementById("goalDeadline").value;
 
     if (!name || !total) {
-        alert("Enter all fields");
+        alert("Enter name & total");
         return;
     }
 
     goals.push({
         name,
         total,
-        done: 0
+        done: 0,
+        deadline: deadline || null
     });
 
     document.getElementById("goalName").value = "";
     document.getElementById("goalTotal").value = "";
+    document.getElementById("goalDeadline").value = "";
 
     save();
 }
@@ -38,7 +39,6 @@ function addGoal() {
 function render() {
 
     let container = document.getElementById("goalContainer");
-
     if (!container) return;
 
     let html = "";
@@ -53,6 +53,8 @@ function render() {
             <h3>${g.name}</h3>
 
             <p>${g.done} / ${g.total}</p>
+
+            ${g.deadline ? `<small>⏳ Deadline: ${g.deadline}</small>` : ""}
 
             <div class="progress-bar">
                 <div class="fill" style="width:${percent}%"></div>
@@ -78,40 +80,62 @@ function openModal(mode, index) {
 
     document.getElementById("modal").classList.add("active");
 
-    let input = document.getElementById("modalInput");
+    let nameInput = document.getElementById("modalName");
+    let totalInput = document.getElementById("modalInput");
+    let dateInput = document.getElementById("modalDate");
 
     if (mode === "progress") {
+
         document.getElementById("modalTitle").innerText = "Add Progress";
-        input.placeholder = "Enter progress";
-        input.value = "";
+
+        nameInput.style.display = "none";
+        dateInput.style.display = "none";
+
+        totalInput.placeholder = "Enter progress";
+        totalInput.value = "";
     }
 
     if (mode === "edit") {
-        document.getElementById("modalTitle").innerText = "Edit Total";
-        input.placeholder = "Enter new total";
-        input.value = goals[index].total;
+
+        let g = goals[index];
+
+        document.getElementById("modalTitle").innerText = "Edit Goal";
+
+        nameInput.style.display = "block";
+        dateInput.style.display = "block";
+
+        nameInput.value = g.name;
+        totalInput.value = g.total;
+        dateInput.value = g.deadline || "";
     }
 }
 
-/* CLOSE MODAL */
+/* CLOSE */
 function closeModal() {
     document.getElementById("modal").classList.remove("active");
-    document.getElementById("modalInput").value = "";
 }
 
 /* SAVE MODAL */
 function saveModal() {
 
-    let val = Number(document.getElementById("modalInput").value);
+    let totalInput = document.getElementById("modalInput").value;
 
-    if (!val) return;
+    if (!totalInput) return;
 
     if (currentMode === "progress") {
-        goals[currentIndex].done += val;
+
+        goals[currentIndex].done += Number(totalInput);
     }
 
     if (currentMode === "edit") {
-        goals[currentIndex].total = val;
+
+        let name = document.getElementById("modalName").value;
+        let total = Number(document.getElementById("modalInput").value);
+        let deadline = document.getElementById("modalDate").value;
+
+        goals[currentIndex].name = name;
+        goals[currentIndex].total = total;
+        goals[currentIndex].deadline = deadline || null;
     }
 
     save();
