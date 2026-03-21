@@ -13,11 +13,11 @@ import {
 /* SIGNUP */
 async function signup() {
 
-    let name = document.getElementById("name").value;
+    let name = document.getElementById("name").value.trim();
     let gender = document.getElementById("gender").value;
     let dob = document.getElementById("dob").value;
 
-    let email = document.getElementById("email").value;
+    let email = document.getElementById("email").value.trim();
     let password = document.getElementById("password").value;
 
     let emailError = document.getElementById("emailError");
@@ -27,6 +27,22 @@ async function signup() {
     passwordError.innerText = "";
 
     /* VALIDATION */
+
+    if (!name) {
+        alert("Please enter your name");
+        return;
+    }
+
+    if (!gender) {
+        alert("Please select gender");
+        return;
+    }
+
+    if (!dob) {
+        alert("Please select date of birth");
+        return;
+    }
+
     if (!email.includes("@")) {
         emailError.innerText = "Enter valid email";
         return;
@@ -47,20 +63,36 @@ async function signup() {
         /* CREATE USER */
         let userCred = await createUserWithEmailAndPassword(auth, email, password);
 
-        /* STORE DATA IN FIRESTORE */
-        await setDoc(doc(db, "users", userCred.user.uid), {
+        let uid = userCred.user.uid;
+
+        /* 🔥 STORE DATA IN FIRESTORE */
+        await setDoc(doc(db, "users", uid), {
             name: name,
             gender: gender,
             dob: dob,
-            email: email
+            email: email,
+            uid: uid,
+            createdAt: new Date().toISOString()
         });
 
-        /* EMAIL VERIFY */
+        /* EMAIL VERIFICATION */
         await sendEmailVerification(userCred.user);
 
-        alert("Account created! Verify email 📩");
+        /* SUCCESS MESSAGE */
+        alert("Account created successfully! Verify your email 📩");
+
+        /* CLEAR FORM */
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("dob").value = "";
+        document.getElementById("gender").value = "";
+
+        /* OPTIONAL REDIRECT */
+        window.location.href = "index.html";
 
     } catch (error) {
+
         if (error.code === "auth/email-already-in-use") {
             emailError.innerText = "Email already exists";
         } else {
@@ -96,7 +128,7 @@ document.getElementById("password").addEventListener("input", () => {
         bar.style.background = "red";
         text.innerText = "Weak Password";
     }
-    else if (strength == 2) {
+    else if (strength === 2) {
         bar.style.width = "50%";
         bar.style.background = "orange";
         text.innerText = "Medium Password";
