@@ -27,7 +27,7 @@ window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR TOGGLE */
 window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("collapsed");
+    document.getElementById("sidebar").classList.toggle("active");
 };
 
 /* AUTH */
@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks();
 });
 
-/* LOAD */
+/* LOAD TASKS */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
 
@@ -68,7 +68,7 @@ function loadTasks() {
     });
 }
 
-/* ADD */
+/* ADD TASK */
 window.addTask = async () => {
 
     let text = document.getElementById("taskInput").value;
@@ -86,9 +86,17 @@ window.addTask = async () => {
     document.getElementById("taskInput").value = "";
 };
 
-/* TAB */
+/* SWITCH TAB */
 window.switchTab = (tab) => {
     currentTab = tab;
+
+    // highlight active tab
+    document.querySelectorAll(".tabs button").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    event.target.classList.add("active");
+
     render();
 };
 
@@ -114,6 +122,7 @@ function render() {
         filtered = filtered.filter(t => t.completed);
     }
 
+    /* GROUP BY DATE */
     let grouped = {};
 
     filtered.forEach(t => {
@@ -124,40 +133,42 @@ function render() {
     let html = "";
 
     Object.keys(grouped)
-    .sort((a,b)=> new Date(a)-new Date(b))
-    .forEach(date => {
+        .sort((a,b)=> new Date(a)-new Date(b))
+        .forEach(date => {
 
-        let dayName = new Date(date).toLocaleDateString("en-US",{weekday:"long"});
+            let dayName = new Date(date).toLocaleDateString("en-US", {
+                weekday: "long"
+            });
 
-        html += `
-        <div class="date-group">
-            <h3>📅 ${dayName} (${date})</h3>
-            <ol class="task-list">
-        `;
-
-        grouped[date].forEach(t => {
             html += `
-            <li class="task-item">
-                <span>${t.text}</span>
+            <div class="date-group">
+                <h3>📅 ${dayName} (${date})</h3>
+                <ol class="task-list">
+            `;
 
-                <div class="task-actions">
-                    <button onclick="toggle('${t.id}', ${t.completed})">✔</button>
-                    <button onclick="editTask('${t.id}', '${t.text}')">✏️</button>
-                    <button onclick="del('${t.id}')">❌</button>
-                </div>
-            </li>`;
+            grouped[date].forEach(t => {
+                html += `
+                <li class="task-item">
+                    <span>${t.text}</span>
+
+                    <div class="task-actions">
+                        <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                        <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
+                        <button onclick="del('${t.id}')">❌</button>
+                    </div>
+                </li>`;
+            });
+
+            html += `</ol></div>`;
         });
-
-        html += `</ol></div>`;
-    });
 
     document.getElementById("taskContainer").innerHTML = html;
 }
 
 /* ACTIONS */
-window.toggle = (id, completed) => {
+window.toggle = (id, c) => {
     updateDoc(doc(db, "tasks", id), {
-        completed: !completed
+        completed: !c
     });
 };
 
@@ -165,8 +176,8 @@ window.del = (id) => {
     deleteDoc(doc(db, "tasks", id));
 };
 
-window.editTask = (id, oldText) => {
-    let newText = prompt("Edit task", oldText);
+window.editTask = (id, text) => {
+    let newText = prompt("Edit task", text);
     if (newText) {
         updateDoc(doc(db, "tasks", id), {
             text: newText
