@@ -1,165 +1,86 @@
-body {
-    margin:0;
-    font-family:'Segoe UI', sans-serif;
-    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
-                url("../mahadev.png") no-repeat center center;
-    background-size:cover;
-    color:white;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
 
-/* SIDEBAR */
-.sidebar {
-    position:fixed;
-    top:0;
-    left:0;
-    width:220px;
-    height:100vh;
-    padding:20px;
+<link rel="stylesheet" href="css/profile.css">
 
-    background: rgba(0,0,0,0.9);
-    transform:translateX(-100%);
-    transition:0.3s;
-}
+<!-- remove favicon error -->
+<link rel="icon" href="data:,">
+</head>
 
-.sidebar.active {
-    transform:translateX(0);
-}
+<body>
 
-.sidebar h2 {
-    margin-bottom:20px;
-}
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
 
-.sidebar button {
-    width:100%;
-    margin:10px 0;
-    padding:10px;
+    <h2>⚡ Menu</h2>
 
-    background:#1e2a38;
-    color:white;
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button id="logoutBtn">🚪 Logout</button>
 
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
+</div>
 
-.sidebar button:hover {
-    background:#00cfff;
-    color:black;
-}
+<!-- MAIN -->
+<div class="main">
 
-/* MAIN */
-.main {
-    padding:20px;
-}
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2>👤 My Profile</h2>
+    </div>
 
-/* NAVBAR */
-.navbar {
-    display:flex;
-    align-items:center;
-    gap:15px;
+    <!-- PROFILE BOX -->
+    <div class="profile-box">
 
-    background: rgba(0,0,0,0.6);
-    padding:15px;
+        <h2>✨ Profile Settings</h2>
 
-    border-radius:10px;
-    box-shadow:0 0 15px rgba(0,255,255,0.2);
-}
+        <!-- NAME -->
+        <label>Name</label>
+        <input id="name" placeholder="Enter your name">
 
-/* MENU BUTTON */
-.menu-btn {
-    padding:8px 12px;
-    background:#00cfff;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
+        <!-- EMAIL -->
+        <label>Email</label>
+        <input id="email" disabled>
 
-/* PROFILE BOX */
-.profile-box {
-    max-width:400px;
-    margin:40px auto;
-    padding:30px;
+        <!-- GENDER -->
+        <label>Gender</label>
+        <select id="gender">
+            <option>Male</option>
+            <option>Female</option>
+        </select>
 
-    background: rgba(0,0,0,0.7);
-    border-radius:15px;
+        <!-- DOB -->
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
 
-    box-shadow:0 0 25px rgba(0,255,255,0.3);
-}
+        <!-- PASSWORD -->
+        <label>New Password</label>
+        <input type="password" id="password" placeholder="Enter new password">
 
-/* TITLE */
-.profile-box h2 {
-    margin-bottom:20px;
-    text-align:center;
-}
+        <!-- STRENGTH BAR -->
+        <div class="strength">
+            <div id="strengthBar"></div>
+        </div>
+        <small id="strengthText"></small>
 
-/* LABEL */
-.profile-box label {
-    display:block;
-    margin-top:12px;
-    color:#ccc;
-}
+        <small class="hint">Leave blank to keep current password</small>
 
-/* INPUT */
-.profile-box input,
-.profile-box select {
-    width:100%;
-    padding:12px;
-    margin-top:5px;
+        <!-- BUTTONS -->
+        <button onclick="togglePassword()">👁 Show / Hide</button>
+        <button onclick="resetPassword()">📩 Reset via Email</button>
+        <button onclick="saveProfile()">💾 Save Changes</button>
 
-    border-radius:8px;
-    border:1px solid #00cfff;
+    </div>
 
-    background:rgba(255,255,255,0.1);
-    color:white;
-}
+</div>
 
-/* BUTTON */
-.profile-box button {
-    width:100%;
-    margin-top:15px;
-    padding:12px;
+<!-- ✅ CORRECT PLACE FOR JS -->
+<script type="module" src="js/profile.js"></script>
 
-    border:none;
-    border-radius:8px;
-
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-    color:black;
-
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-.profile-box button:hover {
-    transform:scale(1.05);
-}
-
-/* PASSWORD STRENGTH */
-.strength {
-    width:100%;
-    height:10px;
-    background:#111;
-    border-radius:10px;
-    margin-top:8px;
-}
-
-#strengthBar {
-    height:100%;
-    width:0%;
-    border-radius:10px;
-}
-
-/* HINT */
-.hint {
-    color:#aaa;
-    font-size:12px;
-    display:block;
-    margin-top:5px;
-}
-
-/* MOBILE */
-@media (max-width:768px) {
-    .profile-box {
-        margin:20px;
-    }
-}
+</body>
+</html>
