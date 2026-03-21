@@ -1,6 +1,9 @@
 let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-/* WAIT FOR PAGE LOAD */
+let currentIndex = null;
+let currentMode = null;
+
+/* INIT */
 window.onload = () => {
 
     document.getElementById("addBtn").addEventListener("click", addGoal);
@@ -25,6 +28,9 @@ function addGoal() {
         done: 0
     });
 
+    document.getElementById("goalName").value = "";
+    document.getElementById("goalTotal").value = "";
+
     save();
 }
 
@@ -33,7 +39,7 @@ function render() {
 
     let container = document.getElementById("goalContainer");
 
-    if (!container) return; // FIX ERROR
+    if (!container) return;
 
     let html = "";
 
@@ -53,8 +59,8 @@ function render() {
             </div>
 
             <div class="actions">
-                <button onclick="updateGoal(${i})">+ Progress</button>
-                <button onclick="editGoal(${i})">Edit</button>
+                <button onclick="openModal('progress', ${i})">+ Progress</button>
+                <button onclick="openModal('edit', ${i})">Edit</button>
                 <button onclick="deleteGoal(${i})">Delete</button>
             </div>
 
@@ -64,28 +70,52 @@ function render() {
     container.innerHTML = html;
 }
 
-/* UPDATE */
-function updateGoal(i) {
+/* OPEN MODAL */
+function openModal(mode, index) {
 
-    let val = prompt("Add progress");
+    currentIndex = index;
+    currentMode = mode;
+
+    document.getElementById("modal").classList.add("active");
+
+    let input = document.getElementById("modalInput");
+
+    if (mode === "progress") {
+        document.getElementById("modalTitle").innerText = "Add Progress";
+        input.placeholder = "Enter progress";
+        input.value = "";
+    }
+
+    if (mode === "edit") {
+        document.getElementById("modalTitle").innerText = "Edit Total";
+        input.placeholder = "Enter new total";
+        input.value = goals[index].total;
+    }
+}
+
+/* CLOSE MODAL */
+function closeModal() {
+    document.getElementById("modal").classList.remove("active");
+    document.getElementById("modalInput").value = "";
+}
+
+/* SAVE MODAL */
+function saveModal() {
+
+    let val = Number(document.getElementById("modalInput").value);
 
     if (!val) return;
 
-    goals[i].done += Number(val);
+    if (currentMode === "progress") {
+        goals[currentIndex].done += val;
+    }
+
+    if (currentMode === "edit") {
+        goals[currentIndex].total = val;
+    }
 
     save();
-}
-
-/* EDIT */
-function editGoal(i) {
-
-    let name = prompt("Edit name", goals[i].name);
-    let total = prompt("Edit total", goals[i].total);
-
-    if (name) goals[i].name = name;
-    if (total) goals[i].total = Number(total);
-
-    save();
+    closeModal();
 }
 
 /* DELETE */
