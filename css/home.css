@@ -7,46 +7,6 @@ body {
     color:white;
 }
 
-/* APP LAYOUT */
-.app {
-    display:flex;
-}
-
-/* SIDEBAR */
-.sidebar {
-    width:220px;
-    height:100vh;
-    padding:20px;
-
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(10px);
-
-    box-shadow:0 0 20px rgba(0,255,255,0.2);
-}
-
-.sidebar h2 {
-    margin-bottom:20px;
-}
-
-.sidebar button {
-    width:100%;
-    margin:10px 0;
-    padding:10px;
-
-    border:none;
-    border-radius:8px;
-
-    background:#1e2a38;
-    color:white;
-    cursor:pointer;
-}
-
-/* MAIN */
-.main {
-    flex:1;
-    padding:20px;
-}
-
 /* NAVBAR */
 .navbar {
     display:flex;
@@ -56,17 +16,23 @@ body {
 
     background: rgba(0,0,0,0.6);
     border-radius:10px;
-
     box-shadow:0 0 15px rgba(0,255,255,0.2);
 }
 
-/* BUTTON */
-button {
-    padding:10px 15px;
+/* MENU */
+.menu button {
+    margin-left:10px;
+    padding:8px 15px;
     border:none;
     border-radius:8px;
-    background:#00cfff;
+    background:#1e2a38;
+    color:white;
     cursor:pointer;
+}
+
+.menu button:hover {
+    background:#00cfff;
+    color:black;
 }
 
 /* CONTENT */
@@ -75,165 +41,7 @@ button {
     text-align:center;
 }
 
-/* PAGE ANIMATION */
-.page {
-    animation:fade 0.3s ease;
-}
-
-/* SEARCH */
-#searchInput {
-    width:100%;
-    padding:10px;
-    margin:15px 0;
-
-    border-radius:8px;
-    border:1px solid #00cfff;
-
-    background:rgba(255,255,255,0.1);
-    color:white;
-}
-
-/* TABS */
-.tabs {
-    margin:15px 0;
-}
-
-.tabs button {
-    margin-right:10px;
-}
-
-/* ADD TASK */
-.add-task {
-    margin:15px 0;
-}
-
-.add-task input {
-    padding:8px;
-    margin-right:10px;
-    border-radius:6px;
-}
-
-/* TASK GRID */
-.task-grid {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px;
-}
-
-/* TASK CARD */
-.task-card {
-    background: rgba(0,0,0,0.6);
-    padding:15px;
-    border-radius:10px;
-
-    box-shadow:0 0 10px rgba(0,255,255,0.2);
-}
-
-/* ANIMATION */
-@keyframes fade {
-    from {opacity:0;}
-    to {opacity:1;}
-}
-/* ================= SIDEBAR TOGGLE ================= */
-
-/* TOGGLE BUTTON */
-.toggle-btn {
-    width:100%;
-    margin-bottom:15px;
-    background:#00cfff;
-    color:black;
-    font-weight:bold;
-}
-
-/* COLLAPSED SIDEBAR */
-.sidebar.collapsed {
-    width:70px;
-    padding:10px;
-    transition:0.3s;
-}
-
-/* HIDE TEXT WHEN COLLAPSED */
-.sidebar.collapsed h2 {
-    display:none;
-}
-
-.sidebar.collapsed button {
-    font-size:0;
-    padding:12px;
-}
-
-/* KEEP ICON VISIBLE */
-.sidebar.collapsed button::before {
-    font-size:16px;
-}
-
-/* MAIN EXPAND */
-.main {
-    transition:0.3s;
-}
-
-/* DATE GROUP */
-.date-group {
-    margin-bottom:25px;
-}
-
-.date-group h3 {
-    color:#00cfff;
-    margin-bottom:10px;
-}
-/* ================= TASK ACTION FIX ================= */
-
-/* BUTTONS IN ROW */
-.task-actions {
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    margin-top:10px;
-}
-
-.task-actions button {
-    flex:1;
-    padding:10px;
-    border-radius:8px;
-    font-size:14px;
-}
-
-/* DIFFERENT COLORS */
-.task-actions button:nth-child(1) {
-    background:#00ffcc;
-}
-
-.task-actions button:nth-child(2) {
-    background:#ffc107;
-}
-
-.task-actions button:nth-child(3) {
-    background:#ff4d4d;
-}
-
-/* HOVER EFFECT */
-.task-actions button:hover {
-    transform:scale(1.05);
-    opacity:0.9;
-}
-
-/* ================= TASK CARD UPGRADE ================= */
-
-.task-card {
-    background: rgba(0,0,0,0.7);
-    padding:18px;
-    border-radius:12px;
-
-    box-shadow:0 0 12px rgba(0,255,255,0.3);
-    transition:0.3s;
-}
-
-.task-card:hover {
-    transform:translateY(-5px);
-}
-
-/* ================= PROGRESS BAR ================= */
-
+/* PROGRESS BAR */
 .progress-bar {
     width:100%;
     height:14px;
@@ -249,100 +57,35 @@ button {
     transition:0.4s;
 }
 
-/* ================= INPUT IMPROVE ================= */
-
-.add-task input {
-    background:rgba(255,255,255,0.1);
-    color:white;
-    border:1px solid #00cfff;
-}
-
-/* ================= TABS ACTIVE LOOK ================= */
-
-.tabs button {
-    background:#1e2a38;
-    transition:0.3s;
-}
-
-.tabs button:hover {
-    background:#00cfff;
-    color:black;
-}
-
-/* ================= SEARCH BAR PREMIUM ================= */
-
-#searchInput {
-    box-shadow:0 0 10px rgba(0,255,255,0.2);
-}
-
-/* ================= DATE TITLE IMPROVE ================= */
-
-.date-group h3 {
-    font-size:18px;
-    letter-spacing:1px;
-}
-/* ================= LIST STYLE TASK ================= */
-
+/* LIST STYLE */
 .task-list {
     list-style: decimal;
     padding-left:20px;
     margin-top:10px;
 }
 
-/* EACH TASK ROW */
 .task-item {
     display:flex;
     justify-content:space-between;
     align-items:center;
-
     background: rgba(0,0,0,0.6);
     padding:12px 15px;
     border-radius:8px;
-
     margin-bottom:10px;
-
-    box-shadow:0 0 8px rgba(0,255,255,0.2);
-    transition:0.3s;
 }
 
-/* HOVER */
-.task-item:hover {
-    transform:translateX(5px);
-}
-
-/* TEXT */
-.task-item span {
-    flex:1;
-    text-align:left;
-}
-
-/* BUTTON GROUP */
+/* ACTIONS */
 .task-actions {
     display:flex;
     gap:8px;
 }
 
-/* BUTTON SIZE */
 .task-actions button {
     padding:6px 10px;
-    font-size:13px;
     border-radius:6px;
 }
 
 /* COLORS */
-.task-actions button:nth-child(1) {
-    background:#00ffcc;
-}
-
-.task-actions button:nth-child(2) {
-    background:#ffc107;
-}
-
-.task-actions button:nth-child(3) {
-    background:#ff4d4d;
-}
-
-/* REMOVE OLD GRID EFFECT (OPTIONAL CLEAN) */
-.task-grid {
-    display:block;
-}
+.task-actions button:nth-child(1){background:#00ffcc;}
+.task-actions button:nth-child(2){background:#ffc107;}
+.task-actions button:nth-child(3){background:#ff4d4d;}
