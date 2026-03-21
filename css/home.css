@@ -294,3 +294,8 @@ body {
         grid-template-columns: 1fr; /* stack */
     }
 }
+.left-panel h2,
+.right-panel h2 {
+    margin-bottom:15px;
+    color:#00cfff;
+}
