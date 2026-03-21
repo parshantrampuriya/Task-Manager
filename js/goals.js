@@ -72,9 +72,9 @@ async function addGoal() {
         user: currentUser.uid
     });
 
-    goalName.value = "";
-    goalTotal.value = "";
-    goalDeadline.value = "";
+    document.getElementById("goalName").value = "";
+    document.getElementById("goalTotal").value = "";
+    document.getElementById("goalDeadline").value = "";
 }
 
 /* RENDER */
@@ -194,10 +194,23 @@ window.deleteGoal = async (id) => {
     await deleteDoc(doc(db, "goals", id));
 };
 
-/* SIDEBAR */
-window.toggleSidebar = () => {
+/* SIDEBAR TOGGLE (FIXED) */
+window.toggleSidebar = function () {
     document.getElementById("sidebar").classList.toggle("collapsed");
 };
+
+/* CLICK OUTSIDE TO CLOSE */
+document.addEventListener("click", function(e) {
+
+    let sidebar = document.getElementById("sidebar");
+    let menuBtn = document.querySelector(".menu-btn");
+
+    if (!sidebar || !menuBtn) return;
+
+    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.add("collapsed");
+    }
+});
 
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
