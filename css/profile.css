@@ -1,0 +1,115 @@
+body {
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+                url("../mahadev.png") no-repeat center center;
+    background-size:cover;
+    color:white;
+}
+
+/* SIDEBAR */
+.sidebar {
+    position:fixed;
+    top:0;
+    left:0;
+    width:220px;
+    height:100vh;
+    padding:20px;
+    background: rgba(0,0,0,0.9);
+    transform:translateX(-100%);
+    transition:0.3s;
+}
+
+.sidebar.active {
+    transform:translateX(0);
+}
+
+.sidebar button {
+    width:100%;
+    margin:10px 0;
+    padding:10px;
+    background:#1e2a38;
+    color:white;
+    border:none;
+    border-radius:8px;
+}
+
+/* MAIN */
+.main {
+    padding:20px;
+}
+
+/* NAVBAR */
+.navbar {
+    display:flex;
+    align-items:center;
+    gap:15px;
+    background: rgba(0,0,0,0.6);
+    padding:15px;
+    border-radius:10px;
+}
+
+/* BUTTON */
+.menu-btn {
+    padding:8px 12px;
+    background:#00cfff;
+    border:none;
+    border-radius:8px;
+}
+
+/* PROFILE BOX */
+.profile-box {
+    max-width:400px;
+    margin:40px auto;
+    padding:30px;
+
+    background: rgba(0,0,0,0.7);
+    border-radius:15px;
+
+    box-shadow:0 0 20px rgba(0,255,255,0.3);
+}
+
+.profile-box h2 {
+    margin-bottom:20px;
+}
+
+.profile-box label {
+    display:block;
+    margin-top:10px;
+    color:#ccc;
+}
+
+.profile-box input,
+.profile-box select {
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+
+    border-radius:8px;
+    border:1px solid #00cfff;
+
+    background:rgba(255,255,255,0.1);
+    color:white;
+}
+
+.profile-box button {
+    width:100%;
+    margin-top:20px;
+    padding:12px;
+
+    border:none;
+    border-radius:8px;
+
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+    .profile-box {
+        margin:20px;
+    }
+}
