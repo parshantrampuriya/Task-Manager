@@ -1,0 +1,41 @@
+body {
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
+                url("../mahadev.png") no-repeat center center;
+    background-size:cover;
+    color:white;
+}
+
+/* CONTAINER */
+.container {
+    padding:20px;
+}
+
+/* NAVBAR */
+.navbar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 20px;
+
+    background: rgba(0,0,0,0.6);
+    border-radius:10px;
+
+    box-shadow:0 0 15px rgba(0,255,255,0.2);
+}
+
+/* BUTTON */
+button {
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    background:#00cfff;
+    cursor:pointer;
+}
+
+/* CONTENT */
+.content {
+    margin-top:40px;
+    text-align:center;
+}
