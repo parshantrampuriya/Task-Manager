@@ -1,7 +1,7 @@
 body {
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
+    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
                 url("../mahadev.png") no-repeat center center;
     background-size:cover;
     color:white;
@@ -12,38 +12,53 @@ body {
     position:fixed;
     top:0;
     left:0;
-    width:220px;
+    width:240px;
     height:100vh;
     padding:20px;
-    background: rgba(0,0,0,0.95);
-    backdrop-filter: blur(10px);
-    box-shadow:0 0 20px rgba(0,255,255,0.3);
-    transition:0.3s;
+
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+
+    box-shadow:0 0 25px rgba(0,255,255,0.4);
+
+    transform:translateX(-100%);
+    transition:0.4s ease;
+    z-index:1000;
 }
 
-.sidebar.collapsed {
-    transform:translateX(-100%);
+.sidebar.active {
+    transform:translateX(0);
+}
+
+.sidebar h2 {
+    margin-bottom:20px;
+    color:#00cfff;
 }
 
 .sidebar button {
     width:100%;
     margin:10px 0;
-    padding:10px;
+    padding:12px;
+
     border:none;
-    border-radius:8px;
+    border-radius:10px;
+
     background:#1e2a38;
     color:white;
+
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.sidebar button:hover {
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+    transform:scale(1.05);
 }
 
 /* MAIN */
 .main {
-    margin-left:220px;
     padding:20px;
-    transition:0.3s;
-}
-
-.sidebar.collapsed ~ .main {
-    margin-left:0;
 }
 
 /* NAVBAR */
@@ -51,85 +66,118 @@ body {
     display:flex;
     align-items:center;
     gap:15px;
+
     padding:15px;
-    background: rgba(0,0,0,0.6);
-    border-radius:10px;
+
+    background: rgba(0,0,0,0.7);
+    border-radius:12px;
+
+    box-shadow:0 0 15px rgba(0,255,255,0.3);
 }
 
-/* MENU */
+/* MENU BUTTON */
 .menu-btn {
     font-size:20px;
-    padding:8px 12px;
+    padding:10px 14px;
+
     border:none;
-    border-radius:8px;
-    background:#00cfff;
+    border-radius:10px;
+
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+
+    cursor:pointer;
 }
 
 /* SEARCH */
 #searchInput {
     width:100%;
-    padding:12px;
+    padding:14px;
     margin-top:20px;
-    border-radius:8px;
+
+    border-radius:10px;
     border:1px solid #00cfff;
+
     background:rgba(255,255,255,0.1);
     color:white;
+
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
 }
 
 /* TABS */
 .tabs {
     margin-top:15px;
     display:flex;
-    gap:10px;
+    gap:12px;
     flex-wrap:wrap;
 }
 
 .tabs button {
-    padding:10px 15px;
+    padding:10px 18px;
+
     border:none;
-    border-radius:20px;
+    border-radius:25px;
+
     background:#1e2a38;
     color:white;
+
     cursor:pointer;
+    transition:0.3s;
 }
 
 .tabs button:hover {
-    background:#00cfff;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
     color:black;
+    transform:scale(1.05);
 }
 
 /* ADD TASK */
 .add-task {
     display:flex;
-    gap:10px;
-    margin:20px 0;
+    gap:12px;
+    margin:25px 0;
 }
 
 .add-task input {
-    padding:10px;
-    border-radius:6px;
+    padding:12px;
+
+    border-radius:8px;
     border:1px solid #00cfff;
+
     background:rgba(255,255,255,0.1);
     color:white;
 }
 
 .add-task button {
-    padding:10px 15px;
+    padding:12px 18px;
+
     border:none;
-    border-radius:8px;
-    background:#00cfff;
+    border-radius:10px;
+
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.add-task button:hover {
+    transform:scale(1.05);
 }
 
 /* DATE GROUP */
 .date-group {
-    margin-bottom:25px;
+    margin-bottom:30px;
 }
 
 .date-group h3 {
     color:#00cfff;
+    margin-bottom:10px;
+    font-size:18px;
 }
 
-/* LIST */
+/* TASK LIST */
 .task-list {
     list-style: decimal;
     padding-left:20px;
@@ -140,11 +188,19 @@ body {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:12px;
-    margin-bottom:10px;
-    background: rgba(0,0,0,0.6);
-    border-radius:8px;
-    box-shadow:0 0 8px rgba(0,255,255,0.2);
+
+    padding:14px;
+    margin-bottom:12px;
+
+    background: rgba(0,0,0,0.7);
+    border-radius:10px;
+
+    box-shadow:0 0 12px rgba(0,255,255,0.25);
+    transition:0.3s;
+}
+
+.task-item:hover {
+    transform:translateX(5px);
 }
 
 /* ACTIONS */
@@ -154,21 +210,26 @@ body {
 }
 
 .task-actions button {
-    padding:6px 10px;
+    padding:8px 12px;
     border:none;
-    border-radius:6px;
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
 }
 
 /* COLORS */
-.task-actions button:nth-child(1){background:#00ffcc;}
-.task-actions button:nth-child(2){background:#ffc107;}
-.task-actions button:nth-child(3){background:#ff4d4d;}
+.task-actions button:nth-child(1){
+    background:#00ffcc;
+}
+.task-actions button:nth-child(2){
+    background:#ffc107;
+}
+.task-actions button:nth-child(3){
+    background:#ff4d4d;
+}
 
 /* MOBILE */
 @media (max-width:768px){
-    .main{
-        margin-left:0;
-    }
 
     .add-task{
         flex-direction:column;
@@ -176,5 +237,11 @@ body {
 
     .tabs{
         justify-content:center;
+    }
+
+    .task-item{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
     }
 }
