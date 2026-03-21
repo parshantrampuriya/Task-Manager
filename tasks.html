@@ -5,43 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tasks</title>
 
-<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/tasks.css">
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-    <h2 id="username">👤 Loading...</h2>
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
 
-    <div class="menu">
-        <button onclick="goHome()">🏠 Home</button>
-        <button onclick="goTasks()">📋 Tasks</button>
-        <button id="logoutBtn">🚪 Logout</button>
-    </div>
+    <h2>⚡ Menu</h2>
+
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button id="logoutBtn">🚪 Logout</button>
+
 </div>
 
-<div class="container">
+<!-- MAIN -->
+<div class="main">
 
-    <!-- SEARCH -->
-    <input id="searchInput" placeholder="Search tasks...">
-
-    <!-- TABS -->
-    <div class="tabs">
-        <button onclick="switchTab('pending')">📌 Pending</button>
-        <button onclick="switchTab('due')">🔥 Due</button>
-        <button onclick="switchTab('completed')">✅ Completed</button>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2 id="username">👤 Loading...</h2>
     </div>
 
-    <!-- ADD -->
-    <div class="add-task">
-        <input id="taskInput" placeholder="New task...">
-        <input type="date" id="dateInput">
-        <button onclick="addTask()">Add</button>
-    </div>
+    <!-- CONTENT -->
+    <div class="container">
 
-    <!-- TASK LIST -->
-    <div id="taskContainer"></div>
+        <!-- TOP BAR -->
+        <div class="top-bar">
+
+            <input id="searchInput" placeholder="🔍 Search tasks...">
+
+            <div class="tabs">
+                <button onclick="switchTab('pending')">📌</button>
+                <button onclick="switchTab('due')">🔥</button>
+                <button onclick="switchTab('completed')">✅</button>
+            </div>
+
+        </div>
+
+        <!-- ADD TASK -->
+        <div class="add-task">
+            <input id="taskInput" placeholder="New task...">
+            <input type="date" id="dateInput">
+            <button onclick="addTask()">Add</button>
+        </div>
+
+        <!-- TASK LIST -->
+        <div id="taskContainer"></div>
+
+    </div>
 
 </div>
 
