@@ -182,3 +182,13 @@ body {
     transform:scale(1.05);
     opacity:0.9;
 }
+/* COMPLETED TASK STYLE */
+.task-item.done span {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* SMOOTH TRANSITION */
+.task-item {
+    transition: 0.3s;
+}
