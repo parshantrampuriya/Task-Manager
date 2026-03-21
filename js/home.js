@@ -80,7 +80,7 @@ function renderHome(tasks) {
     let percent = total ? Math.round((completed / total) * 100) : 0;
 
     let html = `
-        <h2>📅 Today's Tasks</h2>
+        
 
         <div class="progress-bar">
             <div class="progress-fill" style="width:${percent}%"></div>
