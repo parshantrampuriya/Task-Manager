@@ -23,6 +23,12 @@ let currentTab = "pending";
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
+window.goProfile = () => window.location.href = "profile.html";
+
+/* SIDEBAR TOGGLE */
+window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+};
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
@@ -71,13 +77,13 @@ window.addTask = async () => {
     if (!text) return;
 
     await addDoc(collection(db, "tasks"), {
-        text,
-        date,
-        completed:false,
+        text: text,
+        date: date,
+        completed: false,
         user: currentUser.uid
     });
 
-    taskInput.value = "";
+    document.getElementById("taskInput").value = "";
 };
 
 /* TAB */
@@ -135,8 +141,8 @@ function render() {
                 <span>${t.text}</span>
 
                 <div class="task-actions">
-                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                    <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
+                    <button onclick="toggle('${t.id}', ${t.completed})">✔</button>
+                    <button onclick="editTask('${t.id}', '${t.text}')">✏️</button>
                     <button onclick="del('${t.id}')">❌</button>
                 </div>
             </li>`;
@@ -149,11 +155,23 @@ function render() {
 }
 
 /* ACTIONS */
-window.toggle = (id,c)=> updateDoc(doc(db,"tasks",id),{completed:!c});
-window.del = (id)=> deleteDoc(doc(db,"tasks",id));
-window.editTask = (id,text)=>{
-    let t = prompt("Edit task",text);
-    if(t) updateDoc(doc(db,"tasks",id),{text:t});
+window.toggle = (id, completed) => {
+    updateDoc(doc(db, "tasks", id), {
+        completed: !completed
+    });
+};
+
+window.del = (id) => {
+    deleteDoc(doc(db, "tasks", id));
+};
+
+window.editTask = (id, oldText) => {
+    let newText = prompt("Edit task", oldText);
+    if (newText) {
+        updateDoc(doc(db, "tasks", id), {
+            text: newText
+        });
+    }
 };
 
 /* SEARCH */
@@ -164,11 +182,3 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
-window.toggleMenu = () => {
-    let d = document.getElementById("dropdown");
-    d.style.display = d.style.display === "block" ? "none" : "block";
-};
-
-window.goProfile = () => {
-    window.location.href = "profile.html";
-};
