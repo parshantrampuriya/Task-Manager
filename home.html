@@ -17,6 +17,7 @@
 
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button> <!-- 🔥 ADDED -->
     <button onclick="goProfile()">👤 Profile</button>
     <button id="logoutBtn">🚪 Logout</button>
 
@@ -33,7 +34,16 @@
 
     <!-- CONTENT -->
     <div class="container">
+
+        <!-- TASKS -->
         <div class="content" id="homeContent"></div>
+
+        <!-- 🔥 GOALS SECTION -->
+        <div id="goalsHomeSection">
+            <h2>🎯 Goals Progress</h2>
+            <div id="goalsHomeContainer"></div>
+        </div>
+
     </div>
 
 </div>
