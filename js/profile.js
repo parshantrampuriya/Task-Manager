@@ -174,3 +174,18 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
+/* IMAGE PREVIEW BEFORE UPLOAD */
+document.getElementById("imgInput").addEventListener("change", () => {
+
+    let file = document.getElementById("imgInput").files[0];
+
+    if (!file) return;
+
+    let reader = new FileReader();
+
+    reader.onload = function(e) {
+        document.getElementById("profileImg").src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+});
