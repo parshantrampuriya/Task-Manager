@@ -52,6 +52,11 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById("gender").value = data.gender || "Male";
         document.getElementById("dob").value = data.dob || "";
 
+        /* SHOW NAME UNDER IMAGE */
+        if (document.getElementById("profileName")) {
+            document.getElementById("profileName").innerText = data.name || "";
+        }
+
         /* LOAD IMAGE */
         if (data.photoURL) {
             document.getElementById("profileImg").src = data.photoURL;
@@ -74,7 +79,12 @@ window.saveProfile = async () => {
         name, gender, dob
     });
 
-    /* PASSWORD CHANGE (OPTIONAL) */
+    /* UPDATE NAME BELOW IMAGE */
+    if (document.getElementById("profileName")) {
+        document.getElementById("profileName").innerText = name;
+    }
+
+    /* PASSWORD CHANGE */
     if (newPassword) {
         try {
             await updatePassword(user, newPassword);
@@ -105,12 +115,10 @@ window.uploadImage = async () => {
 
         let url = await getDownloadURL(storageRef);
 
-        /* SAVE URL IN FIRESTORE */
         await updateDoc(doc(db, "users", user.uid), {
             photoURL: url
         });
 
-        /* UPDATE UI */
         document.getElementById("profileImg").src = url;
 
         alert("Image uploaded successfully ✅");
@@ -169,23 +177,31 @@ document.getElementById("password").addEventListener("input", () => {
     }
 });
 
+/* 🔥 FIXED IMAGE PREVIEW (IMPORTANT) */
+document.addEventListener("DOMContentLoaded", () => {
+
+    let imgInput = document.getElementById("imgInput");
+
+    if (imgInput) {
+        imgInput.addEventListener("change", () => {
+
+            let file = imgInput.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+
+            reader.onload = function(e) {
+                document.getElementById("profileImg").src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+});
+
 /* LOGOUT */
 document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
-});
-/* IMAGE PREVIEW BEFORE UPLOAD */
-document.getElementById("imgInput").addEventListener("change", () => {
-
-    let file = document.getElementById("imgInput").files[0];
-
-    if (!file) return;
-
-    let reader = new FileReader();
-
-    reader.onload = function(e) {
-        document.getElementById("profileImg").src = e.target.result;
-    };
-
-    reader.readAsDataURL(file);
 });
