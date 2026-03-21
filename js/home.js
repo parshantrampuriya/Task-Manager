@@ -20,10 +20,23 @@ window.goTasks = () => window.location.href = "tasks.html";
 window.goGoals = () => window.location.href = "goals.html";
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR */
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
+/* SIDEBAR (FIXED) */
+window.toggleSidebar = function () {
+    document.getElementById("sidebar").classList.toggle("collapsed");
 };
+
+/* CLICK OUTSIDE TO CLOSE */
+document.addEventListener("click", function(e) {
+
+    let sidebar = document.getElementById("sidebar");
+    let menuBtn = document.querySelector(".menu-btn");
+
+    if (!sidebar || !menuBtn) return;
+
+    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.add("collapsed");
+    }
+});
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
@@ -42,7 +55,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     loadTasks(user.uid);
-    loadGoalsHome(user.uid); // 🔥 IMPORTANT
+    loadGoalsHome(user.uid);
 });
 
 /* ================= TASKS ================= */
@@ -107,7 +120,7 @@ function renderHome(tasks) {
     document.getElementById("homeContent").innerHTML = html;
 }
 
-/* ================= GOALS (FIREBASE SYNC) ================= */
+/* ================= GOALS ================= */
 
 function loadGoalsHome(uid) {
 
