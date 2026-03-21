@@ -17,10 +17,10 @@ import {
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
-window.goGoals = () => window.location.href = "goals.html"; // 🔥 ADDED
+window.goGoals = () => window.location.href = "goals.html";
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR TOGGLE */
+/* SIDEBAR */
 window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("active");
 };
@@ -42,9 +42,11 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     loadTasks(user.uid);
+    loadGoalsHome(user.uid); // 🔥 IMPORTANT
 });
 
-/* LOAD TASKS */
+/* ================= TASKS ================= */
+
 function loadTasks(uid) {
     onSnapshot(collection(db, "tasks"), snap => {
 
@@ -58,20 +60,16 @@ function loadTasks(uid) {
         });
 
         renderHome(tasks);
-        renderGoalsHome(); // 🔥 ADDED
-
         setTimeout(enableDragDrop, 0);
     });
 }
 
-/* HOME RENDER */
 function renderHome(tasks) {
 
     let today = new Date().toISOString().split("T")[0];
 
     let todayTasks = tasks.filter(t => t.date === today);
 
-    /* SORT → incomplete first */
     todayTasks.sort((a, b) => a.completed - b.completed);
 
     let completed = todayTasks.filter(t => t.completed).length;
@@ -80,8 +78,6 @@ function renderHome(tasks) {
     let percent = total ? Math.round((completed / total) * 100) : 0;
 
     let html = `
-        
-
         <div class="progress-bar">
             <div class="progress-fill" style="width:${percent}%"></div>
         </div>
@@ -111,14 +107,28 @@ function renderHome(tasks) {
     document.getElementById("homeContent").innerHTML = html;
 }
 
-/* ================= GOALS ON HOME ================= */
+/* ================= GOALS (FIREBASE SYNC) ================= */
 
-function renderGoalsHome() {
+function loadGoalsHome(uid) {
 
-    let goals = JSON.parse(localStorage.getItem("goals")) || [];
+    onSnapshot(collection(db, "goals"), snap => {
+
+        let goals = [];
+
+        snap.forEach(d => {
+            let g = d.data();
+            if (g.user === uid) {
+                goals.push(g);
+            }
+        });
+
+        renderGoalsHome(goals);
+    });
+}
+
+function renderGoalsHome(goals) {
 
     let container = document.getElementById("goalsHomeContainer");
-
     if (!container) return;
 
     if (goals.length === 0) {
@@ -134,17 +144,15 @@ function renderGoalsHome() {
 
         let extra = "";
 
-        /* 🔥 DEADLINE LOGIC */
         if (g.deadline) {
 
             let today = new Date();
             let end = new Date(g.deadline);
 
-            let diffTime = end - today;
-            let days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            let diff = end - today;
+            let days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
             if (days > 0) {
-
                 let remaining = g.total - g.done;
                 let daily = Math.ceil(remaining / days);
 
@@ -152,8 +160,7 @@ function renderGoalsHome() {
                     <small>⏳ ${days} days left</small><br>
                     <small>📈 ${daily} per day needed</small>
                 `;
-            } 
-            else {
+            } else {
                 extra = `<small style="color:red;">⚠ Deadline passed</small>`;
             }
         }
@@ -174,7 +181,8 @@ function renderGoalsHome() {
 
     container.innerHTML = html;
 }
-/* ================= DRAG & DROP ================= */
+
+/* ================= DRAG ================= */
 
 function enableDragDrop() {
 
@@ -193,29 +201,22 @@ function enableDragDrop() {
             item.classList.remove("dragging");
         });
 
-        item.addEventListener("dragover", (e) => {
-            e.preventDefault();
-        });
+        item.addEventListener("dragover", (e) => e.preventDefault());
 
         item.addEventListener("drop", (e) => {
             e.preventDefault();
 
             if (dragItem !== item) {
-
                 let list = item.parentNode;
-                let itemsArr = [...list.children];
 
-                let dragIndex = itemsArr.indexOf(dragItem);
-                let dropIndex = itemsArr.indexOf(item);
-
-                if (dragIndex < dropIndex) {
+                if ([...list.children].indexOf(dragItem) <
+                    [...list.children].indexOf(item)) {
                     list.insertBefore(dragItem, item.nextSibling);
                 } else {
                     list.insertBefore(dragItem, item);
                 }
             }
         });
-
     });
 }
 
@@ -231,13 +232,9 @@ window.del = (id) => {
     deleteDoc(doc(db, "tasks", id));
 };
 
-window.editTask = (id, oldText) => {
-    let newText = prompt("Edit task", oldText);
-    if (newText) {
-        updateDoc(doc(db, "tasks", id), {
-            text: newText
-        });
-    }
+window.editTask = (id, text) => {
+    let t = prompt("Edit task", text);
+    if (t) updateDoc(doc(db, "tasks", id), { text: t });
 };
 
 /* LOGOUT */
