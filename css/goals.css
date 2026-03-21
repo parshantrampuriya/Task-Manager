@@ -201,3 +201,45 @@ body {
 .modal-actions button:last-child {
     background:#ff4d4d;
 }
+/* SIDEBAR */
+.sidebar {
+    position:fixed;
+    top:0;
+    left:0;
+    width:220px;
+    height:100vh;
+    padding:20px;
+
+    background: rgba(0,0,0,0.9);
+    transform:translateX(-100%);
+    transition:0.3s;
+    z-index:1000;
+}
+
+.sidebar.collapsed {
+    transform:translateX(-100%);
+}
+
+.sidebar:not(.collapsed) {
+    transform:translateX(0);
+}
+
+.sidebar button {
+    width:100%;
+    margin:10px 0;
+    padding:10px;
+    background:#1e2a38;
+    color:white;
+    border:none;
+    border-radius:8px;
+}
+
+.sidebar button:hover {
+    background:#00cfff;
+    color:black;
+}
+
+/* MAIN SHIFT */
+.main {
+    transition:0.3s;
+}
