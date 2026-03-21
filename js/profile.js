@@ -2,7 +2,8 @@ import { auth, db } from "./firebase.js";
 
 import {
   onAuthStateChanged,
-  signOut
+  signOut,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
@@ -11,7 +12,7 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* NAVIGATION */
+/* NAV */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
 window.goProfile = () => window.location.href = "profile.html";
@@ -21,7 +22,7 @@ window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("active");
 };
 
-/* AUTH */
+/* LOAD USER */
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
@@ -39,6 +40,10 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById("email").value = user.email;
         document.getElementById("gender").value = data.gender || "Male";
         document.getElementById("dob").value = data.dob || "";
+
+        if (data.img) {
+            document.getElementById("profileImg").src = data.img;
+        }
     }
 });
 
@@ -51,13 +56,48 @@ window.saveProfile = async () => {
     let gender = document.getElementById("gender").value;
     let dob = document.getElementById("dob").value;
 
-    await updateDoc(doc(db, "users", user.uid), {
-        name,
-        gender,
-        dob
-    });
+    /* IMAGE */
+    let file = document.getElementById("imgUpload").files[0];
+    let imgBase64 = null;
 
-    alert("Profile Updated ✅");
+    if (file) {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = async () => {
+            imgBase64 = reader.result;
+
+            await updateDoc(doc(db, "users", user.uid), {
+                name, gender, dob, img: imgBase64
+            });
+
+            alert("Profile Updated ✅");
+        };
+
+    } else {
+        await updateDoc(doc(db, "users", user.uid), {
+            name, gender, dob
+        });
+
+        alert("Profile Updated ✅");
+    }
+};
+
+/* PASSWORD SHOW */
+window.togglePassword = () => {
+    let p = document.getElementById("password");
+
+    p.type = p.type === "password" ? "text" : "password";
+};
+
+/* RESET PASSWORD */
+window.resetPassword = async () => {
+
+    let email = auth.currentUser.email;
+
+    await sendPasswordResetEmail(auth, email);
+
+    alert("Reset link sent 📩");
 };
 
 /* LOGOUT */
