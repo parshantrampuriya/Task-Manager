@@ -164,3 +164,11 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
+window.toggleMenu = () => {
+    let d = document.getElementById("dropdown");
+    d.style.display = d.style.display === "block" ? "none" : "block";
+};
+
+window.goProfile = () => {
+    window.location.href = "profile.html";
+};
