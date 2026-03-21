@@ -89,3 +89,42 @@ body {
 .task-actions button:nth-child(1){background:#00ffcc;}
 .task-actions button:nth-child(2){background:#ffc107;}
 .task-actions button:nth-child(3){background:#ff4d4d;}
+/* MENU */
+.menu-container {
+    position:relative;
+}
+
+.menu-btn {
+    font-size:20px;
+    padding:8px 12px;
+    border-radius:8px;
+    background:#00cfff;
+    cursor:pointer;
+}
+
+/* DROPDOWN */
+.dropdown {
+    display:none;
+    position:absolute;
+    right:0;
+    top:40px;
+
+    background:rgba(0,0,0,0.9);
+    border-radius:10px;
+    padding:10px;
+
+    box-shadow:0 0 15px rgba(0,255,255,0.3);
+}
+
+.dropdown button {
+    display:block;
+    width:150px;
+    margin:5px 0;
+    background:#1e2a38;
+    color:white;
+}
+
+.dropdown button:hover {
+    background:#00cfff;
+    color:black;
+}
