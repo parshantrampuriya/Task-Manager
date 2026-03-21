@@ -181,3 +181,103 @@ button {
     color:#00cfff;
     margin-bottom:10px;
 }
+/* ================= TASK ACTION FIX ================= */
+
+/* BUTTONS IN ROW */
+.task-actions {
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:10px;
+}
+
+.task-actions button {
+    flex:1;
+    padding:10px;
+    border-radius:8px;
+    font-size:14px;
+}
+
+/* DIFFERENT COLORS */
+.task-actions button:nth-child(1) {
+    background:#00ffcc;
+}
+
+.task-actions button:nth-child(2) {
+    background:#ffc107;
+}
+
+.task-actions button:nth-child(3) {
+    background:#ff4d4d;
+}
+
+/* HOVER EFFECT */
+.task-actions button:hover {
+    transform:scale(1.05);
+    opacity:0.9;
+}
+
+/* ================= TASK CARD UPGRADE ================= */
+
+.task-card {
+    background: rgba(0,0,0,0.7);
+    padding:18px;
+    border-radius:12px;
+
+    box-shadow:0 0 12px rgba(0,255,255,0.3);
+    transition:0.3s;
+}
+
+.task-card:hover {
+    transform:translateY(-5px);
+}
+
+/* ================= PROGRESS BAR ================= */
+
+.progress-bar {
+    width:100%;
+    height:14px;
+    background:#111;
+    border-radius:10px;
+    margin:10px 0;
+}
+
+.progress-fill {
+    height:100%;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    transition:0.4s;
+}
+
+/* ================= INPUT IMPROVE ================= */
+
+.add-task input {
+    background:rgba(255,255,255,0.1);
+    color:white;
+    border:1px solid #00cfff;
+}
+
+/* ================= TABS ACTIVE LOOK ================= */
+
+.tabs button {
+    background:#1e2a38;
+    transition:0.3s;
+}
+
+.tabs button:hover {
+    background:#00cfff;
+    color:black;
+}
+
+/* ================= SEARCH BAR PREMIUM ================= */
+
+#searchInput {
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
+}
+
+/* ================= DATE TITLE IMPROVE ================= */
+
+.date-group h3 {
+    font-size:18px;
+    letter-spacing:1px;
+}
