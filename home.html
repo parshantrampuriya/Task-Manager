@@ -14,10 +14,17 @@
 <div class="navbar">
     <h2 id="username">👤 Loading...</h2>
 
-    <div class="menu">
-        <button onclick="goHome()">🏠 Home</button>
-        <button onclick="goTasks()">📋 Tasks</button>
-        <button id="logoutBtn">🚪 Logout</button>
+    <!-- MENU BUTTON -->
+    <div class="menu-container">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+        <!-- DROPDOWN -->
+        <div id="dropdown" class="dropdown">
+            <button onclick="goHome()">🏠 Home</button>
+            <button onclick="goTasks()">📋 Tasks</button>
+            <button onclick="goProfile()">👤 Profile</button>
+            <button id="logoutBtn">🚪 Logout</button>
+        </div>
     </div>
 </div>
 
