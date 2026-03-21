@@ -16,7 +16,7 @@ import {
 
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "task.html"; // fixed
+window.goTasks = () => window.location.href = "task.html";
 window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR TOGGLE */
@@ -58,7 +58,6 @@ function loadTasks(uid) {
 
         renderHome(tasks);
 
-        /* 🔥 ENABLE DRAG AFTER RENDER */
         setTimeout(enableDragDrop, 0);
     });
 }
@@ -70,7 +69,7 @@ function renderHome(tasks) {
 
     let todayTasks = tasks.filter(t => t.date === today);
 
-    /* SORT */
+    /* SORT → incomplete first */
     todayTasks.sort((a, b) => a.completed - b.completed);
 
     let completed = todayTasks.filter(t => t.completed).length;
@@ -89,12 +88,13 @@ function renderHome(tasks) {
         <ol class="task-list">
     `;
 
-    todayTasks.forEach((t, index) => {
+    /* 🔥 NO MANUAL NUMBERING */
+    todayTasks.forEach((t) => {
 
         html += `
         <li class="task-item ${t.completed ? 'done' : ''}" draggable="true">
 
-            <span>${index + 1}. ${t.text}</span>
+            <span>${t.text}</span>
 
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
@@ -121,11 +121,11 @@ function enableDragDrop() {
 
         item.addEventListener("dragstart", () => {
             dragItem = item;
-            item.style.opacity = "0.5";
+            item.classList.add("dragging");
         });
 
         item.addEventListener("dragend", () => {
-            item.style.opacity = "1";
+            item.classList.remove("dragging");
         });
 
         item.addEventListener("dragover", (e) => {
