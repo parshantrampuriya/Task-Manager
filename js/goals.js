@@ -1,12 +1,23 @@
 let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-/* ADD */
+/* WAIT FOR PAGE LOAD */
+window.onload = () => {
+
+    document.getElementById("addBtn").addEventListener("click", addGoal);
+
+    render();
+};
+
+/* ADD GOAL */
 function addGoal() {
 
     let name = document.getElementById("goalName").value;
     let total = Number(document.getElementById("goalTotal").value);
 
-    if (!name || !total) return;
+    if (!name || !total) {
+        alert("Enter all fields");
+        return;
+    }
 
     goals.push({
         name,
@@ -19,6 +30,10 @@ function addGoal() {
 
 /* RENDER */
 function render() {
+
+    let container = document.getElementById("goalContainer");
+
+    if (!container) return; // FIX ERROR
 
     let html = "";
 
@@ -46,7 +61,7 @@ function render() {
         </div>`;
     });
 
-    document.getElementById("goalContainer").innerHTML = html;
+    container.innerHTML = html;
 }
 
 /* UPDATE */
@@ -75,7 +90,7 @@ function editGoal(i) {
 
 /* DELETE */
 function deleteGoal(i) {
-    goals.splice(i,1);
+    goals.splice(i, 1);
     save();
 }
 
@@ -89,6 +104,3 @@ function save() {
 function goHome() {
     window.location.href = "home.html";
 }
-
-/* INIT */
-render();
