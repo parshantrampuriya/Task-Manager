@@ -132,6 +132,32 @@ function renderGoalsHome() {
 
         let percent = g.total ? Math.round((g.done / g.total) * 100) : 0;
 
+        let extra = "";
+
+        /* 🔥 DEADLINE LOGIC */
+        if (g.deadline) {
+
+            let today = new Date();
+            let end = new Date(g.deadline);
+
+            let diffTime = end - today;
+            let days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (days > 0) {
+
+                let remaining = g.total - g.done;
+                let daily = Math.ceil(remaining / days);
+
+                extra = `
+                    <small>⏳ ${days} days left</small><br>
+                    <small>📈 ${daily} per day needed</small>
+                `;
+            } 
+            else {
+                extra = `<small style="color:red;">⚠ Deadline passed</small>`;
+            }
+        }
+
         html += `
         <div class="goal-home-card">
 
@@ -141,12 +167,13 @@ function renderGoalsHome() {
                 <div class="goal-home-fill" style="width:${percent}%"></div>
             </div>
 
+            ${extra}
+
         </div>`;
     });
 
     container.innerHTML = html;
 }
-
 /* ================= DRAG & DROP ================= */
 
 function enableDragDrop() {
