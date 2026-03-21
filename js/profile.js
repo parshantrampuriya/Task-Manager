@@ -1,10 +1,3 @@
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
 import { auth, db } from "./firebase.js";
 
 import {
@@ -20,12 +13,9 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* STORAGE */
-const storage = getStorage();
-
 /* NAV */
 window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html";
+window.goTasks = () => window.location.href = "task.html"; // fixed
 window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR */
@@ -51,16 +41,6 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById("email").value = user.email;
         document.getElementById("gender").value = data.gender || "Male";
         document.getElementById("dob").value = data.dob || "";
-
-        /* SHOW NAME UNDER IMAGE */
-        if (document.getElementById("profileName")) {
-            document.getElementById("profileName").innerText = data.name || "";
-        }
-
-        /* LOAD IMAGE */
-        if (data.photoURL) {
-            document.getElementById("profileImg").src = data.photoURL;
-        }
     }
 });
 
@@ -74,61 +54,27 @@ window.saveProfile = async () => {
     let dob = document.getElementById("dob").value;
     let newPassword = document.getElementById("password").value;
 
-    /* UPDATE FIRESTORE */
+    /* UPDATE USER DATA */
     await updateDoc(doc(db, "users", user.uid), {
-        name, gender, dob
+        name,
+        gender,
+        dob
     });
 
-    /* UPDATE NAME BELOW IMAGE */
-    if (document.getElementById("profileName")) {
-        document.getElementById("profileName").innerText = name;
-    }
-
-    /* PASSWORD CHANGE */
+    /* PASSWORD CHANGE (ONLY IF ENTERED) */
     if (newPassword) {
         try {
             await updatePassword(user, newPassword);
             alert("Password Updated ✅");
-        } catch {
-            alert("Please login again to change password");
+        } catch (error) {
+            alert("Login again to change password ❗");
         }
     }
 
     alert("Profile Updated ✅");
 };
 
-/* IMAGE UPLOAD */
-window.uploadImage = async () => {
-
-    let file = document.getElementById("imgInput").files[0];
-    let user = auth.currentUser;
-
-    if (!file) {
-        alert("Please select an image");
-        return;
-    }
-
-    try {
-        let storageRef = ref(storage, "profileImages/" + user.uid);
-
-        await uploadBytes(storageRef, file);
-
-        let url = await getDownloadURL(storageRef);
-
-        await updateDoc(doc(db, "users", user.uid), {
-            photoURL: url
-        });
-
-        document.getElementById("profileImg").src = url;
-
-        alert("Image uploaded successfully ✅");
-
-    } catch (error) {
-        alert(error.message);
-    }
-};
-
-/* PASSWORD TOGGLE */
+/* PASSWORD SHOW/HIDE */
 window.togglePassword = () => {
     let p = document.getElementById("password");
     p.type = p.type === "password" ? "text" : "password";
@@ -175,29 +121,6 @@ document.getElementById("password").addEventListener("input", () => {
         bar.style.background = "lime";
         text.innerText = "Strong Password";
     }
-});
-
-/* 🔥 FIXED IMAGE PREVIEW (IMPORTANT) */
-document.addEventListener("DOMContentLoaded", () => {
-
-    let imgInput = document.getElementById("imgInput");
-
-    if (imgInput) {
-        imgInput.addEventListener("change", () => {
-
-            let file = imgInput.files[0];
-            if (!file) return;
-
-            let reader = new FileReader();
-
-            reader.onload = function(e) {
-                document.getElementById("profileImg").src = e.target.result;
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
 });
 
 /* LOGOUT */
