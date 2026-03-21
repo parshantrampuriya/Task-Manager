@@ -1,88 +1,94 @@
-/* LOAD SAVED DATA */
-window.onload = () => {
-    let goal = JSON.parse(localStorage.getItem("goal"));
+let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-    if (goal) {
-        show(goal);
-    }
-};
+/* ADD */
+function addGoal() {
 
-/* SAVE GOAL */
-function saveGoal() {
+    let name = document.getElementById("goalName").value;
+    let total = Number(document.getElementById("goalTotal").value);
 
-    let type = document.getElementById("type").value;
-    let total = Number(document.getElementById("total").value);
-    let deadline = document.getElementById("deadline").value;
+    if (!name || !total) return;
 
-    if (!total) return alert("Enter target");
-
-    let goal = {
-        type,
+    goals.push({
+        name,
         total,
-        done: 0,
-        deadline
-    };
+        done: 0
+    });
 
-    localStorage.setItem("goal", JSON.stringify(goal));
-
-    show(goal);
+    save();
 }
 
-/* UPDATE PROGRESS */
-function updateProgress() {
+/* RENDER */
+function render() {
 
-    let goal = JSON.parse(localStorage.getItem("goal"));
+    let html = "";
 
-    if (!goal) return alert("Set goal first");
+    goals.forEach((g, i) => {
 
-    let done = Number(document.getElementById("done").value);
+        let percent = Math.min((g.done / g.total) * 100, 100);
 
-    goal.done = done;
+        html += `
+        <div class="goal-card">
 
-    localStorage.setItem("goal", JSON.stringify(goal));
+            <h3>${g.name}</h3>
 
-    show(goal);
+            <p>${g.done} / ${g.total}</p>
+
+            <div class="progress-bar">
+                <div class="fill" style="width:${percent}%"></div>
+            </div>
+
+            <div class="actions">
+                <button onclick="updateGoal(${i})">+ Progress</button>
+                <button onclick="editGoal(${i})">Edit</button>
+                <button onclick="deleteGoal(${i})">Delete</button>
+            </div>
+
+        </div>`;
+    });
+
+    document.getElementById("goalContainer").innerHTML = html;
 }
 
-/* SHOW DATA */
-function show(goal) {
+/* UPDATE */
+function updateGoal(i) {
 
-    let percent = Math.min((goal.done / goal.total) * 100, 100);
+    let val = prompt("Add progress");
 
-    document.getElementById("progressFill").style.width = percent + "%";
+    if (!val) return;
 
-    document.getElementById("percent").innerText =
-        "Progress: " + percent.toFixed(1) + "%";
+    goals[i].done += Number(val);
 
-    document.getElementById("remaining").innerText =
-        "Remaining: " + (goal.total - goal.done);
-
-    /* DEADLINE */
-    if (goal.deadline) {
-
-        let today = new Date();
-        let end = new Date(goal.deadline);
-
-        let days = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
-
-        if (days > 0) {
-            let daily = Math.ceil((goal.total - goal.done) / days);
-
-            document.getElementById("daily").innerText =
-                "Daily Target: " + daily + " per day";
-        }
-    }
-
-    document.getElementById("result").style.display = "block";
+    save();
 }
 
-/* RESET */
-function resetGoal() {
-    localStorage.removeItem("goal");
-    location.reload();
+/* EDIT */
+function editGoal(i) {
+
+    let name = prompt("Edit name", goals[i].name);
+    let total = prompt("Edit total", goals[i].total);
+
+    if (name) goals[i].name = name;
+    if (total) goals[i].total = Number(total);
+
+    save();
+}
+
+/* DELETE */
+function deleteGoal(i) {
+    goals.splice(i,1);
+    save();
+}
+
+/* SAVE */
+function save() {
+    localStorage.setItem("goals", JSON.stringify(goals));
+    render();
 }
 
 /* NAV */
 function goHome() {
     window.location.href = "home.html";
 }
+
+/* INIT */
+render();
