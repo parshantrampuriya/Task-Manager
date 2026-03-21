@@ -10,29 +10,32 @@
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-    <h2 id="username">👤 Loading...</h2>
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
 
-    <!-- MENU BUTTON -->
-    <div class="menu-container">
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <h2>⚡ Menu</h2>
 
-        <!-- DROPDOWN -->
-        <div id="dropdown" class="dropdown">
-            <button onclick="goHome()">🏠 Home</button>
-            <button onclick="goTasks()">📋 Tasks</button>
-            <button onclick="goProfile()">👤 Profile</button>
-            <button id="logoutBtn">🚪 Logout</button>
-        </div>
-    </div>
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button id="logoutBtn">🚪 Logout</button>
+
 </div>
 
-<!-- CONTENT -->
-<div class="container">
-    <div class="content" id="homeContent">
-        <!-- Today tasks will load here -->
+<!-- MAIN -->
+<div class="main">
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2 id="username">👤 Loading...</h2>
     </div>
+
+    <!-- CONTENT -->
+    <div class="container">
+        <div class="content" id="homeContent"></div>
+    </div>
+
 </div>
 
 <script type="module" src="js/home.js"></script>
