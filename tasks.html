@@ -31,20 +31,16 @@
         <h2 id="username">👤 Loading...</h2>
     </div>
 
-    <!-- CONTENT -->
     <div class="container">
 
-        <!-- TOP BAR -->
-        <div class="top-bar">
+        <!-- SEARCH -->
+        <input id="searchInput" placeholder="🔍 Search tasks...">
 
-            <input id="searchInput" placeholder="🔍 Search tasks...">
-
-            <div class="tabs">
-                <button onclick="switchTab('pending')">📌</button>
-                <button onclick="switchTab('due')">🔥</button>
-                <button onclick="switchTab('completed')">✅</button>
-            </div>
-
+        <!-- TABS (FIXED POSITION) -->
+        <div class="tabs">
+            <button onclick="switchTab('pending')">📌 Pending</button>
+            <button onclick="switchTab('due')">🔥 Due</button>
+            <button onclick="switchTab('completed')">✅ Completed</button>
         </div>
 
         <!-- ADD TASK -->
