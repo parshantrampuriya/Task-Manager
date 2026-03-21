@@ -17,6 +17,12 @@ import {
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
+window.goProfile = () => window.location.href = "profile.html";
+
+/* SIDEBAR TOGGLE */
+window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+};
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
@@ -37,7 +43,7 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks(user.uid);
 });
 
-/* LOAD */
+/* LOAD TASKS */
 function loadTasks(uid) {
     onSnapshot(collection(db, "tasks"), snap => {
 
@@ -45,7 +51,9 @@ function loadTasks(uid) {
 
         snap.forEach(d => {
             let t = d.data();
-            if (t.user === uid) tasks.push({ id: d.id, ...t });
+            if (t.user === uid) {
+                tasks.push({ id: d.id, ...t });
+            }
         });
 
         renderHome(tasks);
@@ -62,7 +70,7 @@ function renderHome(tasks) {
     let completed = todayTasks.filter(t => t.completed).length;
     let total = todayTasks.length;
 
-    let percent = total ? Math.round((completed/total)*100) : 0;
+    let percent = total ? Math.round((completed / total) * 100) : 0;
 
     let html = `
         <h2>📅 Today's Tasks</h2>
@@ -70,6 +78,7 @@ function renderHome(tasks) {
         <div class="progress-bar">
             <div class="progress-fill" style="width:${percent}%"></div>
         </div>
+
         <p>${completed} / ${total} completed</p>
 
         <ol class="task-list">
@@ -81,8 +90,8 @@ function renderHome(tasks) {
             <span>${t.text}</span>
 
             <div class="task-actions">
-                <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
+                <button onclick="toggle('${t.id}', ${t.completed})">✔</button>
+                <button onclick="editTask('${t.id}', '${t.text}')">✏️</button>
                 <button onclick="del('${t.id}')">❌</button>
             </div>
         </li>`;
@@ -94,11 +103,23 @@ function renderHome(tasks) {
 }
 
 /* ACTIONS */
-window.toggle = (id,c)=> updateDoc(doc(db,"tasks",id),{completed:!c});
-window.del = (id)=> deleteDoc(doc(db,"tasks",id));
-window.editTask = (id,text)=>{
-    let t = prompt("Edit task",text);
-    if(t) updateDoc(doc(db,"tasks",id),{text:t});
+window.toggle = (id, completed) => {
+    updateDoc(doc(db, "tasks", id), {
+        completed: !completed
+    });
+};
+
+window.del = (id) => {
+    deleteDoc(doc(db, "tasks", id));
+};
+
+window.editTask = (id, oldText) => {
+    let newText = prompt("Edit task", oldText);
+    if (newText) {
+        updateDoc(doc(db, "tasks", id), {
+            text: newText
+        });
+    }
 };
 
 /* LOGOUT */
@@ -106,13 +127,3 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
-/* MENU TOGGLE */
-window.toggleMenu = () => {
-    let d = document.getElementById("dropdown");
-    d.style.display = d.style.display === "block" ? "none" : "block";
-};
-
-/* NAVIGATION */
-window.goProfile = () => {
-    window.location.href = "profile.html";
-};
