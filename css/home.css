@@ -7,8 +7,43 @@ body {
     color:white;
 }
 
-/* CONTAINER */
-.container {
+/* APP LAYOUT */
+.app {
+    display:flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width:220px;
+    height:100vh;
+    padding:20px;
+
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+
+    box-shadow:0 0 20px rgba(0,255,255,0.2);
+}
+
+.sidebar h2 {
+    margin-bottom:20px;
+}
+
+.sidebar button {
+    width:100%;
+    margin:10px 0;
+    padding:10px;
+
+    border:none;
+    border-radius:8px;
+
+    background:#1e2a38;
+    color:white;
+    cursor:pointer;
+}
+
+/* MAIN */
+.main {
+    flex:1;
     padding:20px;
 }
 
@@ -38,4 +73,64 @@ button {
 .content {
     margin-top:40px;
     text-align:center;
+}
+
+/* PAGE ANIMATION */
+.page {
+    animation:fade 0.3s ease;
+}
+
+/* SEARCH */
+#searchInput {
+    width:100%;
+    padding:10px;
+    margin:15px 0;
+
+    border-radius:8px;
+    border:1px solid #00cfff;
+
+    background:rgba(255,255,255,0.1);
+    color:white;
+}
+
+/* TABS */
+.tabs {
+    margin:15px 0;
+}
+
+.tabs button {
+    margin-right:10px;
+}
+
+/* ADD TASK */
+.add-task {
+    margin:15px 0;
+}
+
+.add-task input {
+    padding:8px;
+    margin-right:10px;
+    border-radius:6px;
+}
+
+/* TASK GRID */
+.task-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+/* TASK CARD */
+.task-card {
+    background: rgba(0,0,0,0.6);
+    padding:15px;
+    border-radius:10px;
+
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
+}
+
+/* ANIMATION */
+@keyframes fade {
+    from {opacity:0;}
+    to {opacity:1;}
 }
