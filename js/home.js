@@ -106,3 +106,13 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
+/* MENU TOGGLE */
+window.toggleMenu = () => {
+    let d = document.getElementById("dropdown");
+    d.style.display = d.style.display === "block" ? "none" : "block";
+};
+
+/* NAVIGATION */
+window.goProfile = () => {
+    window.location.href = "profile.html";
+};
