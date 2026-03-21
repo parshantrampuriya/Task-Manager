@@ -29,7 +29,6 @@ onAuthStateChanged(auth, async (user) => {
 
         currentUser = user;
 
-        /* GET USER NAME */
         let docRef = doc(db, "users", user.uid);
         let snap = await getDoc(docRef);
 
@@ -48,6 +47,11 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
+
+/* SIDEBAR TOGGLE */
+window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+};
 
 /* PAGE SWITCH */
 window.showPage = (page) => {
@@ -71,6 +75,7 @@ function loadTasks() {
         });
 
         render();
+        renderHome(); // 🔥 NEW
     });
 }
 
@@ -98,8 +103,7 @@ window.switchTab = (tab) => {
     render();
 };
 
-/* RENDER */
-/* RENDER (UPDATED: GROUP BY DATE) */
+/* RENDER TASK PAGE */
 function render() {
 
     let today = new Date().toISOString().split("T")[0];
@@ -121,7 +125,6 @@ function render() {
         filtered = filtered.filter(t => t.completed);
     }
 
-    /* 🔥 GROUP BY DATE */
     let grouped = {};
 
     filtered.forEach(t => {
@@ -150,8 +153,11 @@ function render() {
                 <div class="task-card">
                     <b>${t.text}</b><br><br>
 
-                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                    <button onclick="del('${t.id}')">❌</button>
+                    <div class="task-actions">
+                        <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                        <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
+                        <button onclick="del('${t.id}')">❌</button>
+                    </div>
                 </div>`;
             });
 
@@ -160,6 +166,58 @@ function render() {
 
     document.getElementById("taskContainer").innerHTML = html;
 }
+
+/* HOME PAGE (TODAY + PROGRESS) */
+function renderHome() {
+
+    let today = new Date().toISOString().split("T")[0];
+
+    let todayTasks = tasks.filter(t => t.date === today);
+
+    let completed = todayTasks.filter(t => t.completed).length;
+    let total = todayTasks.length;
+
+    let percent = total ? Math.round((completed / total) * 100) : 0;
+
+    let html = `
+        <h2>📅 Today's Tasks</h2>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width:${percent}%"></div>
+        </div>
+        <p>${completed} / ${total} completed</p>
+
+        <div class="task-grid">
+    `;
+
+    todayTasks.forEach(t => {
+        html += `
+        <div class="task-card">
+            <b>${t.text}</b><br><br>
+
+            <div class="task-actions">
+                <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
+                <button onclick="del('${t.id}')">❌</button>
+            </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+
+    document.querySelector("#homePage .content").innerHTML = html;
+}
+
+/* EDIT */
+window.editTask = (id, oldText) => {
+    let newText = prompt("Edit task", oldText);
+    if (newText) {
+        updateDoc(doc(db, "tasks", id), {
+            text: newText
+        });
+    }
+};
+
 /* TOGGLE */
 window.toggle = (id, c) => {
     updateDoc(doc(db, "tasks", id), {
@@ -172,5 +230,5 @@ window.del = (id) => {
     deleteDoc(doc(db, "tasks", id));
 };
 
-/* SEARCH LIVE */
+/* SEARCH */
 document.getElementById("searchInput").addEventListener("input", render);
