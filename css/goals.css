@@ -24,13 +24,13 @@ body {
 
 /* CONTAINER */
 .container {
-    padding:20px;
+    padding:30px 20px; /* 🔥 improved spacing */
 }
 
 /* ADD BOX */
 .add-box {
     max-width:700px;
-    margin:auto;
+    margin:20px auto 0 auto; /* 🔥 added top spacing */
     display:flex;
     gap:10px;
     flex-wrap:wrap;
@@ -58,6 +58,7 @@ body {
 /* MOBILE DEFAULT */
 #goalContainer {
     display:block;
+    margin-top:50px; /* 🔥 MAIN GAP FIX */
 }
 
 /* LAPTOP GRID */
@@ -129,6 +130,7 @@ body {
 .actions button:hover {
     transform:scale(1.05);
 }
+
 /* ================= MODAL ================= */
 
 .modal {
@@ -149,13 +151,11 @@ body {
     transition:0.3s;
 }
 
-/* ACTIVE */
 .modal.active {
     opacity:1;
     pointer-events:all;
 }
 
-/* BOX */
 .modal-box {
     width:300px;
     padding:25px;
@@ -168,7 +168,6 @@ body {
     text-align:center;
 }
 
-/* INPUT */
 .modal-box input {
     width:100%;
     padding:10px;
@@ -181,7 +180,6 @@ body {
     color:white;
 }
 
-/* BUTTONS */
 .modal-actions {
     display:flex;
     gap:10px;
@@ -201,7 +199,9 @@ body {
 .modal-actions button:last-child {
     background:#ff4d4d;
 }
-/* SIDEBAR */
+
+/* ================= SIDEBAR ================= */
+
 .sidebar {
     position:fixed;
     top:0;
