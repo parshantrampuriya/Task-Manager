@@ -1,7 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA2qZmQSv7tJXmVQiGRJD6xO8MKQvGGQ6o",
   authDomain: "task-manager-c32bc.firebaseapp.com",
@@ -12,7 +19,22 @@ const firebaseConfig = {
   measurementId: "G-TLD8JJGETS"
 };
 
+/* INIT */
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+/* AUTH */
+const auth = getAuth(app);
+
+/* 🔥 VERY IMPORTANT FIX (REMEMBER LOGIN) */
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("✅ Login persistence enabled");
+  })
+  .catch((error) => {
+    console.error("❌ Persistence error:", error);
+  });
+
+/* FIRESTORE */
+const db = getFirestore(app);
+
+export { auth, db };
