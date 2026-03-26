@@ -9,6 +9,7 @@ import {
   doc,
   getDoc,
   collection,
+  addDoc,
   onSnapshot,
   updateDoc,
   deleteDoc
@@ -20,7 +21,7 @@ window.goTasks = () => window.location.href = "tasks.html";
 window.goGoals = () => window.location.href = "goals.html";
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR (FIXED USING active) */
+/* SIDEBAR */
 window.toggleSidebar = function () {
 
     let sidebar = document.getElementById("sidebar");
@@ -32,7 +33,7 @@ window.toggleSidebar = function () {
     }
 };
 
-/* CLICK OUTSIDE TO CLOSE */
+/* CLICK OUTSIDE CLOSE */
 document.addEventListener("click", function(e) {
 
     let sidebar = document.getElementById("sidebar");
@@ -64,6 +65,28 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
 });
+
+/* ================= QUICK ADD TASK ================= */
+
+window.quickAddTask = async () => {
+
+    let text = document.getElementById("quickTaskInput").value;
+    let date = document.getElementById("quickDateInput").value;
+
+    if (!text) return;
+
+    let today = new Date().toISOString().split("T")[0];
+
+    await addDoc(collection(db, "tasks"), {
+        text: text,
+        date: date || today,
+        completed: false,
+        user: auth.currentUser.uid
+    });
+
+    document.getElementById("quickTaskInput").value = "";
+    document.getElementById("quickDateInput").value = "";
+};
 
 /* ================= TASKS ================= */
 
