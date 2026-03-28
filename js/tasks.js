@@ -20,6 +20,9 @@ let currentUser = null;
 let tasks = [];
 let currentTab = "pending";
 
+/* 🔔 NOTIFICATION MEMORY */
+let notifiedTasks = {};
+
 /* MODAL STATE */
 let currentTaskId = null;
 let currentAction = null;
@@ -57,6 +60,11 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
 
+    /* 🔔 REQUEST PERMISSION */
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+
     let snap = await getDoc(doc(db, "users", user.uid));
 
     if (snap.exists()) {
@@ -65,6 +73,11 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     loadTasks();
+
+    /* 🔁 CHECK EVERY MINUTE */
+    setInterval(() => {
+        render();
+    }, 60000);
 });
 
 /* LOCAL DATE */
@@ -72,13 +85,11 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= FIXED TASK STATUS ================= */
+/* ================= TASK STATUS ================= */
 
 function getTaskStatus(task) {
 
-    /* 🔥 FIX: IGNORE COMPLETED TASKS */
     if (task.completed) return null;
-
     if (!task.time || task.time === "00:00") return null;
 
     let now = new Date();
@@ -98,6 +109,48 @@ function getTaskStatus(task) {
     if (hours <= 6) return "warning";
 
     return "safe";
+}
+
+/* ================= 🔔 NOTIFICATION ================= */
+
+function checkAndNotify(task) {
+
+    if (task.completed) return;
+    if (!task.time || task.time === "00:00") return;
+
+    let now = new Date();
+
+    let [h, m] = task.time.split(":");
+
+    let taskTime = new Date();
+    taskTime.setHours(h, m, 0, 0);
+
+    let diff = taskTime - now;
+
+    if (diff <= 0) return;
+
+    let minutesLeft = Math.floor(diff / (1000 * 60));
+
+    let id = task.id;
+
+    if (!notifiedTasks[id]) {
+        notifiedTasks[id] = {};
+    }
+
+    if (minutesLeft <= 60 && minutesLeft > 59 && !notifiedTasks[id][60]) {
+        new Notification(`⏰ 1 hour left: ${task.text}`);
+        notifiedTasks[id][60] = true;
+    }
+
+    if (minutesLeft <= 30 && minutesLeft > 29 && !notifiedTasks[id][30]) {
+        new Notification(`⚠ 30 min left: ${task.text}`);
+        notifiedTasks[id][30] = true;
+    }
+
+    if (minutesLeft <= 10 && minutesLeft > 9 && !notifiedTasks[id][10]) {
+        new Notification(`🔥 10 min left: ${task.text}`);
+        notifiedTasks[id][10] = true;
+    }
 }
 
 /* LOAD TASKS */
@@ -209,6 +262,8 @@ function render() {
             `;
 
             grouped[date].forEach(t => {
+
+                checkAndNotify(t); // 🔥 NOTIFICATION
 
                 let status = getTaskStatus(t);
 
