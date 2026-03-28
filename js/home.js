@@ -23,8 +23,7 @@ window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR */
 window.toggleSidebar = function () {
-    let sidebar = document.getElementById("sidebar");
-    sidebar.classList.toggle("active");
+    document.getElementById("sidebar").classList.toggle("active");
 };
 
 /* CLICK OUTSIDE */
@@ -56,6 +55,11 @@ onAuthStateChanged(auth, async (user) => {
     loadGoalsHome(user.uid);
 });
 
+/* 🔥 LOCAL DATE FUNCTION */
+function getToday() {
+    return new Date().toLocaleDateString("en-CA");
+}
+
 /* ================= QUICK ADD ================= */
 
 window.quickAddTask = async () => {
@@ -65,11 +69,9 @@ window.quickAddTask = async () => {
 
     if (!text) return;
 
-    let today = new Date().toISOString().split("T")[0];
-
     await addDoc(collection(db, "tasks"), {
         text,
-        date: date || today,
+        date: date || getToday(),
         completed: false,
         user: auth.currentUser.uid
     });
@@ -99,15 +101,26 @@ function loadTasks(uid) {
 
 function renderHome(tasks) {
 
-    let today = new Date().toISOString().split("T")[0];
+    let today = getToday();
 
     let todayTasks = tasks.filter(t => t.date === today);
     todayTasks.sort((a, b) => a.completed - b.completed);
 
+    /* 🔥 EMPTY STATE */
+    if (todayTasks.length === 0) {
+        homeContent.innerHTML = `
+            <p style="text-align:center; margin-top:20px; color:#aaa;">
+                😌 No tasks for today<br><br>
+                Stay consistent 🔥
+            </p>
+        `;
+        return;
+    }
+
     let completed = todayTasks.filter(t => t.completed).length;
     let total = todayTasks.length;
 
-    let percent = total ? Math.round((completed / total) * 100) : 0;
+    let percent = Math.round((completed / total) * 100);
 
     let html = `
         <div class="progress-bar">
@@ -148,7 +161,6 @@ function loadGoalsHome(uid) {
             }
         });
 
-        /* 🔥 SORT BY ORDER */
         goals.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         renderGoalsHome(goals);
@@ -168,66 +180,14 @@ function renderGoalsHome(goals) {
 
         html += `
         <div class="goal-home-card" draggable="true" data-id="${g.id}">
-
             <b>${g.name}</b> → ${percent}%
-
             <div class="goal-home-bar">
                 <div class="goal-home-fill" style="width:${percent}%"></div>
             </div>
-
         </div>`;
     });
 
     container.innerHTML = html;
-}
-
-/* 🔥 GOAL DRAG SYSTEM */
-
-function enableGoalDrag(goals) {
-
-    let items = document.querySelectorAll(".goal-home-card");
-    let dragItem = null;
-
-    items.forEach(item => {
-
-        item.addEventListener("dragstart", () => {
-            dragItem = item;
-            item.style.opacity = "0.5";
-        });
-
-        item.addEventListener("dragend", () => {
-            item.style.opacity = "1";
-        });
-
-        item.addEventListener("dragover", e => e.preventDefault());
-
-        item.addEventListener("drop", async e => {
-            e.preventDefault();
-
-            if (dragItem !== item) {
-
-                let list = item.parentNode;
-
-                if ([...list.children].indexOf(dragItem) <
-                    [...list.children].indexOf(item)) {
-                    list.insertBefore(dragItem, item.nextSibling);
-                } else {
-                    list.insertBefore(dragItem, item);
-                }
-
-                /* 🔥 SAVE NEW ORDER */
-                let updated = [...list.children];
-
-                for (let i = 0; i < updated.length; i++) {
-                    let id = updated[i].dataset.id;
-
-                    await updateDoc(doc(db, "goals", id), {
-                        order: i
-                    });
-                }
-            }
-        });
-    });
 }
 
 /* ================= TASK ACTIONS ================= */
