@@ -286,3 +286,46 @@ body {
     flex-direction:column;
     gap:10px;
 }
+/* ================= COUNTDOWN ================= */
+
+#countdownBox {
+    text-align:center;
+    margin:10px 0 20px 0;
+    padding:12px;
+
+    border-radius:12px;
+
+    background:rgba(0,0,0,0.5);
+    box-shadow:0 0 12px rgba(0,255,255,0.3);
+
+    font-weight:bold;
+    font-size:16px;
+
+    transition:0.3s;
+}
+
+/* NORMAL (SAFE TIME) */
+.countdown-safe {
+    color:#00ffcc;
+    box-shadow:0 0 12px rgba(0,255,200,0.4);
+}
+
+/* WARNING (LESS TIME) */
+.countdown-warning {
+    color:#ffc107;
+    box-shadow:0 0 12px rgba(255,193,7,0.5);
+}
+
+/* DANGER (VERY LOW TIME) */
+.countdown-danger {
+    color:#ff4d4d;
+    box-shadow:0 0 15px rgba(255,0,0,0.6);
+    animation: pulse 1s infinite;
+}
+
+/* 🔥 PULSE ANIMATION */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
