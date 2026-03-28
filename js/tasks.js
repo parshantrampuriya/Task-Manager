@@ -67,9 +67,34 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks();
 });
 
-/* 🔥 LOCAL DATE FUNCTION */
+/* LOCAL DATE */
 function getToday() {
     return new Date().toLocaleDateString("en-CA");
+}
+
+/* ================= TASK STATUS ================= */
+
+function getTaskStatus(task) {
+
+    if (!task.time || task.time === "00:00") return null;
+
+    let now = new Date();
+
+    let [h, m] = task.time.split(":");
+
+    let taskTime = new Date();
+    taskTime.setHours(h, m, 0, 0);
+
+    let diff = taskTime - now;
+
+    if (diff <= 0) return "overdue";
+
+    let hours = diff / (1000 * 60 * 60);
+
+    if (hours <= 2) return "danger";
+    if (hours <= 6) return "warning";
+
+    return "safe";
 }
 
 /* LOAD TASKS */
@@ -94,17 +119,21 @@ window.addTask = async () => {
 
     let text = document.getElementById("taskInput").value;
     let date = document.getElementById("dateInput").value;
+    let time = document.getElementById("timeInput").value;
 
     if (!text) return;
 
     await addDoc(collection(db, "tasks"), {
         text,
         date: date || getToday(),
+        time: time || "00:00", // 🔥 default midnight
         completed: false,
         user: currentUser.uid
     });
 
     taskInput.value = "";
+    dateInput.value = "";
+    timeInput.value = "";
 };
 
 /* SWITCH TAB */
@@ -123,7 +152,7 @@ window.switchTab = (tab, e) => {
 /* RENDER */
 function render() {
 
-    let today = getToday(); // 🔥 FIXED HERE
+    let today = getToday();
 
     let search = document.getElementById("searchInput").value.toLowerCase();
 
@@ -177,9 +206,28 @@ function render() {
             `;
 
             grouped[date].forEach(t => {
+
+                let status = getTaskStatus(t);
+
+                let alert = "";
+
+                if (status === "overdue") {
+                    alert = `<small style="color:red;">❗ Overdue</small>`;
+                }
+                else if (status === "danger") {
+                    alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
+                }
+                else if (status === "warning") {
+                    alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
+                }
+
                 html += `
-                <li class="task-item">
+                <li class="task-item ${status || ''}">
                     <span>${t.text}</span>
+
+                    ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+
+                    ${alert}
 
                     <div class="task-actions">
                         <button onclick="toggle('${t.id}',${t.completed})">✔</button>
