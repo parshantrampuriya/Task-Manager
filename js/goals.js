@@ -34,7 +34,7 @@ onAuthStateChanged(auth, (user) => {
     loadGoals();
 });
 
-/* LOAD FROM FIREBASE */
+/* LOAD */
 function loadGoals() {
 
     onSnapshot(collection(db, "goals"), snap => {
@@ -48,40 +48,42 @@ function loadGoals() {
             }
         });
 
+        /* 🔥 SORT BY ORDER */
+        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
+
         render();
+
+        setTimeout(enableDrag, 0);
     });
 }
 
 /* ADD GOAL */
 async function addGoal() {
 
-    let name = document.getElementById("goalName").value;
-    let total = Number(document.getElementById("goalTotal").value);
-    let deadline = document.getElementById("goalDeadline").value;
+    let name = goalName.value;
+    let total = Number(goalTotal.value);
+    let deadline = goalDeadline.value;
 
-    if (!name || !total) {
-        alert("Enter name & total");
-        return;
-    }
+    if (!name || !total) return alert("Enter name & total");
 
     await addDoc(collection(db, "goals"), {
         name,
         total,
         done: 0,
         deadline: deadline || null,
-        user: currentUser.uid
+        user: currentUser.uid,
+        order: Date.now() // 🔥 initial order
     });
 
-    document.getElementById("goalName").value = "";
-    document.getElementById("goalTotal").value = "";
-    document.getElementById("goalDeadline").value = "";
+    goalName.value = "";
+    goalTotal.value = "";
+    goalDeadline.value = "";
 }
 
 /* RENDER */
 function render() {
 
     let container = document.getElementById("goalContainer");
-    if (!container) return;
 
     let html = "";
 
@@ -90,13 +92,13 @@ function render() {
         let percent = Math.min((g.done / g.total) * 100, 100);
 
         html += `
-        <div class="goal-card">
+        <div class="goal-card" draggable="true" data-id="${g.id}">
 
             <h3>${g.name}</h3>
 
             <p>${g.done} / ${g.total}</p>
 
-            ${g.deadline ? `<small>⏳ Deadline: ${g.deadline}</small>` : ""}
+            ${g.deadline ? `<small>⏳ ${g.deadline}</small>` : ""}
 
             <div class="progress-bar">
                 <div class="fill" style="width:${percent}%"></div>
@@ -114,75 +116,107 @@ function render() {
     container.innerHTML = html;
 }
 
-/* OPEN MODAL */
+/* 🔥 DRAG SYSTEM */
+function enableDrag() {
+
+    let items = document.querySelectorAll(".goal-card");
+    let dragItem = null;
+
+    items.forEach(item => {
+
+        item.addEventListener("dragstart", () => {
+            dragItem = item;
+            item.style.opacity = "0.5";
+        });
+
+        item.addEventListener("dragend", () => {
+            item.style.opacity = "1";
+        });
+
+        item.addEventListener("dragover", e => e.preventDefault());
+
+        item.addEventListener("drop", async e => {
+
+            e.preventDefault();
+
+            if (dragItem !== item) {
+
+                let list = item.parentNode;
+
+                if ([...list.children].indexOf(dragItem) <
+                    [...list.children].indexOf(item)) {
+                    list.insertBefore(dragItem, item.nextSibling);
+                } else {
+                    list.insertBefore(dragItem, item);
+                }
+
+                /* 🔥 SAVE ORDER */
+                let updated = [...list.children];
+
+                for (let i = 0; i < updated.length; i++) {
+
+                    let id = updated[i].dataset.id;
+
+                    await updateDoc(doc(db, "goals", id), {
+                        order: i
+                    });
+                }
+            }
+        });
+    });
+}
+
+/* MODAL */
 window.openModal = (mode, index) => {
 
     currentIndex = index;
     currentMode = mode;
 
-    document.getElementById("modal").classList.add("active");
+    modal.classList.add("active");
 
-    let nameInput = document.getElementById("modalName");
-    let totalInput = document.getElementById("modalInput");
-    let dateInput = document.getElementById("modalDate");
+    let g = goals[index];
 
     if (mode === "progress") {
 
-        document.getElementById("modalTitle").innerText = "Add Progress";
+        modalTitle.innerText = "Add Progress";
+        modalName.style.display = "none";
+        modalDate.style.display = "none";
+        modalInput.value = "";
 
-        nameInput.style.display = "none";
-        dateInput.style.display = "none";
+    } else {
 
-        totalInput.placeholder = "Enter progress";
-        totalInput.value = "";
-    }
+        modalTitle.innerText = "Edit Goal";
+        modalName.style.display = "block";
+        modalDate.style.display = "block";
 
-    if (mode === "edit") {
-
-        let g = goals[index];
-
-        document.getElementById("modalTitle").innerText = "Edit Goal";
-
-        nameInput.style.display = "block";
-        dateInput.style.display = "block";
-
-        nameInput.value = g.name;
-        totalInput.value = g.total;
-        dateInput.value = g.deadline || "";
+        modalName.value = g.name;
+        modalInput.value = g.total;
+        modalDate.value = g.deadline || "";
     }
 };
 
-/* CLOSE */
-window.closeModal = () => {
-    document.getElementById("modal").classList.remove("active");
-};
+window.closeModal = () => modal.classList.remove("active");
 
-/* SAVE MODAL */
+/* SAVE */
 window.saveModal = async () => {
-
-    let val = document.getElementById("modalInput").value;
-
-    if (!val) return;
 
     let g = goals[currentIndex];
 
     if (currentMode === "progress") {
 
+        let val = Number(modalInput.value);
+        if (!val) return;
+
         await updateDoc(doc(db, "goals", g.id), {
-            done: g.done + Number(val)
+            done: g.done + val
         });
-    }
 
-    if (currentMode === "edit") {
-
-        let name = document.getElementById("modalName").value;
-        let total = Number(document.getElementById("modalInput").value);
-        let deadline = document.getElementById("modalDate").value;
+    } else {
 
         await updateDoc(doc(db, "goals", g.id), {
-            name,
-            total,
-            deadline: deadline || null
+            name: modalName.value,
+            total: Number(modalInput.value),
+            deadline: modalDate.value || null
         });
     }
 
@@ -194,31 +228,23 @@ window.deleteGoal = async (id) => {
     await deleteDoc(doc(db, "goals", id));
 };
 
-/* SIDEBAR TOGGLE (FIXED) */
-window.toggleSidebar = function () {
-    document.getElementById("sidebar").classList.toggle("collapsed");
+/* SIDEBAR FIX */
+window.toggleSidebar = () => {
+    sidebar.classList.toggle("active");
 };
 
-/* CLICK OUTSIDE TO CLOSE */
-document.addEventListener("click", function(e) {
-
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
-
+/* CLICK OUTSIDE */
+document.addEventListener("click", (e) => {
     if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.add("collapsed");
+        sidebar.classList.remove("active");
     }
 });
 
-/* NAVIGATION */
-window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html";
-window.goGoals = () => window.location.href = "goals.html";
-window.goProfile = () => window.location.href = "profile.html";
+/* NAV */
+window.goHome = () => location.href = "home.html";
+window.goTasks = () => location.href = "tasks.html";
+window.goGoals = () => location.href = "goals.html";
+window.goProfile = () => location.href = "profile.html";
 
 /* LOGOUT */
-window.logout = () => {
-    window.location.href = "index.html";
-};
+window.logout = () => location.href = "index.html";
