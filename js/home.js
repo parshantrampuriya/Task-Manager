@@ -23,23 +23,14 @@ window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR */
 window.toggleSidebar = function () {
-
     let sidebar = document.getElementById("sidebar");
-
-    if (sidebar.classList.contains("active")) {
-        sidebar.classList.remove("active");
-    } else {
-        sidebar.classList.add("active");
-    }
+    sidebar.classList.toggle("active");
 };
 
-/* CLICK OUTSIDE CLOSE */
+/* CLICK OUTSIDE */
 document.addEventListener("click", function(e) {
-
     let sidebar = document.getElementById("sidebar");
     let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
 
     if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
         sidebar.classList.remove("active");
@@ -54,8 +45,7 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    let docRef = doc(db, "users", user.uid);
-    let snap = await getDoc(docRef);
+    let snap = await getDoc(doc(db, "users", user.uid));
 
     if (snap.exists()) {
         document.getElementById("username").innerText =
@@ -66,7 +56,7 @@ onAuthStateChanged(auth, async (user) => {
     loadGoalsHome(user.uid);
 });
 
-/* ================= QUICK ADD TASK ================= */
+/* ================= QUICK ADD ================= */
 
 window.quickAddTask = async () => {
 
@@ -78,14 +68,14 @@ window.quickAddTask = async () => {
     let today = new Date().toISOString().split("T")[0];
 
     await addDoc(collection(db, "tasks"), {
-        text: text,
+        text,
         date: date || today,
         completed: false,
         user: auth.currentUser.uid
     });
 
-    document.getElementById("quickTaskInput").value = "";
-    document.getElementById("quickDateInput").value = "";
+    quickTaskInput.value = "";
+    quickDateInput.value = "";
 };
 
 /* ================= TASKS ================= */
@@ -112,7 +102,6 @@ function renderHome(tasks) {
     let today = new Date().toISOString().split("T")[0];
 
     let todayTasks = tasks.filter(t => t.date === today);
-
     todayTasks.sort((a, b) => a.completed - b.completed);
 
     let completed = todayTasks.filter(t => t.completed).length;
@@ -125,29 +114,23 @@ function renderHome(tasks) {
             <div class="progress-fill" style="width:${percent}%"></div>
         </div>
         <p>${completed} / ${total} completed</p>
-
         <ol class="task-list">
     `;
 
     todayTasks.forEach((t) => {
-
         html += `
         <li class="task-item ${t.completed ? 'done' : ''}" draggable="true">
-
             <span>${t.text}</span>
-
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
                 <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
                 <button onclick="del('${t.id}')">❌</button>
             </div>
-
         </li>`;
     });
 
     html += `</ol>`;
-
-    document.getElementById("homeContent").innerHTML = html;
+    homeContent.innerHTML = html;
 }
 
 /* ================= GOALS ================= */
@@ -161,55 +144,30 @@ function loadGoalsHome(uid) {
         snap.forEach(d => {
             let g = d.data();
             if (g.user === uid) {
-                goals.push(g);
+                goals.push({ id: d.id, ...g });
             }
         });
 
+        /* 🔥 SORT BY ORDER */
+        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
+
         renderGoalsHome(goals);
+        setTimeout(() => enableGoalDrag(goals), 0);
     });
 }
 
 function renderGoalsHome(goals) {
 
     let container = document.getElementById("goalsHomeContainer");
-    if (!container) return;
-
-    if (goals.length === 0) {
-        container.innerHTML = "<p>No goals added yet</p>";
-        return;
-    }
 
     let html = "";
 
     goals.forEach(g => {
 
-        let percent = g.total ? Math.round((g.done / g.total) * 100) : 0;
-
-        let extra = "";
-
-        if (g.deadline) {
-
-            let today = new Date();
-            let end = new Date(g.deadline);
-
-            let diff = end - today;
-            let days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
-            if (days > 0) {
-                let remaining = g.total - g.done;
-                let daily = Math.ceil(remaining / days);
-
-                extra = `
-                    <small>⏳ ${days} days left</small><br>
-                    <small>📈 ${daily} per day needed</small>
-                `;
-            } else {
-                extra = `<small style="color:red;">⚠ Deadline passed</small>`;
-            }
-        }
+        let percent = Math.round((g.done / g.total) * 100 || 0);
 
         html += `
-        <div class="goal-home-card">
+        <div class="goal-home-card" draggable="true" data-id="${g.id}">
 
             <b>${g.name}</b> → ${percent}%
 
@@ -217,39 +175,37 @@ function renderGoalsHome(goals) {
                 <div class="goal-home-fill" style="width:${percent}%"></div>
             </div>
 
-            ${extra}
-
         </div>`;
     });
 
     container.innerHTML = html;
 }
 
-/* ================= DRAG ================= */
+/* 🔥 GOAL DRAG SYSTEM */
 
-function enableDragDrop() {
+function enableGoalDrag(goals) {
 
-    let items = document.querySelectorAll(".task-item");
-
+    let items = document.querySelectorAll(".goal-home-card");
     let dragItem = null;
 
     items.forEach(item => {
 
         item.addEventListener("dragstart", () => {
             dragItem = item;
-            item.classList.add("dragging");
+            item.style.opacity = "0.5";
         });
 
         item.addEventListener("dragend", () => {
-            item.classList.remove("dragging");
+            item.style.opacity = "1";
         });
 
-        item.addEventListener("dragover", (e) => e.preventDefault());
+        item.addEventListener("dragover", e => e.preventDefault());
 
-        item.addEventListener("drop", (e) => {
+        item.addEventListener("drop", async e => {
             e.preventDefault();
 
             if (dragItem !== item) {
+
                 let list = item.parentNode;
 
                 if ([...list.children].indexOf(dragItem) <
@@ -258,17 +214,26 @@ function enableDragDrop() {
                 } else {
                     list.insertBefore(dragItem, item);
                 }
+
+                /* 🔥 SAVE NEW ORDER */
+                let updated = [...list.children];
+
+                for (let i = 0; i < updated.length; i++) {
+                    let id = updated[i].dataset.id;
+
+                    await updateDoc(doc(db, "goals", id), {
+                        order: i
+                    });
+                }
             }
         });
     });
 }
 
-/* ================= ACTIONS ================= */
+/* ================= TASK ACTIONS ================= */
 
 window.toggle = (id, completed) => {
-    updateDoc(doc(db, "tasks", id), {
-        completed: !completed
-    });
+    updateDoc(doc(db, "tasks", id), { completed: !completed });
 };
 
 window.del = (id) => {
@@ -281,7 +246,7 @@ window.editTask = (id, text) => {
 };
 
 /* LOGOUT */
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
