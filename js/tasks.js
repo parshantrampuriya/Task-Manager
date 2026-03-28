@@ -72,9 +72,12 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= TASK STATUS ================= */
+/* ================= FIXED TASK STATUS ================= */
 
 function getTaskStatus(task) {
+
+    /* 🔥 FIX: IGNORE COMPLETED TASKS */
+    if (task.completed) return null;
 
     if (!task.time || task.time === "00:00") return null;
 
@@ -126,7 +129,7 @@ window.addTask = async () => {
     await addDoc(collection(db, "tasks"), {
         text,
         date: date || getToday(),
-        time: time || "00:00", // 🔥 default midnight
+        time: time || "00:00",
         completed: false,
         user: currentUser.uid
     });
@@ -211,18 +214,20 @@ function render() {
 
                 let alert = "";
 
-                if (status === "overdue") {
-                    alert = `<small style="color:red;">❗ Overdue</small>`;
-                }
-                else if (status === "danger") {
-                    alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
-                }
-                else if (status === "warning") {
-                    alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
+                if (!t.completed) {
+                    if (status === "overdue") {
+                        alert = `<small style="color:red;">❗ Overdue</small>`;
+                    }
+                    else if (status === "danger") {
+                        alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
+                    }
+                    else if (status === "warning") {
+                        alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
+                    }
                 }
 
                 html += `
-                <li class="task-item ${status || ''}">
+                <li class="task-item ${t.completed ? 'done' : ''} ${status || ''}">
                     <span>${t.text}</span>
 
                     ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
