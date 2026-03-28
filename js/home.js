@@ -67,9 +67,12 @@ function startCountdown() {
     setInterval(updateCountdown, 1000);
 }
 
-/* ================= TASK STATUS ================= */
+/* ================= FIXED TASK STATUS ================= */
 
 function getTaskStatus(task) {
+
+    /* 🔥 FIX: IGNORE COMPLETED TASKS */
+    if (task.completed) return null;
 
     if (!task.time || task.time === "00:00") return null;
 
@@ -130,7 +133,7 @@ window.quickAddTask = async () => {
     await addDoc(collection(db, "tasks"), {
         text,
         date: date || getToday(),
-        time: time || "00:00", // 🔥 default midnight
+        time: time || "00:00",
         completed: false,
         user: auth.currentUser.uid
     });
@@ -178,14 +181,17 @@ function renderHome(tasks) {
 
         let alert = "";
 
-        if (status === "overdue") {
-            alert = `<small style="color:red;">❗ Overdue</small>`;
-        }
-        else if (status === "danger") {
-            alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
-        }
-        else if (status === "warning") {
-            alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
+        /* 🔥 FIX: ONLY FOR NON-COMPLETED */
+        if (!t.completed) {
+            if (status === "overdue") {
+                alert = `<small style="color:red;">❗ Overdue</small>`;
+            }
+            else if (status === "danger") {
+                alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
+            }
+            else if (status === "warning") {
+                alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
+            }
         }
 
         html += `
