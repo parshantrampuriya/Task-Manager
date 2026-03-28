@@ -20,18 +20,18 @@ let currentUser = null;
 let tasks = [];
 let currentTab = "pending";
 
-/* 🔥 MODAL STATE */
+/* MODAL STATE */
 let currentTaskId = null;
 let currentAction = null;
 
-/* NAVIGATION */
+/* NAV */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
 window.goGoals = () => window.location.href = "goals.html";
 window.goProfile = () => window.location.href = "profile.html";
 
 /* SIDEBAR */
-window.toggleSidebar = function () {
+window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("active");
 };
 
@@ -67,6 +67,11 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks();
 });
 
+/* 🔥 LOCAL DATE FUNCTION */
+function getToday() {
+    return new Date().toLocaleDateString("en-CA");
+}
+
 /* LOAD TASKS */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
@@ -94,7 +99,7 @@ window.addTask = async () => {
 
     await addDoc(collection(db, "tasks"), {
         text,
-        date,
+        date: date || getToday(),
         completed: false,
         user: currentUser.uid
     });
@@ -118,7 +123,8 @@ window.switchTab = (tab, e) => {
 /* RENDER */
 function render() {
 
-    let today = new Date().toISOString().split("T")[0];
+    let today = getToday(); // 🔥 FIXED HERE
+
     let search = document.getElementById("searchInput").value.toLowerCase();
 
     let filtered = tasks.filter(t =>
@@ -145,6 +151,16 @@ function render() {
     });
 
     let html = "";
+
+    if (filtered.length === 0) {
+        taskContainer.innerHTML = `
+            <p style="text-align:center; margin-top:30px; color:#aaa;">
+                😌 No tasks here<br><br>
+                Stay consistent 🔥
+            </p>
+        `;
+        return;
+    }
 
     Object.keys(grouped)
         .sort((a,b)=> new Date(a)-new Date(b))
@@ -179,8 +195,7 @@ function render() {
     taskContainer.innerHTML = html;
 }
 
-/* ================= MODAL SYSTEM ================= */
-
+/* MODAL */
 window.openModal = (type, id, text = "") => {
 
     currentTaskId = id;
