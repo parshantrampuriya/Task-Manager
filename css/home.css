@@ -251,3 +251,25 @@ body {
         grid-template-columns:1fr;
     }
 }
+/* 🔥 TASK CONTENT ALIGN FIX */
+.task-item > div:first-child {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:1;
+    white-space:nowrap;
+    overflow:hidden;
+}
+
+/* TEXT CUT IF LONG */
+.task-item span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* TIME STYLE */
+.task-item small {
+    color:#00cfff;
+    font-size:13px;
+    white-space:nowrap;
+}
