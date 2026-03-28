@@ -39,19 +39,16 @@
 
         <!-- TABS -->
         <div class="tabs">
-            <button onclick="switchTab('pending')">📌 Pending</button>
-            <button onclick="switchTab('due')">🔥 Due</button>
-            <button onclick="switchTab('completed')">✅ Completed</button>
+            <button onclick="switchTab('pending', event)">📌 Pending</button>
+            <button onclick="switchTab('due', event)">🔥 Due</button>
+            <button onclick="switchTab('completed', event)">✅ Completed</button>
         </div>
 
         <!-- ADD TASK -->
         <div class="add-task">
             <input id="taskInput" placeholder="New task...">
             <input type="date" id="dateInput">
-
-            <!-- 🔥 NEW TIME INPUT -->
             <input type="time" id="timeInput">
-
             <button onclick="addTask()">Add</button>
         </div>
 
@@ -62,18 +59,25 @@
 
 </div>
 
-<!-- MODAL -->
+<!-- 🔥 ADVANCED MODAL (UPGRADED) -->
 <div id="modal" class="modal">
 
     <div class="modal-box">
 
         <h3 id="modalTitle">Edit Task</h3>
 
-        <input id="modalInput" placeholder="Enter task">
+        <!-- TEXT -->
+        <input id="modalInput" placeholder="Task name">
+
+        <!-- DATE -->
+        <input type="date" id="modalDate">
+
+        <!-- TIME -->
+        <input type="time" id="modalTime">
 
         <div class="modal-actions">
-            <button onclick="confirmAction()">Save</button>
-            <button onclick="closeModal()">Cancel</button>
+            <button onclick="confirmAction()">💾 Save</button>
+            <button onclick="closeModal()">❌ Cancel</button>
         </div>
 
     </div>
