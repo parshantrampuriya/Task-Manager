@@ -50,12 +50,8 @@
                 <!-- QUICK ADD -->
                 <div class="quick-add">
                     <input id="quickTaskInput" placeholder="Add new task...">
-                    
                     <input type="date" id="quickDateInput">
-
-                    <!-- 🔥 NEW TIME INPUT -->
                     <input type="time" id="quickTimeInput">
-
                     <button onclick="quickAddTask()">➕ Add</button>
                 </div>
 
@@ -68,13 +64,33 @@
             <div class="right-panel">
 
                 <h2>🎯 Goals Progress</h2>
-
                 <small style="color:#aaa;">Drag to reorder goals</small>
 
                 <div id="goalsHomeContainer" class="goal-container"></div>
 
             </div>
 
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= 🔥 MODAL ================= -->
+
+<div id="modal" class="modal">
+
+    <div class="modal-box">
+
+        <h3 id="modalTitle">Edit Task</h3>
+
+        <input id="modalText" placeholder="Task name">
+        <input type="date" id="modalDate">
+        <input type="time" id="modalTime">
+
+        <div class="modal-actions">
+            <button onclick="confirmAction()">💾 Save</button>
+            <button onclick="closeModal()">❌ Cancel</button>
         </div>
 
     </div>
