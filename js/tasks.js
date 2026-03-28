@@ -20,27 +20,23 @@ let currentUser = null;
 let tasks = [];
 let currentTab = "pending";
 
+/* 🔥 MODAL STATE */
+let currentTaskId = null;
+let currentAction = null;
+
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
-window.goGoals = () => window.location.href = "goals.html"; // 🔥 ADDED
+window.goGoals = () => window.location.href = "goals.html";
 window.goProfile = () => window.location.href = "profile.html";
 
-/* SIDEBAR (FIXED USING active) */
+/* SIDEBAR */
 window.toggleSidebar = function () {
-
-    let sidebar = document.getElementById("sidebar");
-
-    if (sidebar.classList.contains("active")) {
-        sidebar.classList.remove("active");
-    } else {
-        sidebar.classList.add("active");
-    }
+    document.getElementById("sidebar").classList.toggle("active");
 };
 
-/* CLICK OUTSIDE TO CLOSE */
+/* CLICK OUTSIDE */
 document.addEventListener("click", function(e) {
-
     let sidebar = document.getElementById("sidebar");
     let menuBtn = document.querySelector(".menu-btn");
 
@@ -61,8 +57,7 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
 
-    let docRef = doc(db, "users", user.uid);
-    let snap = await getDoc(docRef);
+    let snap = await getDoc(doc(db, "users", user.uid));
 
     if (snap.exists()) {
         document.getElementById("username").innerText =
@@ -98,13 +93,13 @@ window.addTask = async () => {
     if (!text) return;
 
     await addDoc(collection(db, "tasks"), {
-        text: text,
-        date: date,
+        text,
+        date,
         completed: false,
         user: currentUser.uid
     });
 
-    document.getElementById("taskInput").value = "";
+    taskInput.value = "";
 };
 
 /* SWITCH TAB */
@@ -172,8 +167,8 @@ function render() {
 
                     <div class="task-actions">
                         <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                        <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
-                        <button onclick="del('${t.id}')">❌</button>
+                        <button onclick="openModal('edit','${t.id}','${t.text}')">✏️</button>
+                        <button onclick="openModal('delete','${t.id}')">❌</button>
                     </div>
                 </li>`;
             });
@@ -181,8 +176,57 @@ function render() {
             html += `</ol></div>`;
         });
 
-    document.getElementById("taskContainer").innerHTML = html;
+    taskContainer.innerHTML = html;
 }
+
+/* ================= MODAL SYSTEM ================= */
+
+window.openModal = (type, id, text = "") => {
+
+    currentTaskId = id;
+    currentAction = type;
+
+    let modal = document.getElementById("modal");
+    let input = document.getElementById("modalInput");
+    let title = document.getElementById("modalTitle");
+
+    modal.classList.add("active");
+
+    if (type === "edit") {
+        title.innerText = "Edit Task";
+        input.style.display = "block";
+        input.value = text;
+    }
+
+    if (type === "delete") {
+        title.innerText = "Are you sure you want to delete?";
+        input.style.display = "none";
+    }
+};
+
+window.closeModal = () => {
+    document.getElementById("modal").classList.remove("active");
+};
+
+window.confirmAction = () => {
+
+    if (currentAction === "edit") {
+
+        let newText = document.getElementById("modalInput").value;
+
+        if (newText) {
+            updateDoc(doc(db, "tasks", currentTaskId), {
+                text: newText
+            });
+        }
+    }
+
+    if (currentAction === "delete") {
+        deleteDoc(doc(db, "tasks", currentTaskId));
+    }
+
+    closeModal();
+};
 
 /* ACTIONS */
 window.toggle = (id, c) => {
@@ -191,24 +235,11 @@ window.toggle = (id, c) => {
     });
 };
 
-window.del = (id) => {
-    deleteDoc(doc(db, "tasks", id));
-};
-
-window.editTask = (id, text) => {
-    let newText = prompt("Edit task", text);
-    if (newText) {
-        updateDoc(doc(db, "tasks", id), {
-            text: newText
-        });
-    }
-};
-
 /* SEARCH */
-document.getElementById("searchInput").addEventListener("input", render);
+searchInput.addEventListener("input", render);
 
 /* LOGOUT */
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
 });
