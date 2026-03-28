@@ -17,7 +17,7 @@
 
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button> <!-- 🔥 ADDED -->
+    <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goProfile()">👤 Profile</button>
     <button id="logoutBtn">🚪 Logout</button>
 
@@ -53,6 +53,24 @@
 
         <!-- TASK LIST -->
         <div id="taskContainer"></div>
+
+    </div>
+
+</div>
+
+<!-- 🔥 MODAL (NEW) -->
+<div id="modal" class="modal">
+
+    <div class="modal-box">
+
+        <h3 id="modalTitle">Edit Task</h3>
+
+        <input id="modalInput" placeholder="Enter task">
+
+        <div class="modal-actions">
+            <button onclick="confirmAction()">Save</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
 
     </div>
 
