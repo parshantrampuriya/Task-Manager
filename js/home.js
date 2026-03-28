@@ -36,7 +36,8 @@ document.addEventListener("click", function(e) {
     }
 });
 
-/* 🔥 COUNTDOWN SYSTEM */
+/* ================= COUNTDOWN ================= */
+
 function startCountdown() {
 
     function updateCountdown() {
@@ -54,8 +55,21 @@ function startCountdown() {
 
         let box = document.getElementById("countdownBox");
 
-        if (box) {
-            box.innerHTML = `⏳ Day ends in: ${h}h ${m}m ${s}s`;
+        if (!box) return;
+
+        box.innerHTML = `⏳ Day ends in: ${h}h ${m}m ${s}s`;
+
+        /* COLOR CHANGE */
+        box.classList.remove("countdown-safe", "countdown-warning", "countdown-danger");
+
+        if (h > 6) {
+            box.classList.add("countdown-safe");
+        }
+        else if (h > 2) {
+            box.classList.add("countdown-warning");
+        }
+        else {
+            box.classList.add("countdown-danger");
         }
     }
 
@@ -81,11 +95,10 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
 
-    /* 🔥 START COUNTDOWN */
-    startCountdown();
+    startCountdown(); // 🔥 START COUNTDOWN
 });
 
-/* 🔥 LOCAL DATE FUNCTION */
+/* LOCAL DATE */
 function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
@@ -136,7 +149,7 @@ function renderHome(tasks) {
     let todayTasks = tasks.filter(t => t.date === today);
     todayTasks.sort((a, b) => a.completed - b.completed);
 
-    /* 🔥 EMPTY STATE */
+    /* EMPTY STATE */
     if (todayTasks.length === 0) {
         homeContent.innerHTML = `
             <p style="text-align:center; margin-top:20px; color:#aaa;">
