@@ -16,7 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* GLOBAL */
-let notifiedTasks = {};
+let currentTasks = [];
 let currentTaskId = null;
 let currentAction = null;
 
@@ -31,26 +31,12 @@ window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("active");
 };
 
-/* CLICK OUTSIDE */
-document.addEventListener("click", (e) => {
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove("active");
-    }
-});
-
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
         location.href = "index.html";
         return;
-    }
-
-    if (Notification.permission !== "granted") {
-        Notification.requestPermission();
     }
 
     let snap = await getDoc(doc(db, "users", user.uid));
@@ -61,12 +47,53 @@ onAuthStateChanged(auth, async (user) => {
 
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
-    startCountdown();
+
+    startCountdown(); // ✅ NOW WORKS
 });
 
 /* DATE */
 function getToday() {
     return new Date().toLocaleDateString("en-CA");
+}
+
+/* ================= COUNTDOWN ================= */
+
+function startCountdown() {
+
+    setInterval(() => {
+
+        if (!currentTasks.length) return;
+
+        let now = new Date();
+
+        let nearest = null;
+
+        currentTasks.forEach(t => {
+
+            if (!t.time || t.time === "00:00") return;
+
+            let taskTime = new Date(`${t.date}T${t.time}`);
+
+            let diff = taskTime - now;
+
+            if (diff > 0 && (!nearest || diff < nearest.diff)) {
+                nearest = { ...t, diff };
+            }
+        });
+
+        if (!nearest) {
+            countdownBox.innerText = "🎉 No upcoming timed tasks";
+            return;
+        }
+
+        let mins = Math.floor(nearest.diff / 60000);
+        let hrs = Math.floor(mins / 60);
+        mins = mins % 60;
+
+        countdownBox.innerText =
+            `⏳ Next: ${nearest.text} in ${hrs}h ${mins}m`;
+
+    }, 1000);
 }
 
 /* ================= QUICK ADD ================= */
@@ -106,6 +133,8 @@ function loadTasks(uid) {
             }
         });
 
+        currentTasks = tasks; // ✅ important
+
         renderHome(tasks);
     });
 }
@@ -122,9 +151,10 @@ function renderHome(tasks) {
         html += `
         <li class="task-item ${t.completed ? 'done' : ''}">
             
-            <span>${t.text}</span>
-
-            ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+            <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                <span>${t.text}</span>
+                ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+            </div>
 
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
@@ -138,7 +168,7 @@ function renderHome(tasks) {
     homeContent.innerHTML = html;
 }
 
-/* ================= GOALS (DRAG ENABLED) ================= */
+/* ================= GOALS ================= */
 
 function loadGoalsHome(uid) {
     onSnapshot(collection(db, "goals"), snap => {
@@ -155,7 +185,6 @@ function loadGoalsHome(uid) {
         goals.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         renderGoalsHome(goals);
-
         setTimeout(enableDrag, 0);
     });
 }
@@ -180,7 +209,7 @@ function renderGoalsHome(goals) {
     goalsHomeContainer.innerHTML = html;
 }
 
-/* DRAG SYSTEM */
+/* DRAG */
 function enableDrag() {
 
     let items = document.querySelectorAll(".goal-home-card");
@@ -231,6 +260,10 @@ window.openModal = (type, id, text="", date="", time="") => {
 
     modal.classList.add("active");
 
+    modalText.style.display = "block";
+    modalDate.style.display = "block";
+    modalTime.style.display = "block";
+
     if (type === "edit") {
         modalTitle.innerText = "Edit Task";
         modalText.value = text;
@@ -250,7 +283,7 @@ window.closeModal = () => {
     modal.classList.remove("active");
 };
 
-/* SAVE */
+/* CONFIRM */
 window.confirmAction = async () => {
 
     if (currentAction === "edit") {
