@@ -42,24 +42,20 @@
 
                 <h2>📅 Today's Tasks</h2>
 
-                <!-- 🔥 COUNTDOWN (NEW) -->
-                <div id="countdownBox" style="
-                    text-align:center;
-                    margin:10px 0 20px 0;
-                    padding:10px;
-                    border-radius:10px;
-                    background:rgba(0,0,0,0.5);
-                    box-shadow:0 0 10px rgba(0,255,255,0.2);
-                    color:#00cfff;
-                    font-weight:bold;
-                ">
+                <!-- COUNTDOWN -->
+                <div id="countdownBox">
                     ⏳ Loading countdown...
                 </div>
 
                 <!-- QUICK ADD -->
                 <div class="quick-add">
                     <input id="quickTaskInput" placeholder="Add new task...">
+                    
                     <input type="date" id="quickDateInput">
+
+                    <!-- 🔥 NEW TIME INPUT -->
+                    <input type="time" id="quickTimeInput">
+
                     <button onclick="quickAddTask()">➕ Add</button>
                 </div>
 
