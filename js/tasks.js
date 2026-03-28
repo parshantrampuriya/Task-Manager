@@ -20,11 +20,9 @@ let currentUser = null;
 let tasks = [];
 let currentTab = "pending";
 
-/* 🔔 MEMORY */
-let notifiedTasks = {};
-
-/* 🔊 SOUND */
-let notifySound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+/* MODAL STATE */
+let currentTaskId = null;
+let currentAction = null;
 
 /* NAV */
 window.goHome = () => window.location.href = "home.html";
@@ -59,17 +57,6 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
 
-    /* 🔔 PERMISSION */
-    if (Notification.permission !== "granted") {
-        Notification.requestPermission();
-    }
-
-    /* 🔊 UNLOCK SOUND (IMPORTANT) */
-    document.body.addEventListener("click", () => {
-        notifySound.play().catch(()=>{});
-        notifySound.pause();
-    }, { once: true });
-
     let snap = await getDoc(doc(db, "users", user.uid));
 
     if (snap.exists()) {
@@ -78,8 +65,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     loadTasks();
-
-    setInterval(() => render(), 60000);
 });
 
 /* DATE */
@@ -87,91 +72,7 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* STATUS */
-function getTaskStatus(task) {
-
-    if (task.completed) return null;
-    if (!task.time || task.time === "00:00") return null;
-
-    let now = new Date();
-    let [h, m] = task.time.split(":");
-
-    let taskTime = new Date();
-    taskTime.setHours(h, m, 0, 0);
-
-    let diff = taskTime - now;
-
-    if (diff <= 0) return "overdue";
-
-    let hours = diff / (1000 * 60 * 60);
-
-    if (hours <= 2) return "danger";
-    if (hours <= 6) return "warning";
-
-    return "safe";
-}
-
-/* 🔔 NOTIFICATION */
-function notifyUser(message) {
-
-    if (Notification.permission === "granted") {
-
-        let n = new Notification(message, {
-            icon: "https://cdn-icons-png.flaticon.com/512/1827/1827349.png",
-            vibrate: [200, 100, 200]
-        });
-
-        /* 🔥 CLICK ACTION */
-        n.onclick = () => {
-            window.focus();
-            window.location.href = "tasks.html";
-        };
-
-        /* 🔊 SOUND */
-        notifySound.play().catch(()=>{});
-    }
-}
-
-/* 🔔 CHECK */
-function checkAndNotify(task) {
-
-    if (task.completed) return;
-    if (!task.time || task.time === "00:00") return;
-
-    let now = new Date();
-    let [h, m] = task.time.split(":");
-
-    let taskTime = new Date();
-    taskTime.setHours(h, m, 0, 0);
-
-    let diff = taskTime - now;
-
-    if (diff <= 0) return;
-
-    let minutesLeft = Math.floor(diff / (1000 * 60));
-    let id = task.id;
-
-    if (!notifiedTasks[id]) {
-        notifiedTasks[id] = {};
-    }
-
-    if (minutesLeft <= 60 && minutesLeft > 59 && !notifiedTasks[id][60]) {
-        notifyUser(`⏰ 1 hour left: ${task.text}`);
-        notifiedTasks[id][60] = true;
-    }
-
-    if (minutesLeft <= 30 && minutesLeft > 29 && !notifiedTasks[id][30]) {
-        notifyUser(`⚠ 30 min left: ${task.text}`);
-        notifiedTasks[id][30] = true;
-    }
-
-    if (minutesLeft <= 10 && minutesLeft > 9 && !notifiedTasks[id][10]) {
-        notifyUser(`🔥 10 min left: ${task.text}`);
-        notifiedTasks[id][10] = true;
-    }
-}
-
-/* LOAD */
+/* LOAD TASKS */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
 
@@ -188,7 +89,7 @@ function loadTasks() {
     });
 }
 
-/* ADD */
+/* ADD TASK */
 window.addTask = async () => {
 
     let text = taskInput.value;
@@ -210,7 +111,7 @@ window.addTask = async () => {
     timeInput.value = "";
 };
 
-/* SWITCH */
+/* SWITCH TAB */
 window.switchTab = (tab, e) => {
     currentTab = tab;
 
@@ -222,6 +123,20 @@ window.switchTab = (tab, e) => {
 
     render();
 };
+
+/* SORT FUNCTION */
+function sortDates(dates) {
+
+    return dates.sort((a, b) => {
+
+        if (currentTab === "pending") {
+            return new Date(a) - new Date(b); // ascending
+        } else {
+            return new Date(b) - new Date(a); // descending
+        }
+
+    });
+}
 
 /* RENDER */
 function render() {
@@ -254,19 +169,35 @@ function render() {
 
     let html = "";
 
-    Object.keys(grouped).forEach(date => {
+    let dates = sortDates(Object.keys(grouped));
 
-        html += `<div class="date-group"><h3>${date}</h3><ol>`;
+    dates.forEach(date => {
+
+        let dayName = new Date(date).toLocaleDateString("en-US", {
+            weekday: "long"
+        });
+
+        html += `
+        <div class="date-group">
+            <h3>📅 ${dayName} (${date})</h3>
+            <ol class="task-list">
+        `;
 
         grouped[date].forEach(t => {
 
-            checkAndNotify(t); // 🔥 HERE
-
             html += `
-            <li class="${t.completed ? 'done':''}">
-                ${t.text}
-                ${t.time && t.time !== "00:00" ? `🕒 ${t.time}` : ""}
-                <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+            <li class="task-item ${t.completed ? 'done':''}">
+
+                <span>${t.text}</span>
+
+                ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+
+                <div class="task-actions">
+                    <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+                    <button onclick="openModal('edit','${t.id}','${t.text}','${t.date}','${t.time || ''}')">✏️</button>
+                    <button onclick="openModal('delete','${t.id}')">❌</button>
+                </div>
+
             </li>`;
         });
 
@@ -276,10 +207,70 @@ function render() {
     taskContainer.innerHTML = html;
 }
 
-/* ACTIONS */
+/* MODAL OPEN */
+window.openModal = (type, id, text="", date="", time="") => {
+
+    currentTaskId = id;
+    currentAction = type;
+
+    let modal = document.getElementById("modal");
+
+    modal.classList.add("active");
+
+    if (type === "edit") {
+
+        modalTitle.innerText = "Edit Task";
+
+        modalInput.style.display = "block";
+        modalDate.style.display = "block";
+        modalTime.style.display = "block";
+
+        modalInput.value = text;
+        modalDate.value = date;
+        modalTime.value = time;
+    }
+
+    if (type === "delete") {
+
+        modalTitle.innerText = "Are you sure to delete?";
+
+        modalInput.style.display = "none";
+        modalDate.style.display = "none";
+        modalTime.style.display = "none";
+    }
+};
+
+/* CLOSE */
+window.closeModal = () => {
+    modal.classList.remove("active");
+};
+
+/* CONFIRM */
+window.confirmAction = async () => {
+
+    if (currentAction === "edit") {
+
+        await updateDoc(doc(db, "tasks", currentTaskId), {
+            text: modalInput.value,
+            date: modalDate.value,
+            time: modalTime.value || "00:00"
+        });
+    }
+
+    if (currentAction === "delete") {
+        await deleteDoc(doc(db, "tasks", currentTaskId));
+    }
+
+    closeModal();
+};
+
+/* TOGGLE */
 window.toggle = (id, c) => {
     updateDoc(doc(db, "tasks", id), { completed: !c });
 };
+
+/* SEARCH */
+searchInput.addEventListener("input", render);
 
 /* LOGOUT */
 logoutBtn.addEventListener("click", async () => {
