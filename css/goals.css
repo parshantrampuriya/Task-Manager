@@ -1,3 +1,4 @@
+/* ================= BODY ================= */
 body {
     margin:0;
     font-family:'Segoe UI', sans-serif;
@@ -5,7 +6,7 @@ body {
     color:white;
 }
 
-/* NAVBAR */
+/* ================= NAVBAR ================= */
 .navbar {
     display:flex;
     align-items:center;
@@ -14,23 +15,23 @@ body {
     background: rgba(0,0,0,0.6);
 }
 
-/* BUTTON */
 .menu-btn {
     padding:8px 12px;
     background:#00cfff;
     border:none;
     border-radius:8px;
+    cursor:pointer;
 }
 
-/* CONTAINER */
+/* ================= CONTAINER ================= */
 .container {
-    padding:30px 20px; /* 🔥 improved spacing */
+    padding:30px 20px;
 }
 
-/* ADD BOX */
+/* ================= ADD BOX ================= */
 .add-box {
     max-width:700px;
-    margin:20px auto 0 auto; /* 🔥 added top spacing */
+    margin:20px auto 0 auto;
     display:flex;
     gap:10px;
     flex-wrap:wrap;
@@ -51,17 +52,15 @@ body {
     border:none;
     border-radius:8px;
     background:#00cfff;
+    cursor:pointer;
 }
 
-/* ================= GRID SYSTEM ================= */
-
-/* MOBILE DEFAULT */
+/* ================= GRID ================= */
 #goalContainer {
     display:block;
-    margin-top:50px; /* 🔥 MAIN GAP FIX */
+    margin-top:50px;
 }
 
-/* LAPTOP GRID */
 @media (min-width: 900px) {
     #goalContainer {
         display:grid;
@@ -71,14 +70,11 @@ body {
 }
 
 /* ================= CARD ================= */
-
 .goal-card {
     padding:15px;
     border-radius:12px;
-
     background: rgba(0,0,0,0.6);
     box-shadow:0 0 10px rgba(0,255,255,0.3);
-
     transition:0.3s;
 }
 
@@ -86,12 +82,11 @@ body {
     transform:translateY(-5px);
 }
 
-/* TITLE */
 .goal-card h3 {
     margin-bottom:10px;
 }
 
-/* PROGRESS */
+/* ================= PROGRESS ================= */
 .progress-bar {
     height:12px;
     background:#111;
@@ -103,49 +98,47 @@ body {
     height:100%;
     background:linear-gradient(#00cfff,#00ffcc);
     border-radius:10px;
-    transition:0.4s;
 }
 
-/* ACTION BUTTONS */
+/* ================= ACTIONS ================= */
 .actions {
     display:flex;
-    gap:10px;
+    gap:8px;
     margin-top:10px;
+    flex-wrap:wrap;
 }
 
 .actions button {
-    flex:1;
+    flex:1 1 45%;
     padding:8px;
     border:none;
     border-radius:8px;
     cursor:pointer;
     transition:0.2s;
+    font-size:12px;
 }
 
 /* COLORS */
 .actions button:nth-child(1){background:#00ffcc;}
 .actions button:nth-child(2){background:#ffc107;}
-.actions button:nth-child(3){background:#ff4d4d;}
+.actions button:nth-child(3){background:#00cfff;}
+.actions button:nth-child(4){background:#ff4d4d;}
 
 .actions button:hover {
     transform:scale(1.05);
 }
 
 /* ================= MODAL ================= */
-
 .modal {
     position:fixed;
     top:0;
     left:0;
     width:100%;
     height:100%;
-
     background: rgba(0,0,0,0.7);
-
     display:flex;
     justify-content:center;
     align-items:center;
-
     opacity:0;
     pointer-events:none;
     transition:0.3s;
@@ -157,25 +150,20 @@ body {
 }
 
 .modal-box {
-    width:300px;
+    width:320px;
     padding:25px;
-
     background: rgba(0,0,0,0.9);
     border-radius:12px;
-
     box-shadow:0 0 20px rgba(0,255,255,0.4);
-
     text-align:center;
 }
 
 .modal-box input {
     width:100%;
     padding:10px;
-    margin:15px 0;
-
+    margin:10px 0;
     border-radius:8px;
     border:1px solid #00cfff;
-
     background:rgba(255,255,255,0.1);
     color:white;
 }
@@ -190,6 +178,7 @@ body {
     padding:10px;
     border:none;
     border-radius:8px;
+    cursor:pointer;
 }
 
 .modal-actions button:first-child {
@@ -201,7 +190,6 @@ body {
 }
 
 /* ================= SIDEBAR ================= */
-
 .sidebar {
     position:fixed;
     top:0;
@@ -209,18 +197,14 @@ body {
     width:220px;
     height:100vh;
     padding:20px;
-
     background: rgba(0,0,0,0.9);
     transform:translateX(-100%);
     transition:0.3s;
     z-index:1000;
 }
 
-.sidebar.collapsed {
-    transform:translateX(-100%);
-}
-
-.sidebar:not(.collapsed) {
+/* 🔥 FIXED */
+.sidebar.active {
     transform:translateX(0);
 }
 
@@ -232,6 +216,7 @@ body {
     color:white;
     border:none;
     border-radius:8px;
+    cursor:pointer;
 }
 
 .sidebar button:hover {
@@ -239,7 +224,7 @@ body {
     color:black;
 }
 
-/* MAIN SHIFT */
+/* ================= MAIN ================= */
 .main {
     transition:0.3s;
 }
