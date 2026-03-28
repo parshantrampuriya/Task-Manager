@@ -36,6 +36,33 @@ document.addEventListener("click", function(e) {
     }
 });
 
+/* 🔥 COUNTDOWN SYSTEM */
+function startCountdown() {
+
+    function updateCountdown() {
+
+        let now = new Date();
+
+        let tomorrow = new Date();
+        tomorrow.setHours(24, 0, 0, 0);
+
+        let diff = tomorrow - now;
+
+        let h = Math.floor(diff / (1000 * 60 * 60));
+        let m = Math.floor((diff / (1000 * 60)) % 60);
+        let s = Math.floor((diff / 1000) % 60);
+
+        let box = document.getElementById("countdownBox");
+
+        if (box) {
+            box.innerHTML = `⏳ Day ends in: ${h}h ${m}m ${s}s`;
+        }
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+}
+
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
@@ -53,6 +80,9 @@ onAuthStateChanged(auth, async (user) => {
 
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
+
+    /* 🔥 START COUNTDOWN */
+    startCountdown();
 });
 
 /* 🔥 LOCAL DATE FUNCTION */
