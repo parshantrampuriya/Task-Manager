@@ -15,22 +15,24 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* GLOBAL NOTIFICATION MEMORY */
+/* GLOBAL */
 let notifiedTasks = {};
+let currentTaskId = null;
+let currentAction = null;
 
-/* NAVIGATION */
-window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html";
-window.goGoals = () => window.location.href = "goals.html";
-window.goProfile = () => window.location.href = "profile.html";
+/* NAV */
+window.goHome = () => location.href = "home.html";
+window.goTasks = () => location.href = "tasks.html";
+window.goGoals = () => location.href = "goals.html";
+window.goProfile = () => location.href = "profile.html";
 
 /* SIDEBAR */
-window.toggleSidebar = function () {
+window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("active");
 };
 
 /* CLICK OUTSIDE */
-document.addEventListener("click", function(e) {
+document.addEventListener("click", (e) => {
     let sidebar = document.getElementById("sidebar");
     let menuBtn = document.querySelector(".menu-btn");
 
@@ -39,114 +41,14 @@ document.addEventListener("click", function(e) {
     }
 });
 
-/* ================= COUNTDOWN ================= */
-
-function startCountdown() {
-    function updateCountdown() {
-
-        let now = new Date();
-        let tomorrow = new Date();
-        tomorrow.setHours(24, 0, 0, 0);
-
-        let diff = tomorrow - now;
-
-        let h = Math.floor(diff / (1000 * 60 * 60));
-        let m = Math.floor((diff / (1000 * 60)) % 60);
-        let s = Math.floor((diff / 1000) % 60);
-
-        let box = document.getElementById("countdownBox");
-        if (!box) return;
-
-        box.innerHTML = `⏳ Day ends in: ${h}h ${m}m ${s}s`;
-
-        box.classList.remove("countdown-safe","countdown-warning","countdown-danger");
-
-        if (h > 6) box.classList.add("countdown-safe");
-        else if (h > 2) box.classList.add("countdown-warning");
-        else box.classList.add("countdown-danger");
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-}
-
-/* ================= TASK STATUS ================= */
-
-function getTaskStatus(task) {
-
-    if (task.completed) return null;
-    if (!task.time || task.time === "00:00") return null;
-
-    let now = new Date();
-
-    let [h, m] = task.time.split(":");
-
-    let taskTime = new Date();
-    taskTime.setHours(h, m, 0, 0);
-
-    let diff = taskTime - now;
-
-    if (diff <= 0) return "overdue";
-
-    let hours = diff / (1000 * 60 * 60);
-
-    if (hours <= 2) return "danger";
-    if (hours <= 6) return "warning";
-
-    return "safe";
-}
-
-/* ================= NOTIFICATION ================= */
-
-function checkAndNotify(task) {
-
-    if (task.completed) return;
-    if (!task.time || task.time === "00:00") return;
-
-    let now = new Date();
-
-    let [h, m] = task.time.split(":");
-
-    let taskTime = new Date();
-    taskTime.setHours(h, m, 0, 0);
-
-    let diff = taskTime - now;
-
-    if (diff <= 0) return;
-
-    let minutesLeft = Math.floor(diff / (1000 * 60));
-
-    let id = task.id;
-
-    if (!notifiedTasks[id]) {
-        notifiedTasks[id] = {};
-    }
-
-    if (minutesLeft <= 60 && minutesLeft > 59 && !notifiedTasks[id][60]) {
-        new Notification(`⏰ 1 hour left: ${task.text}`);
-        notifiedTasks[id][60] = true;
-    }
-
-    if (minutesLeft <= 30 && minutesLeft > 29 && !notifiedTasks[id][30]) {
-        new Notification(`⚠ 30 min left: ${task.text}`);
-        notifiedTasks[id][30] = true;
-    }
-
-    if (minutesLeft <= 10 && minutesLeft > 9 && !notifiedTasks[id][10]) {
-        new Notification(`🔥 10 min left: ${task.text}`);
-        notifiedTasks[id][10] = true;
-    }
-}
-
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
-        window.location.href = "index.html";
+        location.href = "index.html";
         return;
     }
 
-    /* 🔔 REQUEST PERMISSION */
     if (Notification.permission !== "granted") {
         Notification.requestPermission();
     }
@@ -154,21 +56,15 @@ onAuthStateChanged(auth, async (user) => {
     let snap = await getDoc(doc(db, "users", user.uid));
 
     if (snap.exists()) {
-        document.getElementById("username").innerText =
-            "👤 Welcome " + snap.data().name;
+        username.innerText = "👤 Welcome " + snap.data().name;
     }
 
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
     startCountdown();
-
-    /* CHECK EVERY MINUTE */
-    setInterval(() => {
-        loadTasks(user.uid);
-    }, 60000);
 });
 
-/* LOCAL DATE */
+/* DATE */
 function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
@@ -177,9 +73,9 @@ function getToday() {
 
 window.quickAddTask = async () => {
 
-    let text = document.getElementById("quickTaskInput").value;
-    let date = document.getElementById("quickDateInput").value;
-    let time = document.getElementById("quickTimeInput").value;
+    let text = quickTaskInput.value;
+    let date = quickDateInput.value;
+    let time = quickTimeInput.value;
 
     if (!text) return;
 
@@ -217,50 +113,23 @@ function loadTasks(uid) {
 function renderHome(tasks) {
 
     let today = getToday();
-
     let todayTasks = tasks.filter(t => t.date === today);
-    todayTasks.sort((a, b) => a.completed - b.completed);
-
-    if (todayTasks.length === 0) {
-        homeContent.innerHTML = `<p style="text-align:center;color:#aaa;">No tasks today</p>`;
-        return;
-    }
 
     let html = `<ol class="task-list">`;
 
     todayTasks.forEach((t) => {
 
-        checkAndNotify(t); // 🔥 NOTIFICATION CALL
-
-        let status = getTaskStatus(t);
-
-        let alert = "";
-
-        if (!t.completed) {
-            if (status === "overdue") {
-                alert = `<small style="color:red;">❗ Overdue</small>`;
-            }
-            else if (status === "danger") {
-                alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
-            }
-            else if (status === "warning") {
-                alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
-            }
-        }
-
         html += `
-        <li class="task-item ${t.completed ? 'done' : ''} ${status || ''}">
+        <li class="task-item ${t.completed ? 'done' : ''}">
             
             <span>${t.text}</span>
 
             ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
 
-            ${alert}
-
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
-                <button onclick="del('${t.id}')">❌</button>
+                <button onclick="openModal('edit','${t.id}','${t.text}','${t.date}','${t.time || ''}')">✏️</button>
+                <button onclick="openModal('delete','${t.id}')">❌</button>
             </div>
         </li>`;
     });
@@ -269,7 +138,7 @@ function renderHome(tasks) {
     homeContent.innerHTML = html;
 }
 
-/* ================= GOALS ================= */
+/* ================= GOALS (DRAG ENABLED) ================= */
 
 function loadGoalsHome(uid) {
     onSnapshot(collection(db, "goals"), snap => {
@@ -283,13 +152,15 @@ function loadGoalsHome(uid) {
             }
         });
 
+        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
+
         renderGoalsHome(goals);
+
+        setTimeout(enableDrag, 0);
     });
 }
 
 function renderGoalsHome(goals) {
-
-    let container = document.getElementById("goalsHomeContainer");
 
     let html = "";
 
@@ -298,7 +169,7 @@ function renderGoalsHome(goals) {
         let percent = Math.round((g.done / g.total) * 100 || 0);
 
         html += `
-        <div class="goal-home-card">
+        <div class="goal-home-card" draggable="true" data-id="${g.id}">
             <b>${g.name}</b> → ${percent}%
             <div class="goal-home-bar">
                 <div class="goal-home-fill" style="width:${percent}%"></div>
@@ -306,28 +177,104 @@ function renderGoalsHome(goals) {
         </div>`;
     });
 
-    container.innerHTML = html;
+    goalsHomeContainer.innerHTML = html;
 }
 
-/* ================= ACTIONS ================= */
+/* DRAG SYSTEM */
+function enableDrag() {
 
-window.toggle = (id, completed) => {
-    updateDoc(doc(db, "tasks", id), { completed: !completed });
-};
+    let items = document.querySelectorAll(".goal-home-card");
+    let dragItem = null;
 
-window.del = (id) => {
-    if (confirm("Are you sure to delete?")) {
-        deleteDoc(doc(db, "tasks", id));
+    items.forEach(item => {
+
+        item.addEventListener("dragstart", () => {
+            dragItem = item;
+            item.style.opacity = "0.5";
+        });
+
+        item.addEventListener("dragend", () => {
+            item.style.opacity = "1";
+        });
+
+        item.addEventListener("dragover", e => e.preventDefault());
+
+        item.addEventListener("drop", async () => {
+
+            let list = item.parentNode;
+
+            if (dragItem !== item) {
+
+                list.insertBefore(dragItem, item);
+
+                let updated = [...list.children];
+
+                for (let i = 0; i < updated.length; i++) {
+
+                    let id = updated[i].dataset.id;
+
+                    await updateDoc(doc(db, "goals", id), {
+                        order: i
+                    });
+                }
+            }
+        });
+    });
+}
+
+/* ================= MODAL ================= */
+
+window.openModal = (type, id, text="", date="", time="") => {
+
+    currentTaskId = id;
+    currentAction = type;
+
+    modal.classList.add("active");
+
+    if (type === "edit") {
+        modalTitle.innerText = "Edit Task";
+        modalText.value = text;
+        modalDate.value = date;
+        modalTime.value = time;
+    }
+
+    if (type === "delete") {
+        modalTitle.innerText = "Delete this task?";
+        modalText.style.display = "none";
+        modalDate.style.display = "none";
+        modalTime.style.display = "none";
     }
 };
 
-window.editTask = (id, text) => {
-    let t = prompt("Edit task", text);
-    if (t) updateDoc(doc(db, "tasks", id), { text: t });
+window.closeModal = () => {
+    modal.classList.remove("active");
+};
+
+/* SAVE */
+window.confirmAction = async () => {
+
+    if (currentAction === "edit") {
+        await updateDoc(doc(db, "tasks", currentTaskId), {
+            text: modalText.value,
+            date: modalDate.value,
+            time: modalTime.value || "00:00"
+        });
+    }
+
+    if (currentAction === "delete") {
+        await deleteDoc(doc(db, "tasks", currentTaskId));
+    }
+
+    closeModal();
+};
+
+/* ACTIONS */
+window.toggle = (id, completed) => {
+    updateDoc(doc(db, "tasks", id), { completed: !completed });
 };
 
 /* LOGOUT */
 logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
-    window.location.href = "index.html";
+    location.href = "index.html";
 });
