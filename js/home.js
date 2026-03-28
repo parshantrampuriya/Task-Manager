@@ -15,6 +15,9 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* GLOBAL NOTIFICATION MEMORY */
+let notifiedTasks = {};
+
 /* NAVIGATION */
 window.goHome = () => window.location.href = "home.html";
 window.goTasks = () => window.location.href = "tasks.html";
@@ -67,13 +70,11 @@ function startCountdown() {
     setInterval(updateCountdown, 1000);
 }
 
-/* ================= FIXED TASK STATUS ================= */
+/* ================= TASK STATUS ================= */
 
 function getTaskStatus(task) {
 
-    /* 🔥 FIX: IGNORE COMPLETED TASKS */
     if (task.completed) return null;
-
     if (!task.time || task.time === "00:00") return null;
 
     let now = new Date();
@@ -95,12 +96,59 @@ function getTaskStatus(task) {
     return "safe";
 }
 
+/* ================= NOTIFICATION ================= */
+
+function checkAndNotify(task) {
+
+    if (task.completed) return;
+    if (!task.time || task.time === "00:00") return;
+
+    let now = new Date();
+
+    let [h, m] = task.time.split(":");
+
+    let taskTime = new Date();
+    taskTime.setHours(h, m, 0, 0);
+
+    let diff = taskTime - now;
+
+    if (diff <= 0) return;
+
+    let minutesLeft = Math.floor(diff / (1000 * 60));
+
+    let id = task.id;
+
+    if (!notifiedTasks[id]) {
+        notifiedTasks[id] = {};
+    }
+
+    if (minutesLeft <= 60 && minutesLeft > 59 && !notifiedTasks[id][60]) {
+        new Notification(`⏰ 1 hour left: ${task.text}`);
+        notifiedTasks[id][60] = true;
+    }
+
+    if (minutesLeft <= 30 && minutesLeft > 29 && !notifiedTasks[id][30]) {
+        new Notification(`⚠ 30 min left: ${task.text}`);
+        notifiedTasks[id][30] = true;
+    }
+
+    if (minutesLeft <= 10 && minutesLeft > 9 && !notifiedTasks[id][10]) {
+        new Notification(`🔥 10 min left: ${task.text}`);
+        notifiedTasks[id][10] = true;
+    }
+}
+
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
         window.location.href = "index.html";
         return;
+    }
+
+    /* 🔔 REQUEST PERMISSION */
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
     }
 
     let snap = await getDoc(doc(db, "users", user.uid));
@@ -113,6 +161,11 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
     startCountdown();
+
+    /* CHECK EVERY MINUTE */
+    setInterval(() => {
+        loadTasks(user.uid);
+    }, 60000);
 });
 
 /* LOCAL DATE */
@@ -177,11 +230,12 @@ function renderHome(tasks) {
 
     todayTasks.forEach((t) => {
 
+        checkAndNotify(t); // 🔥 NOTIFICATION CALL
+
         let status = getTaskStatus(t);
 
         let alert = "";
 
-        /* 🔥 FIX: ONLY FOR NON-COMPLETED */
         if (!t.completed) {
             if (status === "overdue") {
                 alert = `<small style="color:red;">❗ Overdue</small>`;
