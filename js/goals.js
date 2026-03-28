@@ -48,16 +48,14 @@ function loadGoals() {
             }
         });
 
-        /* 🔥 SORT BY ORDER */
         goals.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         render();
-
         setTimeout(enableDrag, 0);
     });
 }
 
-/* ADD GOAL */
+/* ADD */
 async function addGoal() {
 
     let name = goalName.value;
@@ -72,7 +70,7 @@ async function addGoal() {
         done: 0,
         deadline: deadline || null,
         user: currentUser.uid,
-        order: Date.now() // 🔥 initial order
+        order: Date.now()
     });
 
     goalName.value = "";
@@ -82,8 +80,6 @@ async function addGoal() {
 
 /* RENDER */
 function render() {
-
-    let container = document.getElementById("goalContainer");
 
     let html = "";
 
@@ -105,18 +101,19 @@ function render() {
             </div>
 
             <div class="actions">
-                <button onclick="openModal('progress', ${i})">+ Progress</button>
-                <button onclick="openModal('edit', ${i})">Edit</button>
+                <button onclick="openModal('progress', ${i})">➕ Add</button>
+                <button onclick="openModal('set', ${i})">✏️ Edit Progress</button>
+                <button onclick="openModal('edit', ${i})">Edit Goal</button>
                 <button onclick="deleteGoal('${g.id}')">Delete</button>
             </div>
 
         </div>`;
     });
 
-    container.innerHTML = html;
+    goalContainer.innerHTML = html;
 }
 
-/* 🔥 DRAG SYSTEM */
+/* DRAG */
 function enableDrag() {
 
     let items = document.querySelectorAll(".goal-card");
@@ -150,7 +147,6 @@ function enableDrag() {
                     list.insertBefore(dragItem, item);
                 }
 
-                /* 🔥 SAVE ORDER */
                 let updated = [...list.children];
 
                 for (let i = 0; i < updated.length; i++) {
@@ -172,19 +168,25 @@ window.openModal = (mode, index) => {
     currentIndex = index;
     currentMode = mode;
 
-    modal.classList.add("active");
-
     let g = goals[index];
 
-    if (mode === "progress") {
+    modal.classList.add("active");
 
+    if (mode === "progress") {
         modalTitle.innerText = "Add Progress";
         modalName.style.display = "none";
         modalDate.style.display = "none";
         modalInput.value = "";
+    }
 
-    } else {
+    else if (mode === "set") {
+        modalTitle.innerText = "Set Progress Value";
+        modalName.style.display = "none";
+        modalDate.style.display = "none";
+        modalInput.value = g.done;
+    }
 
+    else {
         modalTitle.innerText = "Edit Goal";
         modalName.style.display = "block";
         modalDate.style.display = "block";
@@ -210,8 +212,19 @@ window.saveModal = async () => {
         await updateDoc(doc(db, "goals", g.id), {
             done: g.done + val
         });
+    }
 
-    } else {
+    else if (currentMode === "set") {
+
+        let val = Number(modalInput.value);
+        if (val < 0) return;
+
+        await updateDoc(doc(db, "goals", g.id), {
+            done: val
+        });
+    }
+
+    else {
 
         await updateDoc(doc(db, "goals", g.id), {
             name: modalName.value,
@@ -228,13 +241,20 @@ window.deleteGoal = async (id) => {
     await deleteDoc(doc(db, "goals", id));
 };
 
-/* SIDEBAR FIX */
+/* ================= SIDEBAR FIX ================= */
+
 window.toggleSidebar = () => {
-    sidebar.classList.toggle("active");
+    document.getElementById("sidebar").classList.toggle("active");
 };
 
 /* CLICK OUTSIDE */
 document.addEventListener("click", (e) => {
+
+    let sidebar = document.getElementById("sidebar");
+    let menuBtn = document.querySelector(".menu-btn");
+
+    if (!sidebar || !menuBtn) return;
+
     if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
         sidebar.classList.remove("active");
     }
