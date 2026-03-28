@@ -20,12 +20,11 @@ let currentUser = null;
 let tasks = [];
 let currentTab = "pending";
 
-/* 🔔 NOTIFICATION MEMORY */
+/* 🔔 MEMORY */
 let notifiedTasks = {};
 
-/* MODAL STATE */
-let currentTaskId = null;
-let currentAction = null;
+/* 🔊 SOUND */
+let notifySound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 
 /* NAV */
 window.goHome = () => window.location.href = "home.html";
@@ -60,10 +59,16 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
 
-    /* 🔔 REQUEST PERMISSION */
+    /* 🔔 PERMISSION */
     if (Notification.permission !== "granted") {
         Notification.requestPermission();
     }
+
+    /* 🔊 UNLOCK SOUND (IMPORTANT) */
+    document.body.addEventListener("click", () => {
+        notifySound.play().catch(()=>{});
+        notifySound.pause();
+    }, { once: true });
 
     let snap = await getDoc(doc(db, "users", user.uid));
 
@@ -74,26 +79,21 @@ onAuthStateChanged(auth, async (user) => {
 
     loadTasks();
 
-    /* 🔁 CHECK EVERY MINUTE */
-    setInterval(() => {
-        render();
-    }, 60000);
+    setInterval(() => render(), 60000);
 });
 
-/* LOCAL DATE */
+/* DATE */
 function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= TASK STATUS ================= */
-
+/* STATUS */
 function getTaskStatus(task) {
 
     if (task.completed) return null;
     if (!task.time || task.time === "00:00") return null;
 
     let now = new Date();
-
     let [h, m] = task.time.split(":");
 
     let taskTime = new Date();
@@ -111,15 +111,34 @@ function getTaskStatus(task) {
     return "safe";
 }
 
-/* ================= 🔔 NOTIFICATION ================= */
+/* 🔔 NOTIFICATION */
+function notifyUser(message) {
 
+    if (Notification.permission === "granted") {
+
+        let n = new Notification(message, {
+            icon: "https://cdn-icons-png.flaticon.com/512/1827/1827349.png",
+            vibrate: [200, 100, 200]
+        });
+
+        /* 🔥 CLICK ACTION */
+        n.onclick = () => {
+            window.focus();
+            window.location.href = "tasks.html";
+        };
+
+        /* 🔊 SOUND */
+        notifySound.play().catch(()=>{});
+    }
+}
+
+/* 🔔 CHECK */
 function checkAndNotify(task) {
 
     if (task.completed) return;
     if (!task.time || task.time === "00:00") return;
 
     let now = new Date();
-
     let [h, m] = task.time.split(":");
 
     let taskTime = new Date();
@@ -130,7 +149,6 @@ function checkAndNotify(task) {
     if (diff <= 0) return;
 
     let minutesLeft = Math.floor(diff / (1000 * 60));
-
     let id = task.id;
 
     if (!notifiedTasks[id]) {
@@ -138,22 +156,22 @@ function checkAndNotify(task) {
     }
 
     if (minutesLeft <= 60 && minutesLeft > 59 && !notifiedTasks[id][60]) {
-        new Notification(`⏰ 1 hour left: ${task.text}`);
+        notifyUser(`⏰ 1 hour left: ${task.text}`);
         notifiedTasks[id][60] = true;
     }
 
     if (minutesLeft <= 30 && minutesLeft > 29 && !notifiedTasks[id][30]) {
-        new Notification(`⚠ 30 min left: ${task.text}`);
+        notifyUser(`⚠ 30 min left: ${task.text}`);
         notifiedTasks[id][30] = true;
     }
 
     if (minutesLeft <= 10 && minutesLeft > 9 && !notifiedTasks[id][10]) {
-        new Notification(`🔥 10 min left: ${task.text}`);
+        notifyUser(`🔥 10 min left: ${task.text}`);
         notifiedTasks[id][10] = true;
     }
 }
 
-/* LOAD TASKS */
+/* LOAD */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
 
@@ -170,12 +188,12 @@ function loadTasks() {
     });
 }
 
-/* ADD TASK */
+/* ADD */
 window.addTask = async () => {
 
-    let text = document.getElementById("taskInput").value;
-    let date = document.getElementById("dateInput").value;
-    let time = document.getElementById("timeInput").value;
+    let text = taskInput.value;
+    let date = dateInput.value;
+    let time = timeInput.value;
 
     if (!text) return;
 
@@ -192,7 +210,7 @@ window.addTask = async () => {
     timeInput.value = "";
 };
 
-/* SWITCH TAB */
+/* SWITCH */
 window.switchTab = (tab, e) => {
     currentTab = tab;
 
@@ -209,8 +227,7 @@ window.switchTab = (tab, e) => {
 function render() {
 
     let today = getToday();
-
-    let search = document.getElementById("searchInput").value.toLowerCase();
+    let search = searchInput.value.toLowerCase();
 
     let filtered = tasks.filter(t =>
         t.text.toLowerCase().includes(search)
@@ -237,129 +254,32 @@ function render() {
 
     let html = "";
 
-    if (filtered.length === 0) {
-        taskContainer.innerHTML = `
-            <p style="text-align:center; margin-top:30px; color:#aaa;">
-                😌 No tasks here<br><br>
-                Stay consistent 🔥
-            </p>
-        `;
-        return;
-    }
+    Object.keys(grouped).forEach(date => {
 
-    Object.keys(grouped)
-        .sort((a,b)=> new Date(a)-new Date(b))
-        .forEach(date => {
+        html += `<div class="date-group"><h3>${date}</h3><ol>`;
 
-            let dayName = new Date(date).toLocaleDateString("en-US", {
-                weekday: "long"
-            });
+        grouped[date].forEach(t => {
+
+            checkAndNotify(t); // 🔥 HERE
 
             html += `
-            <div class="date-group">
-                <h3>📅 ${dayName} (${date})</h3>
-                <ol class="task-list">
-            `;
-
-            grouped[date].forEach(t => {
-
-                checkAndNotify(t); // 🔥 NOTIFICATION
-
-                let status = getTaskStatus(t);
-
-                let alert = "";
-
-                if (!t.completed) {
-                    if (status === "overdue") {
-                        alert = `<small style="color:red;">❗ Overdue</small>`;
-                    }
-                    else if (status === "danger") {
-                        alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
-                    }
-                    else if (status === "warning") {
-                        alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
-                    }
-                }
-
-                html += `
-                <li class="task-item ${t.completed ? 'done' : ''} ${status || ''}">
-                    <span>${t.text}</span>
-
-                    ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
-
-                    ${alert}
-
-                    <div class="task-actions">
-                        <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                        <button onclick="openModal('edit','${t.id}','${t.text}')">✏️</button>
-                        <button onclick="openModal('delete','${t.id}')">❌</button>
-                    </div>
-                </li>`;
-            });
-
-            html += `</ol></div>`;
+            <li class="${t.completed ? 'done':''}">
+                ${t.text}
+                ${t.time && t.time !== "00:00" ? `🕒 ${t.time}` : ""}
+                <button onclick="toggle('${t.id}',${t.completed})">✔</button>
+            </li>`;
         });
+
+        html += `</ol></div>`;
+    });
 
     taskContainer.innerHTML = html;
 }
 
-/* MODAL */
-window.openModal = (type, id, text = "") => {
-
-    currentTaskId = id;
-    currentAction = type;
-
-    let modal = document.getElementById("modal");
-    let input = document.getElementById("modalInput");
-    let title = document.getElementById("modalTitle");
-
-    modal.classList.add("active");
-
-    if (type === "edit") {
-        title.innerText = "Edit Task";
-        input.style.display = "block";
-        input.value = text;
-    }
-
-    if (type === "delete") {
-        title.innerText = "Are you sure you want to delete?";
-        input.style.display = "none";
-    }
-};
-
-window.closeModal = () => {
-    document.getElementById("modal").classList.remove("active");
-};
-
-window.confirmAction = () => {
-
-    if (currentAction === "edit") {
-
-        let newText = document.getElementById("modalInput").value;
-
-        if (newText) {
-            updateDoc(doc(db, "tasks", currentTaskId), {
-                text: newText
-            });
-        }
-    }
-
-    if (currentAction === "delete") {
-        deleteDoc(doc(db, "tasks", currentTaskId));
-    }
-
-    closeModal();
-};
-
 /* ACTIONS */
 window.toggle = (id, c) => {
-    updateDoc(doc(db, "tasks", id), {
-        completed: !c
-    });
+    updateDoc(doc(db, "tasks", id), { completed: !c });
 };
-
-/* SEARCH */
-searchInput.addEventListener("input", render);
 
 /* LOGOUT */
 logoutBtn.addEventListener("click", async () => {
