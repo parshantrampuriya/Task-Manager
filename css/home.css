@@ -1,3 +1,4 @@
+/* ================= BODY ================= */
 body {
     margin:0;
     font-family:'Segoe UI', sans-serif;
@@ -8,7 +9,6 @@ body {
 }
 
 /* ================= SIDEBAR ================= */
-
 .sidebar {
     position:fixed;
     top:0;
@@ -24,13 +24,7 @@ body {
     transform: translateX(-100%);
 }
 
-.sidebar.active {
-    transform: translateX(0);
-}
-
-.sidebar h2 {
-    margin-bottom:20px;
-}
+.sidebar.active { transform: translateX(0); }
 
 .sidebar button {
     width:100%;
@@ -49,7 +43,6 @@ body {
 }
 
 /* ================= MAIN ================= */
-
 .main {
     margin-left:0;
     padding:20px;
@@ -61,7 +54,6 @@ body {
 }
 
 /* ================= NAVBAR ================= */
-
 .navbar {
     display:flex;
     align-items:center;
@@ -69,7 +61,6 @@ body {
     padding:15px 20px;
     background: rgba(0,0,0,0.6);
     border-radius:10px;
-    box-shadow:0 0 15px rgba(0,255,255,0.2);
 }
 
 .menu-btn {
@@ -78,12 +69,10 @@ body {
     border:none;
     border-radius:8px;
     background:#00cfff;
-    color:black;
     cursor:pointer;
 }
 
 /* ================= DASHBOARD ================= */
-
 .dashboard {
     display:grid;
     grid-template-columns: 1fr 1fr;
@@ -96,27 +85,9 @@ body {
     background: rgba(0,0,0,0.6);
     padding:15px;
     border-radius:12px;
-    box-shadow:0 0 10px rgba(0,255,255,0.2);
 }
 
-.left-panel {
-    max-height:80vh;
-    overflow:auto;
-}
-
-.right-panel {
-    max-height:80vh;
-    overflow:auto;
-}
-
-.left-panel h2,
-.right-panel h2 {
-    margin-bottom:15px;
-    color:#00cfff;
-}
-
-/* ================= 🔥 QUICK ADD ================= */
-
+/* ================= QUICK ADD ================= */
 .quick-add {
     display:flex;
     gap:10px;
@@ -126,7 +97,6 @@ body {
 
 .quick-add input {
     flex:1;
-    min-width:150px;
     padding:10px;
     border-radius:8px;
     border:1px solid #00cfff;
@@ -139,62 +109,23 @@ body {
     border:none;
     border-radius:8px;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
-    color:black;
-    cursor:pointer;
     font-weight:bold;
-}
-
-.quick-add button:hover {
-    transform:scale(1.05);
-}
-
-/* ================= PROGRESS ================= */
-
-.progress-bar {
-    width:100%;
-    height:14px;
-    background:#111;
-    border-radius:10px;
-    margin:10px 0;
-}
-
-.progress-fill {
-    height:100%;
-    border-radius:10px;
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-    transition:0.4s;
+    cursor:pointer;
 }
 
 /* ================= TASK LIST ================= */
-
-.task-list {
-    list-style: decimal;
-    padding-left:20px;
-    margin-top:20px;
-}
-
 .task-item {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    background: rgba(0,0,0,0.6);
-    padding:12px 15px;
-    border-radius:8px;
+    padding:12px;
     margin-bottom:10px;
-    box-shadow:0 0 8px rgba(0,255,255,0.2);
+    border-radius:8px;
+    background: rgba(0,0,0,0.6);
     transition:0.3s;
-    cursor: grab;
 }
 
-.task-item:hover {
-    transform:translateX(5px);
-}
-
-.task-item span {
-    flex:1;
-}
-
-/* ACTION BUTTONS */
+.task-item:hover { transform:translateX(5px); }
 
 .task-actions {
     display:flex;
@@ -203,42 +134,33 @@ body {
 
 .task-actions button {
     padding:6px 10px;
-    border-radius:6px;
     border:none;
+    border-radius:6px;
     cursor:pointer;
+    font-weight:bold;
 }
 
 .task-actions button:nth-child(1){background:#00ffcc;}
 .task-actions button:nth-child(2){background:#ffc107;}
 .task-actions button:nth-child(3){background:#ff4d4d;}
 
-.task-actions button:hover {
-    transform:scale(1.05);
-    opacity:0.9;
-}
-
-/* COMPLETED */
-
-.task-item.done span {
-    text-decoration: line-through;
-    opacity:0.6;
-}
-
-/* DRAG */
-
-.task-item.dragging {
-    opacity:0.5;
-    transform:scale(1.02);
-}
-
 /* ================= GOALS ================= */
-
 .goal-home-card {
     background: rgba(0,0,0,0.6);
     padding:12px;
     border-radius:10px;
     margin-bottom:10px;
-    box-shadow:0 0 8px rgba(0,255,255,0.2);
+    cursor:grab;
+    transition:0.2s;
+}
+
+.goal-home-card:active {
+    cursor:grabbing;
+}
+
+.goal-home-card.dragging {
+    opacity:0.5;
+    transform:scale(1.05);
 }
 
 .goal-home-bar {
@@ -250,116 +172,82 @@ body {
 
 .goal-home-fill {
     height:100%;
-    border-radius:10px;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
 
-/* ================= MOBILE ================= */
-
-@media (max-width:768px){
-
-    .dashboard {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        width:200px;
-    }
-
-    .sidebar.active ~ .main {
-        margin-left:0;
-    }
-
-    .task-item {
-        flex-direction:column;
-        align-items:flex-start;
-        gap:10px;
-    }
-
-    .task-actions {
-        width:100%;
-        justify-content:space-between;
-    }
-}
-.goal-container {
+/* ================= MODAL ================= */
+.modal {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.7);
     display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-/* ================= COUNTDOWN ================= */
-
-#countdownBox {
-    text-align:center;
-    margin:10px 0 20px 0;
-    padding:12px;
-
-    border-radius:12px;
-
-    background:rgba(0,0,0,0.5);
-    box-shadow:0 0 12px rgba(0,255,255,0.3);
-
-    font-weight:bold;
-    font-size:16px;
-
+    justify-content:center;
+    align-items:center;
+    opacity:0;
+    pointer-events:none;
     transition:0.3s;
 }
 
-/* NORMAL (SAFE TIME) */
-.countdown-safe {
-    color:#00ffcc;
-    box-shadow:0 0 12px rgba(0,255,200,0.4);
+.modal.active {
+    opacity:1;
+    pointer-events:all;
 }
 
-/* WARNING (LESS TIME) */
-.countdown-warning {
-    color:#ffc107;
-    box-shadow:0 0 12px rgba(255,193,7,0.5);
+/* 🔥 PREMIUM MODAL */
+.modal-box {
+    width:340px;
+    padding:25px;
+    border-radius:15px;
+    background: rgba(0,0,0,0.95);
+    box-shadow:0 0 25px rgba(0,255,255,0.4);
+    text-align:center;
+    animation: popup 0.3s ease;
 }
 
-/* DANGER (VERY LOW TIME) */
-.countdown-danger {
-    color:#ff4d4d;
-    box-shadow:0 0 15px rgba(255,0,0,0.6);
-    animation: pulse 1s infinite;
+@keyframes popup {
+    from { transform:scale(0.8); opacity:0; }
+    to { transform:scale(1); opacity:1; }
 }
 
-/* 🔥 PULSE ANIMATION */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-/* ================= TASK PRIORITY COLORS ================= */
-
-/* SAFE (GREEN) */
-.task-item.safe {
-    border-left: 4px solid #00ffcc;
+.modal-box input {
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid #00cfff;
+    background:rgba(255,255,255,0.1);
+    color:white;
 }
 
-/* WARNING (YELLOW) */
-.task-item.warning {
-    border-left: 4px solid #ffc107;
-    background: rgba(255,193,7,0.05);
+/* BUTTONS */
+.modal-actions {
+    display:flex;
+    gap:10px;
 }
 
-/* DANGER (RED) */
-.task-item.danger {
-    border-left: 4px solid #ff4d4d;
-    background: rgba(255,77,77,0.08);
-    box-shadow:0 0 12px rgba(255,0,0,0.3);
+.modal-actions button {
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
 }
 
-/* OVERDUE (STRONG RED) */
-.task-item.overdue {
-    border-left: 4px solid red;
-    background: rgba(255,0,0,0.15);
-    box-shadow:0 0 15px rgba(255,0,0,0.5);
-    animation: pulseDanger 1s infinite;
+.modal-actions button:first-child {
+    background:linear-gradient(45deg,#00ffcc,#00cfff);
 }
 
-/* 🔥 PULSE FOR OVERDUE */
-@keyframes pulseDanger {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.03); }
-    100% { transform: scale(1); }
+.modal-actions button:last-child {
+    background:#ff4d4d;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width:768px){
+    .dashboard {
+        grid-template-columns:1fr;
+    }
 }
