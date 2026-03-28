@@ -37,29 +37,32 @@
 
         <div class="dashboard">
 
-            <!-- LEFT PANEL (TASKS) -->
+            <!-- LEFT PANEL -->
             <div class="left-panel">
 
                 <h2>📅 Today's Tasks</h2>
 
-                <!-- 🔥 QUICK ADD TASK -->
+                <!-- QUICK ADD -->
                 <div class="quick-add">
                     <input id="quickTaskInput" placeholder="Add new task...">
                     <input type="date" id="quickDateInput">
                     <button onclick="quickAddTask()">➕ Add</button>
                 </div>
 
-                <!-- TASK LIST -->
                 <div id="homeContent"></div>
 
             </div>
 
-            <!-- RIGHT PANEL (GOALS) -->
+            <!-- RIGHT PANEL -->
             <div class="right-panel">
 
                 <h2>🎯 Goals Progress</h2>
 
-                <div id="goalsHomeContainer"></div>
+                <!-- 🔥 DRAG HINT -->
+                <small style="color:#aaa;">Drag to reorder goals</small>
+
+                <!-- 🔥 IMPORTANT CONTAINER -->
+                <div id="goalsHomeContainer" class="goal-container"></div>
 
             </div>
 
