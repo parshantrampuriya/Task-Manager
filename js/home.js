@@ -39,11 +39,9 @@ document.addEventListener("click", function(e) {
 /* ================= COUNTDOWN ================= */
 
 function startCountdown() {
-
     function updateCountdown() {
 
         let now = new Date();
-
         let tomorrow = new Date();
         tomorrow.setHours(24, 0, 0, 0);
 
@@ -54,27 +52,44 @@ function startCountdown() {
         let s = Math.floor((diff / 1000) % 60);
 
         let box = document.getElementById("countdownBox");
-
         if (!box) return;
 
         box.innerHTML = `⏳ Day ends in: ${h}h ${m}m ${s}s`;
 
-        /* COLOR CHANGE */
-        box.classList.remove("countdown-safe", "countdown-warning", "countdown-danger");
+        box.classList.remove("countdown-safe","countdown-warning","countdown-danger");
 
-        if (h > 6) {
-            box.classList.add("countdown-safe");
-        }
-        else if (h > 2) {
-            box.classList.add("countdown-warning");
-        }
-        else {
-            box.classList.add("countdown-danger");
-        }
+        if (h > 6) box.classList.add("countdown-safe");
+        else if (h > 2) box.classList.add("countdown-warning");
+        else box.classList.add("countdown-danger");
     }
 
     updateCountdown();
     setInterval(updateCountdown, 1000);
+}
+
+/* ================= TASK STATUS ================= */
+
+function getTaskStatus(task) {
+
+    if (!task.time || task.time === "00:00") return null;
+
+    let now = new Date();
+
+    let [h, m] = task.time.split(":");
+
+    let taskTime = new Date();
+    taskTime.setHours(h, m, 0, 0);
+
+    let diff = taskTime - now;
+
+    if (diff <= 0) return "overdue";
+
+    let hours = diff / (1000 * 60 * 60);
+
+    if (hours <= 2) return "danger";
+    if (hours <= 6) return "warning";
+
+    return "safe";
 }
 
 /* AUTH */
@@ -94,8 +109,7 @@ onAuthStateChanged(auth, async (user) => {
 
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
-
-    startCountdown(); // 🔥 START COUNTDOWN
+    startCountdown();
 });
 
 /* LOCAL DATE */
@@ -109,18 +123,21 @@ window.quickAddTask = async () => {
 
     let text = document.getElementById("quickTaskInput").value;
     let date = document.getElementById("quickDateInput").value;
+    let time = document.getElementById("quickTimeInput").value;
 
     if (!text) return;
 
     await addDoc(collection(db, "tasks"), {
         text,
         date: date || getToday(),
+        time: time || "00:00", // 🔥 default midnight
         completed: false,
         user: auth.currentUser.uid
     });
 
     quickTaskInput.value = "";
     quickDateInput.value = "";
+    quickTimeInput.value = "";
 };
 
 /* ================= TASKS ================= */
@@ -138,7 +155,6 @@ function loadTasks(uid) {
         });
 
         renderHome(tasks);
-        setTimeout(enableDragDrop, 0);
     });
 }
 
@@ -149,34 +165,38 @@ function renderHome(tasks) {
     let todayTasks = tasks.filter(t => t.date === today);
     todayTasks.sort((a, b) => a.completed - b.completed);
 
-    /* EMPTY STATE */
     if (todayTasks.length === 0) {
-        homeContent.innerHTML = `
-            <p style="text-align:center; margin-top:20px; color:#aaa;">
-                😌 No tasks for today<br><br>
-                Stay consistent 🔥
-            </p>
-        `;
+        homeContent.innerHTML = `<p style="text-align:center;color:#aaa;">No tasks today</p>`;
         return;
     }
 
-    let completed = todayTasks.filter(t => t.completed).length;
-    let total = todayTasks.length;
-
-    let percent = Math.round((completed / total) * 100);
-
-    let html = `
-        <div class="progress-bar">
-            <div class="progress-fill" style="width:${percent}%"></div>
-        </div>
-        <p>${completed} / ${total} completed</p>
-        <ol class="task-list">
-    `;
+    let html = `<ol class="task-list">`;
 
     todayTasks.forEach((t) => {
+
+        let status = getTaskStatus(t);
+
+        let alert = "";
+
+        if (status === "overdue") {
+            alert = `<small style="color:red;">❗ Overdue</small>`;
+        }
+        else if (status === "danger") {
+            alert = `<small style="color:#ff4d4d;">🔥 Due soon</small>`;
+        }
+        else if (status === "warning") {
+            alert = `<small style="color:#ffc107;">⏳ Upcoming</small>`;
+        }
+
         html += `
-        <li class="task-item ${t.completed ? 'done' : ''}" draggable="true">
+        <li class="task-item ${t.completed ? 'done' : ''} ${status || ''}">
+            
             <span>${t.text}</span>
+
+            ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+
+            ${alert}
+
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
                 <button onclick="editTask('${t.id}','${t.text}')">✏️</button>
@@ -192,7 +212,6 @@ function renderHome(tasks) {
 /* ================= GOALS ================= */
 
 function loadGoalsHome(uid) {
-
     onSnapshot(collection(db, "goals"), snap => {
 
         let goals = [];
@@ -204,10 +223,7 @@ function loadGoalsHome(uid) {
             }
         });
 
-        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
-
         renderGoalsHome(goals);
-        setTimeout(() => enableGoalDrag(goals), 0);
     });
 }
 
@@ -222,7 +238,7 @@ function renderGoalsHome(goals) {
         let percent = Math.round((g.done / g.total) * 100 || 0);
 
         html += `
-        <div class="goal-home-card" draggable="true" data-id="${g.id}">
+        <div class="goal-home-card">
             <b>${g.name}</b> → ${percent}%
             <div class="goal-home-bar">
                 <div class="goal-home-fill" style="width:${percent}%"></div>
@@ -233,14 +249,16 @@ function renderGoalsHome(goals) {
     container.innerHTML = html;
 }
 
-/* ================= TASK ACTIONS ================= */
+/* ================= ACTIONS ================= */
 
 window.toggle = (id, completed) => {
     updateDoc(doc(db, "tasks", id), { completed: !completed });
 };
 
 window.del = (id) => {
-    deleteDoc(doc(db, "tasks", id));
+    if (confirm("Are you sure to delete?")) {
+        deleteDoc(doc(db, "tasks", id));
+    }
 };
 
 window.editTask = (id, text) => {
