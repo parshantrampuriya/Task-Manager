@@ -281,3 +281,8 @@ body {
         justify-content:space-between;
     }
 }
+.goal-container {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
