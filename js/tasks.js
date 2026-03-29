@@ -20,38 +20,26 @@ let currentUser = null;
 let tasks = [];
 let currentTab = "pending";
 
-/* MODAL STATE */
+/* MODAL */
 let currentTaskId = null;
 let currentAction = null;
 
 /* NAV */
-window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html";
-window.goGoals = () => window.location.href = "goals.html";
-window.goProfile = () => window.location.href = "profile.html";
+window.goHome = () => location.href = "home.html";
+window.goTasks = () => location.href = "tasks.html";
+window.goGoals = () => location.href = "goals.html";
+window.goProfile = () => location.href = "profile.html";
 
 /* SIDEBAR */
 window.toggleSidebar = () => {
     document.getElementById("sidebar").classList.toggle("active");
 };
 
-/* CLICK OUTSIDE */
-document.addEventListener("click", function(e) {
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
-
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove("active");
-    }
-});
-
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
-        window.location.href = "index.html";
+        location.href = "index.html";
         return;
     }
 
@@ -60,8 +48,7 @@ onAuthStateChanged(auth, async (user) => {
     let snap = await getDoc(doc(db, "users", user.uid));
 
     if (snap.exists()) {
-        document.getElementById("username").innerText =
-            "👤 Welcome " + snap.data().name;
+        username.innerText = "👤 Welcome " + snap.data().name;
     }
 
     loadTasks();
@@ -72,7 +59,7 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* LOAD TASKS */
+/* LOAD */
 function loadTasks() {
     onSnapshot(collection(db, "tasks"), snap => {
 
@@ -89,7 +76,7 @@ function loadTasks() {
     });
 }
 
-/* ADD TASK */
+/* ADD */
 window.addTask = async () => {
 
     let text = taskInput.value;
@@ -111,8 +98,25 @@ window.addTask = async () => {
     timeInput.value = "";
 };
 
+/* STATUS LOGIC */
+function getStatus(t) {
+
+    if (!t.time || t.time === "00:00") return "normal";
+
+    let now = new Date();
+    let taskTime = new Date(`${t.date}T${t.time}`);
+    let diff = taskTime - now;
+
+    if (diff < 0) return "overdue";
+    if (diff < 30 * 60000) return "urgent";
+    if (diff < 60 * 60000) return "soon";
+
+    return "normal";
+}
+
 /* SWITCH TAB */
 window.switchTab = (tab, e) => {
+
     currentTab = tab;
 
     document.querySelectorAll(".tabs button").forEach(btn => {
@@ -124,15 +128,15 @@ window.switchTab = (tab, e) => {
     render();
 };
 
-/* SORT FUNCTION */
+/* SORT */
 function sortDates(dates) {
 
     return dates.sort((a, b) => {
 
         if (currentTab === "pending") {
-            return new Date(a) - new Date(b); // ascending
+            return new Date(a) - new Date(b);
         } else {
-            return new Date(b) - new Date(a); // descending
+            return new Date(b) - new Date(a);
         }
 
     });
@@ -183,14 +187,27 @@ function render() {
             <ol class="task-list">
         `;
 
+        /* SORT INSIDE DATE */
+        grouped[date].sort((a, b) => {
+
+            if (a.completed !== b.completed) {
+                return a.completed ? 1 : -1;
+            }
+
+            return (a.time || "").localeCompare(b.time || "");
+        });
+
         grouped[date].forEach(t => {
 
+            let status = getStatus(t);
+
             html += `
-            <li class="task-item ${t.completed ? 'done':''}">
+            <li class="task-item ${t.completed ? 'done':''} ${status}">
 
-                <span>${t.text}</span>
-
-                ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+                <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                    <span>${t.text}</span>
+                    ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
+                </div>
 
                 <div class="task-actions">
                     <button onclick="toggle('${t.id}',${t.completed})">✔</button>
@@ -207,40 +224,33 @@ function render() {
     taskContainer.innerHTML = html;
 }
 
-/* MODAL OPEN */
+/* MODAL */
 window.openModal = (type, id, text="", date="", time="") => {
 
     currentTaskId = id;
     currentAction = type;
 
-    let modal = document.getElementById("modal");
-
     modal.classList.add("active");
 
+    modalInput.style.display = "block";
+    modalDate.style.display = "block";
+    modalTime.style.display = "block";
+
     if (type === "edit") {
-
         modalTitle.innerText = "Edit Task";
-
-        modalInput.style.display = "block";
-        modalDate.style.display = "block";
-        modalTime.style.display = "block";
-
         modalInput.value = text;
         modalDate.value = date;
         modalTime.value = time;
     }
 
     if (type === "delete") {
-
-        modalTitle.innerText = "Are you sure to delete?";
-
+        modalTitle.innerText = "Delete this task?";
         modalInput.style.display = "none";
         modalDate.style.display = "none";
         modalTime.style.display = "none";
     }
 };
 
-/* CLOSE */
 window.closeModal = () => {
     modal.classList.remove("active");
 };
@@ -249,7 +259,6 @@ window.closeModal = () => {
 window.confirmAction = async () => {
 
     if (currentAction === "edit") {
-
         await updateDoc(doc(db, "tasks", currentTaskId), {
             text: modalInput.value,
             date: modalDate.value,
@@ -275,5 +284,5 @@ searchInput.addEventListener("input", render);
 /* LOGOUT */
 logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
-    window.location.href = "index.html";
+    location.href = "index.html";
 });
