@@ -48,7 +48,7 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
 
-    startCountdown(); // ✅ NOW WORKS
+    startCountdown(); // 🔥 updated
 });
 
 /* DATE */
@@ -56,42 +56,23 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= COUNTDOWN ================= */
+/* ================= TODAY COUNTDOWN ================= */
 
 function startCountdown() {
 
     setInterval(() => {
 
-        if (!currentTasks.length) return;
-
         let now = new Date();
+        let midnight = new Date();
+        midnight.setHours(23,59,59,999);
 
-        let nearest = null;
+        let diff = midnight - now;
 
-        currentTasks.forEach(t => {
-
-            if (!t.time || t.time === "00:00") return;
-
-            let taskTime = new Date(`${t.date}T${t.time}`);
-
-            let diff = taskTime - now;
-
-            if (diff > 0 && (!nearest || diff < nearest.diff)) {
-                nearest = { ...t, diff };
-            }
-        });
-
-        if (!nearest) {
-            countdownBox.innerText = "🎉 No upcoming timed tasks";
-            return;
-        }
-
-        let mins = Math.floor(nearest.diff / 60000);
-        let hrs = Math.floor(mins / 60);
-        mins = mins % 60;
+        let hrs = Math.floor(diff / 3600000);
+        let mins = Math.floor((diff % 3600000) / 60000);
 
         countdownBox.innerText =
-            `⏳ Next: ${nearest.text} in ${hrs}h ${mins}m`;
+            `⏳ Today ends in ${hrs}h ${mins}m`;
 
     }, 1000);
 }
@@ -133,23 +114,51 @@ function loadTasks(uid) {
             }
         });
 
-        currentTasks = tasks; // ✅ important
+        currentTasks = tasks;
 
         renderHome(tasks);
     });
 }
 
+/* 🔥 TIME STATUS */
+function getStatus(t) {
+
+    if (!t.time || t.time === "00:00") return "normal";
+
+    let now = new Date();
+    let taskTime = new Date(`${t.date}T${t.time}`);
+    let diff = taskTime - now;
+
+    if (diff < 0) return "overdue";
+    if (diff < 30 * 60000) return "urgent";
+    if (diff < 60 * 60000) return "soon";
+
+    return "normal";
+}
+
+/* RENDER */
 function renderHome(tasks) {
 
     let today = getToday();
+
     let todayTasks = tasks.filter(t => t.date === today);
+
+    /* SORT */
+    todayTasks.sort((a, b) => {
+        if (a.completed !== b.completed) {
+            return a.completed ? 1 : -1; // completed bottom
+        }
+        return (a.time || "").localeCompare(b.time || "");
+    });
 
     let html = `<ol class="task-list">`;
 
     todayTasks.forEach((t) => {
 
+        let status = getStatus(t);
+
         html += `
-        <li class="task-item ${t.completed ? 'done' : ''}">
+        <li class="task-item ${t.completed ? 'done' : ''} ${status}">
             
             <div style="display:flex; align-items:center; gap:10px; flex:1;">
                 <span>${t.text}</span>
