@@ -48,7 +48,7 @@ onAuthStateChanged(auth, async (user) => {
     loadTasks(user.uid);
     loadGoalsHome(user.uid);
 
-    startCountdown(); // 🔥 updated
+    startCountdown();
 });
 
 /* DATE */
@@ -56,7 +56,7 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= TODAY COUNTDOWN ================= */
+/* ================= COUNTDOWN WITH SECONDS ================= */
 
 function startCountdown() {
 
@@ -70,9 +70,10 @@ function startCountdown() {
 
         let hrs = Math.floor(diff / 3600000);
         let mins = Math.floor((diff % 3600000) / 60000);
+        let secs = Math.floor((diff % 60000) / 1000);
 
         countdownBox.innerText =
-            `⏳ Today ends in ${hrs}h ${mins}m`;
+            `⏳ Today ends in ${hrs}h ${mins}m ${secs}s`;
 
     }, 1000);
 }
@@ -120,7 +121,7 @@ function loadTasks(uid) {
     });
 }
 
-/* 🔥 TIME STATUS */
+/* STATUS */
 function getStatus(t) {
 
     if (!t.time || t.time === "00:00") return "normal";
@@ -136,18 +137,27 @@ function getStatus(t) {
     return "normal";
 }
 
-/* RENDER */
+/* ================= RENDER ================= */
+
 function renderHome(tasks) {
 
     let today = getToday();
 
     let todayTasks = tasks.filter(t => t.date === today);
 
-    /* SORT */
+    /* 🔥 ADVANCED SORT */
     todayTasks.sort((a, b) => {
+
+        // completed always bottom
         if (a.completed !== b.completed) {
-            return a.completed ? 1 : -1; // completed bottom
+            return a.completed ? 1 : -1;
         }
+
+        // tasks WITH time first
+        if ((a.time && a.time !== "00:00") && (!b.time || b.time === "00:00")) return -1;
+        if ((!a.time || a.time === "00:00") && (b.time && b.time !== "00:00")) return 1;
+
+        // both have time → sort by time
         return (a.time || "").localeCompare(b.time || "");
     });
 
@@ -310,7 +320,7 @@ window.confirmAction = async () => {
     closeModal();
 };
 
-/* ACTIONS */
+/* ACTION */
 window.toggle = (id, completed) => {
     updateDoc(doc(db, "tasks", id), { completed: !completed });
 };
