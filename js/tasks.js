@@ -24,17 +24,6 @@ let currentTab = "pending";
 let currentTaskId = null;
 let currentAction = null;
 
-/* NAV */
-window.goHome = () => location.href = "home.html";
-window.goTasks = () => location.href = "tasks.html";
-window.goGoals = () => location.href = "goals.html";
-window.goProfile = () => location.href = "profile.html";
-
-/* SIDEBAR */
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
-};
-
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
@@ -187,7 +176,6 @@ function render() {
             <ol class="task-list">
         `;
 
-        /* SORT INSIDE DATE */
         grouped[date].sort((a, b) => {
 
             if (a.completed !== b.completed) {
@@ -285,18 +273,4 @@ searchInput.addEventListener("input", render);
 logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     location.href = "index.html";
-});
-/* ================= CLICK OUTSIDE SIDEBAR ================= */
-
-document.addEventListener("click", (e) => {
-
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
-
-    // if clicked outside sidebar AND not on menu button
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove("active");
-    }
 });
