@@ -1,117 +1,154 @@
 import { auth, db } from "./firebase.js";
 
 import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
   collection,
   addDoc,
   query,
   where,
+  getDocs,
   onSnapshot,
   updateDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* SEND REQUEST */
+let currentUser;
+
+/* ================= AUTH ================= */
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) location.href = "index.html";
+    currentUser = user;
+
+    loadRequests();
+    loadFriends();
+});
+
+/* ================= SEND REQUEST ================= */
+
 window.sendRequest = async () => {
 
     let email = searchUser.value;
 
     let q = query(collection(db, "users"), where("email", "==", email));
+    let snap = await getDocs(q);
 
-    onSnapshot(q, snap => {
+    if (snap.empty) return alert("User not found ❌");
 
-        snap.forEach(async (u) => {
+    let targetUser = snap.docs[0];
 
-            await addDoc(collection(db, "friendRequests"), {
-                from: auth.currentUser.uid,
-                to: u.id,
-                status: "pending"
-            });
-
-            alert("Request Sent 🚀");
-        });
+    await addDoc(collection(db, "friendRequests"), {
+        from: currentUser.uid,
+        to: targetUser.id,
+        status: "pending"
     });
+
+    alert("Request Sent 🚀");
 };
 
-/* LOAD REQUESTS */
+/* ================= LOAD REQUESTS ================= */
+
 function loadRequests() {
 
-    let q = query(
-        collection(db, "friendRequests"),
-        where("to", "==", auth.currentUser.uid),
+    let q = query(collection(db, "friendRequests"),
+        where("to", "==", currentUser.uid),
         where("status", "==", "pending")
     );
 
-    onSnapshot(q, snap => {
+    onSnapshot(q, async snap => {
 
         let html = "";
 
-        snap.forEach(r => {
+        for (let r of snap.docs) {
 
             let d = r.data();
 
+            let userDoc = await getDocs(
+                query(collection(db,"users"), where("__name__","==",d.from))
+            );
+
+            let name = userDoc.docs[0]?.data().name || "User";
+
             html += `
             <div>
-                ${d.from}
-                <button onclick="accept('${r.id}','${d.from}')">✔</button>
-                <button onclick="reject('${r.id}')">❌</button>
+                👤 ${name}
+                <div>
+                    <button class="req-btn accept" onclick="accept('${r.id}','${d.from}')">✔</button>
+                    <button class="req-btn reject" onclick="reject('${r.id}')">❌</button>
+                </div>
             </div>`;
-        });
+        }
 
-        requestList.innerHTML = html;
+        requestList.innerHTML = html || "No requests";
     });
 }
 
-/* ACCEPT */
+/* ================= ACCEPT ================= */
+
 window.accept = async (id, fromUser) => {
 
-    await updateDoc(doc(db, "friendRequests", id), {
-        status: "accepted"
+    await updateDoc(doc(db,"friendRequests",id), {
+        status:"accepted"
     });
 
-    await addDoc(collection(db, "friends"), {
-        user1: fromUser,
-        user2: auth.currentUser.uid
+    await addDoc(collection(db,"friends"), {
+        users: [fromUser, currentUser.uid]
     });
 };
 
-/* REJECT */
+/* ================= REJECT ================= */
+
 window.reject = async (id) => {
-    await updateDoc(doc(db, "friendRequests", id), {
-        status: "rejected"
+    await updateDoc(doc(db,"friendRequests",id), {
+        status:"rejected"
     });
 };
 
-/* LOAD FRIENDS */
+/* ================= LOAD FRIENDS ================= */
+
 function loadFriends() {
 
-    let q = query(
-        collection(db, "friends"),
-        where("user1", "==", auth.currentUser.uid)
-    );
-
-    onSnapshot(q, snap => {
+    onSnapshot(collection(db,"friends"), async snap => {
 
         let html = "";
 
-        snap.forEach(f => {
+        for (let f of snap.docs) {
 
             let d = f.data();
 
-            html += `
-            <div onclick="viewUser('${d.user2}')">
-                👤 ${d.user2}
-            </div>`;
-        });
+            if (!d.users.includes(currentUser.uid)) continue;
 
-        friendList.innerHTML = html;
+            let friendId = d.users.find(u => u !== currentUser.uid);
+
+            let userDoc = await getDocs(
+                query(collection(db,"users"), where("__name__","==",friendId))
+            );
+
+            let name = userDoc.docs[0]?.data().name || "User";
+
+            html += `
+            <div class="friend" onclick="openFriend('${friendId}')">
+                👤 ${name}
+            </div>`;
+        }
+
+        friendList.innerHTML = html || "No friends yet";
     });
 }
 
-/* VIEW USER */
-window.viewUser = (id) => {
-    window.location.href = "view.html?uid=" + id;
+/* ================= OPEN FRIEND ================= */
+
+window.openFriend = (id) => {
+    location.href = "view.html?uid=" + id;
 };
 
-/* INIT */
-loadRequests();
-loadFriends();
+/* ================= LOGOUT ================= */
+
+logoutBtn.onclick = async () => {
+    await signOut(auth);
+    location.href = "index.html";
+};
