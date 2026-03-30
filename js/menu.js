@@ -1,29 +1,55 @@
 /* ================= GLOBAL MENU SYSTEM ================= */
 
-/* NAVIGATION */
+/* ================= NAVIGATION ================= */
+
 window.goHome = () => location.href = "home.html";
 window.goTasks = () => location.href = "tasks.html";
 window.goGoals = () => location.href = "goals.html";
+window.goFriends = () => location.href = "friends.html";   // 🔥 NEW
 window.goProfile = () => location.href = "profile.html";
 
-/* 🔥 NEW FRIENDS PAGE */
-window.goFriends = () => location.href = "friends.html";
+/* ================= SIDEBAR TOGGLE ================= */
 
-/* SIDEBAR TOGGLE */
 window.toggleSidebar = () => {
-    let sidebar = document.getElementById("sidebar");
+    const sidebar = document.getElementById("sidebar");
     if (sidebar) sidebar.classList.toggle("active");
 };
 
-/* CLICK OUTSIDE TO CLOSE */
+/* ================= CLICK OUTSIDE CLOSE ================= */
+
 document.addEventListener("click", (e) => {
 
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.querySelector(".menu-btn");
 
     if (!sidebar || !menuBtn) return;
 
     if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
         sidebar.classList.remove("active");
     }
+});
+
+/* ================= ACTIVE MENU HIGHLIGHT ================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const currentPage = window.location.pathname.split("/").pop();
+
+    const buttons = document.querySelectorAll("#sidebar button");
+
+    buttons.forEach(btn => {
+
+        const text = btn.innerText.toLowerCase();
+
+        if (
+            (currentPage.includes("home") && text.includes("home")) ||
+            (currentPage.includes("tasks") && text.includes("tasks")) ||
+            (currentPage.includes("goals") && text.includes("goals")) ||
+            (currentPage.includes("friends") && text.includes("friends")) ||
+            (currentPage.includes("profile") && text.includes("profile"))
+        ) {
+            btn.style.background = "linear-gradient(45deg,#00cfff,#00ffcc)";
+            btn.style.color = "black";
+        }
+    });
 });
