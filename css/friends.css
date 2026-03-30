@@ -1,75 +1,173 @@
+/* ================= BODY ================= */
 body {
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
-                url("../mahadev.png") center/cover;
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+                url("../mahadev.png") no-repeat center center;
+    background-size:cover;
     color:white;
 }
 
+/* ================= MAIN ================= */
 .main {
     padding:20px;
+    transition:0.3s;
 }
 
+/* ================= NAVBAR ================= */
 .navbar {
     display:flex;
     align-items:center;
     gap:15px;
-    padding:10px;
-    background:rgba(0,0,0,0.6);
-    border-radius:10px;
+    padding:15px;
+    background: rgba(0,0,0,0.7);
+    border-radius:12px;
+    box-shadow:0 0 15px rgba(0,255,255,0.3);
 }
 
+.menu-btn {
+    font-size:18px;
+    padding:8px 12px;
+    border:none;
+    border-radius:8px;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    cursor:pointer;
+}
+
+/* ================= SEARCH BOX ================= */
 .box {
     display:flex;
     gap:10px;
-    margin:20px 0;
+    margin:25px 0;
 }
 
 .box input {
     flex:1;
-    padding:10px;
-    border-radius:8px;
+    padding:12px;
+    border-radius:10px;
     border:1px solid #00cfff;
     background:rgba(255,255,255,0.1);
     color:white;
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
 }
 
 .box button {
-    padding:10px;
+    padding:12px 18px;
     border:none;
-    border-radius:8px;
+    border-radius:10px;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
+    font-weight:bold;
     cursor:pointer;
+    transition:0.3s;
 }
 
-/* LIST */
+.box button:hover {
+    transform:scale(1.05);
+}
+
+/* ================= HEADINGS ================= */
+h3 {
+    margin-top:25px;
+    color:#00ffcc;
+}
+
+/* ================= LIST ITEMS ================= */
 #requestList div,
+#sentList div,
 #friendList div {
-    background:rgba(0,0,0,0.6);
-    padding:10px;
+    background: rgba(0,0,0,0.7);
+    padding:12px 15px;
     margin:10px 0;
-    border-radius:8px;
+    border-radius:10px;
     display:flex;
     justify-content:space-between;
     align-items:center;
+    box-shadow:0 0 12px rgba(0,255,255,0.25);
+    transition:0.3s;
 }
 
-/* BUTTONS */
+#requestList div:hover,
+#sentList div:hover,
+#friendList div:hover {
+    transform:translateX(5px);
+}
+
+/* ================= BUTTONS ================= */
 .req-btn {
-    padding:5px 10px;
+    padding:6px 10px;
     border:none;
-    border-radius:5px;
+    border-radius:6px;
     cursor:pointer;
+    font-weight:bold;
 }
 
-.accept { background:#00ffcc; }
-.reject { background:#ff4d4d; }
+.accept {
+    background:#00ffcc;
+}
 
-/* FRIEND CLICK */
+.reject {
+    background:#ff4d4d;
+}
+
+/* ================= FRIEND ================= */
 .friend {
     cursor:pointer;
 }
+
 .friend:hover {
     background:linear-gradient(45deg,#00cfff,#00ffcc);
     color:black;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    position:fixed;
+    top:0;
+    left:0;
+    width:220px;
+    height:100vh;
+    padding:20px;
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(10px);
+    box-shadow:0 0 20px rgba(0,255,255,0.3);
+    transform:translateX(-100%);
+    transition:0.3s;
+    z-index:1000;
+}
+
+.sidebar.active {
+    transform:translateX(0);
+}
+
+.sidebar button {
+    width:100%;
+    margin:10px 0;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#1e2a38;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.sidebar button:hover {
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width:768px){
+
+    .box {
+        flex-direction:column;
+    }
+
+    #requestList div,
+    #sentList div,
+    #friendList div {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
 }
