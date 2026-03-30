@@ -20,17 +20,6 @@ let currentTasks = [];
 let currentTaskId = null;
 let currentAction = null;
 
-/* NAV */
-window.goHome = () => location.href = "home.html";
-window.goTasks = () => location.href = "tasks.html";
-window.goGoals = () => location.href = "goals.html";
-window.goProfile = () => location.href = "profile.html";
-
-/* SIDEBAR */
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
-};
-
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
@@ -56,7 +45,7 @@ function getToday() {
     return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= COUNTDOWN WITH SECONDS ================= */
+/* ================= COUNTDOWN ================= */
 
 function startCountdown() {
 
@@ -145,19 +134,16 @@ function renderHome(tasks) {
 
     let todayTasks = tasks.filter(t => t.date === today);
 
-    /* 🔥 ADVANCED SORT */
+    /* SORT */
     todayTasks.sort((a, b) => {
 
-        // completed always bottom
         if (a.completed !== b.completed) {
             return a.completed ? 1 : -1;
         }
 
-        // tasks WITH time first
         if ((a.time && a.time !== "00:00") && (!b.time || b.time === "00:00")) return -1;
         if ((!a.time || a.time === "00:00") && (b.time && b.time !== "00:00")) return 1;
 
-        // both have time → sort by time
         return (a.time || "").localeCompare(b.time || "");
     });
 
@@ -329,18 +315,4 @@ window.toggle = (id, completed) => {
 logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     location.href = "index.html";
-});
-/* ================= CLICK OUTSIDE SIDEBAR ================= */
-
-document.addEventListener("click", (e) => {
-
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
-
-    // if clicked outside sidebar AND not on menu button
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove("active");
-    }
 });
