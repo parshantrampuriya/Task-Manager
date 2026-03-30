@@ -6,37 +6,51 @@
 <title>Friends</title>
 
 <link rel="stylesheet" href="css/friends.css">
-<link rel="icon" href="data:,">
 </head>
 
 <body>
 
-<!-- 🔥 KEEP YOUR EXISTING MENU HERE -->
-<!-- (Do NOT change your sidebar/navbar code) -->
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+    <h2>⚡ Menu</h2>
 
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button id="logoutBtn">🚪 Logout</button>
+</div>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
 <div class="main">
 
-    <h2>👥 Friends</h2>
-
-    <!-- SEARCH -->
-    <div class="box">
-        <input id="searchUser" placeholder="Enter email...">
-        <button onclick="sendRequest()">➕ Send Request</button>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2>👥 Friends</h2>
     </div>
 
-    <!-- REQUESTS -->
-    <h3>📩 Friend Requests</h3>
-    <div id="requestList"></div>
+    <div class="container">
 
-    <!-- FRIENDS -->
-    <h3>🤝 Your Friends</h3>
-    <div id="friendList"></div>
+        <!-- SEARCH -->
+        <div class="box">
+            <input id="searchUser" placeholder="Enter email...">
+            <button onclick="sendRequest()">➕ Send Request</button>
+        </div>
+
+        <!-- REQUESTS -->
+        <h3>📩 Friend Requests</h3>
+        <div id="requestList"></div>
+
+        <!-- FRIENDS -->
+        <h3>🤝 Your Friends</h3>
+        <div id="friendList"></div>
+
+    </div>
 
 </div>
 
-<!-- ✅ IMPORTANT: ONLY FIX -->
 <script type="module" src="js/friends.js"></script>
 <script type="module" src="js/menu.js"></script>
 
