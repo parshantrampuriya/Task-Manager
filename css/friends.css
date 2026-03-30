@@ -1,0 +1,132 @@
+
+/* ================= BODY ================= */
+body {
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+                url("../mahadev.png") no-repeat center center;
+    background-size:cover;
+    color:white;
+}
+
+/* ================= MAIN ================= */
+.main {
+    padding:30px;
+    max-width:800px;
+    margin:auto;
+}
+
+/* TITLE */
+h2 {
+    text-align:center;
+    color:#00cfff;
+    margin-bottom:30px;
+}
+
+/* ================= BOX ================= */
+.box {
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+.box input {
+    flex:1;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #00cfff;
+    background:rgba(255,255,255,0.1);
+    color:white;
+}
+
+.box button {
+    padding:12px 18px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.box button:hover {
+    transform:scale(1.05);
+}
+
+/* ================= SECTION HEADINGS ================= */
+h3 {
+    margin:20px 0 10px;
+    color:#00ffcc;
+}
+
+/* ================= LIST CARDS ================= */
+#requestList div,
+#friendList div {
+    background: rgba(0,0,0,0.6);
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
+    transition:0.3s;
+}
+
+/* HOVER EFFECT */
+#requestList div:hover,
+#friendList div:hover {
+    transform:translateX(5px);
+}
+
+/* ================= BUTTONS ================= */
+#requestList button {
+    margin-left:8px;
+    padding:6px 10px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* ACCEPT */
+#requestList button:first-child {
+    background:#00ffcc;
+}
+
+/* REJECT */
+#requestList button:last-child {
+    background:#ff4d4d;
+}
+
+/* ================= FRIEND ITEM ================= */
+#friendList div {
+    cursor:pointer;
+}
+
+/* HOVER FRIEND */
+#friendList div:hover {
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+}
+
+/* ================= EMPTY STATES ================= */
+.empty {
+    text-align:center;
+    color:#aaa;
+    margin-top:10px;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width:600px){
+
+    .box {
+        flex-direction:column;
+    }
+
+    #requestList div,
+    #friendList div {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+}
