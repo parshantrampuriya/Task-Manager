@@ -6,6 +6,9 @@ window.goTasks = () => location.href = "tasks.html";
 window.goGoals = () => location.href = "goals.html";
 window.goProfile = () => location.href = "profile.html";
 
+/* 🔥 NEW FRIENDS PAGE */
+window.goFriends = () => location.href = "friends.html";
+
 /* SIDEBAR TOGGLE */
 window.toggleSidebar = () => {
     let sidebar = document.getElementById("sidebar");
