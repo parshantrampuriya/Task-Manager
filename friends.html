@@ -1,242 +1,44 @@
-import { auth, db } from "./firebase.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends</title>
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<link rel="stylesheet" href="css/friends.css">
+<link rel="icon" href="data:,">
+</head>
 
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  doc,
-  updateDoc,
-  deleteDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<body>
 
-let currentUser = null;
-let goals = [];
+<!-- 🔥 KEEP YOUR EXISTING MENU HERE -->
+<!-- (Do NOT change your sidebar/navbar code) -->
 
-let currentIndex = null;
-let currentMode = null;
 
-/* INIT */
-onAuthStateChanged(auth, (user) => {
+<!-- MAIN CONTENT -->
+<div class="main">
 
-    if (!user) {
-        window.location.href = "index.html";
-        return;
-    }
+    <h2>👥 Friends</h2>
 
-    currentUser = user;
+    <!-- SEARCH -->
+    <div class="box">
+        <input id="searchUser" placeholder="Enter email...">
+        <button onclick="sendRequest()">➕ Send Request</button>
+    </div>
 
-    document.getElementById("addBtn").addEventListener("click", addGoal);
+    <!-- REQUESTS -->
+    <h3>📩 Friend Requests</h3>
+    <div id="requestList"></div>
 
-    loadGoals();
-});
+    <!-- FRIENDS -->
+    <h3>🤝 Your Friends</h3>
+    <div id="friendList"></div>
 
-/* LOAD */
-function loadGoals() {
+</div>
 
-    onSnapshot(collection(db, "goals"), snap => {
+<!-- ✅ IMPORTANT: ONLY FIX -->
+<script type="module" src="js/friends.js"></script>
+<script type="module" src="js/menu.js"></script>
 
-        goals = [];
-
-        snap.forEach(d => {
-            let g = d.data();
-            if (g.user === currentUser.uid) {
-                goals.push({ id: d.id, ...g });
-            }
-        });
-
-        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-        render();
-        setTimeout(enableDrag, 0);
-    });
-}
-
-/* ADD */
-async function addGoal() {
-
-    let name = goalName.value;
-    let total = Number(goalTotal.value);
-    let deadline = goalDeadline.value;
-
-    if (!name || !total) return alert("Enter name & total");
-
-    await addDoc(collection(db, "goals"), {
-        name,
-        total,
-        done: 0,
-        deadline: deadline || null,
-        user: currentUser.uid,
-        order: Date.now()
-    });
-
-    goalName.value = "";
-    goalTotal.value = "";
-    goalDeadline.value = "";
-}
-
-/* RENDER */
-function render() {
-
-    let html = "";
-
-    goals.forEach((g, i) => {
-
-        let percent = Math.min((g.done / g.total) * 100, 100);
-
-        html += `
-        <div class="goal-card" draggable="true" data-id="${g.id}">
-
-            <h3>${g.name}</h3>
-
-            <p>${g.done} / ${g.total}</p>
-
-            ${g.deadline ? `<small>⏳ ${g.deadline}</small>` : ""}
-
-            <div class="progress-bar">
-                <div class="fill" style="width:${percent}%"></div>
-            </div>
-
-            <div class="actions">
-                <button onclick="openModal('progress', ${i})">➕ Add</button>
-                <button onclick="openModal('set', ${i})">✏️ Edit Progress</button>
-                <button onclick="openModal('edit', ${i})">Edit Goal</button>
-                <button onclick="deleteGoal('${g.id}')">Delete</button>
-            </div>
-
-        </div>`;
-    });
-
-    goalContainer.innerHTML = html;
-}
-
-/* DRAG */
-function enableDrag() {
-
-    let items = document.querySelectorAll(".goal-card");
-    let dragItem = null;
-
-    items.forEach(item => {
-
-        item.addEventListener("dragstart", () => {
-            dragItem = item;
-            item.style.opacity = "0.5";
-        });
-
-        item.addEventListener("dragend", () => {
-            item.style.opacity = "1";
-        });
-
-        item.addEventListener("dragover", e => e.preventDefault());
-
-        item.addEventListener("drop", async e => {
-
-            e.preventDefault();
-
-            if (dragItem !== item) {
-
-                let list = item.parentNode;
-
-                if ([...list.children].indexOf(dragItem) <
-                    [...list.children].indexOf(item)) {
-                    list.insertBefore(dragItem, item.nextSibling);
-                } else {
-                    list.insertBefore(dragItem, item);
-                }
-
-                let updated = [...list.children];
-
-                for (let i = 0; i < updated.length; i++) {
-
-                    let id = updated[i].dataset.id;
-
-                    await updateDoc(doc(db, "goals", id), {
-                        order: i
-                    });
-                }
-            }
-        });
-    });
-}
-
-/* MODAL */
-window.openModal = (mode, index) => {
-
-    currentIndex = index;
-    currentMode = mode;
-
-    let g = goals[index];
-
-    modal.classList.add("active");
-
-    if (mode === "progress") {
-        modalTitle.innerText = "Add Progress";
-        modalName.style.display = "none";
-        modalDate.style.display = "none";
-        modalInput.value = "";
-    }
-
-    else if (mode === "set") {
-        modalTitle.innerText = "Set Progress Value";
-        modalName.style.display = "none";
-        modalDate.style.display = "none";
-        modalInput.value = g.done;
-    }
-
-    else {
-        modalTitle.innerText = "Edit Goal";
-        modalName.style.display = "block";
-        modalDate.style.display = "block";
-
-        modalName.value = g.name;
-        modalInput.value = g.total;
-        modalDate.value = g.deadline || "";
-    }
-};
-
-window.closeModal = () => modal.classList.remove("active");
-
-/* SAVE */
-window.saveModal = async () => {
-
-    let g = goals[currentIndex];
-
-    if (currentMode === "progress") {
-
-        let val = Number(modalInput.value);
-        if (!val) return;
-
-        await updateDoc(doc(db, "goals", g.id), {
-            done: g.done + val
-        });
-    }
-
-    else if (currentMode === "set") {
-
-        let val = Number(modalInput.value);
-        if (val < 0) return;
-
-        await updateDoc(doc(db, "goals", g.id), {
-            done: val
-        });
-    }
-
-    else {
-
-        await updateDoc(doc(db, "goals", g.id), {
-            name: modalName.value,
-            total: Number(modalInput.value),
-            deadline: modalDate.value || null
-        });
-    }
-
-    closeModal();
-};
-
-/* DELETE */
-window.deleteGoal = async (id) => {
-    await deleteDoc(doc(db, "goals", id));
-};
+</body>
+</html>
