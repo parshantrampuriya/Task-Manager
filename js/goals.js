@@ -240,31 +240,3 @@ window.saveModal = async () => {
 window.deleteGoal = async (id) => {
     await deleteDoc(doc(db, "goals", id));
 };
-
-/* ================= SIDEBAR FIX ================= */
-
-window.toggleSidebar = () => {
-    document.getElementById("sidebar").classList.toggle("active");
-};
-
-/* CLICK OUTSIDE */
-document.addEventListener("click", (e) => {
-
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
-
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove("active");
-    }
-});
-
-/* NAV */
-window.goHome = () => location.href = "home.html";
-window.goTasks = () => location.href = "tasks.html";
-window.goGoals = () => location.href = "goals.html";
-window.goProfile = () => location.href = "profile.html";
-
-/* LOGOUT */
-window.logout = () => location.href = "index.html";
