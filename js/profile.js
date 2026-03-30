@@ -13,38 +13,8 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* NAV */
-window.goHome = () => window.location.href = "home.html";
-window.goTasks = () => window.location.href = "tasks.html";
-window.goGoals = () => window.location.href = "goals.html";
-window.goProfile = () => window.location.href = "profile.html";
+/* ================= LOAD USER ================= */
 
-/* SIDEBAR (FIXED USING active) */
-window.toggleSidebar = function () {
-
-    let sidebar = document.getElementById("sidebar");
-
-    if (sidebar.classList.contains("active")) {
-        sidebar.classList.remove("active");
-    } else {
-        sidebar.classList.add("active");
-    }
-};
-
-/* CLICK OUTSIDE TO CLOSE */
-document.addEventListener("click", function(e) {
-
-    let sidebar = document.getElementById("sidebar");
-    let menuBtn = document.querySelector(".menu-btn");
-
-    if (!sidebar || !menuBtn) return;
-
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove("active");
-    }
-});
-
-/* LOAD USER */
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
@@ -65,7 +35,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-/* SAVE PROFILE */
+/* ================= SAVE PROFILE ================= */
+
 window.saveProfile = async () => {
 
     let user = auth.currentUser;
@@ -93,19 +64,22 @@ window.saveProfile = async () => {
     alert("Profile Updated ✅");
 };
 
-/* PASSWORD SHOW/HIDE */
+/* ================= PASSWORD SHOW/HIDE ================= */
+
 window.togglePassword = () => {
     let p = document.getElementById("password");
     p.type = p.type === "password" ? "text" : "password";
 };
 
-/* RESET PASSWORD */
+/* ================= RESET PASSWORD ================= */
+
 window.resetPassword = async () => {
     await sendPasswordResetEmail(auth, auth.currentUser.email);
     alert("Reset link sent 📩");
 };
 
-/* PASSWORD STRENGTH */
+/* ================= PASSWORD STRENGTH ================= */
+
 document.getElementById("password").addEventListener("input", () => {
 
     let p = document.getElementById("password").value;
@@ -142,7 +116,8 @@ document.getElementById("password").addEventListener("input", () => {
     }
 });
 
-/* LOGOUT */
+/* ================= LOGOUT ================= */
+
 document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
