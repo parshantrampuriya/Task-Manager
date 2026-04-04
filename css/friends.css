@@ -100,3 +100,24 @@ button {
     background:#00cfff;
     color:black;
 }
+.friend {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.friend-actions {
+    display:flex;
+    gap:5px;
+}
+
+.friend-actions button {
+    padding:5px 8px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.remove {
+    background:#ff4d4d;
+}
