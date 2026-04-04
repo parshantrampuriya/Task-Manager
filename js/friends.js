@@ -17,9 +17,11 @@ import {
 
 let currentUser;
 
-/* AUTH */
+/* ================= AUTH ================= */
+
 onAuthStateChanged(auth, (user) => {
     if (!user) location.href = "index.html";
+
     currentUser = user;
 
     loadReceived();
@@ -27,18 +29,34 @@ onAuthStateChanged(auth, (user) => {
     loadFriends();
 });
 
-/* SEND */
+/* ================= SEND REQUEST ================= */
+
 window.sendRequest = async () => {
 
-    let email = searchUser.value;
+    let email = searchUser.value.trim();
+
+    if (!email) return alert("Enter email");
 
     let snap = await getDocs(
         query(collection(db,"users"), where("email","==",email))
     );
 
-    if (snap.empty) return alert("User not found");
+    if (snap.empty) return alert("User not found ❌");
 
     let target = snap.docs[0];
+
+    if (target.id === currentUser.uid)
+        return alert("You cannot add yourself");
+
+    // 🔥 prevent duplicate request
+    let existing = await getDocs(
+        query(collection(db,"friendRequests"),
+            where("from","==",currentUser.uid),
+            where("to","==",target.id)
+        )
+    );
+
+    if (!existing.empty) return alert("Already sent request");
 
     await addDoc(collection(db,"friendRequests"), {
         from: currentUser.uid,
@@ -46,95 +64,135 @@ window.sendRequest = async () => {
         status:"pending"
     });
 
-    alert("Request sent");
+    alert("Request sent ✅");
+    searchUser.value = "";
 };
 
-/* RECEIVED */
+/* ================= RECEIVED ================= */
+
 function loadReceived() {
 
     onSnapshot(
         query(collection(db,"friendRequests"),
         where("to","==",currentUser.uid),
         where("status","==","pending")),
-    snap => {
+    async snap => {
 
         let html = "";
 
-        snap.forEach(r => {
+        for (let r of snap.docs) {
+
             let d = r.data();
+
+            let userSnap = await getDocs(
+                query(collection(db,"users"),
+                where("__name__","==",d.from))
+            );
+
+            let name = userSnap.docs[0]?.data()?.name || "User";
 
             html += `
             <div>
-                ${d.from}
+                👤 ${name}
                 <div>
                     <button class="accept" onclick="accept('${r.id}','${d.from}')">✔</button>
                     <button class="reject" onclick="reject('${r.id}')">❌</button>
                 </div>
             </div>`;
-        });
+        }
 
         requestList.innerHTML = html || "No requests";
     });
 }
 
-/* SENT */
+/* ================= SENT ================= */
+
 function loadSent() {
 
     onSnapshot(
         query(collection(db,"friendRequests"),
         where("from","==",currentUser.uid),
         where("status","==","pending")),
-    snap => {
+    async snap => {
 
         let html = "";
 
-        snap.forEach(r => {
-            html += `<div>⏳ Pending request</div>`;
-        });
+        for (let r of snap.docs) {
+
+            let d = r.data();
+
+            let userSnap = await getDocs(
+                query(collection(db,"users"),
+                where("__name__","==",d.to))
+            );
+
+            let name = userSnap.docs[0]?.data()?.name || "User";
+
+            html += `<div>⏳ ${name}</div>`;
+        }
 
         sentList.innerHTML = html || "No sent requests";
     });
 }
 
-/* ACCEPT (FIXED) */
+/* ================= ACCEPT ================= */
+
 window.accept = async (id, fromUser) => {
 
     await updateDoc(doc(db,"friendRequests",id), {
         status:"accepted"
     });
 
+    // 🔥 store BOTH users
     await addDoc(collection(db,"friends"), {
-        user1: currentUser.uid,
-        user2: fromUser
+        users: [currentUser.uid, fromUser]
     });
 };
 
-/* REJECT */
+/* ================= REJECT ================= */
+
 window.reject = async (id) => {
+
     await updateDoc(doc(db,"friendRequests",id), {
         status:"rejected"
     });
 };
 
-/* FRIENDS (FIXED) */
+/* ================= FRIENDS ================= */
+
 function loadFriends() {
 
-    onSnapshot(collection(db,"friends"), snap => {
+    onSnapshot(collection(db,"friends"), async snap => {
 
         let html = "";
 
-        snap.forEach(f => {
+        for (let f of snap.docs) {
 
             let d = f.data();
 
-            if (d.user1 === currentUser.uid || d.user2 === currentUser.uid) {
+            if (!d.users.includes(currentUser.uid)) continue;
 
-                let friendId = d.user1 === currentUser.uid ? d.user2 : d.user1;
+            let friendId = d.users.find(u => u !== currentUser.uid);
 
-                html += `<div>👤 ${friendId}</div>`;
-            }
-        });
+            let userSnap = await getDocs(
+                query(collection(db,"users"),
+                where("__name__","==",friendId))
+            );
+
+            let name = userSnap.docs[0]?.data()?.name || "User";
+
+            html += `
+            <div class="friend" onclick="openFriend('${friendId}')">
+                👤 ${name}
+            </div>`;
+        }
 
         friendList.innerHTML = html || "No friends yet";
     });
 }
+
+/* ================= OPEN FRIEND ================= */
+
+window.openFriend = (id) => {
+    location.href = "view.html?uid=" + id;
+};
