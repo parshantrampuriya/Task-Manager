@@ -317,3 +317,8 @@ body {
 .task-item.done {
     background: rgba(255,255,255,0.05);
 }
+.completed {
+    text-decoration: line-through !
+    important;
+    opacity: 0.6;
+}
