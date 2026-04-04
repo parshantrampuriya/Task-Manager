@@ -278,3 +278,99 @@ button {
         justify-content:space-between;
     }
 }
+/* ================= MOBILE OPTIMIZATION ================= */
+
+@media (max-width:768px){
+
+    /* MAIN PADDING */
+    .main {
+        padding:15px;
+    }
+
+    /* NAVBAR */
+    .navbar {
+        padding:10px;
+        font-size:14px;
+    }
+
+    /* SEARCH BOX */
+    .box {
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .box input {
+        width:100%;
+        font-size:14px;
+    }
+
+    .box button {
+        width:100%;
+        font-size:14px;
+    }
+
+    /* LIST CARDS */
+    #requestList div,
+    #sentList div,
+    #friendList div {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+        padding:12px;
+    }
+
+    /* FRIEND NAME */
+    .friend-name {
+        font-size:16px;
+        font-weight:bold;
+    }
+
+    /* ACTION BUTTONS - FIX LAYOUT */
+    .friend-actions {
+        width:100%;
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        margin-top:5px;
+    }
+
+    /* BUTTON STYLE MOBILE */
+    .friend-actions button {
+        flex:1;
+        padding:10px;
+        font-size:13px;
+        border-radius:12px;
+        text-align:center;
+    }
+
+    /* REMOVE BUTTON SMALL FIX */
+    .friend-actions .remove {
+        flex:0.6;
+    }
+
+    /* HOVER REMOVE (MOBILE SAFE) */
+    .friend-actions button:hover {
+        transform:none;
+        box-shadow:none;
+    }
+
+    /* HEADINGS */
+    h3 {
+        font-size:16px;
+        margin-top:15px;
+    }
+
+    /* TOAST POSITION */
+    .toast {
+        right:10px;
+        left:10px;
+        text-align:center;
+    }
+
+    /* POPUP */
+    .action-popup {
+        right:10px;
+        left:10px;
+        text-align:center;
+    }
+}
