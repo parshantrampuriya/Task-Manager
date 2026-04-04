@@ -170,9 +170,20 @@ function loadFriends() {
 
             let d = f.data();
 
-            if (!d.users.includes(currentUser.uid)) continue;
+            let users = [];
 
-            let friendId = d.users.find(u => u !== currentUser.uid);
+            // 🔥 HANDLE BOTH OLD + NEW DATA
+            if (d.users) {
+                users = d.users;
+            } else if (d.user1 && d.user2) {
+                users = [d.user1, d.user2];
+            } else {
+                continue;
+            }
+
+            if (!users.includes(currentUser.uid)) continue;
+
+            let friendId = users.find(u => u !== currentUser.uid);
 
             let userSnap = await getDocs(
                 query(collection(db,"users"),
