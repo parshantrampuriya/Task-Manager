@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 
-<link rel="stylesheet" href="css/chat.css?
-    v=2">
+<link rel="stylesheet" href="css/chat.css?v=3">
 </head>
 
 <body>
 
-<!-- SIDEBAR (UNCHANGED SAME AS YOUR SYSTEM) -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
     <h2>⚡ Menu</h2>
 
@@ -23,40 +22,38 @@
     <button id="logoutBtn">🚪 Logout</button>
 </div>
 
-<div class="main">
-
-    <!-- NAVBAR -->
-   <div class="navbar">
+<!-- 🔥 FIXED NAVBAR -->
+<div class="chat-navbar">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
     <div class="chat-user">
         <h3 id="chatName">User</h3>
         <span id="status">Offline</span>
     </div>
 </div>
 
-    <!-- CHAT AREA -->
-    <div id="chatBox" class="chat-box"></div>
+<!-- 🔥 CHAT AREA -->
+<div id="chatBox" class="chat-box"></div>
 
-    <!-- INPUT -->
-    <div class="chat-input">
-        <input id="msgInput" placeholder="Type a message...">
-        <button onclick="sendMsg()">➤</button>
-    </div>
-
+<!-- 🔥 INPUT FIXED -->
+<div class="chat-input">
+    <input id="msgInput" placeholder="Type a message...">
+    <button onclick="sendMsg()">➤</button>
 </div>
-<!-- ACTION MODAL -->
+
+<!-- 🔥 ACTION MODAL (UPDATED - NO PIN) -->
 <div id="actionModal" class="action-modal">
   <div class="action-box">
     <h3>Message Options</h3>
 
     <button onclick="deleteForMe()">🗑 Delete for Me</button>
     <button onclick="deleteForAll()">❌ Delete for Everyone</button>
-    <button onclick="pinMsg()">📌 Pin Message</button>
 
     <button onclick="closeAction()" class="cancel">Cancel</button>
   </div>
 </div>
-<script type="module" src="js/chat.js? v=2"></script>
+
+<script type="module" src="js/chat.js?v=3"></script>
 <script type="module" src="js/menu.js"></script>
 
 </body>
