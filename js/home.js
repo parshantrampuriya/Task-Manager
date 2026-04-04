@@ -1,10 +1,3 @@
-const params = new
-  URLSearchParams(location.search);
-const viewuser = param.get("viewUser");
-
-let isViewMode = !!viewuser;
-let uid,
-
 import { auth, db } from "./firebase.js";
 
 import {
@@ -22,6 +15,14 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= VIEW MODE ================= */
+
+const params = new URLSearchParams(location.search);
+const viewUser = params.get("viewUser");
+
+let isViewMode = !!viewUser;
+let uid;
+
 /* GLOBAL */
 let currentTasks = [];
 let currentTaskId = null;
@@ -35,14 +36,25 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    let snap = await getDoc(doc(db, "users", user.uid));
+    // 🔥 FIXED UID LOGIC
+    uid = isViewMode ? viewUser : user.uid;
+
+    let snap = await getDoc(doc(db, "users", uid));
 
     if (snap.exists()) {
-        username.innerText = "👤 Welcome " + snap.data().name;
+        username.innerText = isViewMode
+            ? `👁 Viewing ${snap.data().name}`
+            : "👤 Welcome " + snap.data().name;
     }
 
-    loadTasks(user.uid);
-    loadGoalsHome(user.uid);
+    // 🔥 HIDE ADD BOX IN VIEW MODE
+    if (isViewMode) {
+        let box = document.getElementById("quickAddBox");
+        if (box) box.style.display = "none";
+    }
+
+    loadTasks(uid);
+    loadGoalsHome(uid);
 
     startCountdown();
 });
@@ -78,6 +90,8 @@ function startCountdown() {
 
 window.quickAddTask = async () => {
 
+    if (isViewMode) return; // 🔥 disable in view mode
+
     let text = quickTaskInput.value;
     let date = quickDateInput.value;
     let time = quickTimeInput.value;
@@ -100,6 +114,7 @@ window.quickAddTask = async () => {
 /* ================= TASKS ================= */
 
 function loadTasks(uid) {
+
     onSnapshot(collection(db, "tasks"), snap => {
 
         let tasks = [];
@@ -141,7 +156,6 @@ function renderHome(tasks) {
 
     let todayTasks = tasks.filter(t => t.date === today);
 
-    /* SORT */
     todayTasks.sort((a, b) => {
 
         if (a.completed !== b.completed) {
@@ -164,15 +178,19 @@ function renderHome(tasks) {
         <li class="task-item ${t.completed ? 'done' : ''} ${status}">
             
             <div style="display:flex; align-items:center; gap:10px; flex:1;">
-                <span>${t.text}</span>
+                <span class="${t.completed ? "completed" : ""}">
+                    ${t.text}
+                </span>
                 ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
             </div>
 
+            ${!isViewMode ? `
             <div class="task-actions">
                 <button onclick="toggle('${t.id}',${t.completed})">✔</button>
                 <button onclick="openModal('edit','${t.id}','${t.text}','${t.date}','${t.time || ''}')">✏️</button>
                 <button onclick="openModal('delete','${t.id}')">❌</button>
-            </div>
+            </div>` : ""}
+
         </li>`;
     });
 
@@ -183,6 +201,7 @@ function renderHome(tasks) {
 /* ================= GOALS ================= */
 
 function loadGoalsHome(uid) {
+
     onSnapshot(collection(db, "goals"), snap => {
 
         let goals = [];
@@ -197,7 +216,8 @@ function loadGoalsHome(uid) {
         goals.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         renderGoalsHome(goals);
-        setTimeout(enableDrag, 0);
+
+        if (!isViewMode) setTimeout(enableDrag, 0); // 🔥 disable drag in view
     });
 }
 
@@ -210,7 +230,7 @@ function renderGoalsHome(goals) {
         let percent = Math.round((g.done / g.total) * 100 || 0);
 
         html += `
-        <div class="goal-home-card" draggable="true" data-id="${g.id}">
+        <div class="goal-home-card" ${!isViewMode ? `draggable="true"` : ""} data-id="${g.id}">
             <b>${g.name}</b> → ${percent}%
             <div class="goal-home-bar">
                 <div class="goal-home-fill" style="width:${percent}%"></div>
@@ -267,6 +287,8 @@ function enableDrag() {
 
 window.openModal = (type, id, text="", date="", time="") => {
 
+    if (isViewMode) return; // 🔥 block edit
+
     currentTaskId = id;
     currentAction = type;
 
@@ -298,6 +320,8 @@ window.closeModal = () => {
 /* CONFIRM */
 window.confirmAction = async () => {
 
+    if (isViewMode) return;
+
     if (currentAction === "edit") {
         await updateDoc(doc(db, "tasks", currentTaskId), {
             text: modalText.value,
@@ -315,6 +339,9 @@ window.confirmAction = async () => {
 
 /* ACTION */
 window.toggle = (id, completed) => {
+
+    if (isViewMode) return;
+
     updateDoc(doc(db, "tasks", id), { completed: !completed });
 };
 
