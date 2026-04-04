@@ -258,26 +258,7 @@ button {
     opacity:1;
 }
 
-/* ================= MOBILE ================= */
-@media (max-width:768px) {
 
-    .box {
-        flex-direction:column;
-    }
-
-    #requestList div,
-    #sentList div,
-    #friendList div {
-        flex-direction:column;
-        align-items:flex-start;
-        gap:10px;
-    }
-
-    .friend-actions {
-        width:100%;
-        justify-content:space-between;
-    }
-}
 /* ================= MOBILE OPTIMIZATION ================= */
 
 @media (max-width:768px){
