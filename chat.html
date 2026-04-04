@@ -10,9 +10,10 @@
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR (UNCHANGED SAME AS YOUR SYSTEM) -->
 <div id="sidebar" class="sidebar">
     <h2>⚡ Menu</h2>
+
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
     <button onclick="goGoals()">🎯 Goals</button>
@@ -27,18 +28,18 @@
     <div class="navbar">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-        <div>
+        <div class="chat-user">
             <h3 id="chatName">Loading...</h3>
-            <small id="status">offline</small>
+            <span id="status">Offline</span>
         </div>
     </div>
 
-    <!-- CHAT BOX -->
+    <!-- CHAT AREA -->
     <div id="chatBox" class="chat-box"></div>
 
     <!-- INPUT -->
     <div class="chat-input">
-        <input id="msgInput" placeholder="Type message...">
+        <input id="msgInput" placeholder="Type a message...">
         <button onclick="sendMsg()">➤</button>
     </div>
 
