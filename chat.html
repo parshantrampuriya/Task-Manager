@@ -5,15 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 
-<link rel="stylesheet" href="css/chat.css?v=10">
+<link rel="stylesheet" href="css/chat.css?v=100">
 </head>
 
 <body>
 
-<!-- ================= SIDEBAR ================= -->
-
+<!-- SIDEBAR ONLY MENU -->
 <div id="sidebar" class="sidebar">
-
     <h2>⚡ Menu</h2>
 
     <button onclick="goHome()">🏠 Home</button>
@@ -21,10 +19,10 @@
     <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
     <button onclick="goProfile()">👤 Profile</button>
-    <button onclick="logout()">🚪 Logout</button>
-
+    <button id="logoutBtn">🚪 Logout</button>
 </div>
 
+<div class="main">
 
     <!-- NAVBAR -->
     <div class="navbar">
@@ -36,7 +34,7 @@
         </div>
     </div>
 
-    <!-- CHAT BOX -->
+    <!-- CHAT -->
     <div id="chatBox" class="chat-box"></div>
 
     <!-- INPUT -->
@@ -46,10 +44,9 @@
     </div>
 
 </div>
-<link rel="stylesheet" href="css/chat.css?
-    v=99">
-<script type="module" src="js/chat.js?v=10"></script>
-<script type="module" src="js/menu.js?v=10"></script>
+
+<script type="module" src="js/chat.js?v=100"></script>
+<script type="module" src="js/menu.js?v=100"></script>
 
 </body>
 </html>
