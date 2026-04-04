@@ -1,3 +1,10 @@
+const params = new
+  URLSearchParams(location.search);
+const viewuser = param.get("viewUser");
+
+let isViewMode = !!viewuser;
+let uid,
+
 import { auth, db } from "./firebase.js";
 
 import {
