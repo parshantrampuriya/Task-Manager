@@ -47,3 +47,26 @@ body {
     background:linear-gradient(#00cfff,#00ffcc);
     border-radius:10px;
 }
+/* ================= VIEW PAGE EXTRA ================= */
+
+/* disable hover click feeling */
+.task-item {
+    cursor:default !important;
+}
+
+/* completed task */
+.completed {
+    text-decoration: line-through;
+    opacity:0.6;
+}
+
+/* remove pointer for goals */
+.goal-home-card {
+    cursor:default !important;
+}
+
+/* optional label */
+.view-label {
+    font-size:12px;
+    color:#aaa;
+}
