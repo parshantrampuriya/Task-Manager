@@ -114,15 +114,30 @@ function loadMessages(){
 /* SELECT MESSAGE */
 window.selectMsg = (id)=>{
     selectedMsgId = id;
+    actionModal.classList.add("active");
+};
 
-    let choice = prompt("Type:\n1 = Delete\n2 = Pin");
+window.closeAction = ()=>{
+    actionModal.classList.remove("active");
+};
 
-    if(choice === "1"){
-        deleteOptions();
-    }
-    else if(choice === "2"){
-        pinMsg();
-    }
+window.deleteForMe = async ()=>{
+    await deleteDoc(doc(db,"messages",selectedMsgId));
+    closeAction();
+};
+
+window.deleteForAll = async ()=>{
+    await updateDoc(doc(db,"messages",selectedMsgId),{
+        text:"🚫 Message deleted"
+    });
+    closeAction();
+};
+
+window.pinMsg = async ()=>{
+    await updateDoc(doc(db,"messages",selectedMsgId),{
+        pinned:true
+    });
+    closeAction();
 };
 
 /* DELETE OPTIONS */
