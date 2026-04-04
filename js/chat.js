@@ -167,6 +167,6 @@ window.deleteForAll=async ()=>{
     closeModal();
 };
 
-window.toggleSidebar =() => {
+window.openMenu =() => {
   location.href = "menu.html " ;
 };
