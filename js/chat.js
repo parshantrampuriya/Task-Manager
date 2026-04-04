@@ -1,177 +1,109 @@
-import { auth, db } from "./firebase.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  where,
-  doc,
-  getDoc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* ================= GET PARAM ================= */
-
-const params = new URLSearchParams(window.location.search);
-const friendId = params.get("uid");
-
-let currentUser = null;
-
-/* ================= SAFE DOM ================= */
-
-const getEl = (id) => document.getElementById(id);
-
-/* ================= AUTH ================= */
-
-onAuthStateChanged(auth, async (user) => {
-
-    if (!user) {
-        location.href = "index.html";
-        return;
-    }
-
-    if (!friendId) {
-        alert("No user selected ❗");
-        location.href = "friends.html";
-        return;
-    }
-
-    currentUser = user;
-
-    loadFriend();
-    loadMessages();
-    setOnlineStatus();
-});
-
-/* ================= ONLINE STATUS ================= */
-
-async function setOnlineStatus() {
-
-    try {
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            online: true
-        });
-
-        window.addEventListener("beforeunload", async () => {
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                online: false
-            });
-        });
-
-    } catch (e) {
-        console.error("Online status error:", e);
-    }
+body {
+    margin:0;
+    font-family:'Segoe UI';
+    background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
+                url("../mahadev.png") center/cover;
+    color:white;
 }
 
-/* ================= LOAD FRIEND ================= */
-
-async function loadFriend() {
-
-    try {
-
-        const snap = await getDoc(doc(db, "users", friendId));
-
-        if (!snap.exists()) return;
-
-        const data = snap.data();
-
-        getEl("chatName").innerText = data.name || "User";
-
-        // realtime status
-        onSnapshot(doc(db, "users", friendId), (snap) => {
-
-            const d = snap.data();
-
-            if (!d) return;
-
-            let statusEl = getEl("status");
-
-            if (d.online) {
-                statusEl.innerText = "Online";
-                statusEl.className = "online";
-            } else {
-                statusEl.innerText = "Offline";
-                statusEl.className = "offline";
-            }
-        });
-
-    } catch (e) {
-        console.error("Friend load error:", e);
-    }
+/* NAVBAR */
+.navbar {
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:15px;
+    background:rgba(0,0,0,0.6);
+    border-radius:10px;
 }
 
-/* ================= CHAT ID ================= */
-
-function getChatId() {
-    return [currentUser.uid, friendId].sort().join("_");
+.chat-user h3 {
+    margin:0;
 }
 
-/* ================= SEND MESSAGE ================= */
+#status {
+    font-size:12px;
+    color:#aaa;
+}
 
-window.sendMsg = async () => {
+#status.online {
+    color:#00ffcc;
+}
 
-    const input = getEl("msgInput");
-    const text = input.value.trim();
+/* CHAT BOX */
+.chat-box {
+    height:70vh;
+    overflow-y:auto;
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
 
-    if (!text) return;
+/* MESSAGE */
+.msg {
+    max-width:70%;
+    padding:10px 15px;
+    border-radius:15px;
+    word-wrap:break-word;
+    animation:fade 0.2s ease;
+}
 
-    try {
+@keyframes fade {
+    from {opacity:0; transform:translateY(5px);}
+    to {opacity:1;}
+}
 
-        await addDoc(collection(db, "messages"), {
-            chatId: getChatId(),
-            sender: currentUser.uid,
-            text: text,
-            time: Date.now()
-        });
+/* MY MESSAGE */
+.me {
+    align-self:flex-end;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+}
 
-        input.value = "";
+/* OTHER MESSAGE */
+.other {
+    align-self:flex-start;
+    background:#222;
+}
 
-    } catch (e) {
-        console.error("Send error:", e);
+/* INPUT */
+.chat-input {
+    display:flex;
+    gap:10px;
+    padding:10px;
+    background:rgba(0,0,0,0.8);
+}
+
+.chat-input input {
+    flex:1;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    background:#111;
+    color:white;
+}
+
+.chat-input button {
+    padding:12px 15px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    cursor:pointer;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+    .chat-box {
+        height:65vh;
     }
-};
 
-/* ================= LOAD MESSAGES ================= */
+    .msg {
+        max-width:85%;
+        font-size:14px;
+    }
 
-function loadMessages() {
-
-    onSnapshot(
-        query(
-            collection(db, "messages"),
-            where("chatId", "==", getChatId())
-        ),
-        (snap) => {
-
-            let msgs = [];
-
-            snap.forEach(doc => {
-                msgs.push(doc.data());
-            });
-
-            msgs.sort((a, b) => a.time - b.time);
-
-            let html = "";
-
-            msgs.forEach(m => {
-
-                let cls = m.sender === currentUser.uid ? "me" : "other";
-
-                html += `
-                <div class="msg ${cls}">
-                    ${m.text}
-                </div>`;
-            });
-
-            const box = getEl("chatBox");
-            box.innerHTML = html;
-
-            // auto scroll
-            box.scrollTop = box.scrollHeight;
-        }
-    );
+    .chat-input input {
+        font-size:14px;
+    }
 }
