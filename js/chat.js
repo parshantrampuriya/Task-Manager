@@ -9,40 +9,28 @@ import {
   where,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const params = new URLSearchParams(location.search);
 const friendId = params.get("uid");
 
 let currentUser;
+let selectedMsgId = null;
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
-        location.href = "index.html";
-        return;
-    }
+    if (!user) location.href = "index.html";
 
     currentUser = user;
 
     loadFriend();
     loadMessages();
-    setOnline();
 });
 
-/* ONLINE STATUS */
-async function setOnline() {
-
-    await updateDoc(doc(db,"users",currentUser.uid), { online:true });
-
-    window.addEventListener("beforeunload", async () => {
-        await updateDoc(doc(db,"users",currentUser.uid), { online:false });
-    });
-}
-
-/* LOAD FRIEND */
+/* FRIEND */
 async function loadFriend() {
 
     let snap = await getDoc(doc(db,"users",friendId));
@@ -62,7 +50,7 @@ function chatId() {
     return [currentUser.uid, friendId].sort().join("_");
 }
 
-/* SEND */
+/* SEND MESSAGE */
 window.sendMsg = async () => {
 
     let text = msgInput.value.trim();
@@ -72,35 +60,93 @@ window.sendMsg = async () => {
         chatId: chatId(),
         sender: currentUser.uid,
         text,
-        time: Date.now()
+        time: Date.now(),
+        pinned:false
     });
 
     msgInput.value = "";
 };
 
-/* LOAD MESSAGES */
-function loadMessages() {
+/* ENTER KEY SEND */
+msgInput.addEventListener("keypress", (e)=>{
+    if(e.key === "Enter"){
+        sendMsg();
+    }
+});
+
+/* FORMAT TIME */
+function formatTime(t){
+    let d = new Date(t);
+    return d.getHours() + ":" + String(d.getMinutes()).padStart(2,'0');
+}
+
+/* LOAD */
+function loadMessages(){
 
     onSnapshot(
         query(collection(db,"messages"), where("chatId","==",chatId())),
-        snap => {
+        snap=>{
 
-            let msgs = [];
-
-            snap.forEach(d => msgs.push(d.data()));
+            let msgs=[];
+            snap.forEach(d=>msgs.push({id:d.id,...d.data()}));
 
             msgs.sort((a,b)=>a.time-b.time);
 
-            let html = "";
+            let html="";
 
             msgs.forEach(m=>{
+
                 let cls = m.sender === currentUser.uid ? "me":"other";
 
-                html += `<div class="msg ${cls}">${m.text}</div>`;
+                html+=`
+                <div class="msg ${cls}" onclick="selectMsg('${m.id}')">
+                    ${m.text}
+                    <div class="time">${formatTime(m.time)}</div>
+                </div>`;
             });
 
             chatBox.innerHTML = html;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     );
+}
+
+/* SELECT MESSAGE */
+window.selectMsg = (id)=>{
+    selectedMsgId = id;
+
+    let choice = prompt("Type:\n1 = Delete\n2 = Pin");
+
+    if(choice === "1"){
+        deleteOptions();
+    }
+    else if(choice === "2"){
+        pinMsg();
+    }
+};
+
+/* DELETE OPTIONS */
+async function deleteOptions(){
+
+    let choice = prompt("1 = Delete for me\n2 = Delete for everyone");
+
+    if(choice === "1"){
+        await deleteDoc(doc(db,"messages",selectedMsgId));
+    }
+
+    if(choice === "2"){
+        await updateDoc(doc(db,"messages",selectedMsgId),{
+            text:"🚫 Message deleted"
+        });
+    }
+}
+
+/* PIN MESSAGE */
+async function pinMsg(){
+
+    await updateDoc(doc(db,"messages",selectedMsgId),{
+        pinned:true
+    });
+
+    alert("Pinned 📌");
 }
