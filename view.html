@@ -6,6 +6,8 @@
 <title>View Dashboard</title>
 
 <link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/view.css"> <!-- optional extra polish -->
+
 </head>
 
 <body>
@@ -30,7 +32,14 @@
     <!-- NAVBAR -->
     <div class="navbar">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-        <h2 id="username">👤 Loading...</h2>
+
+        <div>
+            <h2 id="username">👤 Loading...</h2>
+            <small class="view-label">👁 Read-only view</small>
+        </div>
+
+        <!-- OPTIONAL BACK BUTTON -->
+        <button onclick="history.back()" style="margin-left:auto;">⬅ Back</button>
     </div>
 
     <!-- DASHBOARD -->
@@ -41,12 +50,12 @@
             <!-- LEFT PANEL -->
             <div class="left-panel">
 
-                <h2>📅 Tasks</h2>
-
-                <!-- 🔥 NO QUICK ADD (READ ONLY) -->
+                <h2>📅 Today's Tasks</h2>
 
                 <!-- TASK LIST -->
-                <div id="homeContent"></div>
+                <div id="homeContent">
+                    <!-- tasks will load here -->
+                </div>
 
             </div>
 
@@ -55,7 +64,9 @@
 
                 <h2>🎯 Goals Progress</h2>
 
-                <div id="goalsHomeContainer" class="goal-container"></div>
+                <div id="goalsHomeContainer" class="goal-container">
+                    <!-- goals will load here -->
+                </div>
 
             </div>
 
