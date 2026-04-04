@@ -44,15 +44,25 @@ function loadTasks() {
             tasks.push(doc.data());
         });
 
-        // 🔥 SAME SORT AS HOME
+        let today = new Date().toISOString().split("T")[0];
+
+        // 🔥 FILTER ONLY TODAY TASKS
+        tasks = tasks.filter(t => t.date === today);
+
+        // 🔥 SORT (PENDING FIRST → TIME ORDER)
         tasks.sort((a,b)=>{
 
-            if(!a.date) return 1;
-            if(!b.date) return -1;
+            if(a.completed !== b.completed){
+                return a.completed - b.completed;
+            }
 
-            return new Date(a.date) - new Date(b.date);
+            if(!a.time) return 1;
+            if(!b.time) return -1;
+
+            return a.time.localeCompare(b.time);
         });
 
+        // 🔥 RENDER SAME AS HOME
         tasks.forEach(t=>{
 
             html += `
@@ -66,10 +76,9 @@ function loadTasks() {
             </div>`;
         });
 
-        homeContent.innerHTML = html || "No tasks";
+        homeContent.innerHTML = html || "No tasks for today";
     });
 }
-
 /* ================= GOALS (HOME STYLE) ================= */
 
 function loadGoals() {
