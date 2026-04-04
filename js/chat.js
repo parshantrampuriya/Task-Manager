@@ -168,5 +168,5 @@ window.deleteForAll=async ()=>{
 };
 
 window.openMenu =() => {
-  location.href = "menu,html " ;
+  location.href = "menu.html " ;
 };
