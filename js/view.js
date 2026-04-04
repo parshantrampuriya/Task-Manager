@@ -75,7 +75,18 @@ function loadTasks() {
 
             </div>`;
         });
+tasks.forEach(t=>{
 
+    html += `
+    <div class="task-item">
+
+        <span class="${t.completed ? "completed":""}">
+            ${t.text}
+            ${t.time ? ` ⏰ ${t.time}`:""}
+        </span>
+
+    </div>`;
+});
         homeContent.innerHTML = html || "No tasks for today";
     });
 }
