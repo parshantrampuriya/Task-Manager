@@ -5,37 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 
-<link rel="stylesheet" href="css/chat.css?v=100">
+<link rel="stylesheet" href="css/chat.css?v=200">
 </head>
 
 <body>
 
-<!-- SIDEBAR ONLY MENU -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
     <h2>⚡ Menu</h2>
-
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
     <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
     <button onclick="goProfile()">👤 Profile</button>
-    <button id="logoutBtn">🚪 Logout</button>
 </div>
 
-<div class="main">
+<div class="chat-page">
 
-    <!-- NAVBAR -->
-    <div class="navbar">
+    <!-- HEADER -->
+    <div class="chat-header">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-        <div class="chat-user">
+        <div>
             <h3 id="chatName">User</h3>
             <span id="status">Offline</span>
         </div>
     </div>
 
-    <!-- CHAT -->
+    <!-- MESSAGES -->
     <div id="chatBox" class="chat-box"></div>
+
+    <!-- REPLY PREVIEW -->
+    <div id="replyBox" class="reply-box hidden"></div>
 
     <!-- INPUT -->
     <div class="chat-input">
@@ -45,8 +46,18 @@
 
 </div>
 
-<script type="module" src="js/chat.js?v=100"></script>
-<script type="module" src="js/menu.js?v=100"></script>
+<!-- DELETE MODAL -->
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Message Options</h3>
+    <button onclick="deleteForMe()">Delete for me</button>
+    <button onclick="deleteForAll()">Delete for everyone</button>
+    <button onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script type="module" src="js/chat.js?v=200"></script>
+<script type="module" src="js/menu.js?v=200"></script>
 
 </body>
 </html>
