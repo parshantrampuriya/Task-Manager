@@ -12,7 +12,8 @@ import {
   getDocs,
   onSnapshot,
   updateDoc,
-  doc
+  doc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let currentUser;
@@ -48,7 +49,6 @@ window.sendRequest = async () => {
     if (target.id === currentUser.uid)
         return alert("You cannot add yourself");
 
-    // 🔥 prevent duplicate request
     let existing = await getDocs(
         query(collection(db,"friendRequests"),
             where("from","==",currentUser.uid),
@@ -143,7 +143,6 @@ window.accept = async (id, fromUser) => {
         status:"accepted"
     });
 
-    // 🔥 store BOTH users
     await addDoc(collection(db,"friends"), {
         users: [currentUser.uid, fromUser]
     });
@@ -172,7 +171,6 @@ function loadFriends() {
 
             let users = [];
 
-            // 🔥 HANDLE BOTH OLD + NEW DATA
             if (d.users) {
                 users = d.users;
             } else if (d.user1 && d.user2) {
@@ -193,8 +191,18 @@ function loadFriends() {
             let name = userSnap.docs[0]?.data()?.name || "User";
 
             html += `
-            <div class="friend" onclick="openFriend('${friendId}')">
-                👤 ${name}
+            <div class="friend">
+                
+                <span class="friend-name" onclick="openFriend('${friendId}')">
+                    👤 ${name}
+                </span>
+
+                <div class="friend-actions">
+                    <button onclick="openChat('${friendId}')">💬 Chat</button>
+                    <button onclick="openFriend('${friendId}')">📊 View</button>
+                    <button class="remove" onclick="removeFriend('${f.id}')">❌</button>
+                </div>
+
             </div>`;
         }
 
@@ -202,8 +210,27 @@ function loadFriends() {
     });
 }
 
+/* ================= REMOVE FRIEND ================= */
+
+window.removeFriend = async (docId) => {
+
+    let confirmDelete = confirm("Remove this friend?");
+
+    if (!confirmDelete) return;
+
+    await deleteDoc(doc(db,"friends",docId));
+
+    alert("Friend removed ❌");
+};
+
 /* ================= OPEN FRIEND ================= */
 
 window.openFriend = (id) => {
     location.href = "view.html?uid=" + id;
+};
+
+/* ================= CHAT ================= */
+
+window.openChat = (id) => {
+    location.href = "chat.html?uid=" + id;
 };
