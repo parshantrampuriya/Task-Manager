@@ -1,137 +1,148 @@
 import { auth, db } from "./firebase.js";
-
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  where,
-  doc,
-  getDoc,
-  updateDoc
+  collection, addDoc, onSnapshot, query, where,
+  doc, getDoc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const params = new URLSearchParams(location.search);
-const friendId = params.get("uid");
+const friendId = new URLSearchParams(location.search).get("uid");
 
-let currentUser;
+let user, selectedMsg = null, replyMsg=null;
 
 /* AUTH */
-onAuthStateChanged(auth, async (user) => {
-
-    if (!user) location.href = "index.html";
-
-    currentUser = user;
-
-    /* SET ONLINE */
-    await updateDoc(doc(db,"users",user.uid),{
-        online:true,
-        lastSeen:Date.now()
-    });
-
+onAuthStateChanged(auth, async (u)=>{
+    user=u;
+    setOnline(true);
     loadFriend();
     loadMessages();
 });
 
-/* OFFLINE */
-window.addEventListener("beforeunload", async ()=>{
-    if(auth.currentUser){
-        await updateDoc(doc(db,"users",auth.currentUser.uid),{
-            online:false,
-            lastSeen:Date.now()
-        });
-    }
-});
+/* ONLINE */
+async function setOnline(val){
+    await updateDoc(doc(db,"users",user.uid),{
+        online:val,
+        lastSeen:Date.now()
+    });
+}
 
-/* FRIEND INFO */
+window.onbeforeunload=()=>setOnline(false);
+
+/* FRIEND */
 async function loadFriend(){
+    let s=await getDoc(doc(db,"users",friendId));
+    chatName.innerText=s.data().name;
 
-    let snap = await getDoc(doc(db,"users",friendId));
-    chatName.innerText = snap.data().name;
+    onSnapshot(doc(db,"users",friendId), snap=>{
+        let d=snap.data();
 
-    onSnapshot(doc(db,"users",friendId), s=>{
-        let d = s.data();
-
-        if(d.online){
-            status.innerText = "🟢 Online";
-            status.className="online";
-        }else{
-            let t = new Date(d.lastSeen || Date.now());
-            status.innerText = "Last seen " + t.toLocaleTimeString();
-        }
+        if(d.typing) status.innerText="Typing...";
+        else if(d.online) status.innerText="Online";
+        else status.innerText="Last seen "+new Date(d.lastSeen).toLocaleTimeString();
     });
 }
 
 /* CHAT ID */
-function chatId(){
-    return [currentUser.uid,friendId].sort().join("_");
+function cid(){
+    return [user.uid,friendId].sort().join("_");
 }
 
 /* SEND */
-window.sendMsg = async ()=>{
-    let text = msgInput.value.trim();
+window.sendMsg=async ()=>{
+    let text=msgInput.value.trim();
     if(!text) return;
 
     await addDoc(collection(db,"messages"),{
-        chatId:chatId(),
-        sender:currentUser.uid,
+        chatId:cid(),
+        sender:user.uid,
         text,
+        reply:replyMsg||null,
         time:Date.now(),
         seen:false
     });
 
     msgInput.value="";
+    replyMsg=null;
+    replyBox.classList.add("hidden");
 };
 
-/* ENTER SEND */
-msgInput.addEventListener("keypress", e=>{
-    if(e.key==="Enter") sendMsg();
-});
-
-/* LOAD MSG */
+/* LOAD */
 function loadMessages(){
+    onSnapshot(query(collection(db,"messages"),where("chatId","==",cid())),snap=>{
 
-    onSnapshot(
-        query(collection(db,"messages"), where("chatId","==",chatId())),
-        snap=>{
+        let arr=[];
+        snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+        arr.sort((a,b)=>a.time-b.time);
 
-            let msgs=[];
-            snap.forEach(d=>msgs.push({id:d.id,...d.data()}));
-            msgs.sort((a,b)=>a.time-b.time);
+        chatBox.innerHTML="";
 
-            let html="";
+        arr.forEach(m=>{
 
-            msgs.forEach(m=>{
+            if(m.sender!==user.uid && !m.seen){
+                updateDoc(doc(db,"messages",m.id),{seen:true});
+            }
 
-                let mine = m.sender===currentUser.uid;
+            let div=document.createElement("div");
+            div.className="msg "+(m.sender===user.uid?"me":"other");
 
-                if(!mine){
-                    updateDoc(doc(db,"messages",m.id),{seen:true});
-                }
+            div.innerHTML=`
+                ${m.reply?`<small>↩ ${m.reply}</small><br>`:""}
+                ${m.text}
+                <div class="meta">
+                    ${time(m.time)}
+                    ${m.sender===user.uid?`<span class="tick ${m.seen?"seen":""}">${m.seen?"✔✔":"✔"}</span>`:""}
+                </div>
+            `;
 
-                let tick="";
-                if(mine){
-                    tick = m.seen ? "✔✔" : "✔";
-                }
+            /* CLICK = DELETE */
+            div.onclick=()=>{
+                selectedMsg=m.id;
+                modal.classList.remove("hidden");
+            };
 
-                html+=`
-                <div class="msg ${mine?'me':'other'}">
-                    ${m.text}
-                    <div class="meta">
-                        ${formatTime(m.time)} ${tick}
-                    </div>
-                </div>`;
-            });
+            /* SWIPE / DRAG REPLY */
+            div.onmousedown=()=>{
+                replyMsg=m.text;
+                replyBox.innerText="Replying: "+m.text;
+                replyBox.classList.remove("hidden");
+            };
 
-            chatBox.innerHTML = html;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    );
+            chatBox.appendChild(div);
+        });
+
+        chatBox.scrollTop=chatBox.scrollHeight;
+    });
 }
 
+/* DELETE */
+window.deleteForMe=()=>{
+    deleteDoc(doc(db,"messages",selectedMsg));
+    closeModal();
+};
+
+window.deleteForAll=()=>{
+    updateDoc(doc(db,"messages",selectedMsg),{text:"🚫 Deleted"});
+    closeModal();
+};
+
+window.closeModal=()=>modal.classList.add("hidden");
+
 /* TIME */
-function formatTime(t){
+function time(t){
     let d=new Date(t);
     return d.getHours()+":"+String(d.getMinutes()).padStart(2,'0');
 }
+
+/* TYPING */
+msgInput.addEventListener("input",async ()=>{
+    await updateDoc(doc(db,"users",user.uid),{typing:true});
+
+    clearTimeout(window.tt);
+    window.tt=setTimeout(()=>{
+        updateDoc(doc(db,"users",user.uid),{typing:false});
+    },1000);
+});
+
+/* ENTER */
+msgInput.addEventListener("keypress",e=>{
+    if(e.key==="Enter") sendMsg();
+});
