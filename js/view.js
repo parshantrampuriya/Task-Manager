@@ -94,7 +94,11 @@ function loadGoals() {
 
             let g = doc.data();
 
-            let percent = Math.min((g.done/g.total)*100,100);
+            let percent = 0;
+
+            if (g.total && g.total > 0) {
+                percent = Math.min(Math.round((g.done / g.total) * 100), 100);
+            }
 
             html += `
             <div class="goal-home-card">
@@ -106,7 +110,10 @@ function loadGoals() {
                     style="width:${percent}%"></div>
                 </div>
 
-                <small>${g.done} / ${g.total}</small>
+                <small>
+                    ${g.done} / ${g.total} 
+                    (${percent}%)
+                </small>
 
             </div>`;
         });
