@@ -36,18 +36,18 @@ window.sendRequest = async () => {
 
     let email = searchUser.value.trim();
 
-    if (!email) return alert("Enter email");
+    if (!email) return showToast("Enter email ❗");
 
     let snap = await getDocs(
         query(collection(db,"users"), where("email","==",email))
     );
 
-    if (snap.empty) return alert("User not found ❌");
+    if (snap.empty) return showToast("User not found ❌");
 
     let target = snap.docs[0];
 
     if (target.id === currentUser.uid)
-        return alert("You cannot add yourself");
+        return showToast("You cannot add yourself ❗");
 
     let existing = await getDocs(
         query(collection(db,"friendRequests"),
@@ -56,7 +56,7 @@ window.sendRequest = async () => {
         )
     );
 
-    if (!existing.empty) return alert("Already sent request");
+    if (!existing.empty) return showToast("Already sent request ⚠️");
 
     await addDoc(collection(db,"friendRequests"), {
         from: currentUser.uid,
@@ -64,7 +64,7 @@ window.sendRequest = async () => {
         status:"pending"
     });
 
-    alert("Request sent ✅");
+    showToast("Request sent ✅");
     searchUser.value = "";
 };
 
@@ -146,6 +146,8 @@ window.accept = async (id, fromUser) => {
     await addDoc(collection(db,"friends"), {
         users: [currentUser.uid, fromUser]
     });
+
+    showToast("Friend added 🎉");
 };
 
 /* ================= REJECT ================= */
@@ -155,6 +157,8 @@ window.reject = async (id) => {
     await updateDoc(doc(db,"friendRequests",id), {
         status:"rejected"
     });
+
+    showToast("Request rejected ❌");
 };
 
 /* ================= FRIENDS ================= */
@@ -192,7 +196,7 @@ function loadFriends() {
 
             html += `
             <div class="friend">
-                
+
                 <span class="friend-name" onclick="openFriend('${friendId}')">
                     👤 ${name}
                 </span>
@@ -210,17 +214,18 @@ function loadFriends() {
     });
 }
 
-/* ================= REMOVE FRIEND ================= */
+/* ================= REMOVE FRIEND (PREMIUM) ================= */
 
-window.removeFriend = async (docId) => {
+window.removeFriend = (docId) => {
 
-    let confirmDelete = confirm("Remove this friend?");
-
-    if (!confirmDelete) return;
-
-    await deleteDoc(doc(db,"friends",docId));
-
-    alert("Friend removed ❌");
+    showConfirmModal(
+        "Remove Friend",
+        "Are you sure you want to remove this friend?",
+        async () => {
+            await deleteDoc(doc(db,"friends",docId));
+            showToast("Friend removed ❌");
+        }
+    );
 };
 
 /* ================= OPEN FRIEND ================= */
@@ -233,4 +238,35 @@ window.openFriend = (id) => {
 
 window.openChat = (id) => {
     location.href = "chat.html?uid=" + id;
+};
+
+/* ================= MODAL SYSTEM ================= */
+
+let confirmCallback = null;
+
+window.showConfirmModal = (title, text, callback) => {
+    confirmTitle.innerText = title;
+    confirmText.innerText = text;
+    confirmModal.classList.add("active");
+    confirmCallback = callback;
+};
+
+window.closeConfirm = () => {
+    confirmModal.classList.remove("active");
+};
+
+window.confirmYes = () => {
+    if (confirmCallback) confirmCallback();
+    closeConfirm();
+};
+
+/* ================= TOAST ================= */
+
+window.showToast = (msg) => {
+    toast.innerText = msg;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2000);
 };
