@@ -103,3 +103,49 @@ body {
     border-radius:10px;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
+/* ACTION MODAL */
+.action-modal {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,0.7);
+    z-index:9999;
+}
+
+.action-modal.active {
+    display:flex;
+}
+
+.action-box {
+    background:#111;
+    padding:20px;
+    border-radius:15px;
+    width:260px;
+    text-align:center;
+    box-shadow:0 0 20px #00cfff;
+}
+
+.action-box button {
+    width:100%;
+    margin:8px 0;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#222;
+    color:white;
+    cursor:pointer;
+}
+
+.action-box button:hover {
+    background:#00cfff;
+    color:black;
+}
+
+.cancel {
+    background:#ff4d4d !important;
+}
