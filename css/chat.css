@@ -1,7 +1,8 @@
 body {
     margin:0;
     font-family:'Segoe UI';
-    background:linear-gradient(black,#001f2f);
+    background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
+                url("../mahadev.png") center/cover;
     color:white;
 }
 
@@ -9,12 +10,26 @@ body {
 .navbar {
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:15px;
     padding:15px;
     background:rgba(0,0,0,0.6);
+    border-radius:10px;
 }
 
-/* CHAT AREA */
+.chat-user h3 {
+    margin:0;
+}
+
+#status {
+    font-size:12px;
+    color:#aaa;
+}
+
+#status.online {
+    color:#00ffcc;
+}
+
+/* CHAT BOX */
 .chat-box {
     height:70vh;
     overflow-y:auto;
@@ -27,16 +42,25 @@ body {
 /* MESSAGE */
 .msg {
     max-width:70%;
-    padding:10px;
-    border-radius:12px;
+    padding:10px 15px;
+    border-radius:15px;
+    word-wrap:break-word;
+    animation:fade 0.2s ease;
 }
 
+@keyframes fade {
+    from {opacity:0; transform:translateY(5px);}
+    to {opacity:1;}
+}
+
+/* MY MESSAGE */
 .me {
     align-self:flex-end;
-    background:linear-gradient(#00cfff,#00ffcc);
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
     color:black;
 }
 
+/* OTHER MESSAGE */
 .other {
     align-self:flex-start;
     background:#222;
@@ -45,30 +69,41 @@ body {
 /* INPUT */
 .chat-input {
     display:flex;
-    padding:10px;
     gap:10px;
-    background:#111;
+    padding:10px;
+    background:rgba(0,0,0,0.8);
 }
 
 .chat-input input {
     flex:1;
-    padding:10px;
-    border-radius:8px;
+    padding:12px;
+    border-radius:10px;
     border:none;
+    background:#111;
+    color:white;
 }
 
 .chat-input button {
-    padding:10px 15px;
+    padding:12px 15px;
     border:none;
-    border-radius:8px;
-    background:#00ffcc;
+    border-radius:10px;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    cursor:pointer;
 }
 
-/* ONLINE STATUS */
-#status.online {
-    color:#00ffcc;
-}
+/* MOBILE */
+@media(max-width:768px){
 
-#status.offline {
-    color:#aaa;
+    .chat-box {
+        height:65vh;
+    }
+
+    .msg {
+        max-width:85%;
+        font-size:14px;
+    }
+
+    .chat-input input {
+        font-size:14px;
+    }
 }
