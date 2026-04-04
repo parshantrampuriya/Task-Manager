@@ -19,7 +19,6 @@ import {
 let currentUser;
 
 /* ================= SAFE DOM ================= */
-
 const getEl = (id) => document.getElementById(id);
 
 /* ================= AUTH ================= */
@@ -53,6 +52,7 @@ window.sendRequest = async () => {
     if (target.id === currentUser.uid)
         return showToast("You cannot add yourself ❗");
 
+    // 🔥 Prevent duplicate request
     let existing = await getDocs(
         query(collection(db,"friendRequests"),
             where("from","==",currentUser.uid),
@@ -61,6 +61,15 @@ window.sendRequest = async () => {
     );
 
     if (!existing.empty) return showToast("Already sent ⚠️");
+
+    // 🔥 Prevent already friends
+    let alreadyFriend = await getDocs(collection(db,"friends"));
+    for (let f of alreadyFriend.docs) {
+        let users = f.data().users || [];
+        if (users.includes(currentUser.uid) && users.includes(target.id)) {
+            return showToast("Already friends 🤝");
+        }
+    }
 
     await addDoc(collection(db,"friendRequests"), {
         from: currentUser.uid,
@@ -147,6 +156,17 @@ window.accept = async (id, fromUser) => {
         status:"accepted"
     });
 
+    // 🔥 Avoid duplicate friend entry
+    let existing = await getDocs(collection(db,"friends"));
+
+    for (let f of existing.docs) {
+        let users = f.data().users || [];
+        if (users.includes(currentUser.uid) && users.includes(fromUser)) {
+            showToast("Already friends 🤝");
+            return;
+        }
+    }
+
     await addDoc(collection(db,"friends"), {
         users: [currentUser.uid, fromUser]
     });
@@ -176,10 +196,9 @@ function loadFriends() {
         for (let f of snap.docs) {
 
             let d = f.data();
+            let users = d.users || [];
 
-            let users = d.users || [d.user1, d.user2];
-
-            if (!users || !users.includes(currentUser.uid)) continue;
+            if (!users.includes(currentUser.uid)) continue;
 
             let friendId = users.find(u => u !== currentUser.uid);
 
@@ -224,10 +243,11 @@ window.removeFriend = (docId) => {
     );
 };
 
-/* ================= NAV ================= */
+/* ================= NAVIGATION ================= */
 
 window.openFriend = (id) => {
-    location.href = "view.html?uid=" + id;
+    // 🔥 IMPORTANT CHANGE → HOME VIEW MODE
+    location.href = "home.html?viewUser=" + id;
 };
 
 window.openChat = (id) => {
