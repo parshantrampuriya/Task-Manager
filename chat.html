@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 
-<link rel="stylesheet" href="css/chat.css?v=5">
+<link rel="stylesheet" href="css/chat.css?v=10">
 </head>
 
 <body>
@@ -13,6 +13,7 @@
 <!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
     <h2>⚡ Menu</h2>
+
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
     <button onclick="goGoals()">🎯 Goals</button>
@@ -34,31 +35,18 @@
     </div>
 
     <!-- CHAT BOX -->
-    <div class="chat-container">
+    <div id="chatBox" class="chat-box"></div>
 
-        <div id="chatBox" class="chat-box"></div>
-
-        <div class="chat-input">
-            <input id="msgInput" placeholder="Type a message...">
-            <button onclick="sendMsg()">➤</button>
-        </div>
-
+    <!-- INPUT -->
+    <div class="chat-input">
+        <input id="msgInput" placeholder="Type a message...">
+        <button onclick="sendMsg()">➤</button>
     </div>
 
 </div>
 
-<!-- ACTION MODAL -->
-<div id="actionModal" class="action-modal">
-  <div class="action-box">
-    <h3>Message Options</h3>
-    <button onclick="deleteForMe()">🗑 Delete for Me</button>
-    <button onclick="deleteForAll()">❌ Delete for Everyone</button>
-    <button onclick="closeAction()" class="cancel">Cancel</button>
-  </div>
-</div>
-
-<script type="module" src="js/chat.js?v=5"></script>
-<script type="module" src="js/menu.js"></script>
+<script type="module" src="js/chat.js?v=10"></script>
+<script type="module" src="js/menu.js?v=10"></script>
 
 </body>
 </html>
