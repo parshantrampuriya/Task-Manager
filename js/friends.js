@@ -18,6 +18,10 @@ import {
 
 let currentUser;
 
+/* ================= SAFE DOM ================= */
+
+const getEl = (id) => document.getElementById(id);
+
 /* ================= AUTH ================= */
 
 onAuthStateChanged(auth, (user) => {
@@ -34,7 +38,7 @@ onAuthStateChanged(auth, (user) => {
 
 window.sendRequest = async () => {
 
-    let email = searchUser.value.trim();
+    let email = getEl("searchUser")?.value.trim();
 
     if (!email) return showToast("Enter email ❗");
 
@@ -56,7 +60,7 @@ window.sendRequest = async () => {
         )
     );
 
-    if (!existing.empty) return showToast("Already sent request ⚠️");
+    if (!existing.empty) return showToast("Already sent ⚠️");
 
     await addDoc(collection(db,"friendRequests"), {
         from: currentUser.uid,
@@ -65,7 +69,7 @@ window.sendRequest = async () => {
     });
 
     showToast("Request sent ✅");
-    searchUser.value = "";
+    getEl("searchUser").value = "";
 };
 
 /* ================= RECEIVED ================= */
@@ -101,7 +105,7 @@ function loadReceived() {
             </div>`;
         }
 
-        requestList.innerHTML = html || "No requests";
+        getEl("requestList").innerHTML = html || "No requests";
     });
 }
 
@@ -131,7 +135,7 @@ function loadSent() {
             html += `<div>⏳ ${name}</div>`;
         }
 
-        sentList.innerHTML = html || "No sent requests";
+        getEl("sentList").innerHTML = html || "No sent";
     });
 }
 
@@ -147,7 +151,7 @@ window.accept = async (id, fromUser) => {
         users: [currentUser.uid, fromUser]
     });
 
-    showToast("Friend added 🎉");
+    showActionPopup("Friend Added 🎉","success");
 };
 
 /* ================= REJECT ================= */
@@ -158,7 +162,7 @@ window.reject = async (id) => {
         status:"rejected"
     });
 
-    showToast("Request rejected ❌");
+    showActionPopup("Request Rejected ❌","reject");
 };
 
 /* ================= FRIENDS ================= */
@@ -173,17 +177,9 @@ function loadFriends() {
 
             let d = f.data();
 
-            let users = [];
+            let users = d.users || [d.user1, d.user2];
 
-            if (d.users) {
-                users = d.users;
-            } else if (d.user1 && d.user2) {
-                users = [d.user1, d.user2];
-            } else {
-                continue;
-            }
-
-            if (!users.includes(currentUser.uid)) continue;
+            if (!users || !users.includes(currentUser.uid)) continue;
 
             let friendId = users.find(u => u !== currentUser.uid);
 
@@ -210,11 +206,11 @@ function loadFriends() {
             </div>`;
         }
 
-        friendList.innerHTML = html || "No friends yet";
+        getEl("friendList").innerHTML = html || "No friends yet";
     });
 }
 
-/* ================= REMOVE FRIEND (PREMIUM) ================= */
+/* ================= REMOVE FRIEND ================= */
 
 window.removeFriend = (docId) => {
 
@@ -228,31 +224,29 @@ window.removeFriend = (docId) => {
     );
 };
 
-/* ================= OPEN FRIEND ================= */
+/* ================= NAV ================= */
 
 window.openFriend = (id) => {
     location.href = "view.html?uid=" + id;
 };
 
-/* ================= CHAT ================= */
-
 window.openChat = (id) => {
     location.href = "chat.html?uid=" + id;
 };
 
-/* ================= MODAL SYSTEM ================= */
+/* ================= MODAL ================= */
 
 let confirmCallback = null;
 
 window.showConfirmModal = (title, text, callback) => {
-    confirmTitle.innerText = title;
-    confirmText.innerText = text;
-    confirmModal.classList.add("active");
+    getEl("confirmTitle").innerText = title;
+    getEl("confirmText").innerText = text;
+    getEl("confirmModal").classList.add("active");
     confirmCallback = callback;
 };
 
 window.closeConfirm = () => {
-    confirmModal.classList.remove("active");
+    getEl("confirmModal").classList.remove("active");
 };
 
 window.confirmYes = () => {
@@ -263,10 +257,23 @@ window.confirmYes = () => {
 /* ================= TOAST ================= */
 
 window.showToast = (msg) => {
-    toast.innerText = msg;
-    toast.classList.add("show");
+    let t = getEl("toast");
+    t.innerText = msg;
+    t.classList.add("show");
 
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 2000);
+    setTimeout(() => t.classList.remove("show"), 2000);
+};
+
+/* ================= ACTION POPUP ================= */
+
+window.showActionPopup = (msg,type) => {
+
+    let p = getEl("actionPopup");
+
+    p.innerText = msg;
+    p.className = "action-popup show " + type;
+
+    setTimeout(()=>{
+        p.classList.remove("show");
+    },2000);
 };
