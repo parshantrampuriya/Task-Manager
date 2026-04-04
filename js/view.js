@@ -8,12 +8,12 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GET FRIEND ID ================= */
+/* ================= GET UID ================= */
 
 const params = new URLSearchParams(location.search);
 const uid = params.get("uid");
 
-/* ================= LOAD USER NAME ================= */
+/* ================= USER ================= */
 
 async function loadUser() {
 
@@ -27,7 +27,7 @@ async function loadUser() {
     document.getElementById("username").innerText = "👤 " + name;
 }
 
-/* ================= LOAD TASKS ================= */
+/* ================= TASKS (HOME STYLE) ================= */
 
 function loadTasks() {
 
@@ -38,21 +38,39 @@ function loadTasks() {
 
         let html = "";
 
-        snap.forEach(doc => {
+        let tasks = [];
 
-            let t = doc.data();
+        snap.forEach(doc=>{
+            tasks.push(doc.data());
+        });
+
+        // 🔥 SAME SORT AS HOME
+        tasks.sort((a,b)=>{
+
+            if(!a.date) return 1;
+            if(!b.date) return -1;
+
+            return new Date(a.date) - new Date(b.date);
+        });
+
+        tasks.forEach(t=>{
 
             html += `
-            <div class="card ${t.completed ? "completed":""}">
-                ${t.text}
+            <div class="task-item ${t.completed ? "completed":""}">
+
+                <span>
+                    ${t.text}
+                    ${t.time ? `⏰ ${t.time}`:""}
+                </span>
+
             </div>`;
         });
 
-        taskList.innerHTML = html || "No tasks";
+        homeContent.innerHTML = html || "No tasks";
     });
 }
 
-/* ================= LOAD GOALS ================= */
+/* ================= GOALS (HOME STYLE) ================= */
 
 function loadGoals() {
 
@@ -63,29 +81,30 @@ function loadGoals() {
 
         let html = "";
 
-        snap.forEach(doc => {
+        snap.forEach(doc=>{
 
             let g = doc.data();
+
             let percent = Math.min((g.done/g.total)*100,100);
 
             html += `
-            <div class="card">
-                <b>${g.name}</b><br>
-                ${g.done} / ${g.total}
+            <div class="goal-home-card">
 
-                <div class="bar">
-                    <div class="fill" style="width:${percent}%"></div>
+                <h4>${g.name}</h4>
+
+                <div class="goal-home-bar">
+                    <div class="goal-home-fill"
+                    style="width:${percent}%"></div>
                 </div>
+
+                <small>${g.done} / ${g.total}</small>
+
             </div>`;
         });
 
-        goalList.innerHTML = html || "No goals";
+        goalsHomeContainer.innerHTML = html || "No goals";
     });
 }
-
-/* ================= BACK ================= */
-
-window.goBack = () => history.back();
 
 /* ================= INIT ================= */
 
