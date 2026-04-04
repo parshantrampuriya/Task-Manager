@@ -3,32 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>View Profile</title>
+<title>View Dashboard</title>
 
-<link rel="stylesheet" href="css/view.css">
+<link rel="stylesheet" href="css/home.css">
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+    <h2>⚡ Menu</h2>
+
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
 <div class="main">
 
     <!-- NAVBAR -->
     <div class="navbar">
-        <button onclick="goBack()">⬅ Back</button>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <h2 id="username">👤 Loading...</h2>
     </div>
 
-    <!-- TASKS -->
-    <h3>📋 Tasks</h3>
-    <div id="taskList"></div>
+    <!-- DASHBOARD -->
+    <div class="container">
 
-    <!-- GOALS -->
-    <h3>🎯 Goals</h3>
-    <div id="goalList"></div>
+        <div class="dashboard">
+
+            <!-- LEFT PANEL -->
+            <div class="left-panel">
+
+                <h2>📅 Tasks</h2>
+
+                <!-- 🔥 NO QUICK ADD (READ ONLY) -->
+
+                <!-- TASK LIST -->
+                <div id="homeContent"></div>
+
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="right-panel">
+
+                <h2>🎯 Goals Progress</h2>
+
+                <div id="goalsHomeContainer" class="goal-container"></div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
 <script type="module" src="js/view.js"></script>
+<script type="module" src="js/menu.js"></script>
 
 </body>
 </html>
