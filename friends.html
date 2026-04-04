@@ -1,6 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends</title>
+
+<link rel="stylesheet" href="css/friends.css">
+</head>
+
 <body>
 
-<!-- SAME MENU AS OTHER PAGES -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
     <h2>⚡ Menu</h2>
 
@@ -21,29 +31,25 @@
 
     <div class="container">
 
-        <!-- SEARCH -->
         <div class="box">
             <input id="searchUser" placeholder="Enter email...">
             <button onclick="sendRequest()">➕ Send</button>
         </div>
 
-        <!-- 🔥 RECEIVED -->
         <h3>📩 Received Requests</h3>
         <div id="requestList"></div>
 
-        <!-- 🔥 SENT -->
         <h3>📤 Sent Requests</h3>
         <div id="sentList"></div>
 
-        <!-- 🔥 FRIENDS -->
         <h3>🤝 Your Friends</h3>
         <div id="friendList"></div>
 
     </div>
-
 </div>
 
 <script type="module" src="js/friends.js"></script>
 <script type="module" src="js/menu.js"></script>
 
 </body>
+</html>
