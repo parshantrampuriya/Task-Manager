@@ -17,8 +17,7 @@ import {
 
 let currentUser;
 
-/* ================= AUTH ================= */
-
+/* AUTH */
 onAuthStateChanged(auth, (user) => {
     if (!user) location.href = "index.html";
     currentUser = user;
@@ -28,8 +27,7 @@ onAuthStateChanged(auth, (user) => {
     loadFriends();
 });
 
-/* ================= SEND ================= */
-
+/* SEND */
 window.sendRequest = async () => {
 
     let email = searchUser.value;
@@ -38,7 +36,7 @@ window.sendRequest = async () => {
         query(collection(db,"users"), where("email","==",email))
     );
 
-    if (snap.empty) return alert("User not found ❌");
+    if (snap.empty) return alert("User not found");
 
     let target = snap.docs[0];
 
@@ -48,76 +46,57 @@ window.sendRequest = async () => {
         status:"pending"
     });
 
-    alert("Sent ✅");
+    alert("Request sent");
 };
 
-/* ================= RECEIVED ================= */
-
+/* RECEIVED */
 function loadReceived() {
 
     onSnapshot(
         query(collection(db,"friendRequests"),
         where("to","==",currentUser.uid),
         where("status","==","pending")),
-    async snap => {
+    snap => {
 
         let html = "";
 
-        for (let r of snap.docs) {
-
+        snap.forEach(r => {
             let d = r.data();
-
-            let u = await getDocs(
-                query(collection(db,"users"), where("__name__","==",d.from))
-            );
-
-            let name = u.docs[0]?.data().name;
 
             html += `
             <div>
-                👤 ${name}
+                ${d.from}
                 <div>
-                    <button onclick="accept('${r.id}','${d.from}')">✔</button>
-                    <button onclick="reject('${r.id}')">❌</button>
+                    <button class="accept" onclick="accept('${r.id}','${d.from}')">✔</button>
+                    <button class="reject" onclick="reject('${r.id}')">❌</button>
                 </div>
             </div>`;
-        }
+        });
 
         requestList.innerHTML = html || "No requests";
     });
 }
 
-/* ================= SENT ================= */
-
+/* SENT */
 function loadSent() {
 
     onSnapshot(
         query(collection(db,"friendRequests"),
         where("from","==",currentUser.uid),
         where("status","==","pending")),
-    async snap => {
+    snap => {
 
         let html = "";
 
-        for (let r of snap.docs) {
-
-            let d = r.data();
-
-            let u = await getDocs(
-                query(collection(db,"users"), where("__name__","==",d.to))
-            );
-
-            let name = u.docs[0]?.data().name;
-
-            html += `<div>⏳ ${name}</div>`;
-        }
+        snap.forEach(r => {
+            html += `<div>⏳ Pending request</div>`;
+        });
 
         sentList.innerHTML = html || "No sent requests";
     });
 }
 
-/* ================= ACCEPT ================= */
-
+/* ACCEPT (FIXED) */
 window.accept = async (id, fromUser) => {
 
     await updateDoc(doc(db,"friendRequests",id), {
@@ -125,52 +104,37 @@ window.accept = async (id, fromUser) => {
     });
 
     await addDoc(collection(db,"friends"), {
-        users:[fromUser,currentUser.uid]
+        user1: currentUser.uid,
+        user2: fromUser
     });
 };
 
-/* ================= REJECT ================= */
-
+/* REJECT */
 window.reject = async (id) => {
     await updateDoc(doc(db,"friendRequests",id), {
         status:"rejected"
     });
 };
 
-/* ================= FRIENDS ================= */
-
+/* FRIENDS (FIXED) */
 function loadFriends() {
 
-    onSnapshot(collection(db,"friends"), async snap => {
+    onSnapshot(collection(db,"friends"), snap => {
 
         let html = "";
 
-        for (let f of snap.docs) {
+        snap.forEach(f => {
 
             let d = f.data();
 
-            if (!d.users.includes(currentUser.uid)) continue;
+            if (d.user1 === currentUser.uid || d.user2 === currentUser.uid) {
 
-            let friendId = d.users.find(u => u !== currentUser.uid);
+                let friendId = d.user1 === currentUser.uid ? d.user2 : d.user1;
 
-            let u = await getDocs(
-                query(collection(db,"users"), where("__name__","==",friendId))
-            );
-
-            let name = u.docs[0]?.data().name;
-
-            html += `
-            <div onclick="openFriend('${friendId}')">
-                👤 ${name}
-            </div>`;
-        }
+                html += `<div>👤 ${friendId}</div>`;
+            }
+        });
 
         friendList.innerHTML = html || "No friends yet";
     });
 }
-
-/* ================= VIEW ================= */
-
-window.openFriend = (id) => {
-    location.href = "view.html?uid=" + id;
-};
