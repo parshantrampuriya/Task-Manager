@@ -22,6 +22,8 @@ body {
 /* ================= MAIN ================= */
 .main {
     padding:20px;
+    max-width:900px;
+    margin:auto;
 }
 
 /* ================= SEARCH ================= */
@@ -38,7 +40,6 @@ body {
     border:1px solid #00cfff;
     background:rgba(255,255,255,0.1);
     color:white;
-    box-shadow:0 0 8px rgba(0,255,255,0.2);
 }
 
 .box button {
@@ -53,7 +54,6 @@ body {
 
 .box button:hover {
     transform:scale(1.05);
-    box-shadow:0 0 10px rgba(0,255,255,0.5);
 }
 
 /* ================= LIST ================= */
@@ -67,22 +67,16 @@ body {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    box-shadow:0 0 10px rgba(0,255,255,0.25);
     transition:0.3s;
 }
 
 #requestList div:hover,
 #sentList div:hover,
 #friendList div:hover {
-    transform:translateX(5px);
+    transform:translateY(-3px);
 }
 
 /* ================= BUTTONS ================= */
-button {
-    cursor:pointer;
-}
-
-/* ACCEPT */
 .accept {
     background:linear-gradient(45deg,#00ffcc,#00cfff);
     border:none;
@@ -90,7 +84,6 @@ button {
     border-radius:8px;
 }
 
-/* REJECT */
 .reject {
     background:linear-gradient(45deg,#ff4d4d,#ff0000);
     border:none;
@@ -107,8 +100,6 @@ button {
     height:100vh;
     padding:20px;
     background: rgba(0,0,0,0.9);
-    backdrop-filter: blur(10px);
-    box-shadow:0 0 20px rgba(0,255,255,0.3);
     transform:translateX(-100%);
     transition:0.3s;
     z-index:1000;
@@ -126,22 +117,27 @@ button {
     border:none;
     border-radius:10px;
     color:white;
-    transition:0.3s;
 }
 
 .sidebar button:hover {
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    background:#00cfff;
     color:black;
 }
 
-/* ================= FRIEND ITEM ================= */
+/* ================= FRIEND ================= */
 .friend {
     display:flex;
     justify-content:space-between;
     align-items:center;
+    gap:10px;
 }
 
-/* ================= FRIEND ACTIONS ================= */
+.friend-name {
+    font-size:16px;
+    font-weight:600;
+}
+
+/* ================= ACTION BUTTONS ================= */
 .friend-actions {
     display:flex;
     gap:8px;
@@ -153,48 +149,37 @@ button {
     border-radius:20px;
     font-size:13px;
     cursor:pointer;
-    transition:0.3s;
     font-weight:600;
 }
 
 /* CHAT */
 .friend-actions button:nth-child(1) {
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    background:#00cfff;
     color:black;
 }
 
 /* VIEW */
 .friend-actions button:nth-child(2) {
-    background:linear-gradient(45deg,#4facfe,#00f2fe);
+    background:#4facfe;
     color:black;
 }
 
 /* REMOVE */
-.friend-actions button:nth-child(3),
 .remove {
-    background:linear-gradient(45deg,#ff4d4d,#ff0000);
+    background:#ff4d4d;
     color:white;
 }
 
-/* HOVER EFFECT */
-.friend-actions button:hover {
-    transform:scale(1.08);
-    box-shadow:0 0 10px rgba(0,255,255,0.5);
-}
-
-/* ================= FIX MODAL ================= */
+/* ================= MODAL ================= */
 .confirm-modal {
     position:fixed;
     top:0;
     left:0;
     width:100%;
     height:100%;
-
-    display:none; /* 🔥 FIXES PERMANENT ISSUE */
-
+    display:none;
     justify-content:center;
     align-items:center;
-
     background:rgba(0,0,0,0.7);
     z-index:9999;
 }
@@ -204,154 +189,105 @@ button {
 }
 
 .confirm-box {
-    width:320px;
-    padding:25px;
-    border-radius:15px;
-    background: rgba(0,0,0,0.95);
-    box-shadow:0 0 25px rgba(0,255,255,0.5);
+    width:300px;
+    padding:20px;
+    border-radius:12px;
+    background:#111;
     text-align:center;
 }
 
-/* ================= ACTION POPUP ================= */
+/* ================= POPUP ================= */
 .action-popup {
     position:fixed;
-    top:20px;
-    right:20px;
-    padding:12px 20px;
-    border-radius:10px;
-    font-weight:bold;
+    top:15px;
+    right:15px;
+    padding:10px 15px;
+    border-radius:8px;
     opacity:0;
-    transform:translateY(-20px);
     transition:0.3s;
     z-index:9999;
 }
 
 .action-popup.show {
     opacity:1;
-    transform:translateY(0);
 }
 
 .action-popup.success {
-    background:linear-gradient(45deg,#00ffcc,#00cfff);
+    background:#00ffcc;
     color:black;
 }
 
 .action-popup.reject {
-    background:linear-gradient(45deg,#ff4d4d,#ff0000);
-    color:white;
+    background:#ff4d4d;
 }
 
 /* ================= TOAST ================= */
 .toast {
     position:fixed;
-    bottom:20px;
-    right:20px;
+    bottom:15px;
+    right:15px;
     background:#00ffcc;
     color:black;
-    padding:10px 15px;
+    padding:10px;
     border-radius:8px;
     opacity:0;
-    transition:0.3s;
 }
 
 .toast.show {
     opacity:1;
 }
 
+/* ================= MOBILE (FIXED PROPERLY) ================= */
+@media screen and (max-width:768px){
 
-/* ================= MOBILE OPTIMIZATION ================= */
-
-@media (max-width:768px){
-
-    /* MAIN PADDING */
     .main {
-        padding:15px;
-    }
-
-    /* NAVBAR */
-    .navbar {
-        padding:10px;
-        font-size:14px;
-    }
-
-    /* SEARCH BOX */
-    .box {
-        flex-direction:column;
-        gap:8px;
-    }
-
-    .box input {
-        width:100%;
-        font-size:14px;
-    }
-
-    .box button {
-        width:100%;
-        font-size:14px;
-    }
-
-    /* LIST CARDS */
-    #requestList div,
-    #sentList div,
-    #friendList div {
-        flex-direction:column;
-        align-items:flex-start;
-        gap:10px;
         padding:12px;
     }
 
-    /* FRIEND NAME */
-    .friend-name {
-        font-size:16px;
-        font-weight:bold;
+    .box {
+        flex-direction:column;
     }
 
-    /* ACTION BUTTONS - FIX LAYOUT */
+    .box input,
+    .box button {
+        width:100%;
+    }
+
+    /* CARD FIX */
+    #friendList div {
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    /* BUTTONS IN ROW */
     .friend-actions {
         width:100%;
-        display:flex;
-        justify-content:space-between;
-        gap:8px;
-        margin-top:5px;
+        display:grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap:6px;
     }
 
-    /* BUTTON STYLE MOBILE */
     .friend-actions button {
-        flex:1;
+        width:100%;
         padding:10px;
-        font-size:13px;
-        border-radius:12px;
-        text-align:center;
+        font-size:12px;
+        border-radius:10px;
     }
 
-    /* REMOVE BUTTON SMALL FIX */
-    .friend-actions .remove {
-        flex:0.6;
+    .remove {
+        width:45px;
     }
 
-    /* HOVER REMOVE (MOBILE SAFE) */
-    .friend-actions button:hover {
-        transform:none;
-        box-shadow:none;
-    }
-
-    /* HEADINGS */
+    /* TEXT */
     h3 {
         font-size:16px;
-        margin-top:15px;
     }
 
-    /* TOAST POSITION */
-    .toast {
-        right:10px;
-        left:10px;
-        text-align:center;
-    }
-
-    /* POPUP */
+    /* POPUPS FULL WIDTH */
+    .toast,
     .action-popup {
-        right:10px;
         left:10px;
+        right:10px;
         text-align:center;
     }
 }
