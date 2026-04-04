@@ -45,7 +45,18 @@
     </div>
 
 </div>
+<!-- ACTION MODAL -->
+<div id="actionModal" class="action-modal">
+  <div class="action-box">
+    <h3>Message Options</h3>
 
+    <button onclick="deleteForMe()">🗑 Delete for Me</button>
+    <button onclick="deleteForAll()">❌ Delete for Everyone</button>
+    <button onclick="pinMsg()">📌 Pin Message</button>
+
+    <button onclick="closeAction()" class="cancel">Cancel</button>
+  </div>
+</div>
 <script type="module" src="js/chat.js? v=2"></script>
 <script type="module" src="js/menu.js"></script>
 
