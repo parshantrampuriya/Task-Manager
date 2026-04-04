@@ -70,3 +70,13 @@ body {
     font-size:12px;
     color:#aaa;
 }
+/* FORCE STRIKE */
+.completed {
+    text-decoration: line-through !important;
+    opacity:0.6;
+}
+
+/* EXTRA SAFETY */
+.task-item .completed {
+    text-decoration: line-through !important;
+}
