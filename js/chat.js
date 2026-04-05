@@ -14,9 +14,11 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= SAFE GET ELEMENT ================= */
 function getEl(id){
- return document.getElementById(id);
+    return document.getElementById(id);
 }
+
 const params = new URLSearchParams(location.search);
 const friendId = params.get("uid");
 
@@ -27,10 +29,17 @@ let replyData = null;
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async (user)=>{
 
-    if(!user) location.href="index.html";
+    if(!user){
+        location.href="index.html";
+        return;
+    }
 
     currentUser = user;
- getE1("replybox").style.display = "none";
+
+    // hide reply box safely
+    const rb = getEl("replyBox");
+    if(rb) rb.style.display = "none";
+
     await updateDoc(doc(db,"users",user.uid),{
         online:true,
         lastSeen:Date.now(),
@@ -86,7 +95,9 @@ function chatId(){
 /* ================= SEND ================= */
 window.sendMsg = async ()=>{
 
-    let text = getEl("msgInput").value.trim();
+    let input = getEl("msgInput");
+    let text = input.value.trim();
+
     if(!text) return;
 
     await addDoc(collection(db,"messages"),{
@@ -98,39 +109,51 @@ window.sendMsg = async ()=>{
         reply: replyData
     });
 
-    getEl("msgInput").value="";
+    input.value="";
     cancelReply();
 
-    // stop typing
-    updateDoc(doc(db,"users",currentUser.uid),{typing:false});
+    await updateDoc(doc(db,"users",currentUser.uid),{
+        typing:false
+    });
 };
 
-/* ================= ENTER SEND ================= */
-document.addEventListener("DOMContentLoaded",()=>{
-getEl("msgInput").addEventListener("keypress",(e)=>{
-    if(e.key==="Enter"){
-        e.preventDefault();
-        sendMsg();
-    }
-});
+/* ================= DOM READY ================= */
+document.addEventListener("DOMContentLoaded", ()=>{
 
-/* ================= TYPING ================= */
-getEl("msgInput").addEventListener("input", async ()=>{
-    await updateDoc(doc(db,"users",currentUser.uid),{
-        typing: true
+    const input = getEl("msgInput");
+
+    if(!input) return;
+
+    /* ENTER SEND */
+    input.addEventListener("keypress",(e)=>{
+        if(e.key==="Enter"){
+            e.preventDefault();
+            sendMsg();
+        }
     });
 
-    setTimeout(()=>{
-        updateDoc(doc(db,"users",currentUser.uid),{
-            typing:false
+    /* TYPING */
+    input.addEventListener("input", async ()=>{
+        if(!currentUser) return;
+
+        await updateDoc(doc(db,"users",currentUser.uid),{
+            typing:true
         });
-    },1000);
+
+        setTimeout(()=>{
+            updateDoc(doc(db,"users",currentUser.uid),{
+                typing:false
+            });
+        },1000);
+    });
+
 });
 
 /* ================= TIME ================= */
 function formatTime(t){
     let d=new Date(t);
-    return d.getHours()+":"+String(d.getMinutes()).padStart(2,'0');
+    return d.getHours()+":"+
+           String(d.getMinutes()).padStart(2,'0');
 }
 
 /* ================= LOAD ================= */
@@ -151,11 +174,14 @@ function loadMessages(){
 
                 let cls = m.sender===currentUser.uid ? "me":"other";
 
-                /* SEEN */
+                /* SEEN UPDATE */
                 if(m.sender!==currentUser.uid && !m.seen){
-                    await updateDoc(doc(db,"messages",m.id),{seen:true});
+                    await updateDoc(doc(db,"messages",m.id),{
+                        seen:true
+                    });
                 }
 
+                /* TICKS */
                 let ticks="";
                 if(m.sender===currentUser.uid){
                     ticks = m.seen 
@@ -163,26 +189,31 @@ function loadMessages(){
                         : `<span class="sent">✔</span>`;
                 }
 
-                /* REPLY UI */
-                let replyHtml = "";
+                /* REPLY PREVIEW */
+                let replyHtml="";
                 if(m.reply){
                     replyHtml = `
-                    <div class="reply-preview">
-                        ${m.reply.text}
-                    </div>`;
+                        <div class="reply-preview">
+                            ${m.reply.text}
+                        </div>`;
                 }
 
                 html+=`
                 <div class="msg ${cls}" onclick="selectMsg('${m.id}','${m.text}')">
                     ${replyHtml}
                     ${m.text}
-                    <div class="meta">${formatTime(m.time)} ${ticks}</div>
+                    <div class="meta">
+                        ${formatTime(m.time)} ${ticks}
+                    </div>
                 </div>`;
             }
 
             let box = getEl("chatBox");
-            box.innerHTML = html;
-            box.scrollTop = box.scrollHeight;
+
+            if(box){
+                box.innerHTML = html;
+                box.scrollTop = box.scrollHeight;
+            }
         }
     );
 }
@@ -190,7 +221,8 @@ function loadMessages(){
 /* ================= SELECT ================= */
 window.selectMsg=(id,text)=>{
     selectedMsgId=id;
-    replyData = {text}; // prepare reply
+    replyData = {text};
+
     getEl("modal").classList.add("active");
 };
 
@@ -214,18 +246,28 @@ window.deleteForAll=async ()=>{
 
 /* ================= REPLY ================= */
 window.replyMsg=()=>{
-    getEl("replyBox").style.display="flex";
-    getEl("replyText").innerText = replyData.text;
+    let box = getEl("replyBox");
+
+    if(box){
+        box.style.display="flex";
+        getEl("replyText").innerText = replyData.text;
+    }
+
     closeModal();
 };
 
-/* CANCEL REPLY */
+/* ================= CANCEL REPLY ================= */
 window.cancelReply=()=>{
     replyData=null;
-    getEl("replyBox").style.display="none";
+
+    let box = getEl("replyBox");
+    if(box) box.style.display="none";
 };
 
-/* ================= MENU FIX ================= */
+/* ================= MENU ================= */
 window.toggleSidebar = ()=>{
-    document.getElementById("sidebar").classList.toggle("active");
+    const sidebar = document.getElementById("sidebar");
+    if(sidebar){
+        sidebar.classList.toggle("active");
+    }
 };
