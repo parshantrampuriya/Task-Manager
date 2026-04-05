@@ -14,9 +14,9 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const getEl = (id)=>
-  document.getElementById(id);
-
+const getEl = (id){
+ return document.getElementById(id);
+}
 const params = new URLSearchParams(location.search);
 const friendId = params.get("uid");
 
