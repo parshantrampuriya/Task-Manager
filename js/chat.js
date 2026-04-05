@@ -14,7 +14,7 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const getEl = (id){
+function getEl(id){
  return document.getElementById(id);
 }
 const params = new URLSearchParams(location.search);
@@ -30,8 +30,7 @@ onAuthStateChanged(auth, async (user)=>{
     if(!user) location.href="index.html";
 
     currentUser = user;
- getE1 ("replybox").style.display =
-   "none";
+ getE1("replybox").style.display = "none";
     await updateDoc(doc(db,"users",user.uid),{
         online:true,
         lastSeen:Date.now(),
@@ -107,6 +106,7 @@ window.sendMsg = async ()=>{
 };
 
 /* ================= ENTER SEND ================= */
+document.addEventListener("DOMContentLoaded",()=>{
 getEl("msgInput").addEventListener("keypress",(e)=>{
     if(e.key==="Enter"){
         e.preventDefault();
