@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 
-<link rel="stylesheet" href="css/chat.css?v=500">
-   <link rel="stylesheet" href="css/home.css"> 
+<link rel="stylesheet" href="css/chat.css?v=600">
+<link rel="stylesheet" href="css/home.css">
 </head>
 
 <body>
 
 <!-- ================= SIDEBAR ================= -->
-
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
@@ -28,7 +27,7 @@
 
 <div class="chat-page">
 
-    <!-- TOP BAR -->
+    <!-- ================= TOP BAR ================= -->
     <div class="top-bar">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
@@ -38,28 +37,42 @@
         </div>
     </div>
 
-    <!-- MESSAGE BOX -->
+    <!-- ================= CHAT BOX ================= -->
     <div id="chatBox" class="chat-box"></div>
 
-    <!-- INPUT -->
+    <!-- ================= INPUT AREA ================= -->
     <div class="chat-input">
-        <input id="msgInput" placeholder="Type a message...">
-        <button onclick="sendMsg()">➤</button>
+
+        <!-- 🔥 REPLY PREVIEW (NEW) -->
+        <div id="replyBox" class="reply-box">
+            <span id="replyText"></span>
+            <button onclick="cancelReply()">✖</button>
+        </div>
+
+        <!-- INPUT ROW -->
+        <div class="input-row">
+            <input id="msgInput" placeholder="Type a message...">
+            <button onclick="sendMsg()">➤</button>
+        </div>
+
     </div>
 
 </div>
 
-<!-- MODAL -->
+<!-- ================= MODAL ================= -->
 <div id="modal" class="modal">
   <div class="modal-box">
     <h3>Message Options</h3>
-    <button onclick="deleteForMe()">Delete for Me</button>
-    <button onclick="deleteForAll()">Delete for Everyone</button>
+
+    <button onclick="deleteForMe()">🗑 Delete for Me</button>
+    <button onclick="deleteForAll()">❌ Delete for Everyone</button>
+    <button onclick="replyMsg()">↩ Reply</button>
+
     <button onclick="closeModal()">Cancel</button>
   </div>
 </div>
 
-<script type="module" src="js/chat.js?v=500"></script>
+<script type="module" src="js/chat.js?v=600"></script>
 <script type="module" src="js/menu.js"></script>
 
 </body>
