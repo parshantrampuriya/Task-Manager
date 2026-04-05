@@ -147,7 +147,7 @@ body{
     margin-bottom:6px;
     border-radius:8px;
 
-    display:flex;
+    display:none;
     justify-content:space-between;
     align-items:center;
 }
