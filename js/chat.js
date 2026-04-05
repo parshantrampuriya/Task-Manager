@@ -29,7 +29,8 @@ onAuthStateChanged(auth, async (user)=>{
     if(!user) location.href="index.html";
 
     currentUser = user;
-
+ getE1 ("replybox").style.display =
+   "none";
     await updateDoc(doc(db,"users",user.uid),{
         online:true,
         lastSeen:Date.now(),
