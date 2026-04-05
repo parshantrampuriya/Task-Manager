@@ -20,35 +20,38 @@ const params = new URLSearchParams(location.search);
 const friendId = params.get("uid");
 
 let currentUser;
-let selectedMsgId=null;
+let selectedMsgId = null;
+let replyData = null;
 
-/* AUTH */
+/* ================= AUTH ================= */
 onAuthStateChanged(auth, async (user)=>{
 
     if(!user) location.href="index.html";
 
-    currentUser=user;
+    currentUser = user;
 
     await updateDoc(doc(db,"users",user.uid),{
         online:true,
-        lastSeen:Date.now()
+        lastSeen:Date.now(),
+        typing:false
     });
 
     loadFriend();
     loadMessages();
 });
 
-/* OFFLINE */
+/* ================= OFFLINE ================= */
 window.addEventListener("beforeunload", async ()=>{
     if(currentUser){
         await updateDoc(doc(db,"users",currentUser.uid),{
             online:false,
-            lastSeen:Date.now()
+            lastSeen:Date.now(),
+            typing:false
         });
     }
 });
 
-/* FRIEND INFO */
+/* ================= FRIEND ================= */
 async function loadFriend(){
 
     let snap = await getDoc(doc(db,"users",friendId));
@@ -59,7 +62,11 @@ async function loadFriend(){
     onSnapshot(doc(db,"users",friendId),(s)=>{
         let d = s.data();
 
-        if(d.online){
+        if(d.typing){
+            getEl("status").innerText="Typing...";
+            getEl("status").className="online";
+        }
+        else if(d.online){
             getEl("status").innerText="Online";
             getEl("status").className="online";
         }else{
@@ -70,12 +77,12 @@ async function loadFriend(){
     });
 }
 
-/* CHAT ID */
+/* ================= CHAT ID ================= */
 function chatId(){
     return [currentUser.uid,friendId].sort().join("_");
 }
 
-/* SEND */
+/* ================= SEND ================= */
 window.sendMsg = async ()=>{
 
     let text = getEl("msgInput").value.trim();
@@ -86,24 +93,45 @@ window.sendMsg = async ()=>{
         sender:currentUser.uid,
         text,
         time:Date.now(),
-        seen:false
+        seen:false,
+        reply: replyData
     });
 
     getEl("msgInput").value="";
+    cancelReply();
+
+    // stop typing
+    updateDoc(doc(db,"users",currentUser.uid),{typing:false});
 };
 
-/* ENTER */
+/* ================= ENTER SEND ================= */
 getEl("msgInput").addEventListener("keypress",(e)=>{
-    if(e.key==="Enter") sendMsg();
+    if(e.key==="Enter"){
+        e.preventDefault();
+        sendMsg();
+    }
 });
 
-/* TIME */
+/* ================= TYPING ================= */
+getEl("msgInput").addEventListener("input", async ()=>{
+    await updateDoc(doc(db,"users",currentUser.uid),{
+        typing: true
+    });
+
+    setTimeout(()=>{
+        updateDoc(doc(db,"users",currentUser.uid),{
+            typing:false
+        });
+    },1000);
+});
+
+/* ================= TIME ================= */
 function formatTime(t){
     let d=new Date(t);
     return d.getHours()+":"+String(d.getMinutes()).padStart(2,'0');
 }
 
-/* LOAD MESSAGES */
+/* ================= LOAD ================= */
 function loadMessages(){
 
     onSnapshot(
@@ -121,40 +149,55 @@ function loadMessages(){
 
                 let cls = m.sender===currentUser.uid ? "me":"other";
 
-                /* MARK SEEN */
+                /* SEEN */
                 if(m.sender!==currentUser.uid && !m.seen){
                     await updateDoc(doc(db,"messages",m.id),{seen:true});
                 }
 
                 let ticks="";
                 if(m.sender===currentUser.uid){
-                    ticks = m.seen ? "✔✔" : "✔";
+                    ticks = m.seen 
+                        ? `<span class="seen">✔✔</span>` 
+                        : `<span class="sent">✔</span>`;
+                }
+
+                /* REPLY UI */
+                let replyHtml = "";
+                if(m.reply){
+                    replyHtml = `
+                    <div class="reply-preview">
+                        ${m.reply.text}
+                    </div>`;
                 }
 
                 html+=`
-                <div class="msg ${cls}" onclick="selectMsg('${m.id}')">
+                <div class="msg ${cls}" onclick="selectMsg('${m.id}','${m.text}')">
+                    ${replyHtml}
                     ${m.text}
                     <div class="meta">${formatTime(m.time)} ${ticks}</div>
                 </div>`;
             }
 
-            getEl("chatBox").innerHTML=html;
-            getEl("chatBox").scrollTop = getEl("chatBox").scrollHeight;
+            let box = getEl("chatBox");
+            box.innerHTML = html;
+            box.scrollTop = box.scrollHeight;
         }
     );
 }
 
-/* SELECT */
-window.selectMsg=(id)=>{
+/* ================= SELECT ================= */
+window.selectMsg=(id,text)=>{
     selectedMsgId=id;
+    replyData = {text}; // prepare reply
     getEl("modal").classList.add("active");
 };
 
+/* ================= MODAL ================= */
 window.closeModal=()=>{
     getEl("modal").classList.remove("active");
 };
 
-/* DELETE */
+/* ================= DELETE ================= */
 window.deleteForMe=async ()=>{
     await deleteDoc(doc(db,"messages",selectedMsgId));
     closeModal();
@@ -167,6 +210,20 @@ window.deleteForAll=async ()=>{
     closeModal();
 };
 
-window.openMenu =() => {
-  location.href = "menu.html " ;
+/* ================= REPLY ================= */
+window.replyMsg=()=>{
+    getEl("replyBox").style.display="flex";
+    getEl("replyText").innerText = replyData.text;
+    closeModal();
+};
+
+/* CANCEL REPLY */
+window.cancelReply=()=>{
+    replyData=null;
+    getEl("replyBox").style.display="none";
+};
+
+/* ================= MENU FIX ================= */
+window.toggleSidebar = ()=>{
+    document.getElementById("sidebar").classList.toggle("active");
 };
