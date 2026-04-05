@@ -12,7 +12,7 @@ body{
     display:flex;
     flex-direction:column;
     height:100vh;
-    position:relative; /* 🔥 important */
+    position:relative;
 }
 
 /* ================= TOP BAR ================= */
@@ -26,12 +26,12 @@ body{
     position:sticky;
     top:0;
 
-    z-index:1000; /* 🔥 FIX CLICK ISSUE */
+    z-index:1000;
 }
 
 /* MENU BUTTON */
 .menu-btn{
-    z-index:1001;  /* 🔥 ALWAYS CLICKABLE */
+    z-index:1001;
     cursor:pointer;
 }
 
@@ -58,7 +58,7 @@ body{
     flex-direction:column;
     gap:10px;
 
-    z-index:1; /* 🔥 BELOW TOP BAR */
+    z-index:1;
 }
 
 /* ================= MESSAGE ================= */
@@ -83,6 +83,15 @@ body{
     background:#222;
 }
 
+/* ================= REPLY PREVIEW IN MESSAGE ================= */
+.reply-preview{
+    font-size:12px;
+    opacity:0.7;
+    border-left:3px solid #00cfff;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
 /* ================= TIME + TICKS ================= */
 .meta{
     font-size:10px;
@@ -94,13 +103,19 @@ body{
 /* ================= INPUT ================= */
 .chat-input{
     display:flex;
+    flex-direction:column; /* 🔥 important for reply box */
     padding:10px;
     background:#111;
 
     position:sticky;
     bottom:0;
 
-    z-index:1000; /* 🔥 ALWAYS ABOVE */
+    z-index:1000;
+}
+
+/* INPUT ROW */
+.input-row{
+    display:flex;
 }
 
 /* INPUT FIELD */
@@ -120,6 +135,33 @@ body{
     border:none;
     border-radius:10px;
     background:#00cfff;
+    cursor:pointer;
+}
+
+/* ================= REPLY BOX ================= */
+.reply-box{
+    display:none;
+    background:#222;
+    padding:8px;
+    border-left:4px solid #00cfff;
+    margin-bottom:6px;
+    border-radius:8px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.reply-box span{
+    font-size:13px;
+    opacity:0.85;
+}
+
+.reply-box button{
+    background:none;
+    border:none;
+    color:#ff4d4d;
+    font-size:14px;
     cursor:pointer;
 }
 
@@ -146,7 +188,7 @@ body{
 .modal-box{
     background:#111;
     padding:20px;
-    border-radius:10px;
+    border-radius:12px;
     text-align:center;
     box-shadow:0 0 20px #00cfff;
 }
@@ -163,18 +205,20 @@ body{
     cursor:pointer;
 }
 
+.modal-box button:hover{
+    background:#00cfff;
+    color:black;
+}
 
-/* ACTIVE */
+/* ================= SIDEBAR ================= */
 .sidebar.active {
     transform: translateX(0);
 }
 
-/* TITLE */
 .sidebar h2 {
     margin-bottom: 20px;
 }
 
-/* BUTTON STYLE (🔥 SAME AS HOME) */
 .sidebar button {
     width: 100%;
     margin: 10px 0;
@@ -192,19 +236,18 @@ body{
     transition: 0.3s;
 }
 
-/* HOVER */
 .sidebar button:hover {
     background: linear-gradient(45deg,#00cfff,#00ffcc);
     color: black;
     transform: translateX(5px);
 }
 
-/* ACTIVE PAGE */
 .sidebar button.active {
     background: linear-gradient(45deg,#00cfff,#00ffcc);
     color: black;
 }
-/* ================= MOBILE FIX ================= */
+
+/* ================= MOBILE ================= */
 @media(max-width:768px){
 
     .msg{
