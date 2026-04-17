@@ -6,6 +6,9 @@ window.goHome = () => location.href = "home.html";
 window.goTasks = () => location.href = "tasks.html";
 window.goGoals = () => location.href = "goals.html";
 window.goFriends = () => location.href = "friends.html";   // 🔥 NEW
+window.goCreateTest = () => location.href = "create-test.html";
+
+window.goGiveTest = () => location.href = "give-test.html";
 window.goProfile = () => location.href = "profile.html";
 
 /* ================= SIDEBAR TOGGLE ================= */
