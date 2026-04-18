@@ -255,6 +255,36 @@ window.saveQuestions = async ()=>{
         return;
     }
 
+    /* ===== LOAD EXISTING QUESTIONS SAME LOCATION ===== */
+    const existingSnap = await getDocs(
+        query(
+            collection(db,"questionBank"),
+            where("uid","==",currentUser.uid),
+            where("subject","==",subject),
+            where("chapter","==",chapter),
+            where("topic","==",topic)
+        )
+    );
+
+    let existingSet = [];
+
+    existingSnap.forEach(doc=>{
+
+        const d = doc.data();
+
+        const sign = JSON.stringify({
+            question: d.question.trim(),
+            options: d.options,
+            answer: Number(d.answer)
+        });
+
+        existingSet.push(sign);
+    });
+
+    let savedCount = 0;
+    let skippedCount = 0;
+
+    /* ===== SAVE LOOP ===== */
     for(let q of data){
 
         const answer = Number(
@@ -263,6 +293,18 @@ window.saveQuestions = async ()=>{
             q.correctAnswer ??
             0
         );
+
+        const newSign = JSON.stringify({
+            question: q.question.trim(),
+            options: q.options,
+            answer: answer
+        });
+
+        /* DUPLICATE FOUND */
+        if(existingSet.includes(newSign)){
+            skippedCount++;
+            continue;
+        }
 
         await addDoc(collection(db,"questionBank"),{
 
@@ -278,9 +320,12 @@ window.saveQuestions = async ()=>{
 
             createdAt: Date.now()
         });
+
+        existingSet.push(newSign);
+        savedCount++;
     }
 
-    /* CLEAR */
+    /* ===== CLEAR ===== */
     getEl("jsonBox").value = "";
     getEl("previewBox").innerHTML = "No Preview Yet";
 
@@ -296,5 +341,8 @@ window.saveQuestions = async ()=>{
 
     await loadSubjects();
 
-    showToast("Questions Saved Successfully ✅","success");
+    showToast(
+        `${savedCount} Saved ✅ | ${skippedCount} Duplicate Skipped`,
+        "success"
+    );
 };
