@@ -1,5 +1,5 @@
 /* ================= UPDATED view-question.js ================= */
-/* OWN MODE + FRIEND READ ONLY MODE */
+/* FRIEND MODE FIXED + DEBUG + OLD FEATURES SAFE */
 
 import { auth, db } from "./firebase.js";
 
@@ -9,10 +9,7 @@ import {
   collection,
   getDocs,
   query,
-  where,
-  doc,
-  updateDoc,
-  deleteDoc
+  where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
@@ -22,11 +19,11 @@ let currentUser = null;
 let allQuestions = [];
 let currentPath = [];
 let selectedQuestion = null;
-let holdTimer = null;
 
-/* FRIEND MODE */
-const params = new URLSearchParams(location.search);
+/* ================= FRIEND MODE ================= */
+const params = new URLSearchParams(window.location.search);
 const friendUid = params.get("uid");
+
 let readOnly = false;
 
 /* ================= AUTH ================= */
@@ -39,10 +36,18 @@ onAuthStateChanged(auth, async (user)=>{
 
     currentUser = user;
 
-    /* if friend uid exists and not mine */
-    if(friendUid && friendUid !== user.uid){
+    console.log("My UID =", user.uid);
+    console.log("Friend UID =", friendUid);
+
+    if(
+        friendUid &&
+        friendUid.trim() !== "" &&
+        friendUid !== user.uid
+    ){
         readOnly = true;
     }
+
+    console.log("Read Only =", readOnly);
 
     await loadAllQuestions();
 });
@@ -53,24 +58,15 @@ window.toggleSidebar = ()=>{
     if(sidebar) sidebar.classList.toggle("active");
 };
 
-/* ================= TOAST ================= */
-function showToast(msg){
-
-    const toast = getEl("toast");
-
-    toast.innerText = msg;
-    toast.className = "show";
-
-    setTimeout(()=>{
-        toast.className = "";
-    },2200);
-}
-
 /* ================= LOAD ================= */
 async function loadAllQuestions(){
 
     const targetUid =
-        readOnly ? friendUid : currentUser.uid;
+    (readOnly && friendUid)
+    ? friendUid
+    : currentUser.uid;
+
+    console.log("Loading Questions UID =", targetUid);
 
     const snap = await getDocs(
         query(
@@ -81,17 +77,17 @@ async function loadAllQuestions(){
 
     allQuestions = [];
 
-    snap.forEach(d=>{
+    snap.forEach(doc=>{
         allQuestions.push({
-            id:d.id,
-            ...d.data()
+            id:doc.id,
+            ...doc.data()
         });
     });
 
     renderFiles();
 }
 
-/* ================= FILE VIEW ================= */
+/* ================= RENDER ================= */
 function renderFiles(){
 
     const fileArea = getEl("fileArea");
@@ -99,9 +95,9 @@ function renderFiles(){
     const viewBtn = getEl("viewAllBtn");
 
     pathText.innerText =
-        currentPath.length===0
-        ? "Home"
-        : currentPath.join(" > ");
+    currentPath.length===0
+    ? "Home"
+    : currentPath.join(" > ");
 
     let folders = [];
     let questions = [];
@@ -114,23 +110,24 @@ function renderFiles(){
             q.topic || ""
         ].filter(v=>v!== "");
 
-        let match = true;
+        let ok = true;
 
         for(let i=0;i<currentPath.length;i++){
             if(levels[i] !== currentPath[i]){
-                match = false;
+                ok = false;
                 break;
             }
         }
 
-        if(!match) return;
+        if(!ok) return;
 
         if(levels.length > currentPath.length){
 
-            const nextFolder = levels[currentPath.length];
+            const next =
+            levels[currentPath.length];
 
-            if(nextFolder && !folders.includes(nextFolder)){
-                folders.push(nextFolder);
+            if(next && !folders.includes(next)){
+                folders.push(next);
             }
 
         }else{
@@ -139,11 +136,15 @@ function renderFiles(){
     });
 
     folders.sort((a,b)=>a.localeCompare(b));
-    questions.sort((a,b)=>a.question.localeCompare(b.question));
+    questions.sort((a,b)=>
+        a.question.localeCompare(b.question)
+    );
 
     if(viewBtn){
         viewBtn.style.display =
-        questions.length>0 ? "inline-flex":"none";
+        questions.length>0
+        ? "inline-flex"
+        : "none";
     }
 
     let html = "";
@@ -152,20 +153,7 @@ function renderFiles(){
 
         html += `
         <div class="file-item folder"
-        onclick="openFolder('${safe(name)}')"
-
-        ${
-          readOnly
-          ? ""
-          :
-          `
-          onmousedown="startHold('${safe(name)}')"
-          ontouchstart="startHold('${safe(name)}')"
-          onmouseup="cancelHold()"
-          onmouseleave="cancelHold()"
-          ontouchend="cancelHold()"
-          `
-        }>
+        onclick="openFolder('${safe(name)}')">
 
         <div class="file-icon">📁</div>
         <div class="file-name">${name}</div>
@@ -189,9 +177,11 @@ function renderFiles(){
     });
 
     if(!html){
-        html=`
+        html = `
         <div class="file-item">
-        <div class="file-name">Empty Folder</div>
+        <div class="file-name">
+        Empty Folder
+        </div>
         </div>`;
     }
 
@@ -216,51 +206,6 @@ window.goFolderBack = ()=>{
     }
 };
 
-/* ================= HOLD ================= */
-window.startHold = (name)=>{
-
-    if(readOnly) return;
-
-    holdTimer = setTimeout(()=>{
-        folderPopup(name);
-    },900);
-};
-
-window.cancelHold = ()=>{
-    clearTimeout(holdTimer);
-};
-
-/* ================= FOLDER POPUP ================= */
-function folderPopup(name){
-
-    if(readOnly) return;
-
-    getEl("popupQuestion").innerText =
-    "📁 Folder : " + name;
-
-    getEl("popupContent").innerHTML = `
-    <div class="popup-btn-row">
-
-    <button class="save-btn"
-    onclick="openFolder('${safe(name)}');closePopup()">
-    📂 Open Folder
-    </button>
-
-    <button class="edit-btn"
-    onclick="renameFolder('${safe(name)}')">
-    ✏ Edit Name
-    </button>
-
-    <button class="delete-btn"
-    onclick="deleteFolder('${safe(name)}')">
-    🗑 Delete Folder
-    </button>
-
-    </div>`;
-
-    getEl("popup").classList.add("show");
-}
-
 /* ================= OPEN QUESTION ================= */
 window.openQuestion = (id)=>{
 
@@ -272,7 +217,6 @@ window.openQuestion = (id)=>{
     getEl("popupQuestion").innerText =
     selectedQuestion.question;
 
-    /* FRIEND MODE */
     if(readOnly){
 
         getEl("popupContent").innerHTML = `
@@ -295,13 +239,11 @@ window.openQuestion = (id)=>{
         👁 Preview
         </button>
 
-        <button class="edit-btn"
-        onclick="editQuestion()">
+        <button class="edit-btn">
         ✏ Edit
         </button>
 
-        <button class="delete-btn"
-        onclick="deleteQuestion()">
+        <button class="delete-btn">
         🗑 Delete
         </button>
 
@@ -311,26 +253,28 @@ window.openQuestion = (id)=>{
     getEl("popup").classList.add("show");
 };
 
-/* ================= CLOSE ================= */
-window.closePopup = ()=>{
-    getEl("popup").classList.remove("show");
-};
-
 /* ================= PREVIEW ================= */
 window.previewQuestion = ()=>{
 
-    let ans=parseInt(selectedQuestion.answer);
-    if(isNaN(ans)) ans=0;
+    let ans =
+    parseInt(selectedQuestion.answer);
 
-    let html="";
+    if(isNaN(ans)) ans = 0;
+
+    let html = "";
 
     selectedQuestion.options.forEach((op,i)=>{
 
         html += `
-        <div class="option-box ${i===ans?"correct":""}">
+        <div class="option-box ${
+        i===ans ? "correct":""
+        }">
+
         ${String.fromCharCode(65+i)}.
         ${op}
-        ${i===ans?" ✅ Correct":""}
+
+        ${i===ans ? " ✅ Correct":""}
+
         </div>`;
     });
 
@@ -340,7 +284,9 @@ window.previewQuestion = ()=>{
 /* ================= VIEW ALL ================= */
 window.viewAllQuestions = ()=>{
 
-    let questions=[];
+    let html = "";
+
+    let list = [];
 
     allQuestions.forEach(q=>{
 
@@ -350,30 +296,24 @@ window.viewAllQuestions = ()=>{
             q.topic || ""
         ].filter(v=>v!== "");
 
-        let ok=true;
+        let ok = true;
 
         for(let i=0;i<currentPath.length;i++){
             if(levels[i]!==currentPath[i]){
-                ok=false;
+                ok = false;
                 break;
             }
         }
 
         if(ok && levels.length===currentPath.length){
-            questions.push(q);
+            list.push(q);
         }
     });
 
-    questions.sort((a,b)=>
-        a.question.localeCompare(b.question)
-    );
+    list.forEach((q,no)=>{
 
-    let html="";
-
-    questions.forEach((q,no)=>{
-
-        let ans=parseInt(q.answer);
-        if(isNaN(ans)) ans=0;
+        let ans = parseInt(q.answer);
+        if(isNaN(ans)) ans = 0;
 
         html += `
         <div class="all-box">
@@ -382,10 +322,12 @@ window.viewAllQuestions = ()=>{
         q.options.forEach((op,i)=>{
 
             html += `
-            <div class="option-box ${i===ans?"correct":""}">
+            <div class="option-box ${
+            i===ans ? "correct":""
+            }">
             ${String.fromCharCode(65+i)}.
             ${op}
-            ${i===ans?" ✅":""}
+            ${i===ans ? " ✅":""}
             </div>`;
         });
 
@@ -400,13 +342,7 @@ window.viewAllQuestions = ()=>{
     getEl("popup").classList.add("show");
 };
 
-/* ================= OWNER ONLY FUNCTIONS ================= */
-
-window.renameFolder = async ()=>{};
-window.saveRenameFolder = async ()=>{};
-window.deleteFolder = async ()=>{};
-window.editQuestion = async ()=>{};
-window.saveEdit = async ()=>{};
-window.deleteQuestion = async ()=>{};
-
-/* keep your existing owner edit/delete functions below if needed */
+/* ================= CLOSE ================= */
+window.closePopup = ()=>{
+    getEl("popup").classList.remove("show");
+};
