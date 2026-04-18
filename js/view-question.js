@@ -16,7 +16,7 @@ const getEl = (id) => document.getElementById(id);
 
 let currentUser = null;
 let allQuestions = [];
-let currentPath = [];      // [subject, chapter, topic]
+let currentPath = [];
 let selectedQuestion = null;
 
 /* ================= AUTH ================= */
@@ -51,7 +51,7 @@ function showToast(msg){
     },2200);
 }
 
-/* ================= LOAD ================= */
+/* ================= LOAD QUESTIONS ================= */
 async function loadAllQuestions(){
 
     const snap = await getDocs(
@@ -73,7 +73,7 @@ async function loadAllQuestions(){
     renderFiles();
 }
 
-/* ================= RENDER ================= */
+/* ================= FILE MANAGER VIEW ================= */
 function renderFiles(){
 
     const fileArea = getEl("fileArea");
@@ -93,18 +93,18 @@ function renderFiles(){
             q.subject || "",
             q.chapter || "",
             q.topic || ""
-        ].filter(x=>x !== "");
+        ].filter(v=>v !== "");
 
-        let ok = true;
+        let match = true;
 
         for(let i=0;i<currentPath.length;i++){
-            if(currentPath[i] !== levels[i]){
-                ok = false;
+            if(levels[i] !== currentPath[i]){
+                match = false;
                 break;
             }
         }
 
-        if(!ok) return;
+        if(!match) return;
 
         if(levels.length > currentPath.length){
 
@@ -165,18 +165,18 @@ function renderFiles(){
     fileArea.innerHTML = html;
 }
 
-/* ================= SAFE ================= */
+/* ================= SAFE TEXT ================= */
 function safe(text){
     return text.replace(/'/g,"\\'");
 }
 
-/* ================= OPEN FOLDER ================= */
+/* ================= FOLDER OPEN ================= */
 window.openFolder = (name)=>{
     currentPath.push(name);
     renderFiles();
 };
 
-/* ================= BACK FOLDER ================= */
+/* ================= FOLDER BACK ================= */
 window.goFolderBack = ()=>{
 
     if(currentPath.length > 0){
@@ -207,25 +207,25 @@ window.closePopup = ()=>{
     getEl("popup").classList.remove("show");
 };
 
-/* ================= PREVIEW ================= */
+/* ================= PREVIEW QUESTION ================= */
 window.previewQuestion = ()=>{
 
     if(!selectedQuestion) return;
 
-    const ans =
-        Number(selectedQuestion.answer);
+    let ans = parseInt(selectedQuestion.answer);
+
+    if(isNaN(ans)) ans = 0;
 
     let html = "";
 
     selectedQuestion.options.forEach((op,index)=>{
 
+        const correct = index === ans;
+
         html += `
-        <div class="option-box ${
-            index === ans ? "correct" : ""
-        }">
-            ${String.fromCharCode(65+index)}.
-            ${op}
-            ${index === ans ? " ✅" : ""}
+        <div class="option-box ${correct ? 'correct' : ''}">
+            ${String.fromCharCode(65+index)}. ${op}
+            ${correct ? ' ✅ Correct' : ''}
         </div>
         `;
     });
@@ -233,32 +233,25 @@ window.previewQuestion = ()=>{
     getEl("popupContent").innerHTML = html;
 };
 
-/* ================= EDIT ================= */
+/* ================= EDIT QUESTION ================= */
 window.editQuestion = ()=>{
 
     if(!selectedQuestion) return;
 
-    const ans =
-        Number(selectedQuestion.answer);
+    let ans = parseInt(selectedQuestion.answer);
+
+    if(isNaN(ans)) ans = 0;
 
     let html = `
     <label>Question</label>
-
-    <textarea id="editQ">${
-        selectedQuestion.question
-    }</textarea>
+    <textarea id="editQ">${selectedQuestion.question}</textarea>
     `;
 
     selectedQuestion.options.forEach((op,i)=>{
 
         html += `
-        <label>Option ${
-            String.fromCharCode(65+i)
-        }</label>
-
-        <input
-            id="op${i}"
-            value="${op}">
+        <label>Option ${String.fromCharCode(65+i)}</label>
+        <input id="op${i}" value="${op}">
         `;
     });
 
@@ -272,19 +265,14 @@ window.editQuestion = ()=>{
         <option value="3">D</option>
     </select>
 
-    <button class="save-btn"
-        onclick="saveEdit()">
+    <button class="save-btn" onclick="saveEdit()">
         💾 Save Changes
     </button>
     `;
 
     getEl("popupContent").innerHTML = html;
 
-    /* AUTO SELECT CURRENT ANSWER */
-    setTimeout(()=>{
-        getEl("correctAns").value =
-            String(ans);
-    },50);
+    document.getElementById("correctAns").value = String(ans);
 };
 
 /* ================= SAVE EDIT ================= */
@@ -303,14 +291,10 @@ window.saveEdit = async ()=>{
     ];
 
     const answer =
-        Number(getEl("correctAns").value);
+        parseInt(getEl("correctAns").value);
 
     await updateDoc(
-        doc(
-            db,
-            "questionBank",
-            selectedQuestion.id
-        ),
+        doc(db,"questionBank",selectedQuestion.id),
         {
             question:newQ,
             options,
