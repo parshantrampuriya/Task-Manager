@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Questions</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/add-question.css">
+
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar">
+    <h2>⚡ Menu</h2>
+
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+    <button onclick="goCreateTest()">📝 Create Test</button>
+    <button onclick="goGiveTest()">🎯 Give Test</button>
+    <button onclick="logout()">🚪 Logout</button>
+</div>
+
+<!-- Page -->
+<div class="page">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1>➕ Add Questions</h1>
+    </div>
+
+    <!-- Container -->
+    <div class="box">
+
+        <!-- Mode -->
+        <label>Save Mode</label>
+        <select id="modeSelect">
+            <option value="new">Create New Folder</option>
+            <option value="existing">Add to Existing Folder</option>
+        </select>
+
+        <!-- New Folder Inputs -->
+        <div id="newFields">
+
+            <label>Subject</label>
+            <input id="subject" placeholder="Mechanical">
+
+            <label>Chapter</label>
+            <input id="chapter" placeholder="Thermodynamics">
+
+            <label>Topic</label>
+            <input id="topic" placeholder="First Law">
+
+        </div>
+
+        <!-- Existing Folder -->
+        <div id="existingFields" style="display:none;">
+
+            <label>Select Subject</label>
+            <select id="subjectList"></select>
+
+            <label>Select Chapter</label>
+            <select id="chapterList"></select>
+
+            <label>Select Topic</label>
+            <select id="topicList"></select>
+
+        </div>
+
+        <!-- JSON -->
+        <label>Paste JSON Questions</label>
+        <textarea id="jsonBox" rows="14" placeholder='[
+{
+"question":"What is force?",
+"options":["Joule","Newton","Watt","Pascal"],
+"answer":1
+}
+]'></textarea>
+
+        <!-- Buttons -->
+        <div class="btn-row">
+            <button class="secondary" onclick="previewQuestions()">👁 Preview</button>
+            <button class="primary" onclick="saveQuestions()">💾 Save Questions</button>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-box">
+            <h2>👁 Preview</h2>
+            <div id="previewArea">No Preview Yet</div>
+        </div>
+
+        <!-- Back -->
+        <button class="back-btn" onclick="location.href='question-bank.html'">
+            ← Back
+        </button>
+
+    </div>
+
+</div>
+
+<script type="module" src="js/menu.js"></script>
+<script type="module" src="js/add-question.js"></script>
+
+</body>
+</html>
