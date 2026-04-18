@@ -17,7 +17,7 @@ let currentUser = null;
 let previewOpen = false;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async (user)=>{
 
     if(!user){
         location.href = "index.html";
@@ -29,13 +29,27 @@ onAuthStateChanged(auth, async (user) => {
     await loadSubjects();
 });
 
-/* ================= SIDEBAR ================= */
-window.toggleSidebar = () => {
+/* ================= MENU ================= */
+window.toggleSidebar = ()=>{
     const sidebar = getEl("sidebar");
     if(sidebar) sidebar.classList.toggle("active");
 };
 
-/* ================= MODE SWITCH ================= */
+/* ================= TOAST ================= */
+function showToast(msg,type="success"){
+
+    const toast = getEl("toast");
+
+    toast.innerText = msg;
+    toast.className = "";
+    toast.classList.add("show",type);
+
+    setTimeout(()=>{
+        toast.classList.remove("show");
+    },2500);
+}
+
+/* ================= MODE ================= */
 getEl("modeSelect").addEventListener("change", ()=>{
 
     const mode = getEl("modeSelect").value;
@@ -59,19 +73,19 @@ async function loadSubjects(){
         )
     );
 
-    let subjects = [];
+    let arr = [];
 
-    snap.forEach(doc => {
+    snap.forEach(doc=>{
         const d = doc.data();
 
-        if(d.subject && !subjects.includes(d.subject)){
-            subjects.push(d.subject);
+        if(d.subject && !arr.includes(d.subject)){
+            arr.push(d.subject);
         }
     });
 
-    fillSelect("subjectList", subjects);
-    fillSelect("chapterList", []);
-    fillSelect("topicList", []);
+    fillSelect("subjectList",arr);
+    fillSelect("chapterList",[]);
+    fillSelect("topicList",[]);
 }
 
 /* ================= SUBJECT CHANGE ================= */
@@ -87,19 +101,18 @@ getEl("subjectList").addEventListener("change", async ()=>{
         )
     );
 
-    let chapters = [];
+    let arr = [];
 
-    snap.forEach(doc => {
-
+    snap.forEach(doc=>{
         const d = doc.data();
 
-        if(d.chapter && !chapters.includes(d.chapter)){
-            chapters.push(d.chapter);
+        if(d.chapter && !arr.includes(d.chapter)){
+            arr.push(d.chapter);
         }
     });
 
-    fillSelect("chapterList", chapters);
-    fillSelect("topicList", []);
+    fillSelect("chapterList",arr);
+    fillSelect("topicList",[]);
 });
 
 /* ================= CHAPTER CHANGE ================= */
@@ -117,26 +130,25 @@ getEl("chapterList").addEventListener("change", async ()=>{
         )
     );
 
-    let topics = [];
+    let arr = [];
 
-    snap.forEach(doc => {
-
+    snap.forEach(doc=>{
         const d = doc.data();
 
-        if(d.topic && !topics.includes(d.topic)){
-            topics.push(d.topic);
+        if(d.topic && !arr.includes(d.topic)){
+            arr.push(d.topic);
         }
     });
 
-    fillSelect("topicList", topics);
+    fillSelect("topicList",arr);
 });
 
 /* ================= FILL SELECT ================= */
-function fillSelect(id, arr){
+function fillSelect(id,data){
 
     let html = `<option value="">Select</option>`;
 
-    arr.forEach(v=>{
+    data.forEach(v=>{
         html += `<option value="${v}">${v}</option>`;
     });
 
@@ -157,7 +169,7 @@ window.previewQuestions = ()=>{
     const raw = getEl("jsonBox").value.trim();
 
     if(!raw){
-        box.innerHTML = "Paste JSON first";
+        showToast("Paste JSON First","error");
         return;
     }
 
@@ -166,7 +178,7 @@ window.previewQuestions = ()=>{
     try{
         data = JSON.parse(raw);
     }catch{
-        box.innerHTML = "Invalid JSON";
+        showToast("Invalid JSON","error");
         return;
     }
 
@@ -174,13 +186,12 @@ window.previewQuestions = ()=>{
 
     data.forEach((q,i)=>{
 
-        const ans =
-            Number(
-                q.answer ??
-                q.correct_option ??
-                q.correctAnswer ??
-                0
-            );
+        const ans = Number(
+            q.answer ??
+            q.correct_option ??
+            q.correctAnswer ??
+            0
+        );
 
         html += `
         <div class="qbox">
@@ -209,7 +220,7 @@ window.saveQuestions = async ()=>{
     const raw = getEl("jsonBox").value.trim();
 
     if(!raw){
-        alert("Paste JSON first");
+        showToast("Paste JSON First","error");
         return;
     }
 
@@ -218,18 +229,15 @@ window.saveQuestions = async ()=>{
     try{
         data = JSON.parse(raw);
     }catch{
-        alert("Invalid JSON");
+        showToast("Invalid JSON","error");
         return;
     }
 
-    let subject = "";
-    let chapter = "";
-    let topic   = "";
+    let subject="", chapter="", topic="";
 
     const mode = getEl("modeSelect").value;
 
-    /* NEW MODE */
-    if(mode === "new"){
+    if(mode==="new"){
 
         subject = getEl("subject").value.trim();
         chapter = getEl("chapter").value.trim();
@@ -242,21 +250,19 @@ window.saveQuestions = async ()=>{
         topic   = getEl("topicList").value.trim();
     }
 
-    /* Subject compulsory */
     if(!subject){
-        alert("Subject required");
+        showToast("Subject Required","error");
         return;
     }
 
     for(let q of data){
 
-        const answer =
-            Number(
-                q.answer ??
-                q.correct_option ??
-                q.correctAnswer ??
-                0
-            );
+        const answer = Number(
+            q.answer ??
+            q.correct_option ??
+            q.correctAnswer ??
+            0
+        );
 
         await addDoc(collection(db,"questionBank"),{
 
@@ -274,20 +280,21 @@ window.saveQuestions = async ()=>{
         });
     }
 
-    alert("Questions Saved Successfully ✅");
-
-    /* CLEAR ALL */
+    /* CLEAR */
     getEl("jsonBox").value = "";
     getEl("previewBox").innerHTML = "No Preview Yet";
-    previewOpen = false;
 
     getEl("subject").value = "";
     getEl("chapter").value = "";
     getEl("topic").value = "";
 
     getEl("subjectList").selectedIndex = 0;
-    getEl("chapterList").innerHTML = `<option value="">Select</option>`;
-    getEl("topicList").innerHTML = `<option value="">Select</option>`;
+    fillSelect("chapterList",[]);
+    fillSelect("topicList",[]);
+
+    previewOpen = false;
 
     await loadSubjects();
+
+    showToast("Questions Saved Successfully ✅","success");
 };
