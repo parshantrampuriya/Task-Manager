@@ -6,7 +6,7 @@
 <title>Question Bank</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/question-bank.css">
+<link rel="stylesheet" href="css/question-bank.css?v=2">
 
 </head>
 <body>
@@ -39,26 +39,51 @@
         <p>Store Questions • Organize Folders • Build Smart Tests</p>
     </div>
 
-    <!-- Buttons -->
+    <!-- MAIN BUTTONS -->
     <div class="card-wrap">
 
-        <div class="big-card" onclick="location.href='add-question.html'">
+        <div class="big-card"
+        onclick="location.href='add-question.html'">
+
             <div class="icon">➕</div>
             <h2>Add Questions</h2>
             <p>Paste JSON and save into folders</p>
+
         </div>
 
-        <div class="big-card" onclick="location.href='view-question.html'">
+        <div class="big-card"
+        onclick="location.href='view-question.html'">
+
             <div class="icon">📂</div>
             <h2>View Questions</h2>
             <p>Browse subjects and preview stored questions</p>
+
+        </div>
+
+    </div>
+
+    <!-- FRIEND SECTION -->
+    <div class="friend-section">
+
+        <h2 class="friend-title">
+            👥 Friends Question Banks
+        </h2>
+
+        <div id="friendCards" class="card-wrap">
+
+            <!-- Dynamic friend buttons here -->
+
         </div>
 
     </div>
 
 </div>
 
+<!-- MENU JS -->
 <script type="module" src="js/menu.js"></script>
+
+<!-- QUESTION BANK JS -->
+<script type="module" src="js/question-bank.js?v=2"></script>
 
 </body>
 </html>
