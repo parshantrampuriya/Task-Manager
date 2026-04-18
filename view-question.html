@@ -6,7 +6,7 @@
 <title>View Questions</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/view-question.css?v=2">
+<link rel="stylesheet" href="css/view-question.css?v=3">
 
 </head>
 <body>
@@ -34,13 +34,13 @@
     <div class="top-bar">
 
         <button class="menu-btn"
-        onclick="toggleSidebar()">
-        ☰
-        </button>
+        onclick="toggleSidebar()">☰</button>
 
         <div class="top-title">
-            <h1>📚 View Questions</h1>
-            <p>Browse Your Question Bank Like File Manager</p>
+            <h1 id="pageTitle">📚 View Questions</h1>
+            <p id="pageSubTitle">
+                Browse Question Bank Like File Manager
+            </p>
         </div>
 
         <button class="page-back-btn"
@@ -62,7 +62,6 @@
             Home
         </div>
 
-        <!-- IMPORTANT: PREVIEW ALL BUTTON -->
         <button
         id="viewAllBtn"
         class="preview-btn"
@@ -75,9 +74,7 @@
 
     <!-- FILE AREA -->
     <div class="main-card">
-
         <div id="fileArea"></div>
-
     </div>
 
 </div>
@@ -88,16 +85,10 @@
     <div class="popup-box">
 
         <button class="close-btn"
-        onclick="closePopup()">
-        ✕
-        </button>
+        onclick="closePopup()">✕</button>
 
-        <!-- TITLE ONLY -->
-        <h2 id="popupQuestion">
-            Title
-        </h2>
+        <h2 id="popupQuestion">Title</h2>
 
-        <!-- EMPTY CONTENT ONLY -->
         <div id="popupContent"></div>
 
     </div>
@@ -107,7 +98,8 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script type="module" src="js/view-question.js?v=2"></script>
+<!-- IMPORTANT: CACHE REFRESH -->
+<script type="module" src="js/view-question.js?v=99"></script>
 
 </body>
 </html>
