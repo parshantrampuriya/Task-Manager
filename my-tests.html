@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Tests</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/my-tests.css?v=1">
+
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar" class="sidebar">
+
+    <h2>⚡ Menu</h2>
+
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='tests.html'">📝 Tests</button>
+    <button onclick="location.href='create-test.html'">➕ Create Test</button>
+    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+    <button onclick="location.href='friends.html'">👥 Friends</button>
+    <button onclick="location.href='profile.html'">👤 Profile</button>
+
+</div>
+
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <button class="menu-btn"
+        onclick="toggleSidebar()">☰</button>
+
+        <div class="top-title">
+            <h1>📋 My Tests</h1>
+            <p>Manage all tests created by you</p>
+        </div>
+
+        <button class="back-btn"
+        onclick="location.href='tests.html'">⬅</button>
+
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+
+        <div class="tabs">
+
+            <button class="tab-btn active"
+            onclick="changeTab('all',this)">
+            All
+            </button>
+
+            <button class="tab-btn"
+            onclick="changeTab('draft',this)">
+            Draft
+            </button>
+
+            <button class="tab-btn"
+            onclick="changeTab('active',this)">
+            Active
+            </button>
+
+            <button class="tab-btn"
+            onclick="changeTab('completed',this)">
+            Completed
+            </button>
+
+        </div>
+
+        <div class="search-row">
+
+            <input type="text"
+            id="searchBox"
+            placeholder="Search test name..."
+            onkeyup="searchTests()">
+
+            <select id="sortBox"
+            onchange="loadMyTests()">
+                <option value="new">Newest</option>
+                <option value="old">Oldest</option>
+                <option value="name">Name A-Z</option>
+            </select>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3 id="totalTests">0</h3>
+            <p>Total Tests</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="activeTests">0</h3>
+            <p>Active</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="attemptCount">0</h3>
+            <p>Total Attempts</p>
+        </div>
+
+    </div>
+
+    <!-- TEST LIST -->
+    <div class="main-card">
+
+        <div id="testList">
+
+            <!-- Dynamic Cards -->
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module" src="js/my-tests.js?v=1"></script>
+
+</body>
+</html>
