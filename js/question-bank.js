@@ -10,91 +10,192 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const getEl = (id)=>document.getElementById(id);
+/* ================= HELPERS ================= */
+const getEl = (id) => document.getElementById(id);
 
 let currentUser = null;
+let previewOpen = false;
 
-/* AUTH */
-onAuthStateChanged(auth,(user)=>{
-
-    if(!user){
-        location.href="index.html";
+/* ================= AUTH ================= */
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        location.href = "index.html";
         return;
     }
 
     currentUser = user;
 
-    loadFilters();
+    initAll();
 });
 
-/* PREVIEW */
-window.previewQuestions = ()=>{
+/* ================= INIT ================= */
+async function initAll() {
+
+    fillEmptySelects();
+
+    await loadFolderSelectors();
+
+    changeMode();
+}
+
+/* ================= EMPTY SELECTS ================= */
+function fillEmptySelects() {
+
+    ["path1","path2","path3","path4","view1","view2","view3","view4"]
+    .forEach(id => {
+        getEl(id).innerHTML = `<option value="">Select Folder</option>`;
+    });
+}
+
+/* ================= MODE CHANGE ================= */
+window.changeMode = () => {
+
+    let mode =
+        document.querySelector('input[name="mode"]:checked').value;
+
+    if(mode === "new"){
+        getEl("newFolderBox").style.display = "block";
+        getEl("existingFolderBox").style.display = "none";
+    }else{
+        getEl("newFolderBox").style.display = "none";
+        getEl("existingFolderBox").style.display = "block";
+    }
+};
+
+/* ================= PREVIEW TOGGLE ================= */
+window.previewQuestions = () => {
+
+    let box = getEl("previewArea");
+
+    if(previewOpen){
+        box.innerHTML = "No Preview Yet";
+        previewOpen = false;
+        return;
+    }
 
     let raw = getEl("jsonBox").value.trim();
 
     if(!raw){
-        getEl("previewArea").innerText="Paste JSON first";
+        box.innerHTML = "Paste JSON first";
         return;
     }
 
-    try{
-
-        let data = JSON.parse(raw);
-        renderQuestions(data,"previewArea");
-
-    }catch{
-        getEl("previewArea").innerText="Invalid JSON";
-    }
-};
-
-/* SAVE */
-window.saveQuestions = async ()=>{
-
-    let subject = getEl("subject").value.trim();
-    let chapter = getEl("chapter").value.trim();
-    let topic = getEl("topic").value.trim();
-    let raw = getEl("jsonBox").value.trim();
-
-    if(!subject || !chapter || !topic || !raw){
-        alert("Fill all fields");
-        return;
-    }
-
-    let data=[];
+    let data = [];
 
     try{
         data = JSON.parse(raw);
+    }catch{
+        box.innerHTML = "Invalid JSON";
+        return;
+    }
+
+    renderQuestions(data, "previewArea");
+    previewOpen = true;
+};
+
+/* ================= SAVE QUESTIONS ================= */
+window.saveQuestions = async () => {
+
+    let raw = getEl("jsonBox").value.trim();
+
+    if(!raw){
+        alert("Paste JSON first");
+        return;
+    }
+
+    let questions = [];
+
+    try{
+        questions = JSON.parse(raw);
     }catch{
         alert("Invalid JSON");
         return;
     }
 
-    for(let q of data){
+    /* VALIDATE */
+    for(let q of questions){
+
+        if(
+            !q.question ||
+            !Array.isArray(q.options) ||
+            q.options.length < 2 ||
+            q.answer === undefined ||
+            isNaN(q.answer)
+        ){
+            alert("Invalid JSON question format");
+            return;
+        }
+    }
+
+    /* GET FOLDER PATH */
+    let path = getFolderPath();
+
+    if(path.length === 0){
+        alert("Please select or create folder");
+        return;
+    }
+
+    for(let q of questions){
 
         await addDoc(collection(db,"questionBank"),{
-            createdBy: currentUser.uid,
-            subject,
-            chapter,
-            topic,
-            question:q.question,
-            options:q.options,
-            answer:q.answer
+
+            createdBy : currentUser.uid,
+
+            folders : path,
+
+            question : q.question,
+
+            options : q.options,
+
+            answer : Number(q.answer),
+
+            time : Date.now()
         });
     }
 
-    alert("Questions Saved ✅");
+    alert("Questions Saved Successfully ✅");
 
-    getEl("subject").value="";
-    getEl("chapter").value="";
-    getEl("topic").value="";
-    getEl("jsonBox").value="";
-    getEl("previewArea").innerText="No preview yet";
+    getEl("jsonBox").value = "";
+    getEl("previewArea").innerHTML = "No Preview Yet";
+    previewOpen = false;
 
-    loadFilters();
+    await loadFolderSelectors();
 };
 
-/* LOAD FILTERS */
-async function loadFilters(){
+/* ================= GET FOLDER PATH ================= */
+function getFolderPath(){
+
+    let mode =
+        document.querySelector('input[name="mode"]:checked').value;
+
+    let path = [];
+
+    if(mode === "new"){
+
+        ["folder1","folder2","folder3","folder4"].forEach(id => {
+
+            let val = getEl(id).value.trim();
+
+            if(val) path.push(val);
+        });
+
+    }else{
+
+        ["path1","path2","path3","path4"].forEach(id => {
+
+            let val = getEl(id).value.trim();
+
+            if(val) path.push(val);
+        });
+    }
+
+    return path;
+}
+
+/* ================= LOAD FOLDERS ================= */
+async function loadFolderSelectors(){
+
+    fillEmptySelects();
 
     let snap = await getDocs(
         query(
@@ -103,114 +204,132 @@ async function loadFilters(){
         )
     );
 
-    let subjects = new Set();
+    let all = [];
 
-    snap.forEach(d=>{
-        subjects.add(d.data().subject);
+    snap.forEach(doc => {
+        all.push(doc.data().folders || []);
     });
 
-    let html = `<option value="">Select Subject</option>`;
+    /* LEVEL 1 */
+    let level1 = [...new Set(all.map(a => a[0]).filter(Boolean))];
 
-    subjects.forEach(s=>{
-        html += `<option>${s}</option>`;
-    });
-
-    getEl("filterSubject").innerHTML = html;
-
-    getEl("filterChapter").innerHTML =
-        `<option value="">Select Chapter</option>`;
-
-    getEl("filterTopic").innerHTML =
-        `<option value="">Select Topic</option>`;
+    fillSelect("path1", level1);
+    fillSelect("view1", level1);
 }
 
-/* SUBJECT CHANGE */
-getEl("filterSubject").addEventListener("change", async ()=>{
+/* ================= FILL SELECT ================= */
+function fillSelect(id, arr){
 
-    let subject = getEl("filterSubject").value;
+    let html = `<option value="">Select Folder</option>`;
+
+    arr.forEach(v => {
+        html += `<option value="${v}">${v}</option>`;
+    });
+
+    getEl(id).innerHTML = html;
+}
+
+/* ================= CASCADE SELECTS ================= */
+["path1","path2","path3","view1","view2","view3"].forEach(id => {
+
+    getEl(id).addEventListener("change", async ()=>{
+
+        await handleCascade(id);
+    });
+});
+
+async function handleCascade(changedId){
+
+    let isView = changedId.startsWith("view");
+
+    let prefix = isView ? "view" : "path";
+
+    let vals = [
+        getEl(prefix+"1").value,
+        getEl(prefix+"2").value,
+        getEl(prefix+"3").value
+    ];
 
     let snap = await getDocs(
         query(
             collection(db,"questionBank"),
-            where("createdBy","==",currentUser.uid),
-            where("subject","==",subject)
+            where("createdBy","==",currentUser.uid)
         )
     );
 
-    let set = new Set();
+    let all = [];
 
-    snap.forEach(d=>set.add(d.data().chapter));
+    snap.forEach(doc => all.push(doc.data().folders || []));
 
-    let html = `<option value="">Select Chapter</option>`;
+    for(let level=2; level<=4; level++){
 
-    set.forEach(v=>{
-        html += `<option>${v}</option>`;
-    });
+        let need =
+            vals.slice(0, level-1).filter(Boolean);
 
-    getEl("filterChapter").innerHTML = html;
-});
+        let next = all
+            .filter(a =>
+                need.every((v,i)=>a[i]===v)
+            )
+            .map(a => a[level-1])
+            .filter(Boolean);
 
-/* CHAPTER CHANGE */
-getEl("filterChapter").addEventListener("change", async ()=>{
+        next = [...new Set(next)];
 
-    let subject = getEl("filterSubject").value;
-    let chapter = getEl("filterChapter").value;
+        fillSelect(prefix+level, next);
+    }
+}
 
-    let snap = await getDocs(
-        query(
-            collection(db,"questionBank"),
-            where("createdBy","==",currentUser.uid),
-            where("subject","==",subject),
-            where("chapter","==",chapter)
-        )
-    );
-
-    let set = new Set();
-
-    snap.forEach(d=>set.add(d.data().topic));
-
-    let html = `<option value="">Select Topic</option>`;
-
-    set.forEach(v=>{
-        html += `<option>${v}</option>`;
-    });
-
-    getEl("filterTopic").innerHTML = html;
-});
-
-/* LOAD QUESTIONS */
+/* ================= LOAD QUESTIONS ================= */
 window.loadQuestions = async ()=>{
 
-    let subject = getEl("filterSubject").value;
-    let chapter = getEl("filterChapter").value;
-    let topic = getEl("filterTopic").value;
+    let path = [];
+
+    ["view1","view2","view3","view4"].forEach(id => {
+
+        let v = getEl(id).value.trim();
+
+        if(v) path.push(v);
+    });
+
+    if(path.length === 0){
+        alert("Select folder");
+        return;
+    }
 
     let snap = await getDocs(
         query(
             collection(db,"questionBank"),
-            where("createdBy","==",currentUser.uid),
-            where("subject","==",subject),
-            where("chapter","==",chapter),
-            where("topic","==",topic)
+            where("createdBy","==",currentUser.uid)
         )
     );
 
-    let data=[];
+    let data = [];
 
-    snap.forEach(d=>data.push(d.data()));
+    snap.forEach(doc => {
+
+        let d = doc.data();
+
+        let folders = d.folders || [];
+
+        let match =
+            path.every((v,i)=>folders[i]===v);
+
+        if(match) data.push(d);
+    });
 
     renderQuestions(data,"questionList");
 };
 
-/* RENDER */
+/* ================= RENDER ================= */
 function renderQuestions(data,target){
 
-    let html="";
+    let html = "";
 
     data.forEach((q,i)=>{
 
         html += `
         <div class="q-box">
+
             <b>Q${i+1}. ${q.question}</b>
         `;
 
@@ -219,12 +338,13 @@ function renderQuestions(data,target){
             html += `
             <div class="option ${index===q.answer ? 'correct':''}">
                 ${String.fromCharCode(65+index)}. ${op}
-            </div>`;
+            </div>
+            `;
         });
 
         html += `</div>`;
     });
 
     getEl(target).innerHTML =
-        html || "No questions found";
+        html || "No Questions Found";
 }
