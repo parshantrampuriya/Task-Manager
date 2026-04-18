@@ -3,8 +3,8 @@ body{
     margin:0;
     font-family:'Segoe UI',sans-serif;
     background:
-    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
-    url("../mahadev.png") center/cover fixed;
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.94)),
+    url("../mahadev.png") center/cover no-repeat fixed;
     color:#fff;
 }
 
@@ -12,99 +12,88 @@ body{
 .page{
     min-height:100vh;
     padding-left:260px;
-    padding-bottom:40px;
 }
 
 /* ================= TOP BAR ================= */
 .top-bar{
     display:flex;
     align-items:center;
-    gap:16px;
+    gap:18px;
     padding:18px 24px;
-    background:rgba(0,0,0,.45);
+    background:rgba(0,0,0,.42);
     backdrop-filter:blur(8px);
     position:sticky;
     top:0;
-    z-index:1000;
-}
-
-.top-title{
-    flex:1;
+    z-index:999;
 }
 
 .top-title h1{
     margin:0;
-    font-size:32px;
+    font-size:34px;
 }
 
 .top-title p{
     margin:5px 0 0;
-    color:#bfe9f0;
+    color:#cfd8dc;
     font-size:14px;
 }
 
-/* ================= BUTTONS ================= */
 .menu-btn,
 .back-btn{
-    width:50px;
-    height:50px;
     border:none;
-    border-radius:16px;
+    width:48px;
+    height:48px;
+    border-radius:14px;
     cursor:pointer;
-    font-size:22px;
-    transition:.25s;
-}
-
-.menu-btn{
-    color:#000;
+    font-size:20px;
+    font-weight:700;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:#000;
 }
 
 .back-btn{
-    color:#fff;
-    background:#222;
+    margin-left:auto;
 }
 
-.menu-btn:hover,
-.back-btn:hover{
-    transform:translateY(-2px);
-}
-
-/* ================= MAIN CARD ================= */
+/* ================= CARD ================= */
 .main-card{
-    max-width:1100px;
+    max-width:1150px;
     margin:28px auto;
     padding:28px;
-    border-radius:28px;
-    background:rgba(18,18,18,.93);
-    border:1px solid rgba(0,255,255,.08);
-    box-shadow:0 0 25px rgba(0,255,255,.04);
+    border-radius:26px;
+    background:rgba(20,30,45,.88);
+    box-shadow:0 15px 40px rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.05);
 }
 
-/* ================= TITLES ================= */
 .section-title{
-    margin:0 0 18px;
-    font-size:24px;
-    color:#fff;
+    margin:26px 0 14px;
+    font-size:28px;
+    color:#fff6d5;
 }
 
 /* ================= GRID ================= */
 .grid-2{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    grid-template-columns:repeat(2,1fr);
     gap:18px;
-    margin-bottom:24px;
 }
 
-/* ================= LABEL ================= */
+.settings-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+/* ================= FORM ================= */
 label{
     display:block;
     margin-bottom:8px;
-    color:#d8f7ff;
     font-size:15px;
+    color:#dfefff;
+    font-weight:600;
 }
 
-/* ================= INPUT ================= */
 input,
 select,
 textarea{
@@ -112,40 +101,44 @@ textarea{
     box-sizing:border-box;
     border:none;
     outline:none;
-    padding:14px;
-    border-radius:16px;
-    background:#1e1e1e;
-    color:#fff;
+    border-radius:14px;
+    padding:14px 16px;
     font-size:15px;
+    background:rgba(255,255,255,.08);
+    color:#fff;
+}
+
+select option{
+    color:#000;
 }
 
 textarea{
     min-height:220px;
     resize:vertical;
-    margin-bottom:24px;
-    font-family:Consolas,monospace;
+}
+
+input::placeholder,
+textarea::placeholder{
+    color:#b0bec5;
 }
 
 /* ================= MODE ================= */
 .mode-row{
-    display:flex;
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:14px;
-    flex-wrap:wrap;
-    margin-bottom:22px;
+    margin-bottom:18px;
 }
 
 .mode-btn{
-    flex:1;
-    min-width:220px;
     border:none;
-    padding:14px;
+    padding:16px;
     border-radius:16px;
     cursor:pointer;
-    font-size:15px;
+    font-size:16px;
     font-weight:700;
     color:#fff;
-    background:#252525;
-    transition:.25s;
+    background:rgba(255,255,255,.08);
 }
 
 .mode-btn.active{
@@ -153,70 +146,76 @@ textarea{
     background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
 
-/* ================= CHECK ROW ================= */
-.check-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:12px;
-    cursor:pointer;
+/* ================= HINT ================= */
+.hint-box{
+    margin-top:16px;
+    padding:14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+    color:#d5e5ea;
+    line-height:1.5;
 }
 
-.check-row input{
-    width:auto;
-}
-
-/* ================= FRIEND BOX ================= */
-.assign-box{
-    background:#151515;
+/* ================= ASSIGN ================= */
+.assign-card{
     padding:18px;
     border-radius:18px;
-    margin-bottom:24px;
+    background:rgba(255,255,255,.05);
 }
 
 .friend-list{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:12px;
+    gap:10px;
     margin-top:14px;
 }
 
 .friend-item{
-    background:#1f1f1f;
-    padding:12px;
-    border-radius:14px;
-}
-
-/* ================= SETTINGS ================= */
-.settings-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:12px;
-    margin-bottom:24px;
-}
-
-/* ================= BUTTON ROW ================= */
-.btn-row{
     display:flex;
-    gap:14px;
-    flex-wrap:wrap;
-    margin-bottom:24px;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+}
+
+/* ================= CUSTOM TICK ================= */
+.tick-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.04);
+    cursor:pointer;
+}
+
+.tick-row input{
+    width:20px;
+    height:20px;
+    accent-color:#00ffd0;
+    cursor:pointer;
+}
+
+/* ================= BUTTONS ================= */
+.btn-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:24px;
 }
 
 .preview-btn,
 .save-btn{
-    flex:1;
     border:none;
     padding:16px;
     border-radius:16px;
-    cursor:pointer;
-    font-size:16px;
+    font-size:17px;
     font-weight:700;
-    transition:.25s;
+    cursor:pointer;
 }
 
 .preview-btn{
-    background:#252525;
+    background:rgba(255,255,255,.10);
     color:#fff;
 }
 
@@ -225,75 +224,82 @@ textarea{
     color:#000;
 }
 
-.preview-btn:hover,
-.save-btn:hover{
-    transform:translateY(-2px);
-}
-
 /* ================= PREVIEW ================= */
 .preview-card{
-    background:#151515;
+    margin-top:26px;
     padding:22px;
-    border-radius:22px;
+    border-radius:20px;
+    background:rgba(255,255,255,.04);
 }
 
 #previewBox{
-    color:#d4edf2;
-    line-height:1.8;
+    color:#dfe7ea;
+    line-height:1.6;
 }
 
 /* ================= TOAST ================= */
 #toast{
     position:fixed;
-    top:18px;
-    right:18px;
-    background:#111;
-    color:#fff;
-    padding:14px 18px;
-    border-radius:14px;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#00e6b8;
+    color:#000;
+    padding:12px 18px;
+    border-radius:12px;
+    font-weight:700;
     opacity:0;
-    transform:translateY(-100px);
-    transition:.3s;
+    pointer-events:none;
+    transition:.25s;
     z-index:9999;
 }
 
 #toast.show{
     opacity:1;
-    transform:translateY(0);
+}
+
+/* ================= CENTER ERROR POPUP ================= */
+.center-popup{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(.8);
+    background:#ff4d6d;
+    color:#fff;
+    padding:18px 24px;
+    border-radius:16px;
+    font-weight:700;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:9999;
+}
+
+.center-popup.show{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
 }
 
 /* ================= MOBILE ================= */
 @media(max-width:900px){
+
     .page{
         padding-left:0;
     }
-}
 
-@media(max-width:768px){
-
-    .top-bar{
-        padding:14px;
+    .grid-2,
+    .settings-grid,
+    .btn-row,
+    .mode-row{
+        grid-template-columns:1fr;
     }
 
     .top-title h1{
-        font-size:24px;
+        font-size:28px;
     }
 
     .main-card{
-        margin:16px;
+        margin:14px;
         padding:18px;
-    }
-
-    .btn-row{
-        flex-direction:column;
-    }
-
-    .mode-row{
-        flex-direction:column;
-    }
-
-    #toast{
-        left:12px;
-        right:12px;
     }
 }
