@@ -396,3 +396,54 @@ body{
         min-width:auto;
     }
 }
+/* ================= ADD THIS IN YOUR view-question.css ================= */
+
+/* PATH BAR RIGHT BUTTON */
+.path-bar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.path-text{
+    flex:1;
+}
+
+/* VIEW ALL BUTTON */
+.view-all-btn{
+    border:none;
+    padding:12px 18px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:700;
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    transition:.25s;
+}
+
+.view-all-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* ALL QUESTIONS PREVIEW */
+.all-box{
+    background:#161616;
+    padding:16px;
+    border-radius:18px;
+    margin-bottom:16px;
+    border-left:4px solid #00eaff;
+}
+
+.all-box h3{
+    margin:0 0 12px;
+    font-size:18px;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+    .view-all-btn{
+        width:100%;
+    }
+}
