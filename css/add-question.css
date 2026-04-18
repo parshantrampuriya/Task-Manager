@@ -1,0 +1,204 @@
+/* ================= BODY ================= */
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
+    url("../mahadev.png") center/cover no-repeat fixed;
+    color:white;
+}
+
+/* ================= PAGE ================= */
+.page{
+    min-height:100vh;
+    padding-left:260px;
+}
+
+/* ================= TOP BAR ================= */
+.top-bar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px 25px;
+    background:rgba(0,0,0,0.45);
+    backdrop-filter: blur(8px);
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.top-bar h1{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+}
+
+/* ================= MENU BTN ================= */
+.menu-btn{
+    border:none;
+    width:46px;
+    height:46px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:22px;
+    color:black;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    box-shadow:0 0 18px rgba(0,255,255,0.35);
+}
+
+/* ================= MAIN BOX ================= */
+.box{
+    max-width:900px;
+    margin:28px auto;
+    padding:28px;
+    border-radius:24px;
+    background:linear-gradient(145deg,rgba(20,30,45,.92),rgba(35,50,70,.88));
+    border:1px solid rgba(255,255,255,0.06);
+    box-shadow:0 12px 32px rgba(0,0,0,.35);
+}
+
+/* ================= LABEL ================= */
+label{
+    display:block;
+    margin:16px 0 8px;
+    font-weight:600;
+    color:#e0f7fa;
+}
+
+/* ================= INPUTS ================= */
+input,
+select,
+textarea{
+    width:100%;
+    padding:14px;
+    border:none;
+    outline:none;
+    border-radius:14px;
+    background:#111923;
+    color:white;
+    font-size:15px;
+    box-sizing:border-box;
+}
+
+textarea{
+    resize:vertical;
+    font-family:Consolas,monospace;
+    line-height:1.5;
+}
+
+/* ================= BUTTONS ================= */
+.btn-row{
+    display:flex;
+    gap:14px;
+    margin-top:22px;
+    flex-wrap:wrap;
+}
+
+button{
+    border:none;
+    padding:14px 22px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:700;
+    transition:0.25s ease;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.primary{
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:black;
+}
+
+.secondary{
+    background:#1c2b3b;
+    color:white;
+}
+
+.back-btn{
+    width:100%;
+    margin-top:22px;
+    background:#243447;
+    color:white;
+}
+
+/* ================= PREVIEW ================= */
+.preview-box{
+    margin-top:28px;
+    padding:22px;
+    border-radius:20px;
+    background:rgba(0,0,0,.35);
+}
+
+.preview-box h2{
+    margin-top:0;
+    font-size:22px;
+}
+
+#previewArea{
+    color:#cfd8dc;
+}
+
+/* Question preview */
+.q-card{
+    background:#111923;
+    padding:16px;
+    border-radius:16px;
+    margin-top:14px;
+}
+
+.q-title{
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.option{
+    background:#1b2735;
+    padding:10px;
+    border-radius:10px;
+    margin-top:8px;
+}
+
+.correct{
+    border-left:4px solid #00ff99;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:900px){
+    .page{
+        padding-left:0;
+    }
+}
+
+@media(max-width:768px){
+
+    .top-bar{
+        padding:14px;
+    }
+
+    .top-bar h1{
+        font-size:22px;
+    }
+
+    .box{
+        margin:16px;
+        padding:18px;
+        border-radius:18px;
+    }
+
+    .btn-row{
+        flex-direction:column;
+    }
+
+    button{
+        width:100%;
+    }
+
+    input,
+    select,
+    textarea{
+        font-size:16px; /* prevents zoom on mobile */
+    }
+}
