@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Add Questions</title>
 
 <link rel="stylesheet" href="css/home.css">
@@ -11,71 +11,68 @@
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
     <h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button>
-    <button onclick="goFriends()">👥 Friends</button>
-    <button onclick="goProfile()">👤 Profile</button>
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='tasks.html'">📋 Tasks</button>
+    <button onclick="location.href='goals.html'">🎯 Goals</button>
+    <button onclick="location.href='friends.html'">👥 Friends</button>
     <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
-    <button onclick="goCreateTest()">📝 Create Test</button>
-    <button onclick="goGiveTest()">🎯 Give Test</button>
-    <button onclick="logout()">🚪 Logout</button>
+    <button onclick="location.href='profile.html'">👤 Profile</button>
 </div>
 
-<!-- Page -->
+<!-- PAGE -->
 <div class="page">
 
-    <!-- Top Bar -->
+    <!-- TOP -->
     <div class="top-bar">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <h1>➕ Add Questions</h1>
     </div>
 
-    <!-- Container -->
-    <div class="box">
+    <!-- CARD -->
+    <div class="main-card">
 
-        <!-- Mode -->
+        <!-- MODE -->
         <label>Save Mode</label>
         <select id="modeSelect">
             <option value="new">Create New Folder</option>
-            <option value="existing">Add to Existing Folder</option>
+            <option value="existing">Save In Existing Folder</option>
         </select>
 
-        <!-- New Folder Inputs -->
-        <div id="newFields">
+        <!-- NEW FOLDER AREA -->
+        <div id="newArea">
 
             <label>Subject</label>
-            <input id="subject" placeholder="Mechanical">
+            <input id="subject" placeholder="Example: Mechanical">
 
-            <label>Chapter</label>
-            <input id="chapter" placeholder="Thermodynamics">
+            <label>Chapter (optional)</label>
+            <input id="chapter" placeholder="Example: SOM">
 
-            <label>Topic</label>
-            <input id="topic" placeholder="First Law">
+            <label>Topic (optional)</label>
+            <input id="topic" placeholder="Example: Stress">
 
         </div>
 
-        <!-- Existing Folder -->
-        <div id="existingFields" style="display:none;">
+        <!-- EXISTING -->
+        <div id="existingArea" style="display:none;">
 
             <label>Select Subject</label>
             <select id="subjectList"></select>
 
-            <label>Select Chapter</label>
+            <label>Select Chapter (optional)</label>
             <select id="chapterList"></select>
 
-            <label>Select Topic</label>
+            <label>Select Topic (optional)</label>
             <select id="topicList"></select>
 
         </div>
 
         <!-- JSON -->
         <label>Paste JSON Questions</label>
-        <textarea id="jsonBox" rows="14" placeholder='[
+        <textarea id="jsonBox" rows="12" placeholder='[
 {
 "question":"What is force?",
 "options":["Joule","Newton","Watt","Pascal"],
@@ -83,28 +80,22 @@
 }
 ]'></textarea>
 
-        <!-- Buttons -->
+        <!-- BUTTONS -->
         <div class="btn-row">
-            <button class="secondary" onclick="previewQuestions()">👁 Preview</button>
-            <button class="primary" onclick="saveQuestions()">💾 Save Questions</button>
+            <button class="preview-btn" onclick="previewQuestions()">👁 Preview</button>
+            <button class="save-btn" onclick="saveQuestions()">💾 Save Questions</button>
         </div>
 
-        <!-- Preview -->
-        <div class="preview-box">
-            <h2>👁 Preview</h2>
-            <div id="previewArea">No Preview Yet</div>
-        </div>
+    </div>
 
-        <!-- Back -->
-        <button class="back-btn" onclick="location.href='question-bank.html'">
-            ← Back
-        </button>
-
+    <!-- PREVIEW -->
+    <div class="preview-card">
+        <h2>👁 Preview Questions</h2>
+        <div id="previewBox">No Preview Yet</div>
     </div>
 
 </div>
 
-<script type="module" src="js/menu.js"></script>
 <script type="module" src="js/add-question.js"></script>
 
 </body>
