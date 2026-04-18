@@ -10,7 +10,7 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GLOBAL ================= */
+/* ================= HELPERS ================= */
 const getEl = (id) => document.getElementById(id);
 
 let currentUser = null;
@@ -41,11 +41,11 @@ getEl("modeSelect").addEventListener("change", ()=>{
     const mode = getEl("modeSelect").value;
 
     if(mode === "new"){
-        getEl("newFields").style.display = "block";
-        getEl("existingFields").style.display = "none";
+        getEl("newArea").style.display = "block";
+        getEl("existingArea").style.display = "none";
     }else{
-        getEl("newFields").style.display = "none";
-        getEl("existingFields").style.display = "block";
+        getEl("newArea").style.display = "none";
+        getEl("existingArea").style.display = "block";
     }
 });
 
@@ -63,15 +63,18 @@ async function loadSubjects(){
 
     snap.forEach(doc => {
         const d = doc.data();
+
         if(d.subject && !subjects.includes(d.subject)){
             subjects.push(d.subject);
         }
     });
 
     fillSelect("subjectList", subjects);
+    fillSelect("chapterList", []);
+    fillSelect("topicList", []);
 }
 
-/* ================= LOAD CHAPTERS ================= */
+/* ================= SUBJECT CHANGE ================= */
 getEl("subjectList").addEventListener("change", async ()=>{
 
     const subject = getEl("subjectList").value;
@@ -87,16 +90,19 @@ getEl("subjectList").addEventListener("change", async ()=>{
     let chapters = [];
 
     snap.forEach(doc => {
+
         const d = doc.data();
+
         if(d.chapter && !chapters.includes(d.chapter)){
             chapters.push(d.chapter);
         }
     });
 
     fillSelect("chapterList", chapters);
+    fillSelect("topicList", []);
 });
 
-/* ================= LOAD TOPICS ================= */
+/* ================= CHAPTER CHANGE ================= */
 getEl("chapterList").addEventListener("change", async ()=>{
 
     const subject = getEl("subjectList").value;
@@ -114,7 +120,9 @@ getEl("chapterList").addEventListener("change", async ()=>{
     let topics = [];
 
     snap.forEach(doc => {
+
         const d = doc.data();
+
         if(d.topic && !topics.includes(d.topic)){
             topics.push(d.topic);
         }
@@ -138,10 +146,10 @@ function fillSelect(id, arr){
 /* ================= PREVIEW ================= */
 window.previewQuestions = ()=>{
 
-    const area = getEl("previewArea");
+    const box = getEl("previewBox");
 
     if(previewOpen){
-        area.innerHTML = "No Preview Yet";
+        box.innerHTML = "No Preview Yet";
         previewOpen = false;
         return;
     }
@@ -149,7 +157,7 @@ window.previewQuestions = ()=>{
     const raw = getEl("jsonBox").value.trim();
 
     if(!raw){
-        area.innerHTML = "Paste JSON first";
+        box.innerHTML = "Paste JSON first";
         return;
     }
 
@@ -158,7 +166,7 @@ window.previewQuestions = ()=>{
     try{
         data = JSON.parse(raw);
     }catch{
-        area.innerHTML = "Invalid JSON";
+        box.innerHTML = "Invalid JSON";
         return;
     }
 
@@ -166,17 +174,23 @@ window.previewQuestions = ()=>{
 
     data.forEach((q,i)=>{
 
+        const ans =
+            Number(
+                q.answer ??
+                q.correct_option ??
+                q.correctAnswer ??
+                0
+            );
+
         html += `
-        <div class="q-card">
-            <div class="q-title">
-                Q${i+1}. ${q.question}
-            </div>
+        <div class="qbox">
+            <h3>Q${i+1}. ${q.question}</h3>
         `;
 
         q.options.forEach((op,index)=>{
 
             html += `
-            <div class="option ${index == q.answer ? 'correct':''}">
+            <div class="opt ${index===ans ? 'correct':''}">
                 ${String.fromCharCode(65+index)}. ${op}
             </div>
             `;
@@ -185,7 +199,7 @@ window.previewQuestions = ()=>{
         html += `</div>`;
     });
 
-    area.innerHTML = html;
+    box.innerHTML = html;
     previewOpen = true;
 };
 
@@ -199,19 +213,22 @@ window.saveQuestions = async ()=>{
         return;
     }
 
-    let questions = [];
+    let data = [];
 
     try{
-        questions = JSON.parse(raw);
+        data = JSON.parse(raw);
     }catch{
         alert("Invalid JSON");
         return;
     }
 
-    let subject, chapter, topic;
+    let subject = "";
+    let chapter = "";
+    let topic   = "";
 
     const mode = getEl("modeSelect").value;
 
+    /* NEW MODE */
     if(mode === "new"){
 
         subject = getEl("subject").value.trim();
@@ -220,23 +237,26 @@ window.saveQuestions = async ()=>{
 
     }else{
 
-        subject = getEl("subjectList").value;
-        chapter = getEl("chapterList").value;
-        topic   = getEl("topicList").value;
+        subject = getEl("subjectList").value.trim();
+        chapter = getEl("chapterList").value.trim();
+        topic   = getEl("topicList").value.trim();
     }
 
-    if(!subject || !chapter || !topic){
-        alert("Select folder path");
+    /* Subject compulsory */
+    if(!subject){
+        alert("Subject required");
         return;
     }
 
-    for(let q of questions){
+    for(let q of data){
 
         const answer =
-            q.answer ??
-            q.correct_option ??
-            q.correctAnswer ??
-            0;
+            Number(
+                q.answer ??
+                q.correct_option ??
+                q.correctAnswer ??
+                0
+            );
 
         await addDoc(collection(db,"questionBank"),{
 
@@ -248,7 +268,7 @@ window.saveQuestions = async ()=>{
 
             question: q.question,
             options: q.options,
-            answer: Number(answer),
+            answer,
 
             createdAt: Date.now()
         });
@@ -256,9 +276,18 @@ window.saveQuestions = async ()=>{
 
     alert("Questions Saved Successfully ✅");
 
+    /* CLEAR ALL */
     getEl("jsonBox").value = "";
-    getEl("previewArea").innerHTML = "No Preview Yet";
+    getEl("previewBox").innerHTML = "No Preview Yet";
     previewOpen = false;
+
+    getEl("subject").value = "";
+    getEl("chapter").value = "";
+    getEl("topic").value = "";
+
+    getEl("subjectList").selectedIndex = 0;
+    getEl("chapterList").innerHTML = `<option value="">Select</option>`;
+    getEl("topicList").innerHTML = `<option value="">Select</option>`;
 
     await loadSubjects();
 };
