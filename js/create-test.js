@@ -42,12 +42,23 @@ window.newCode = ()=>{
 };
 
 /* PREVIEW */
+let previewOpen = false;
+
 window.previewTest = ()=>{
+
+    let area = getEl("previewArea");
+
+    /* CLOSE IF OPEN */
+    if(previewOpen){
+        area.innerHTML = "No preview yet";
+        previewOpen = false;
+        return;
+    }
 
     let raw = getEl("jsonBox").value.trim();
 
     if(!raw){
-        getEl("previewArea").innerText="Paste JSON first";
+        area.innerText="Paste JSON first";
         return;
     }
 
@@ -75,13 +86,13 @@ window.previewTest = ()=>{
             html += `</div>`;
         });
 
-        getEl("previewArea").innerHTML = html;
+        area.innerHTML = html;
+        previewOpen = true;
 
-    }catch(err){
-        getEl("previewArea").innerText = "Invalid JSON";
+    }catch{
+        area.innerText="Invalid JSON";
     }
 };
-
 /* CREATE */
 window.createTest = async ()=>{
 
