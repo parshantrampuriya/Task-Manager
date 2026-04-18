@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Test</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/create-test.css?v=1">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+    <h2>⚡ Menu</h2>
+
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button onclick="goCreateTest()">🏗 Create Test</button>
+    <button onclick="goGiveTest()">📝 Give Test</button>
+</div>
+
+<div class="main">
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2>🏗 Create Test</h2>
+    </div>
+
+    <!-- FORM -->
+    <div class="card">
+
+        <label>Test Name</label>
+        <input id="testName" placeholder="Enter test name">
+
+        <label>Topic</label>
+        <input id="testTopic" placeholder="Enter topic">
+
+        <label>Duration (Minutes)</label>
+        <input id="testDuration" type="number" placeholder="60">
+
+        <label>Generated Test Code</label>
+        <div id="testCode" class="code-box">Loading...</div>
+
+        <label>Questions JSON</label>
+        <textarea id="jsonBox" placeholder='[
+{
+ "question":"Entropy unit is?",
+ "options":["J/kg","J/kgK","W","Pa"],
+ "answer":1
+}
+]'></textarea>
+
+        <div class="btn-row">
+            <button onclick="newCode()">🔄 New Code</button>
+            <button onclick="previewTest()">👁 Preview</button>
+            <button class="primary" onclick="createTest()">✅ Create</button>
+        </div>
+
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="card">
+        <h3>👁 Preview</h3>
+        <div id="previewArea">No preview yet</div>
+    </div>
+
+    <!-- MY TESTS -->
+    <div class="card">
+        <h3>📚 My Created Tests</h3>
+        <div id="testList">Loading...</div>
+    </div>
+
+</div>
+
+<script type="module" src="js/create-test.js?v=1"></script>
+<script type="module" src="js/menu.js"></script>
+
+</body>
+</html>
