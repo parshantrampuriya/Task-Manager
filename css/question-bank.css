@@ -5,7 +5,7 @@ body{
     background:
     linear-gradient(rgba(0,0,0,0.88),rgba(0,0,0,0.95)),
     url("../mahadev.png") center/cover no-repeat fixed;
-    color:white;
+    color:#fff;
 }
 
 /* ===== PAGE ===== */
@@ -21,7 +21,7 @@ body{
     gap:15px;
     padding:18px 25px;
     background:rgba(0,0,0,0.45);
-    backdrop-filter: blur(8px);
+    backdrop-filter:blur(8px);
     position:sticky;
     top:0;
     z-index:1000;
@@ -41,16 +41,21 @@ body{
     border-radius:14px;
     cursor:pointer;
     font-size:22px;
-    color:black;
+    color:#000;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
     box-shadow:0 0 18px rgba(0,255,255,0.4);
+    transition:.25s;
+}
+
+.menu-btn:hover{
+    transform:scale(1.04);
 }
 
 /* ===== HERO ===== */
 .hero{
     text-align:center;
     padding:30px 15px 10px;
-    opacity:0.95;
+    opacity:.95;
 }
 
 .hero p{
@@ -59,26 +64,69 @@ body{
     color:#cfd8dc;
 }
 
+/* ===== SECTION TITLE ===== */
+.friend-title{
+    text-align:center;
+    margin:10px 0 0;
+    font-size:26px;
+    font-weight:700;
+    color:#fff;
+    text-shadow:0 0 12px rgba(0,255,255,.18);
+}
+
+/* ===== FRIEND SECTION ===== */
+.friend-section{
+    max-width:1150px;
+    margin:10px auto 35px;
+    padding:0 20px;
+}
+
 /* ===== CARD WRAP ===== */
 .card-wrap{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
     gap:28px;
     padding:35px;
-    max-width:1100px;
+    max-width:1150px;
     margin:auto;
 }
 
 /* ===== BIG CARD ===== */
 .big-card{
-    background:linear-gradient(145deg,rgba(20,30,45,.92),rgba(35,50,70,.88));
+    background:
+    linear-gradient(
+    145deg,
+    rgba(20,30,45,.92),
+    rgba(35,50,70,.88)
+    );
     border-radius:24px;
     padding:38px 28px;
     cursor:pointer;
-    transition:0.25s ease;
+    transition:.25s ease;
     box-shadow:0 10px 30px rgba(0,0,0,0.35);
     border:1px solid rgba(255,255,255,0.06);
     text-align:center;
+    position:relative;
+    overflow:hidden;
+}
+
+.big-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+    linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,.03),
+    transparent
+    );
+    transform:translateX(-100%);
+    transition:.5s;
+}
+
+.big-card:hover::before{
+    transform:translateX(100%);
 }
 
 .big-card:hover{
@@ -86,16 +134,19 @@ body{
     box-shadow:0 0 24px rgba(0,255,255,.25);
 }
 
+/* ===== ICON ===== */
 .big-card .icon{
     font-size:56px;
     margin-bottom:18px;
 }
 
+/* ===== TITLE ===== */
 .big-card h2{
     margin:0 0 10px;
     font-size:28px;
 }
 
+/* ===== TEXT ===== */
 .big-card p{
     margin:0;
     color:#b0bec5;
@@ -103,13 +154,39 @@ body{
     line-height:1.5;
 }
 
-/* ===== MOBILE ===== */
+/* ===== FRIEND CARD SPECIAL ===== */
+#friendCards .big-card{
+    background:
+    linear-gradient(
+    145deg,
+    rgba(25,45,35,.92),
+    rgba(40,70,55,.88)
+    );
+}
+
+#friendCards .big-card:hover{
+    box-shadow:0 0 24px rgba(0,255,170,.22);
+}
+
+/* ===== EMPTY / ERROR CARD ===== */
+.no-friend-card{
+    cursor:default;
+}
+
+.no-friend-card:hover{
+    transform:none;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+/* ===== MOBILE LARGE ===== */
 @media(max-width:900px){
+
     .page{
         padding-left:0;
     }
 }
 
+/* ===== MOBILE ===== */
 @media(max-width:768px){
 
     .top-bar{
@@ -120,17 +197,32 @@ body{
         font-size:22px;
     }
 
+    .hero{
+        padding:22px 12px 5px;
+    }
+
     .hero p{
         font-size:15px;
+    }
+
+    .friend-title{
+        font-size:22px;
+        margin-top:5px;
+    }
+
+    .friend-section{
+        padding:0 10px;
     }
 
     .card-wrap{
         padding:18px;
         gap:18px;
+        grid-template-columns:1fr;
     }
 
     .big-card{
         padding:28px 20px;
+        border-radius:20px;
     }
 
     .big-card h2{
@@ -139,5 +231,9 @@ body{
 
     .big-card .icon{
         font-size:44px;
+    }
+
+    .big-card p{
+        font-size:14px;
     }
 }
