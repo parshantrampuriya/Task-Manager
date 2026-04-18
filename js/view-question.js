@@ -8,7 +8,8 @@ import {
   query,
   where,
   doc,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
@@ -18,6 +19,8 @@ let currentUser = null;
 let allQuestions = [];
 let currentPath = [];
 let selectedQuestion = null;
+
+let holdTimer = null;
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async (user)=>{
@@ -51,7 +54,7 @@ function showToast(msg){
     },2200);
 }
 
-/* ================= LOAD QUESTIONS ================= */
+/* ================= LOAD ================= */
 async function loadAllQuestions(){
 
     const snap = await getDocs(
@@ -73,7 +76,7 @@ async function loadAllQuestions(){
     renderFiles();
 }
 
-/* ================= FILE MANAGER VIEW ================= */
+/* ================= FILE MANAGER ================= */
 function renderFiles(){
 
     const fileArea = getEl("fileArea");
@@ -119,7 +122,7 @@ function renderFiles(){
         }
     });
 
-    folders.sort();
+    folders.sort((a,b)=>a.localeCompare(b));
     questions.sort((a,b)=>
         a.question.localeCompare(b.question)
     );
@@ -131,7 +134,15 @@ function renderFiles(){
 
         html += `
         <div class="file-item folder"
-            onclick="openFolder('${safe(name)}')">
+
+            onclick="openFolder('${safe(name)}')"
+
+            onmousedown="startHold('${safe(name)}')"
+            ontouchstart="startHold('${safe(name)}')"
+
+            onmouseup="cancelHold()"
+            onmouseleave="cancelHold()"
+            ontouchend="cancelHold()">
 
             <div class="file-icon">📁</div>
             <div class="file-name">${name}</div>
@@ -165,24 +176,96 @@ function renderFiles(){
     fileArea.innerHTML = html;
 }
 
-/* ================= SAFE TEXT ================= */
+/* ================= SAFE ================= */
 function safe(text){
     return text.replace(/'/g,"\\'");
 }
 
-/* ================= FOLDER OPEN ================= */
+/* ================= OPEN FOLDER ================= */
 window.openFolder = (name)=>{
     currentPath.push(name);
     renderFiles();
 };
 
-/* ================= FOLDER BACK ================= */
+/* ================= BACK FOLDER ================= */
 window.goFolderBack = ()=>{
 
     if(currentPath.length > 0){
         currentPath.pop();
         renderFiles();
     }
+};
+
+/* ================= LONG HOLD FOLDER ================= */
+window.startHold = (name)=>{
+
+    holdTimer = setTimeout(()=>{
+        folderPopup(name);
+    },900);
+};
+
+window.cancelHold = ()=>{
+    clearTimeout(holdTimer);
+};
+
+function folderPopup(name){
+
+    getEl("popupQuestion").innerText =
+        "Folder : " + name;
+
+    getEl("popupContent").innerHTML = `
+        <button class="save-btn"
+            onclick="openFolder('${safe(name)}')">
+            📂 Open Folder
+        </button>
+
+        <br><br>
+
+        <button class="delete-btn"
+            onclick="deleteFolder('${safe(name)}')">
+            🗑 Delete Folder
+        </button>
+    `;
+
+    getEl("popup").classList.add("show");
+}
+
+/* ================= DELETE FOLDER ================= */
+window.deleteFolder = async (name)=>{
+
+    let targetPath = [...currentPath, name];
+
+    if(!confirm(
+        "Delete folder and all inside data?"
+    )) return;
+
+    for(let q of allQuestions){
+
+        const levels = [
+            q.subject || "",
+            q.chapter || "",
+            q.topic || ""
+        ].filter(v=>v !== "");
+
+        let match = true;
+
+        for(let i=0;i<targetPath.length;i++){
+            if(levels[i] !== targetPath[i]){
+                match = false;
+                break;
+            }
+        }
+
+        if(match){
+            await deleteDoc(
+                doc(db,"questionBank",q.id)
+            );
+        }
+    }
+
+    closePopup();
+    showToast("Folder Deleted ✅");
+    await loadAllQuestions();
 };
 
 /* ================= OPEN QUESTION ================= */
@@ -196,8 +279,22 @@ window.openQuestion = (id)=>{
     getEl("popupQuestion").innerText =
         selectedQuestion.question;
 
-    getEl("popupContent").innerHTML =
-        `<p>Select Preview or Edit</p>`;
+    getEl("popupContent").innerHTML = `
+        <button class="preview-btn"
+            onclick="previewQuestion()">
+            👁 Preview
+        </button>
+
+        <button class="save-btn"
+            onclick="editQuestion()">
+            ✏ Edit
+        </button>
+
+        <button class="delete-btn"
+            onclick="deleteQuestion()">
+            🗑 Delete
+        </button>
+    `;
 
     getEl("popup").classList.add("show");
 };
@@ -207,25 +304,25 @@ window.closePopup = ()=>{
     getEl("popup").classList.remove("show");
 };
 
-/* ================= PREVIEW QUESTION ================= */
+/* ================= PREVIEW ================= */
 window.previewQuestion = ()=>{
 
     if(!selectedQuestion) return;
 
     let ans = parseInt(selectedQuestion.answer);
-
     if(isNaN(ans)) ans = 0;
 
     let html = "";
 
     selectedQuestion.options.forEach((op,index)=>{
 
-        const correct = index === ans;
-
         html += `
-        <div class="option-box ${correct ? 'correct' : ''}">
-            ${String.fromCharCode(65+index)}. ${op}
-            ${correct ? ' ✅ Correct' : ''}
+        <div class="option-box ${
+            index===ans ? "correct" : ""
+        }">
+            ${String.fromCharCode(65+index)}.
+            ${op}
+            ${index===ans ? " ✅ Correct" : ""}
         </div>
         `;
     });
@@ -233,13 +330,12 @@ window.previewQuestion = ()=>{
     getEl("popupContent").innerHTML = html;
 };
 
-/* ================= EDIT QUESTION ================= */
+/* ================= EDIT ================= */
 window.editQuestion = ()=>{
 
     if(!selectedQuestion) return;
 
     let ans = parseInt(selectedQuestion.answer);
-
     if(isNaN(ans)) ans = 0;
 
     let html = `
@@ -265,20 +361,22 @@ window.editQuestion = ()=>{
         <option value="3">D</option>
     </select>
 
-    <button class="save-btn" onclick="saveEdit()">
+    <br><br>
+
+    <button class="save-btn"
+        onclick="saveEdit()">
         💾 Save Changes
     </button>
     `;
 
     getEl("popupContent").innerHTML = html;
 
-    document.getElementById("correctAns").value = String(ans);
+    getEl("correctAns").value =
+        String(ans);
 };
 
 /* ================= SAVE EDIT ================= */
 window.saveEdit = async ()=>{
-
-    if(!selectedQuestion) return;
 
     const newQ =
         getEl("editQ").value.trim();
@@ -302,9 +400,27 @@ window.saveEdit = async ()=>{
         }
     );
 
-    showToast("Updated Successfully ✅");
+    closePopup();
+    showToast("Updated ✅");
+
+    await loadAllQuestions();
+};
+
+/* ================= DELETE QUESTION ================= */
+window.deleteQuestion = async ()=>{
+
+    if(!selectedQuestion) return;
+
+    if(!confirm("Delete this question?"))
+        return;
+
+    await deleteDoc(
+        doc(db,"questionBank",selectedQuestion.id)
+    );
 
     closePopup();
+
+    showToast("Question Deleted ✅");
 
     await loadAllQuestions();
 };
