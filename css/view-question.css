@@ -60,6 +60,7 @@ body{
 .menu-btn{
     color:#000;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
+    box-shadow:0 0 16px rgba(0,255,255,.25);
 }
 
 .page-back-btn{
@@ -126,11 +127,16 @@ body{
     cursor:pointer;
     background:#171717;
     transition:.22s;
+    user-select:none;
 }
 
 .file-item:hover{
     transform:translateX(4px);
     background:#222;
+}
+
+.file-item:active{
+    transform:scale(.98);
 }
 
 .file-icon{
@@ -143,6 +149,7 @@ body{
     flex:1;
     font-size:16px;
     font-weight:600;
+    word-break:break-word;
 }
 
 .folder{
@@ -179,6 +186,7 @@ body{
     padding:22px;
     position:relative;
     border:1px solid rgba(0,255,255,.12);
+    box-shadow:0 0 26px rgba(0,255,255,.10);
 }
 
 .close-btn{
@@ -193,33 +201,49 @@ body{
     background:#222;
     color:#fff;
     font-size:18px;
+    transition:.2s;
+}
+
+.close-btn:hover{
+    background:#333;
 }
 
 .popup-box h2{
     margin-top:0;
-    padding-right:50px;
+    padding-right:52px;
     font-size:24px;
+    line-height:1.4;
+    word-break:break-word;
 }
 
+/* ================= BUTTON ROW ================= */
 .popup-btn-row{
     display:flex;
     gap:12px;
     margin:18px 0;
+    flex-wrap:wrap;
 }
 
+/* ================= BUTTONS ================= */
 .preview-btn,
 .edit-btn,
-.save-btn{
+.save-btn,
+.delete-btn{
     border:none;
     padding:12px 18px;
     border-radius:14px;
     cursor:pointer;
     font-weight:700;
+    transition:.22s;
 }
 
 .preview-btn{
     background:#252525;
     color:#fff;
+}
+
+.preview-btn:hover{
+    background:#333;
 }
 
 .edit-btn,
@@ -228,19 +252,44 @@ body{
     color:#000;
 }
 
+.edit-btn:hover,
+.save-btn:hover{
+    transform:translateY(-2px);
+}
+
+.delete-btn{
+    background:linear-gradient(45deg,#ff4d4d,#ff7676);
+    color:#fff;
+}
+
+.delete-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 0 14px rgba(255,0,0,.20);
+}
+
 /* ================= OPTIONS ================= */
 .option-box{
     padding:12px;
     border-radius:14px;
     background:#1b1b1b;
     margin-bottom:10px;
+    line-height:1.5;
 }
 
 .correct{
     border-left:4px solid #00ff99;
+    background:#153026;
 }
 
 /* ================= FORM ================= */
+.popup-box label{
+    display:block;
+    margin:10px 0 6px;
+    font-size:14px;
+    color:#9eeeff;
+    font-weight:700;
+}
+
 .popup-box input,
 .popup-box textarea,
 .popup-box select{
@@ -253,6 +302,12 @@ body{
     background:#1b1b1b;
     color:#fff;
     margin-bottom:10px;
+    font-size:15px;
+}
+
+.popup-box textarea{
+    min-height:100px;
+    resize:vertical;
 }
 
 /* ================= TOAST ================= */
@@ -265,6 +320,7 @@ body{
     border-radius:14px;
     background:#111;
     border:1px solid rgba(0,255,255,.2);
+    box-shadow:0 0 18px rgba(0,255,255,.12);
     transform:translateY(-120px);
     opacity:0;
     transition:.3s;
@@ -318,13 +374,19 @@ body{
         padding:14px;
     }
 
+    .popup-box{
+        padding:18px;
+        border-radius:18px;
+    }
+
     .popup-btn-row{
         flex-direction:column;
     }
 
     .preview-btn,
     .edit-btn,
-    .save-btn{
+    .save-btn,
+    .delete-btn{
         width:100%;
     }
 
