@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question Bank</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/question-bank.css?v=1">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+    <h2>⚡ Menu</h2>
+
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goProfile()">👤 Profile</button>
+
+    <button onclick="goCreateTest()">🏗 Create Test</button>
+    <button onclick="goGiveTest()">📝 Give Test</button>
+    <button onclick="goQuestionBank()">🏦 Question Bank</button>
+</div>
+
+<div class="main">
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2>🏦 Question Bank</h2>
+    </div>
+
+    <!-- ADD QUESTIONS -->
+    <div class="card">
+
+        <h3>➕ Add Questions</h3>
+
+        <label>Main Subject</label>
+        <input id="subject" placeholder="Mechanical">
+
+        <label>Chapter</label>
+        <input id="chapter" placeholder="Thermodynamics">
+
+        <label>Topic</label>
+        <input id="topic" placeholder="Entropy">
+
+        <label>Questions JSON</label>
+        <textarea id="jsonBox" placeholder='[
+{
+ "question":"Entropy unit is?",
+ "options":["J/kg","J/kgK","Pa","W"],
+ "answer":1
+}
+]'></textarea>
+
+        <div class="btn-row">
+            <button onclick="previewQuestions()">👁 Preview</button>
+            <button class="primary" onclick="saveQuestions()">💾 Save Questions</button>
+        </div>
+
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="card">
+        <h3>👁 Preview</h3>
+        <div id="previewArea">No preview yet</div>
+    </div>
+
+    <!-- VIEW BANK -->
+    <div class="card">
+
+        <h3>📚 View Stored Questions</h3>
+
+        <select id="filterSubject"></select>
+        <select id="filterChapter"></select>
+        <select id="filterTopic"></select>
+
+        <div class="btn-row">
+            <button onclick="loadQuestions()">🔍 Load Questions</button>
+        </div>
+
+        <div id="questionList">No data loaded</div>
+
+    </div>
+
+</div>
+
+<script type="module" src="js/question-bank.js?v=1"></script>
+<script type="module" src="js/menu.js"></script>
+
+</body>
+</html>
