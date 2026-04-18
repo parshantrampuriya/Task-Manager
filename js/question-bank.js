@@ -1,15 +1,15 @@
 /* ================= QUESTION BANK PAGE ================= */
-/* OLD FEATURES KEPT + FRIEND BUTTONS ADDED */
+/* OLD FEATURES KEPT + NOW USES REAL FRIENDS COLLECTION */
 
 import { auth, db } from "./firebase.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
     collection,
-    getDocs,
-    query,
-    where,
+    onSnapshot,
     doc,
     getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -29,7 +29,7 @@ window.toggleSidebar = ()=>{
     }
 };
 
-/* ================= CLOSE SIDEBAR OUTSIDE ================= */
+/* ================= CLOSE SIDEBAR ================= */
 document.addEventListener("click",(e)=>{
 
     const sidebar = getEl("sidebar");
@@ -47,7 +47,7 @@ document.addEventListener("click",(e)=>{
 });
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async (user)=>{
+onAuthStateChanged(auth,(user)=>{
 
     if(!user){
         location.href="index.html";
@@ -56,12 +56,11 @@ onAuthStateChanged(auth, async (user)=>{
 
     currentUser = user;
 
-    await loadFriendBanks();
-
+    loadFriendBanks();
     animateCards();
 });
 
-/* ================= PAGE ANIMATION ================= */
+/* ================= CARD ANIMATION ================= */
 function animateCards(){
 
     const cards =
@@ -82,77 +81,65 @@ function animateCards(){
             card.style.transform=
             "translateY(0)";
 
-        },200 + (index*140));
+        },180 + (index*130));
     });
 }
 
 /* ================= LOAD FRIEND BUTTONS ================= */
-async function loadFriendBanks(){
+function loadFriendBanks(){
 
     const wrap = getEl("friendCards");
 
     if(!wrap) return;
 
-    wrap.innerHTML = "";
+    onSnapshot(
+        collection(db,"friends"),
 
-    try{
+        async (snap)=>{
 
-        /* TRY COLLECTION friends */
-        const snap = await getDocs(
-            query(
-                collection(db,"friends"),
-                where("uid","==",currentUser.uid)
-            )
-        );
+            let html = "";
 
-        if(snap.empty){
-            wrap.innerHTML = `
-                <div class="big-card no-friend-card">
-                    <div class="icon">👥</div>
-                    <h2>No Friends</h2>
-                    <p>Add friends to access their Question Bank</p>
-                </div>
-            `;
-            animateCards();
-            return;
-        }
+            for(const item of snap.docs){
 
-        let html = "";
+                const data = item.data();
+                const users = data.users || [];
 
-        for(const item of snap.docs){
+                /* only my friends */
+                if(
+                    !users.includes(currentUser.uid)
+                ) continue;
 
-            const data = item.data();
-
-            const friendId =
-                data.friendId ||
-                data.fid ||
-                data.friendUid;
-
-            if(!friendId) continue;
-
-            let friendName = "Friend";
-
-            try{
-
-                const userSnap =
-                await getDoc(
-                    doc(db,"users",friendId)
+                const friendId =
+                users.find(
+                    uid => uid !== currentUser.uid
                 );
 
-                if(userSnap.exists()){
+                if(!friendId) continue;
 
-                    const u = userSnap.data();
+                let friendName = "Friend";
 
-                    friendName =
-                        u.name ||
-                        u.username ||
-                        u.email ||
-                        "Friend";
-                }
+                try{
 
-            }catch(err){}
+                    const userSnap =
+                    await getDoc(
+                        doc(db,"users",friendId)
+                    );
 
-            html += `
+                    if(userSnap.exists()){
+
+                        const u =
+                        userSnap.data();
+
+                        friendName =
+                            u.name ||
+                            u.username ||
+                            u.email ||
+                            "Friend";
+                    }
+
+                }catch(err){}
+
+                html += `
                 <div class="big-card"
                 onclick="openFriendBank('${friendId}')">
 
@@ -165,23 +152,31 @@ async function loadFriendBanks(){
                     </p>
 
                 </div>
-            `;
+                `;
+            }
+
+            if(!html){
+
+                html = `
+                <div class="big-card no-friend-card">
+
+                    <div class="icon">👥</div>
+
+                    <h2>No Friends Yet</h2>
+
+                    <p>
+                    Add friends first to access their Question Bank
+                    </p>
+
+                </div>
+                `;
+            }
+
+            wrap.innerHTML = html;
+
+            animateCards();
         }
-
-        wrap.innerHTML = html;
-
-        animateCards();
-
-    }catch(error){
-
-        wrap.innerHTML = `
-            <div class="big-card no-friend-card">
-                <div class="icon">⚠</div>
-                <h2>Error</h2>
-                <p>Unable to load friends</p>
-            </div>
-        `;
-    }
+    );
 }
 
 /* ================= OPEN FRIEND BANK ================= */
