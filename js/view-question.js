@@ -95,7 +95,6 @@ function renderFiles(){
             q.topic || ""
         ].filter(x=>x !== "");
 
-        /* Check matching path */
         let ok = true;
 
         for(let i=0;i<currentPath.length;i++){
@@ -107,7 +106,6 @@ function renderFiles(){
 
         if(!ok) return;
 
-        /* Folder below current path */
         if(levels.length > currentPath.length){
 
             const nextFolder = levels[currentPath.length];
@@ -117,7 +115,6 @@ function renderFiles(){
             }
 
         }else{
-
             questions.push(q);
         }
     });
@@ -129,7 +126,7 @@ function renderFiles(){
 
     let html = "";
 
-    /* FOLDERS FIRST */
+    /* FOLDERS */
     folders.forEach(name=>{
 
         html += `
@@ -143,7 +140,7 @@ function renderFiles(){
         `;
     });
 
-    /* QUESTIONS BELOW */
+    /* QUESTIONS */
     questions.forEach(q=>{
 
         html += `
@@ -151,9 +148,7 @@ function renderFiles(){
             onclick="openQuestion('${q.id}')">
 
             <div class="file-icon">📄</div>
-            <div class="file-name">
-                ${q.question}
-            </div>
+            <div class="file-name">${q.question}</div>
 
         </div>
         `;
@@ -162,9 +157,7 @@ function renderFiles(){
     if(!html){
         html = `
         <div class="file-item">
-            <div class="file-name">
-                Empty Folder
-            </div>
+            <div class="file-name">Empty Folder</div>
         </div>
         `;
     }
@@ -172,7 +165,7 @@ function renderFiles(){
     fileArea.innerHTML = html;
 }
 
-/* ================= SAFE TEXT ================= */
+/* ================= SAFE ================= */
 function safe(text){
     return text.replace(/'/g,"\\'");
 }
@@ -219,16 +212,20 @@ window.previewQuestion = ()=>{
 
     if(!selectedQuestion) return;
 
+    const ans =
+        Number(selectedQuestion.answer);
+
     let html = "";
 
     selectedQuestion.options.forEach((op,index)=>{
 
         html += `
-        <div class="option-box
-            ${index===Number(selectedQuestion.answer)
-            ? 'correct' : ''}">
+        <div class="option-box ${
+            index === ans ? "correct" : ""
+        }">
             ${String.fromCharCode(65+index)}.
             ${op}
+            ${index === ans ? " ✅" : ""}
         </div>
         `;
     });
@@ -241,8 +238,12 @@ window.editQuestion = ()=>{
 
     if(!selectedQuestion) return;
 
+    const ans =
+        Number(selectedQuestion.answer);
+
     let html = `
     <label>Question</label>
+
     <textarea id="editQ">${
         selectedQuestion.question
     }</textarea>
@@ -255,7 +256,9 @@ window.editQuestion = ()=>{
             String.fromCharCode(65+i)
         }</label>
 
-        <input id="op${i}" value="${op}">
+        <input
+            id="op${i}"
+            value="${op}">
         `;
     });
 
@@ -277,8 +280,11 @@ window.editQuestion = ()=>{
 
     getEl("popupContent").innerHTML = html;
 
-    getEl("correctAns").value =
-        Number(selectedQuestion.answer);
+    /* AUTO SELECT CURRENT ANSWER */
+    setTimeout(()=>{
+        getEl("correctAns").value =
+            String(ans);
+    },50);
 };
 
 /* ================= SAVE EDIT ================= */
@@ -300,7 +306,11 @@ window.saveEdit = async ()=>{
         Number(getEl("correctAns").value);
 
     await updateDoc(
-        doc(db,"questionBank",selectedQuestion.id),
+        doc(
+            db,
+            "questionBank",
+            selectedQuestion.id
+        ),
         {
             question:newQ,
             options,
