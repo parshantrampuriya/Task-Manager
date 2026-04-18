@@ -7,8 +7,10 @@ import {
     getDocs,
     query,
     where,
-    deleteDoc,
-    doc
+    doc,
+    getDoc,
+    updateDoc,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
@@ -17,6 +19,9 @@ const getEl = (id)=>document.getElementById(id);
 let currentUser = null;
 let allTests = [];
 let activeTab = "all";
+
+let editingTest = null;
+let deletingId = null;
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async(user)=>{
@@ -67,7 +72,6 @@ window.loadMyTests = async ()=>{
     allTests = [];
 
     snap.forEach(d=>{
-
         allTests.push({
             id:d.id,
             ...d.data()
@@ -77,13 +81,12 @@ window.loadMyTests = async ()=>{
     renderTests();
 };
 
-/* ================= CHANGE TAB ================= */
+/* ================= TAB ================= */
 window.changeTab = (tab,btn)=>{
 
     activeTab = tab;
 
-    document
-    .querySelectorAll(".tab-btn")
+    document.querySelectorAll(".tab-btn")
     .forEach(x=>x.classList.remove("active"));
 
     btn.classList.add("active");
@@ -91,7 +94,6 @@ window.changeTab = (tab,btn)=>{
     renderTests();
 };
 
-/* ================= SEARCH ================= */
 window.searchTests = ()=>{
     renderTests();
 };
@@ -101,14 +103,12 @@ function renderTests(){
 
     let arr = [...allTests];
 
-    /* Filter by tab */
     if(activeTab !== "all"){
         arr = arr.filter(x=>
             (x.status || "active") === activeTab
         );
     }
 
-    /* Search */
     const txt =
     getEl("searchBox").value
     .trim()
@@ -122,9 +122,7 @@ function renderTests(){
         );
     }
 
-    /* Sort */
-    const sort =
-    getEl("sortBox").value;
+    const sort = getEl("sortBox").value;
 
     if(sort === "new"){
         arr.sort((a,b)=>
@@ -147,27 +145,25 @@ function renderTests(){
         );
     }
 
-    /* Stats */
+    /* stats */
     getEl("totalTests").innerText =
         allTests.length;
 
     getEl("activeTests").innerText =
         allTests.filter(x=>
-            (x.status || "active") === "active"
+            (x.status || "active")==="active"
         ).length;
 
     let attempts = 0;
 
     allTests.forEach(x=>{
-        attempts += Number(
-            x.attemptCount || 0
-        );
+        attempts += Number(x.attemptCount||0);
     });
 
     getEl("attemptCount").innerText =
         attempts;
 
-    /* HTML */
+    /* cards */
     let html = "";
 
     arr.forEach(test=>{
@@ -183,14 +179,12 @@ function renderTests(){
 
             <div class="test-top">
 
-                <div>
-                    <div class="test-name">
-                        ${test.testName || "Untitled Test"}
-                    </div>
+                <div class="test-name">
+                    ${test.testName || "Untitled Test"}
                 </div>
 
                 <div class="status ${status}">
-                    ${capitalize(status)}
+                    ${cap(status)}
                 </div>
 
             </div>
@@ -213,7 +207,7 @@ function renderTests(){
                 </div>
 
                 <div class="meta-box">
-                    <h4>Duration</h4>
+                    <h4>Time</h4>
                     <p>${test.duration || 0} min</p>
                 </div>
 
@@ -242,7 +236,7 @@ function renderTests(){
                 </button>
 
                 <button class="action-btn delete"
-                onclick="deleteTest('${test.id}')">
+                onclick="askDelete('${test.id}')">
                 🗑 Delete
                 </button>
 
@@ -253,54 +247,195 @@ function renderTests(){
     });
 
     if(!html){
-
         html = `
         <div class="empty-box">
             No tests found.
-        </div>
-        `;
+        </div>`;
     }
 
     getEl("testList").innerHTML = html;
 }
 
-/* ================= BUTTON ACTIONS ================= */
-window.editTest = (id)=>{
-    location.href =
-    "create-test.html?edit=" + id;
+/* ================= EDIT TEST ================= */
+window.editTest = async(id)=>{
+
+    const ref = doc(db,"tests",id);
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()) return;
+
+    editingTest = {
+        id,
+        ...snap.data()
+    };
+
+    let questions =
+    editingTest.questions || [];
+
+    let qHtml = "";
+
+    questions.forEach((q,i)=>{
+
+        qHtml += `
+        <div class="q-item">
+
+            <div class="q-item-top">
+
+                <div>
+                    Q${i+1}. ${q.question || ""}
+                </div>
+
+                <button class="remove-q"
+                onclick="removeQuestion(${i})">
+                Remove
+                </button>
+
+            </div>
+
+        </div>
+        `;
+    });
+
+    getEl("editArea").innerHTML = `
+        <label>Test Name</label>
+        <input id="eName"
+        value="${editingTest.testName || ""}">
+
+        <label>Duration (Min)</label>
+        <input id="eTime"
+        type="number"
+        value="${editingTest.duration || 0}">
+
+        <label>Total Marks</label>
+        <input id="eMarks"
+        type="number"
+        value="${editingTest.totalMarks || 0}">
+
+        <label>Negative Marking (%)</label>
+        <input id="eNegative"
+        type="number"
+        value="${editingTest.negativeMarks || 0}">
+
+        <div class="q-list">
+            <h3>Questions</h3>
+            ${qHtml || "No Questions"}
+        </div>
+
+        <div class="popup-btn-row">
+
+            <button class="cancel-btn"
+            onclick="closeEditPopup()">
+            Cancel
+            </button>
+
+            <button class="save-btn"
+            onclick="saveEditTest()">
+            Save
+            </button>
+
+        </div>
+    `;
+
+    getEl("editPopup")
+    .classList.add("show");
 };
 
-window.openResults = (id)=>{
-    location.href =
-    "admin-results.html?id=" + id;
+/* ================= REMOVE QUESTION ================= */
+window.removeQuestion = (index)=>{
+
+    editingTest.questions.splice(index,1);
+
+    editTest(editingTest.id);
 };
 
-window.assignTest = (id)=>{
-    location.href =
-    "assign-test.html?id=" + id;
+/* ================= SAVE EDIT ================= */
+window.saveEditTest = async()=>{
+
+    await updateDoc(
+        doc(db,"tests",editingTest.id),
+        {
+            testName:
+            getEl("eName").value.trim(),
+
+            duration:
+            Number(getEl("eTime").value),
+
+            totalMarks:
+            Number(getEl("eMarks").value),
+
+            negativeMarks:
+            Number(getEl("eNegative").value),
+
+            questions:
+            editingTest.questions || []
+        }
+    );
+
+    closeEditPopup();
+
+    showToast("Updated ✅");
+
+    await loadMyTests();
 };
 
-window.duplicateTest = (id)=>{
-    location.href =
-    "create-test.html?copy=" + id;
+/* ================= DELETE ================= */
+window.askDelete = (id)=>{
+
+    deletingId = id;
+
+    getEl("deletePopup")
+    .classList.add("show");
 };
 
-window.deleteTest = async(id)=>{
+window.closeDeletePopup = ()=>{
 
-    if(!confirm("Delete this test?"))
-        return;
+    getEl("deletePopup")
+    .classList.remove("show");
+};
+
+getEl("confirmDeleteBtn")
+.onclick = async()=>{
+
+    if(!deletingId) return;
 
     await deleteDoc(
-        doc(db,"tests",id)
+        doc(db,"tests",deletingId)
     );
+
+    deletingId = null;
+
+    closeDeletePopup();
 
     showToast("Deleted ✅");
 
     await loadMyTests();
 };
 
-/* ================= HELPER ================= */
-function capitalize(txt){
-    return txt.charAt(0).toUpperCase()
-    + txt.slice(1);
+/* ================= CLOSE EDIT ================= */
+window.closeEditPopup = ()=>{
+
+    getEl("editPopup")
+    .classList.remove("show");
+};
+
+/* ================= OTHER BUTTONS ================= */
+window.openResults = (id)=>{
+    location.href =
+    "admin-results.html?id="+id;
+};
+
+window.assignTest = (id)=>{
+    location.href =
+    "assign-test.html?id="+id;
+};
+
+window.duplicateTest = (id)=>{
+    location.href =
+    "create-test.html?copy="+id;
+};
+
+/* ================= HELPERS ================= */
+function cap(t){
+    return t.charAt(0).toUpperCase()
+    + t.slice(1);
 }
