@@ -1,114 +1,145 @@
-/* ===== BODY ===== */
+/* ================= BODY ================= */
 body{
     margin:0;
     font-family:'Segoe UI',sans-serif;
     background:
-    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.94)),
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
     url("../mahadev.png") center/cover fixed;
     color:#fff;
 }
 
-/* ===== PAGE ===== */
+/* ================= PAGE ================= */
 .page{
-    padding:20px;
-    max-width:1000px;
+    max-width:1050px;
     margin:auto;
+    padding:18px;
 }
 
-/* ===== TOP ===== */
+/* ================= TOP BAR ================= */
 .top-bar{
     display:flex;
     align-items:center;
-    gap:15px;
-    margin-bottom:25px;
+    gap:16px;
+    margin-bottom:20px;
+    padding:18px;
+    border-radius:22px;
+    background:rgba(15,15,15,.88);
+    border:1px solid rgba(0,255,255,.15);
+    box-shadow:0 0 20px rgba(0,255,255,.08);
 }
 
 .top-bar h1{
     margin:0;
     font-size:34px;
-    color:#ffffff;
-    text-shadow:0 0 12px #00eaff;
+    color:#fff;
+    text-shadow:0 0 14px rgba(0,255,255,.35);
 }
 
-/* ===== MENU BTN ===== */
+.top-bar p{
+    margin:4px 0 0;
+    color:#9eeeff;
+    font-size:14px;
+}
+
+/* ================= MENU BUTTON ================= */
 .menu-btn{
     border:none;
-    width:52px;
-    height:52px;
-    border-radius:14px;
-    font-size:24px;
+    width:54px;
+    height:54px;
+    border-radius:16px;
     cursor:pointer;
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-    color:#000;
+    font-size:24px;
     font-weight:700;
-    box-shadow:0 0 18px rgba(0,255,255,.35);
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    box-shadow:0 0 18px rgba(0,255,255,.28);
 }
 
-/* ===== CARD ===== */
+/* ================= CARD ================= */
 .main-card,
 .preview-card{
-    background:rgba(17,17,17,.88);
-    border:1px solid rgba(0,255,255,.15);
-    border-radius:20px;
+    background:rgba(16,16,16,.90);
+    border:1px solid rgba(0,255,255,.12);
+    border-radius:24px;
     padding:24px;
-    margin-bottom:24px;
-    box-shadow:0 0 25px rgba(0,255,255,.08);
-    backdrop-filter:blur(8px);
+    margin-bottom:22px;
+    box-shadow:0 0 22px rgba(0,255,255,.06);
 }
 
-/* ===== LABEL ===== */
+/* ================= TITLE ================= */
+.section-title{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:14px;
+    color:#fff;
+    text-shadow:0 0 10px rgba(0,255,255,.28);
+}
+
+/* ================= LABEL ================= */
 label{
     display:block;
     margin-top:14px;
     margin-bottom:7px;
-    font-size:15px;
+    color:#dffcff;
+    font-size:14px;
     font-weight:700;
-    color:#d9ffff;
 }
 
-/* ===== INPUT ===== */
+/* ================= INPUTS ================= */
 input,
 select,
 textarea{
     width:100%;
-    padding:14px;
-    border:none;
+    padding:15px;
+    border-radius:16px;
+    border:1px solid rgba(0,255,255,.12);
     outline:none;
-    border-radius:14px;
-    background:#1b1b1b;
+    box-sizing:border-box;
+    background:#0e0e0e;
     color:#fff;
     font-size:15px;
-    box-sizing:border-box;
-    margin-bottom:8px;
     transition:.25s;
 }
 
 input:focus,
 select:focus,
 textarea:focus{
-    box-shadow:0 0 0 2px #00eaff;
-    background:#202020;
+    border-color:#00eaff;
+    box-shadow:0 0 12px rgba(0,255,255,.25);
+}
+
+select{
+    appearance:none;
+    background-image:
+    linear-gradient(45deg,transparent 50%,#00eaff 50%),
+    linear-gradient(135deg,#00eaff 50%,transparent 50%);
+    background-position:
+    calc(100% - 20px) calc(1.1em),
+    calc(100% - 14px) calc(1.1em);
+    background-size:6px 6px,6px 6px;
+    background-repeat:no-repeat;
 }
 
 textarea{
-    resize:vertical;
     min-height:260px;
-    font-family:monospace;
+    resize:vertical;
+    font-family:Consolas,monospace;
+    line-height:1.55;
 }
 
-/* ===== BUTTONS ===== */
+/* ================= BUTTONS ================= */
 .btn-row{
     display:flex;
     gap:14px;
+    margin-top:22px;
     flex-wrap:wrap;
-    margin-top:18px;
 }
 
 .preview-btn,
 .save-btn{
     border:none;
-    padding:14px 24px;
-    border-radius:14px;
+    padding:15px 24px;
+    border-radius:16px;
     font-size:15px;
     font-weight:700;
     cursor:pointer;
@@ -116,13 +147,13 @@ textarea{
 }
 
 .preview-btn{
-    background:#2b2b2b;
+    background:#232323;
     color:#fff;
 }
 
 .preview-btn:hover{
     transform:translateY(-2px);
-    box-shadow:0 0 12px rgba(255,255,255,.15);
+    box-shadow:0 0 14px rgba(255,255,255,.12);
 }
 
 .save-btn{
@@ -132,35 +163,28 @@ textarea{
 
 .save-btn:hover{
     transform:translateY(-2px) scale(1.02);
-    box-shadow:0 0 18px rgba(0,255,255,.35);
+    box-shadow:0 0 18px rgba(0,255,255,.30);
 }
 
-/* ===== PREVIEW ===== */
-.preview-card h2{
-    margin-top:0;
-    margin-bottom:18px;
-    color:#ffffff;
-    text-shadow:0 0 10px #00eaff;
-}
-
+/* ================= PREVIEW ================= */
 .qbox{
-    background:#1d1d1d;
+    background:#171717;
     padding:18px;
-    border-radius:16px;
+    border-radius:18px;
     margin-bottom:16px;
     border-left:4px solid #00eaff;
 }
 
 .qbox h3{
-    margin:0 0 12px 0;
+    margin:0 0 12px;
     font-size:18px;
 }
 
 .opt{
-    background:#262626;
+    background:#242424;
     padding:11px 12px;
     border-radius:12px;
-    margin:7px 0;
+    margin:8px 0;
 }
 
 .correct{
@@ -169,21 +193,61 @@ textarea{
     font-weight:700;
 }
 
-/* ===== MOBILE ===== */
+/* ================= TOAST ================= */
+#toast{
+    position:fixed;
+    top:20px;
+    right:20px;
+    min-width:240px;
+    padding:14px 18px;
+    border-radius:14px;
+    background:#111;
+    color:#fff;
+    border:1px solid rgba(0,255,255,.25);
+    box-shadow:0 0 18px rgba(0,255,255,.18);
+    transform:translateY(-120px);
+    opacity:0;
+    transition:.35s;
+    z-index:99999;
+}
+
+#toast.show{
+    transform:translateY(0);
+    opacity:1;
+}
+
+#toast.success{
+    border-color:#00ffcc;
+}
+
+#toast.error{
+    border-color:#ff5c5c;
+}
+
+/* ================= MOBILE ================= */
 @media(max-width:768px){
 
     .page{
+        padding:12px;
+    }
+
+    .top-bar{
         padding:14px;
+        border-radius:18px;
     }
 
     .top-bar h1{
         font-size:26px;
     }
 
+    .top-bar p{
+        font-size:12px;
+    }
+
     .main-card,
     .preview-card{
         padding:16px;
-        border-radius:16px;
+        border-radius:18px;
     }
 
     .btn-row{
@@ -197,5 +261,11 @@ textarea{
 
     textarea{
         min-height:220px;
+    }
+
+    #toast{
+        left:12px;
+        right:12px;
+        min-width:auto;
     }
 }
