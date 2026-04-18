@@ -1,0 +1,322 @@
+/* ================= BODY ================= */
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
+    url("../mahadev.png") center/cover fixed;
+    color:#fff;
+}
+
+/* ================= PAGE ================= */
+.page{
+    min-height:100vh;
+    padding-left:260px;
+    padding-bottom:40px;
+}
+
+/* ================= TOP BAR ================= */
+.top-bar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px 24px;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(8px);
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.top-title{
+    flex:1;
+}
+
+.top-title h1{
+    margin:0;
+    font-size:30px;
+    font-weight:700;
+}
+
+.top-title p{
+    margin:4px 0 0;
+    color:#b8d7e0;
+    font-size:14px;
+}
+
+/* ================= BUTTONS ================= */
+.menu-btn,
+.refresh-btn{
+    width:48px;
+    height:48px;
+    border:none;
+    border-radius:15px;
+    cursor:pointer;
+    font-size:22px;
+    transition:.25s;
+}
+
+.menu-btn{
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    box-shadow:0 0 18px rgba(0,255,255,.30);
+}
+
+.refresh-btn{
+    color:#fff;
+    background:#1f1f1f;
+}
+
+.menu-btn:hover,
+.refresh-btn:hover{
+    transform:translateY(-2px) scale(1.03);
+}
+
+/* ================= HERO ================= */
+.hero-card{
+    margin:24px auto 18px;
+    width:calc(100% - 50px);
+    max-width:1180px;
+    padding:28px;
+    border-radius:24px;
+    background:
+    linear-gradient(145deg,
+    rgba(10,30,45,.95),
+    rgba(15,45,60,.88));
+    border:1px solid rgba(0,255,255,.10);
+    box-shadow:0 0 28px rgba(0,255,255,.08);
+}
+
+.hero-card h2{
+    margin:0 0 8px;
+    font-size:32px;
+}
+
+.hero-card p{
+    margin:0;
+    color:#c7dce2;
+    line-height:1.6;
+    font-size:16px;
+}
+
+/* ================= CARD WRAP ================= */
+.card-wrap{
+    width:calc(100% - 50px);
+    max-width:1180px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:22px;
+}
+
+/* ================= BIG CARD ================= */
+.big-card{
+    padding:30px 24px;
+    border-radius:24px;
+    cursor:pointer;
+    transition:.25s;
+    border:1px solid rgba(255,255,255,.06);
+    box-shadow:0 10px 28px rgba(0,0,0,.30);
+    text-align:center;
+}
+
+.big-card:hover{
+    transform:translateY(-8px);
+}
+
+.big-card .icon{
+    font-size:54px;
+    margin-bottom:14px;
+}
+
+.big-card h2{
+    margin:0 0 10px;
+    font-size:26px;
+}
+
+.big-card p{
+    margin:0;
+    color:#c1d0d6;
+    line-height:1.5;
+    font-size:15px;
+}
+
+/* CARD COLORS */
+.create{
+    background:linear-gradient(145deg,#123a48,#0d5666);
+}
+
+.mine{
+    background:linear-gradient(145deg,#32255a,#5132a0);
+}
+
+.give{
+    background:linear-gradient(145deg,#3b3818,#6a611d);
+}
+
+.result{
+    background:linear-gradient(145deg,#153a24,#1c6a41);
+}
+
+.history{
+    background:linear-gradient(145deg,#47231e,#7a3728);
+}
+
+.analytics{
+    background:linear-gradient(145deg,#20334d,#284c82);
+}
+
+/* ================= SECTION BOX ================= */
+.section-box{
+    width:calc(100% - 50px);
+    max-width:1180px;
+    margin:24px auto 0;
+    background:rgba(16,16,16,.92);
+    border-radius:24px;
+    padding:22px;
+    border:1px solid rgba(0,255,255,.08);
+}
+
+/* ================= SECTION HEAD ================= */
+.section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.section-head h2{
+    margin:0;
+    font-size:24px;
+}
+
+.section-head span{
+    min-width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#00d7ff;
+    color:#000;
+    font-weight:700;
+}
+
+/* ================= MINI LIST ================= */
+.mini-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.list-row,
+.empty-row{
+    padding:16px;
+    border-radius:16px;
+    background:#1a1a1a;
+}
+
+.list-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.list-row strong{
+    display:block;
+    margin-bottom:4px;
+}
+
+.list-row small{
+    color:#b4c3c9;
+}
+
+.empty-row{
+    text-align:center;
+    color:#9cb0b7;
+}
+
+/* ================= TOAST ================= */
+#toast{
+    position:fixed;
+    top:18px;
+    right:18px;
+    background:#111;
+    color:#fff;
+    padding:14px 18px;
+    border-radius:14px;
+    opacity:0;
+    transform:translateY(-100px);
+    transition:.3s;
+    z-index:9999;
+}
+
+#toast.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:900px){
+
+    .page{
+        padding-left:0;
+    }
+}
+
+@media(max-width:768px){
+
+    .top-bar{
+        padding:14px;
+    }
+
+    .top-title h1{
+        font-size:22px;
+    }
+
+    .hero-card,
+    .card-wrap,
+    .section-box{
+        width:calc(100% - 24px);
+    }
+
+    .hero-card{
+        padding:22px;
+    }
+
+    .hero-card h2{
+        font-size:24px;
+    }
+
+    .card-wrap{
+        gap:16px;
+        grid-template-columns:1fr;
+    }
+
+    .big-card{
+        padding:24px 18px;
+    }
+
+    .big-card h2{
+        font-size:22px;
+    }
+
+    .big-card .icon{
+        font-size:44px;
+    }
+
+    .section-head h2{
+        font-size:20px;
+    }
+
+    .list-row{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:8px;
+    }
+
+    #toast{
+        left:12px;
+        right:12px;
+    }
+}
