@@ -21,21 +21,26 @@ body{
     align-items:center;
     gap:16px;
     margin-bottom:20px;
-    padding:18px;
+    padding:18px 22px;
     border-radius:22px;
     background:rgba(15,15,15,.88);
     border:1px solid rgba(0,255,255,.15);
     box-shadow:0 0 20px rgba(0,255,255,.08);
 }
 
-.top-bar h1{
+/* TITLE AREA */
+.top-title{
+    flex:1;
+}
+
+.top-title h1{
     margin:0;
     font-size:34px;
     color:#fff;
     text-shadow:0 0 14px rgba(0,255,255,.35);
 }
 
-.top-bar p{
+.top-title p{
     margin:4px 0 0;
     color:#9eeeff;
     font-size:14px;
@@ -44,15 +49,50 @@ body{
 /* ================= MENU BUTTON ================= */
 .menu-btn{
     border:none;
-    width:54px;
-    height:54px;
-    border-radius:16px;
+    width:56px;
+    height:56px;
+    border-radius:18px;
     cursor:pointer;
     font-size:24px;
     font-weight:700;
     color:#000;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
     box-shadow:0 0 18px rgba(0,255,255,.28);
+    transition:.25s;
+}
+
+.menu-btn:hover{
+    transform:translateY(-2px) scale(1.03);
+}
+
+/* ================= BACK BUTTON ================= */
+.back-btn{
+    border:none;
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    cursor:pointer;
+    font-size:24px;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1d1d1d,#2d2d2d);
+    box-shadow:0 8px 18px rgba(0,0,0,.35);
+    transition:.25s;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.back-btn:hover{
+    transform:translateY(-2px) scale(1.03);
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:#000;
+    box-shadow:0 0 18px rgba(0,255,255,.30);
+}
+
+.back-btn:active{
+    transform:scale(.96);
 }
 
 /* ================= CARD ================= */
@@ -110,6 +150,7 @@ textarea:focus{
 
 select{
     appearance:none;
+    cursor:pointer;
     background-image:
     linear-gradient(45deg,transparent 50%,#00eaff 50%),
     linear-gradient(135deg,#00eaff 50%,transparent 50%);
@@ -233,15 +274,24 @@ textarea{
 
     .top-bar{
         padding:14px;
+        gap:10px;
         border-radius:18px;
     }
 
-    .top-bar h1{
-        font-size:26px;
+    .top-title h1{
+        font-size:24px;
     }
 
-    .top-bar p{
-        font-size:12px;
+    .top-title p{
+        font-size:11px;
+    }
+
+    .menu-btn,
+    .back-btn{
+        width:48px;
+        height:48px;
+        font-size:20px;
+        border-radius:14px;
     }
 
     .main-card,
@@ -268,23 +318,4 @@ textarea{
         right:12px;
         min-width:auto;
     }
-}
-/* BACK BUTTON */
-.back-btn{
-    border:none;
-    width:54px;
-    height:54px;
-    border-radius:16px;
-    cursor:pointer;
-    font-size:24px;
-    font-weight:700;
-    color:#fff;
-    background:#1f1f1f;
-    box-shadow:0 0 14px rgba(255,255,255,.08);
-    transition:.25s;
-}
-
-.back-btn:hover{
-    transform:translateY(-2px);
-    background:#2b2b2b;
 }
