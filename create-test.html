@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
 <title>Create Test</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/create-test.css?v=5">
+<link rel="stylesheet" href="css/create-test.css?v=10">
 
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
@@ -24,7 +26,7 @@
 
 </div>
 
-<!-- PAGE -->
+<!-- ================= PAGE ================= -->
 <div class="page">
 
     <!-- TOP BAR -->
@@ -35,7 +37,7 @@
 
         <div class="top-title">
             <h1>📝 Create Test</h1>
-            <p>Create smart tests for yourself & friends</p>
+            <p>Create smart tests from question bank or manual input</p>
         </div>
 
         <button class="back-btn"
@@ -43,47 +45,59 @@
 
     </div>
 
-    <!-- CARD -->
+    <!-- MAIN CARD -->
     <div class="main-card">
 
-        <!-- TEST DETAILS -->
+        <!-- BASIC DETAILS -->
         <h2 class="section-title">Basic Details</h2>
 
         <div class="grid-2">
 
             <div>
                 <label>Test Name</label>
-                <input id="testName" type="text"
+                <input type="text"
+                id="testName"
                 placeholder="Enter test name">
             </div>
 
             <div>
                 <label>Description</label>
-                <input id="testDesc" type="text"
+                <input type="text"
+                id="testDesc"
                 placeholder="Optional">
             </div>
 
             <div>
                 <label>Duration (Minutes)</label>
-                <input id="duration" type="number"
+                <input type="number"
+                id="duration"
                 placeholder="60">
             </div>
 
             <div>
                 <label>Total Marks</label>
-                <input id="totalMarks" type="number"
+                <input type="number"
+                id="totalMarks"
                 placeholder="100">
             </div>
 
             <div>
                 <label>Passing Marks</label>
-                <input id="passMarks" type="number"
+                <input type="number"
+                id="passMarks"
                 placeholder="40">
+            </div>
+
+            <div>
+                <label>Negative Marking (%)</label>
+                <input type="number"
+                id="negativeMarks"
+                placeholder="25">
             </div>
 
         </div>
 
-        <!-- QUESTION MODE -->
+        <!-- SOURCE -->
         <h2 class="section-title">Question Source</h2>
 
         <div class="mode-row">
@@ -102,7 +116,7 @@
 
         </div>
 
-        <!-- BANK -->
+        <!-- BANK AREA -->
         <div id="bankArea">
 
             <div class="grid-2">
@@ -126,18 +140,33 @@
                 </div>
 
                 <div>
+                    <label>Topic</label>
+                    <select id="topicList">
+                        <option value="">
+                        All Topics
+                        </option>
+                    </select>
+                </div>
+
+                <div>
                     <label>No. of Questions</label>
-                    <input id="questionCount"
-                    type="number"
+                    <input type="number"
+                    id="questionCount"
                     placeholder="20">
                 </div>
 
             </div>
 
+            <div class="hint-box">
+                If only Subject selected, random questions will come from all chapters/topics.  
+                If Subject + Topic selected, questions will come from matching topic across all folders.
+            </div>
+
         </div>
 
-        <!-- MANUAL -->
-        <div id="manualArea" style="display:none;">
+        <!-- MANUAL AREA -->
+        <div id="manualArea"
+        style="display:none;">
 
             <label>Paste JSON Questions</label>
 
@@ -149,16 +178,18 @@
         <!-- ASSIGN -->
         <h2 class="section-title">Assign Test</h2>
 
-        <div class="assign-box">
+        <div class="assign-card">
 
-            <label class="check-row">
+            <label class="tick-row">
                 <input type="checkbox"
-                id="selfCheck" checked>
-                Myself
+                id="selfCheck"
+                checked>
+                <span>Myself</span>
             </label>
 
             <div id="friendList"
             class="friend-list">
+
             </div>
 
         </div>
@@ -168,28 +199,32 @@
 
         <div class="settings-grid">
 
-            <label class="check-row">
+            <label class="tick-row">
                 <input type="checkbox"
-                id="shuffleQ" checked>
-                Shuffle Questions
+                id="shuffleQ"
+                checked>
+                <span>Shuffle Questions</span>
             </label>
 
-            <label class="check-row">
+            <label class="tick-row">
                 <input type="checkbox"
-                id="shuffleO" checked>
-                Shuffle Options
+                id="shuffleO"
+                checked>
+                <span>Shuffle Options</span>
             </label>
 
-            <label class="check-row">
-                <input type="checkbox"
+            <label class="tick-row">
+                <input type="radio"
+                name="resultMode"
                 id="instantResult">
-                Instant Result
+                <span>Instant Result</span>
             </label>
 
-            <label class="check-row">
-                <input type="checkbox"
+            <label class="tick-row">
+                <input type="radio"
+                name="resultMode"
                 id="releaseLater">
-                Release Score Later
+                <span>Release Score Later</span>
             </label>
 
         </div>
@@ -212,7 +247,9 @@
         <!-- PREVIEW -->
         <div class="preview-card">
 
-            <h2 class="section-title">Preview</h2>
+            <h2 class="section-title">
+                Preview
+            </h2>
 
             <div id="previewBox">
                 No Preview Yet
@@ -224,10 +261,15 @@
 
 </div>
 
+<!-- POPUP -->
 <div id="toast"></div>
 
+<div id="centerPopup" class="center-popup">
+    Message
+</div>
+
 <script type="module"
-src="js/create-test.js?v=5"></script>
+src="js/create-test.js?v=10"></script>
 
 </body>
 </html>
