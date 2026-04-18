@@ -6,14 +6,13 @@
 <title>Question Bank</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/question-bank.css?v=2">
-</head>
+<link rel="stylesheet" href="css/question-bank.css">
 
+</head>
 <body>
 
-<!-- ================= SIDEBAR ================= -->
+<!-- Sidebar -->
 <div id="sidebar" class="sidebar">
-
     <h2>⚡ Menu</h2>
 
     <button onclick="goHome()">🏠 Home</button>
@@ -21,139 +20,44 @@
     <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
     <button onclick="goProfile()">👤 Profile</button>
-
-    <button onclick="location.href='create-test.html'">📝 Create Test</button>
-    <button onclick="location.href='give-test.html'">🎯 Give Test</button>
-    <button onclick="location.href='question-bank.html'">🏦 Question Bank</button>
-
+    <button onclick="goCreateTest()">📝 Create Test</button>
+    <button onclick="goGiveTest()">🎯 Give Test</button>
+    <button onclick="logout()">🚪 Logout</button>
 </div>
 
-<!-- ================= PAGE ================= -->
+<!-- Main -->
 <div class="page">
 
-    <!-- TOP BAR -->
+    <!-- Top Bar -->
     <div class="top-bar">
-
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-
-        <div class="title-box">
-            <h2>🏦 Question Bank</h2>
-            <span>Store Questions • Manage Folders • Create Powerful Tests</span>
-        </div>
-
+        <h1>📚 Question Bank</h1>
     </div>
 
-    <!-- ADD SECTION -->
-    <div class="card">
-
-        <h3>➕ Add Questions</h3>
-
-        <!-- MODE -->
-        <div class="mode-box">
-
-            <label>
-                <input type="radio" name="mode" value="new" checked onchange="changeMode()">
-                New Folder
-            </label>
-
-            <label>
-                <input type="radio" name="mode" value="existing" onchange="changeMode()">
-                Existing Folder
-            </label>
-
-        </div>
-
-        <!-- NEW FOLDER MODE -->
-        <div id="newFolderBox">
-
-            <label>Main Folder</label>
-            <input id="folder1" placeholder="Mechanical">
-
-            <label>Sub Folder</label>
-            <input id="folder2" placeholder="Thermodynamics">
-
-            <label>Sub Folder</label>
-            <input id="folder3" placeholder="Entropy">
-
-            <label>Sub Folder (optional)</label>
-            <input id="folder4" placeholder="Basics">
-
-        </div>
-
-        <!-- EXISTING MODE -->
-        <div id="existingFolderBox" style="display:none;">
-
-            <label>Select Existing Folder</label>
-
-            <select id="path1"></select>
-            <select id="path2"></select>
-            <select id="path3"></select>
-            <select id="path4"></select>
-
-        </div>
-
-        <!-- JSON -->
-        <label>Paste JSON Questions</label>
-
-        <textarea id="jsonBox" placeholder='[
- {
-   "question":"Entropy unit is?",
-   "options":["J/kg","J/kgK","Pa","W"],
-   "answer":1
- }
-]'></textarea>
-
-        <!-- BUTTONS -->
-        <div class="btn-row">
-
-            <button onclick="previewQuestions()">👁 Preview</button>
-
-            <button class="main-btn" onclick="saveQuestions()">💾 Save Questions</button>
-
-        </div>
-
+    <!-- Hero -->
+    <div class="hero">
+        <p>Store Questions • Organize Folders • Build Smart Tests</p>
     </div>
 
-    <!-- PREVIEW -->
-    <div class="card">
+    <!-- Buttons -->
+    <div class="card-wrap">
 
-        <h3>👁 Preview Questions</h3>
-
-        <div id="previewArea">
-            No Preview Yet
+        <div class="big-card" onclick="location.href='add-question.html'">
+            <div class="icon">➕</div>
+            <h2>Add Questions</h2>
+            <p>Paste JSON and save into folders</p>
         </div>
 
-    </div>
-
-    <!-- FILE MANAGER -->
-    <div class="card">
-
-        <h3>📂 View Stored Questions</h3>
-
-        <div class="path-box">
-
-            <select id="view1"></select>
-            <select id="view2"></select>
-            <select id="view3"></select>
-            <select id="view4"></select>
-
-        </div>
-
-        <div class="btn-row">
-
-            <button onclick="loadQuestions()">📄 Open Folder</button>
-
-        </div>
-
-        <div id="questionList">
-            No Questions Loaded
+        <div class="big-card" onclick="location.href='view-question.html'">
+            <div class="icon">📂</div>
+            <h2>View Questions</h2>
+            <p>Browse subjects and preview stored questions</p>
         </div>
 
     </div>
 
 </div>
 
-<script type="module" src="js/question-bank.js?v=2"></script>
 <script type="module" src="js/menu.js"></script>
 
 </body>
