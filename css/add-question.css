@@ -1,71 +1,72 @@
-/* ================= BODY ================= */
+/* ===== BODY ===== */
 body{
     margin:0;
     font-family:'Segoe UI',sans-serif;
     background:
-    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
-    url("../mahadev.png") center/cover no-repeat fixed;
-    color:white;
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.94)),
+    url("../mahadev.png") center/cover fixed;
+    color:#fff;
 }
 
-/* ================= PAGE ================= */
+/* ===== PAGE ===== */
 .page{
-    min-height:100vh;
-    padding-left:260px;
+    padding:20px;
+    max-width:1000px;
+    margin:auto;
 }
 
-/* ================= TOP BAR ================= */
+/* ===== TOP ===== */
 .top-bar{
     display:flex;
     align-items:center;
-    gap:14px;
-    padding:18px 25px;
-    background:rgba(0,0,0,0.45);
-    backdrop-filter: blur(8px);
-    position:sticky;
-    top:0;
-    z-index:1000;
+    gap:15px;
+    margin-bottom:25px;
 }
 
 .top-bar h1{
     margin:0;
-    font-size:28px;
-    font-weight:700;
+    font-size:34px;
+    color:#ffffff;
+    text-shadow:0 0 12px #00eaff;
 }
 
-/* ================= MENU BTN ================= */
+/* ===== MENU BTN ===== */
 .menu-btn{
     border:none;
-    width:46px;
-    height:46px;
+    width:52px;
+    height:52px;
     border-radius:14px;
+    font-size:24px;
     cursor:pointer;
-    font-size:22px;
-    color:black;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
-    box-shadow:0 0 18px rgba(0,255,255,0.35);
+    color:#000;
+    font-weight:700;
+    box-shadow:0 0 18px rgba(0,255,255,.35);
 }
 
-/* ================= MAIN BOX ================= */
-.box{
-    max-width:900px;
-    margin:28px auto;
-    padding:28px;
-    border-radius:24px;
-    background:linear-gradient(145deg,rgba(20,30,45,.92),rgba(35,50,70,.88));
-    border:1px solid rgba(255,255,255,0.06);
-    box-shadow:0 12px 32px rgba(0,0,0,.35);
+/* ===== CARD ===== */
+.main-card,
+.preview-card{
+    background:rgba(17,17,17,.88);
+    border:1px solid rgba(0,255,255,.15);
+    border-radius:20px;
+    padding:24px;
+    margin-bottom:24px;
+    box-shadow:0 0 25px rgba(0,255,255,.08);
+    backdrop-filter:blur(8px);
 }
 
-/* ================= LABEL ================= */
+/* ===== LABEL ===== */
 label{
     display:block;
-    margin:16px 0 8px;
-    font-weight:600;
-    color:#e0f7fa;
+    margin-top:14px;
+    margin-bottom:7px;
+    font-size:15px;
+    font-weight:700;
+    color:#d9ffff;
 }
 
-/* ================= INPUTS ================= */
+/* ===== INPUT ===== */
 input,
 select,
 textarea{
@@ -74,131 +75,127 @@ textarea{
     border:none;
     outline:none;
     border-radius:14px;
-    background:#111923;
-    color:white;
+    background:#1b1b1b;
+    color:#fff;
     font-size:15px;
     box-sizing:border-box;
+    margin-bottom:8px;
+    transition:.25s;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    box-shadow:0 0 0 2px #00eaff;
+    background:#202020;
 }
 
 textarea{
     resize:vertical;
-    font-family:Consolas,monospace;
-    line-height:1.5;
+    min-height:260px;
+    font-family:monospace;
 }
 
-/* ================= BUTTONS ================= */
+/* ===== BUTTONS ===== */
 .btn-row{
     display:flex;
     gap:14px;
-    margin-top:22px;
     flex-wrap:wrap;
+    margin-top:18px;
 }
 
-button{
+.preview-btn,
+.save-btn{
     border:none;
-    padding:14px 22px;
+    padding:14px 24px;
     border-radius:14px;
+    font-size:15px;
+    font-weight:700;
     cursor:pointer;
-    font-weight:700;
-    transition:0.25s ease;
+    transition:.25s;
 }
 
-button:hover{
+.preview-btn{
+    background:#2b2b2b;
+    color:#fff;
+}
+
+.preview-btn:hover{
     transform:translateY(-2px);
+    box-shadow:0 0 12px rgba(255,255,255,.15);
 }
 
-.primary{
+.save-btn{
     background:linear-gradient(45deg,#00cfff,#00ffcc);
-    color:black;
+    color:#000;
 }
 
-.secondary{
-    background:#1c2b3b;
-    color:white;
+.save-btn:hover{
+    transform:translateY(-2px) scale(1.02);
+    box-shadow:0 0 18px rgba(0,255,255,.35);
 }
 
-.back-btn{
-    width:100%;
-    margin-top:22px;
-    background:#243447;
-    color:white;
-}
-
-/* ================= PREVIEW ================= */
-.preview-box{
-    margin-top:28px;
-    padding:22px;
-    border-radius:20px;
-    background:rgba(0,0,0,.35);
-}
-
-.preview-box h2{
+/* ===== PREVIEW ===== */
+.preview-card h2{
     margin-top:0;
-    font-size:22px;
+    margin-bottom:18px;
+    color:#ffffff;
+    text-shadow:0 0 10px #00eaff;
 }
 
-#previewArea{
-    color:#cfd8dc;
-}
-
-/* Question preview */
-.q-card{
-    background:#111923;
-    padding:16px;
+.qbox{
+    background:#1d1d1d;
+    padding:18px;
     border-radius:16px;
-    margin-top:14px;
+    margin-bottom:16px;
+    border-left:4px solid #00eaff;
 }
 
-.q-title{
-    font-weight:700;
-    margin-bottom:10px;
+.qbox h3{
+    margin:0 0 12px 0;
+    font-size:18px;
 }
 
-.option{
-    background:#1b2735;
-    padding:10px;
-    border-radius:10px;
-    margin-top:8px;
+.opt{
+    background:#262626;
+    padding:11px 12px;
+    border-radius:12px;
+    margin:7px 0;
 }
 
 .correct{
-    border-left:4px solid #00ff99;
+    background:linear-gradient(45deg,#00b894,#00ffcc);
+    color:#000;
+    font-weight:700;
 }
 
-/* ================= MOBILE ================= */
-@media(max-width:900px){
-    .page{
-        padding-left:0;
-    }
-}
-
+/* ===== MOBILE ===== */
 @media(max-width:768px){
 
-    .top-bar{
+    .page{
         padding:14px;
     }
 
     .top-bar h1{
-        font-size:22px;
+        font-size:26px;
     }
 
-    .box{
-        margin:16px;
-        padding:18px;
-        border-radius:18px;
+    .main-card,
+    .preview-card{
+        padding:16px;
+        border-radius:16px;
     }
 
     .btn-row{
         flex-direction:column;
     }
 
-    button{
+    .preview-btn,
+    .save-btn{
         width:100%;
     }
 
-    input,
-    select,
     textarea{
-        font-size:16px; /* prevents zoom on mobile */
+        min-height:220px;
     }
 }
