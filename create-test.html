@@ -8,7 +8,7 @@ content="width=device-width,initial-scale=1.0">
 <title>Create Test</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/create-test.css?v=10">
+<link rel="stylesheet" href="css/create-test.css?v=11">
 
 </head>
 <body>
@@ -20,7 +20,7 @@ content="width=device-width,initial-scale=1.0">
 
     <button onclick="location.href='home.html'">🏠 Home</button>
     <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
-    <button onclick="location.href='tests.html'">📝 Tests </button>
+    <button onclick="location.href='tests.html'">📝 Tests</button>
     <button onclick="location.href='friends.html'">👥 Friends</button>
     <button onclick="location.href='profile.html'">👤 Profile</button>
 
@@ -102,15 +102,15 @@ content="width=device-width,initial-scale=1.0">
 
         <div class="mode-row">
 
-            <button id="bankBtn"
+            <button id="btnBank"
             class="mode-btn active"
-            onclick="setMode('bank')">
+            onclick="setSourceMode('bank')">
             📚 Question Bank
             </button>
 
-            <button id="manualBtn"
+            <button id="btnManual"
             class="mode-btn"
-            onclick="setMode('manual')">
+            onclick="setSourceMode('manual')">
             ✍ Manual JSON
             </button>
 
@@ -124,27 +124,21 @@ content="width=device-width,initial-scale=1.0">
                 <div>
                     <label>Subject</label>
                     <select id="subjectList">
-                        <option value="">
-                        Select Subject
-                        </option>
+                        <option value="">All</option>
                     </select>
                 </div>
 
                 <div>
                     <label>Chapter</label>
                     <select id="chapterList">
-                        <option value="">
-                        All Chapters
-                        </option>
+                        <option value="">All</option>
                     </select>
                 </div>
 
                 <div>
                     <label>Topic</label>
                     <select id="topicList">
-                        <option value="">
-                        All Topics
-                        </option>
+                        <option value="">All</option>
                     </select>
                 </div>
 
@@ -158,19 +152,18 @@ content="width=device-width,initial-scale=1.0">
             </div>
 
             <div class="hint-box">
-                If only Subject selected, random questions will come from all chapters/topics.  
+                If only Subject selected, random questions will come from all chapters/topics.<br>
                 If Subject + Topic selected, questions will come from matching topic across all folders.
             </div>
 
         </div>
 
         <!-- MANUAL AREA -->
-        <div id="manualArea"
-        style="display:none;">
+        <div id="manualArea" style="display:none;">
 
             <label>Paste JSON Questions</label>
 
-            <textarea id="jsonBox"
+            <textarea id="manualJson"
             placeholder='[{"question":"2+2?","options":["1","2","3","4"],"answer":3}]'></textarea>
 
         </div>
@@ -182,15 +175,13 @@ content="width=device-width,initial-scale=1.0">
 
             <label class="tick-row">
                 <input type="checkbox"
-                id="selfCheck"
+                id="assignSelf"
                 checked>
                 <span>Myself</span>
             </label>
 
             <div id="friendList"
-            class="friend-list">
-
-            </div>
+            class="friend-list"></div>
 
         </div>
 
@@ -201,14 +192,14 @@ content="width=device-width,initial-scale=1.0">
 
             <label class="tick-row">
                 <input type="checkbox"
-                id="shuffleQ"
+                id="shuffleQuestions"
                 checked>
                 <span>Shuffle Questions</span>
             </label>
 
             <label class="tick-row">
                 <input type="checkbox"
-                id="shuffleO"
+                id="shuffleOptions"
                 checked>
                 <span>Shuffle Options</span>
             </label>
@@ -247,9 +238,7 @@ content="width=device-width,initial-scale=1.0">
         <!-- PREVIEW -->
         <div class="preview-card">
 
-            <h2 class="section-title">
-                Preview
-            </h2>
+            <h2 class="section-title">Preview</h2>
 
             <div id="previewBox">
                 No Preview Yet
@@ -261,15 +250,16 @@ content="width=device-width,initial-scale=1.0">
 
 </div>
 
-<!-- POPUP -->
+<!-- TOAST -->
 <div id="toast"></div>
 
-<div id="centerPopup" class="center-popup">
-    Message
+<!-- CENTER ERROR -->
+<div id="errorPopup" class="center-popup">
+Message
 </div>
 
 <script type="module"
-src="js/create-test.js?v=10"></script>
+src="js/create-test.js?v=11"></script>
 
 </body>
 </html>
