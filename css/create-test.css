@@ -1,245 +1,299 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
-
-<title>Create Test</title>
-
-<link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/create-test.css">
-
-</head>
-<body>
-
-<!-- ================= SIDEBAR ================= -->
-<div id="sidebar" class="sidebar">
-
-<h2>⚡ Menu</h2>
-
-<button onclick="location.href='home.html'">🏠 Home</button>
-<button onclick="location.href='test-dashboard.html'">📝 Test Home</button>
-<button onclick="location.href='question-bank.html'">📚 Question Bank</button>
-<button onclick="location.href='friends.html'">👥 Friends</button>
-<button onclick="location.href='profile.html'">👤 Profile</button>
-
-</div>
-
-<!-- ================= PAGE ================= -->
-<div class="page">
-
-<!-- TOP BAR -->
-<div class="top-bar">
-
-<button class="menu-btn"
-onclick="toggleSidebar()">
-☰
-</button>
-
-<div class="top-title">
-<h1>📝 Create Test</h1>
-<p>Create smart tests for yourself or friends</p>
-</div>
-
-<button class="back-btn"
-onclick="location.href='test-dashboard.html'">
-⬅
-</button>
-
-</div>
-
-<!-- MAIN FORM -->
-<div class="main-card">
-
-<div class="section-title">
-Basic Details
-</div>
-
-<label>Test Name</label>
-<input type="text"
-id="testName"
-placeholder="Enter test name">
-
-<label>Description</label>
-<input type="text"
-id="testDesc"
-placeholder="Optional">
-
-<label>Duration (Minutes)</label>
-<input type="number"
-id="duration"
-placeholder="60">
-
-<label>Total Marks</label>
-<input type="number"
-id="totalMarks"
-placeholder="100">
-
-<label>Passing Marks</label>
-<input type="number"
-id="passMarks"
-placeholder="40">
-
-</div>
-
-<!-- QUESTION SOURCE -->
-<div class="main-card">
-
-<div class="section-title">
-Question Source
-</div>
-
-<div class="mode-row">
-
-<button class="mode-btn active"
-id="bankBtn"
-onclick="setMode('bank')">
-📚 From Question Bank
-</button>
-
-<button class="mode-btn"
-id="manualBtn"
-onclick="setMode('manual')">
-✍ Manual Input
-</button>
-
-</div>
-
-<!-- BANK MODE -->
-<div id="bankArea">
-
-<label>Select Subject</label>
-<select id="subjectList">
-<option value="">
-Select Subject
-</option>
-</select>
-
-<label>Select Chapter</label>
-<select id="chapterList">
-<option value="">
-All Chapters
-</option>
-</select>
-
-<label>No. of Questions</label>
-<input type="number"
-id="questionCount"
-placeholder="20">
-
-</div>
-
-<!-- MANUAL MODE -->
-<div id="manualArea"
-style="display:none;">
-
-<label>Paste JSON Questions</label>
-
-<textarea id="jsonBox"
-placeholder='[{"question":"2+2?","options":["1","2","3","4"],"answer":3}]'></textarea>
-
-</div>
-
-</div>
-
-<!-- ASSIGN USERS -->
-<div class="main-card">
-
-<div class="section-title">
-Assign Test To
-</div>
-
-<div class="assign-box">
-
-<label>
-<input type="checkbox"
-id="selfCheck"
-checked>
- Myself
-</label>
-
-<div id="friendList"
-class="friend-list">
-
-<!-- Dynamic friends -->
-
-</div>
-
-</div>
-
-</div>
-
-<!-- SETTINGS -->
-<div class="main-card">
-
-<div class="section-title">
-Settings
-</div>
-
-<label>
-<input type="checkbox"
-id="shuffleQ"
-checked>
- Shuffle Questions
-</label>
-
-<label>
-<input type="checkbox"
-id="shuffleO"
-checked>
- Shuffle Options
-</label>
-
-<label>
-<input type="checkbox"
-id="instantResult">
- Show Result Instantly
-</label>
-
-<label>
-<input type="checkbox"
-id="releaseLater">
- Release Score Later
-</label>
-
-</div>
-
-<!-- BUTTONS -->
-<div class="btn-row">
-
-<button class="preview-btn"
-onclick="previewTest()">
-👁 Preview
-</button>
-
-<button class="save-btn"
-onclick="createTest()">
-🚀 Create Test
-</button>
-
-</div>
-
-<!-- PREVIEW -->
-<div class="preview-card">
-
-<div class="section-title">
-Preview
-</div>
-
-<div id="previewBox">
-No Preview Yet
-</div>
-
-</div>
-
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<script type="module"
-src="js/create-test.js"></script>
-
-</body>
-</html>
+/* ================= BODY ================= */
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
+    url("../mahadev.png") center/cover fixed;
+    color:#fff;
+}
+
+/* ================= PAGE ================= */
+.page{
+    min-height:100vh;
+    padding-left:260px;
+    padding-bottom:40px;
+}
+
+/* ================= TOP BAR ================= */
+.top-bar{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:18px 24px;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(8px);
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.top-title{
+    flex:1;
+}
+
+.top-title h1{
+    margin:0;
+    font-size:32px;
+}
+
+.top-title p{
+    margin:5px 0 0;
+    color:#bfe9f0;
+    font-size:14px;
+}
+
+/* ================= BUTTONS ================= */
+.menu-btn,
+.back-btn{
+    width:50px;
+    height:50px;
+    border:none;
+    border-radius:16px;
+    cursor:pointer;
+    font-size:22px;
+    transition:.25s;
+}
+
+.menu-btn{
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
+.back-btn{
+    color:#fff;
+    background:#222;
+}
+
+.menu-btn:hover,
+.back-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* ================= MAIN CARD ================= */
+.main-card{
+    max-width:1100px;
+    margin:28px auto;
+    padding:28px;
+    border-radius:28px;
+    background:rgba(18,18,18,.93);
+    border:1px solid rgba(0,255,255,.08);
+    box-shadow:0 0 25px rgba(0,255,255,.04);
+}
+
+/* ================= TITLES ================= */
+.section-title{
+    margin:0 0 18px;
+    font-size:24px;
+    color:#fff;
+}
+
+/* ================= GRID ================= */
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+    margin-bottom:24px;
+}
+
+/* ================= LABEL ================= */
+label{
+    display:block;
+    margin-bottom:8px;
+    color:#d8f7ff;
+    font-size:15px;
+}
+
+/* ================= INPUT ================= */
+input,
+select,
+textarea{
+    width:100%;
+    box-sizing:border-box;
+    border:none;
+    outline:none;
+    padding:14px;
+    border-radius:16px;
+    background:#1e1e1e;
+    color:#fff;
+    font-size:15px;
+}
+
+textarea{
+    min-height:220px;
+    resize:vertical;
+    margin-bottom:24px;
+    font-family:Consolas,monospace;
+}
+
+/* ================= MODE ================= */
+.mode-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+}
+
+.mode-btn{
+    flex:1;
+    min-width:220px;
+    border:none;
+    padding:14px;
+    border-radius:16px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    background:#252525;
+    transition:.25s;
+}
+
+.mode-btn.active{
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
+/* ================= CHECK ROW ================= */
+.check-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+    cursor:pointer;
+}
+
+.check-row input{
+    width:auto;
+}
+
+/* ================= FRIEND BOX ================= */
+.assign-box{
+    background:#151515;
+    padding:18px;
+    border-radius:18px;
+    margin-bottom:24px;
+}
+
+.friend-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
+    margin-top:14px;
+}
+
+.friend-item{
+    background:#1f1f1f;
+    padding:12px;
+    border-radius:14px;
+}
+
+/* ================= SETTINGS ================= */
+.settings-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:12px;
+    margin-bottom:24px;
+}
+
+/* ================= BUTTON ROW ================= */
+.btn-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+}
+
+.preview-btn,
+.save-btn{
+    flex:1;
+    border:none;
+    padding:16px;
+    border-radius:16px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:700;
+    transition:.25s;
+}
+
+.preview-btn{
+    background:#252525;
+    color:#fff;
+}
+
+.save-btn{
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:#000;
+}
+
+.preview-btn:hover,
+.save-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* ================= PREVIEW ================= */
+.preview-card{
+    background:#151515;
+    padding:22px;
+    border-radius:22px;
+}
+
+#previewBox{
+    color:#d4edf2;
+    line-height:1.8;
+}
+
+/* ================= TOAST ================= */
+#toast{
+    position:fixed;
+    top:18px;
+    right:18px;
+    background:#111;
+    color:#fff;
+    padding:14px 18px;
+    border-radius:14px;
+    opacity:0;
+    transform:translateY(-100px);
+    transition:.3s;
+    z-index:9999;
+}
+
+#toast.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:900px){
+    .page{
+        padding-left:0;
+    }
+}
+
+@media(max-width:768px){
+
+    .top-bar{
+        padding:14px;
+    }
+
+    .top-title h1{
+        font-size:24px;
+    }
+
+    .main-card{
+        margin:16px;
+        padding:18px;
+    }
+
+    .btn-row{
+        flex-direction:column;
+    }
+
+    .mode-row{
+        flex-direction:column;
+    }
+
+    #toast{
+        left:12px;
+        right:12px;
+    }
+}
