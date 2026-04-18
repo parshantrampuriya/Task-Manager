@@ -6,13 +6,14 @@
 <title>View Questions</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/view-question.css?v=1">
+<link rel="stylesheet" href="css/view-question.css?v=2">
 
 </head>
 <body>
 
 <!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
+
     <h2>⚡ Menu</h2>
 
     <button onclick="location.href='home.html'">🏠 Home</button>
@@ -23,6 +24,7 @@
     <button onclick="location.href='create-test.html'">📝 Create Test</button>
     <button onclick="location.href='give-test.html'">🎯 Give Test</button>
     <button onclick="location.href='profile.html'">👤 Profile</button>
+
 </div>
 
 <!-- ================= PAGE ================= -->
@@ -31,7 +33,10 @@
     <!-- TOP BAR -->
     <div class="top-bar">
 
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <button class="menu-btn"
+        onclick="toggleSidebar()">
+        ☰
+        </button>
 
         <div class="top-title">
             <h1>📚 View Questions</h1>
@@ -39,8 +44,8 @@
         </div>
 
         <button class="page-back-btn"
-            onclick="location.href='question-bank.html'">
-            ⬅
+        onclick="location.href='question-bank.html'">
+        ⬅
         </button>
 
     </div>
@@ -48,26 +53,30 @@
     <!-- PATH BAR -->
     <div class="path-bar">
 
-        <button id="folderBackBtn"
-            class="folder-back-btn"
-            onclick="goFolderBack()">
-            ↩ Folder Back
+        <button class="folder-back-btn"
+        onclick="goFolderBack()">
+        ↩ Folder Back
         </button>
 
         <div id="pathText" class="path-text">
             Home
         </div>
 
+        <!-- IMPORTANT: PREVIEW ALL BUTTON -->
+        <button
+        id="viewAllBtn"
+        class="preview-btn"
+        onclick="viewAllQuestions()"
+        style="display:none;">
+        👁 Preview All
+        </button>
+
     </div>
 
     <!-- FILE AREA -->
     <div class="main-card">
 
-        <div id="fileArea">
-
-            <!-- Dynamic folders / questions -->
-
-        </div>
+        <div id="fileArea"></div>
 
     </div>
 
@@ -78,29 +87,18 @@
 
     <div class="popup-box">
 
-        <button class="close-btn" onclick="closePopup()">✕</button>
+        <button class="close-btn"
+        onclick="closePopup()">
+        ✕
+        </button>
 
+        <!-- TITLE ONLY -->
         <h2 id="popupQuestion">
-            Question Here
+            Title
         </h2>
 
-        <div class="popup-btn-row">
-
-            <button class="preview-btn"
-                onclick="previewQuestion()">
-                👁 Preview
-            </button>
-
-            <button class="edit-btn"
-                onclick="editQuestion()">
-                ✏ Edit
-            </button>
-
-        </div>
-
-        <div id="popupContent">
-
-        </div>
+        <!-- EMPTY CONTENT ONLY -->
+        <div id="popupContent"></div>
 
     </div>
 
@@ -109,7 +107,7 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script type="module" src="js/view-question.js?v=1"></script>
+<script type="module" src="js/view-question.js?v=2"></script>
 
 </body>
 </html>
