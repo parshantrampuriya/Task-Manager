@@ -269,3 +269,22 @@ textarea{
         min-width:auto;
     }
 }
+/* BACK BUTTON */
+.back-btn{
+    border:none;
+    width:54px;
+    height:54px;
+    border-radius:16px;
+    cursor:pointer;
+    font-size:24px;
+    font-weight:700;
+    color:#fff;
+    background:#1f1f1f;
+    box-shadow:0 0 14px rgba(255,255,255,.08);
+    transition:.25s;
+}
+
+.back-btn:hover{
+    transform:translateY(-2px);
+    background:#2b2b2b;
+}
