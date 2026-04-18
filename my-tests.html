@@ -6,12 +6,12 @@
 <title>My Tests</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/my-tests.css?v=1">
+<link rel="stylesheet" href="css/my-tests.css?v=2">
 
 </head>
 <body>
 
-<!-- ================= SIDEBAR ================= -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
@@ -25,10 +25,10 @@
 
 </div>
 
-<!-- ================= PAGE ================= -->
+<!-- PAGE -->
 <div class="page">
 
-    <!-- TOP BAR -->
+    <!-- TOP -->
     <div class="top-bar">
 
         <button class="menu-btn"
@@ -36,7 +36,7 @@
 
         <div class="top-title">
             <h1>📋 My Tests</h1>
-            <p>Manage all tests created by you</p>
+            <p>Manage created tests professionally</p>
         </div>
 
         <button class="back-btn"
@@ -44,7 +44,7 @@
 
     </div>
 
-    <!-- FILTER BAR -->
+    <!-- FILTER -->
     <div class="filter-bar">
 
         <div class="tabs">
@@ -75,14 +75,16 @@
 
             <input type="text"
             id="searchBox"
-            placeholder="Search test name..."
+            placeholder="Search Test..."
             onkeyup="searchTests()">
 
             <select id="sortBox"
             onchange="loadMyTests()">
+
                 <option value="new">Newest</option>
                 <option value="old">Oldest</option>
                 <option value="name">Name A-Z</option>
+
             </select>
 
         </div>
@@ -109,12 +111,53 @@
 
     </div>
 
-    <!-- TEST LIST -->
+    <!-- MAIN -->
     <div class="main-card">
 
-        <div id="testList">
+        <div id="testList"></div>
 
-            <!-- Dynamic Cards -->
+    </div>
+
+</div>
+
+<!-- EDIT POPUP -->
+<div id="editPopup" class="popup">
+
+    <div class="popup-box">
+
+        <button class="close-btn"
+        onclick="closeEditPopup()">✕</button>
+
+        <h2>✏ Edit Test</h2>
+
+        <div id="editArea"></div>
+
+    </div>
+
+</div>
+
+<!-- DELETE POPUP -->
+<div id="deletePopup" class="popup">
+
+    <div class="popup-box small">
+
+        <h2>🗑 Delete Test?</h2>
+
+        <p class="confirm-text">
+            This action cannot be undone.
+        </p>
+
+        <div class="popup-btn-row">
+
+            <button class="cancel-btn"
+            onclick="closeDeletePopup()">
+            Cancel
+            </button>
+
+            <button class="delete-btn"
+            id="confirmDeleteBtn">
+            Delete
+            </button>
 
         </div>
 
@@ -125,7 +168,8 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script type="module" src="js/my-tests.js?v=1"></script>
+<script type="module"
+src="js/my-tests.js?v=2"></script>
 
 </body>
 </html>
