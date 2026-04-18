@@ -2,84 +2,244 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
 <title>Create Test</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/create-test.css?v=1">
-</head>
+<link rel="stylesheet" href="css/create-test.css">
 
+</head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
-    <h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button>
-    <button onclick="goFriends()">👥 Friends</button>
-    <button onclick="goProfile()">👤 Profile</button>
-    <button onclick="goCreateTest()">🏗 Create Test</button>
-    <button onclick="goGiveTest()">📝 Give Test</button>
-</div>
+<h2>⚡ Menu</h2>
 
-<div class="main">
-
-    <!-- NAVBAR -->
-    <div class="navbar">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-        <h2>🏗 Create Test</h2>
-    </div>
-
-    <!-- FORM -->
-    <div class="card">
-
-        <label>Test Name</label>
-        <input id="testName" placeholder="Enter test name">
-
-        <label>Topic</label>
-        <input id="testTopic" placeholder="Enter topic">
-
-        <label>Duration (Minutes)</label>
-        <input id="testDuration" type="number" placeholder="60">
-
-        <label>Generated Test Code</label>
-        <div id="testCode" class="code-box">Loading...</div>
-
-        <label>Questions JSON</label>
-        <textarea id="jsonBox" placeholder='[
-{
- "question":"Entropy unit is?",
- "options":["J/kg","J/kgK","W","Pa"],
- "answer":1
-}
-]'></textarea>
-
-        <div class="btn-row">
-            <button onclick="newCode()">🔄 New Code</button>
-            <button onclick="previewTest()">👁 Preview</button>
-            <button class="primary" onclick="createTest()">✅ Create</button>
-        </div>
-
-    </div>
-
-    <!-- PREVIEW -->
-    <div class="card">
-        <h3>👁 Preview</h3>
-        <div id="previewArea">No preview yet</div>
-    </div>
-
-    <!-- MY TESTS -->
-    <div class="card">
-        <h3>📚 My Created Tests</h3>
-        <div id="testList">Loading...</div>
-    </div>
+<button onclick="location.href='home.html'">🏠 Home</button>
+<button onclick="location.href='test-dashboard.html'">📝 Test Home</button>
+<button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+<button onclick="location.href='friends.html'">👥 Friends</button>
+<button onclick="location.href='profile.html'">👤 Profile</button>
 
 </div>
 
-<script type="module" src="js/create-test.js?v=1"></script>
-<script type="module" src="js/menu.js"></script>
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+<!-- TOP BAR -->
+<div class="top-bar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">
+☰
+</button>
+
+<div class="top-title">
+<h1>📝 Create Test</h1>
+<p>Create smart tests for yourself or friends</p>
+</div>
+
+<button class="back-btn"
+onclick="location.href='test-dashboard.html'">
+⬅
+</button>
+
+</div>
+
+<!-- MAIN FORM -->
+<div class="main-card">
+
+<div class="section-title">
+Basic Details
+</div>
+
+<label>Test Name</label>
+<input type="text"
+id="testName"
+placeholder="Enter test name">
+
+<label>Description</label>
+<input type="text"
+id="testDesc"
+placeholder="Optional">
+
+<label>Duration (Minutes)</label>
+<input type="number"
+id="duration"
+placeholder="60">
+
+<label>Total Marks</label>
+<input type="number"
+id="totalMarks"
+placeholder="100">
+
+<label>Passing Marks</label>
+<input type="number"
+id="passMarks"
+placeholder="40">
+
+</div>
+
+<!-- QUESTION SOURCE -->
+<div class="main-card">
+
+<div class="section-title">
+Question Source
+</div>
+
+<div class="mode-row">
+
+<button class="mode-btn active"
+id="bankBtn"
+onclick="setMode('bank')">
+📚 From Question Bank
+</button>
+
+<button class="mode-btn"
+id="manualBtn"
+onclick="setMode('manual')">
+✍ Manual Input
+</button>
+
+</div>
+
+<!-- BANK MODE -->
+<div id="bankArea">
+
+<label>Select Subject</label>
+<select id="subjectList">
+<option value="">
+Select Subject
+</option>
+</select>
+
+<label>Select Chapter</label>
+<select id="chapterList">
+<option value="">
+All Chapters
+</option>
+</select>
+
+<label>No. of Questions</label>
+<input type="number"
+id="questionCount"
+placeholder="20">
+
+</div>
+
+<!-- MANUAL MODE -->
+<div id="manualArea"
+style="display:none;">
+
+<label>Paste JSON Questions</label>
+
+<textarea id="jsonBox"
+placeholder='[{"question":"2+2?","options":["1","2","3","4"],"answer":3}]'></textarea>
+
+</div>
+
+</div>
+
+<!-- ASSIGN USERS -->
+<div class="main-card">
+
+<div class="section-title">
+Assign Test To
+</div>
+
+<div class="assign-box">
+
+<label>
+<input type="checkbox"
+id="selfCheck"
+checked>
+ Myself
+</label>
+
+<div id="friendList"
+class="friend-list">
+
+<!-- Dynamic friends -->
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SETTINGS -->
+<div class="main-card">
+
+<div class="section-title">
+Settings
+</div>
+
+<label>
+<input type="checkbox"
+id="shuffleQ"
+checked>
+ Shuffle Questions
+</label>
+
+<label>
+<input type="checkbox"
+id="shuffleO"
+checked>
+ Shuffle Options
+</label>
+
+<label>
+<input type="checkbox"
+id="instantResult">
+ Show Result Instantly
+</label>
+
+<label>
+<input type="checkbox"
+id="releaseLater">
+ Release Score Later
+</label>
+
+</div>
+
+<!-- BUTTONS -->
+<div class="btn-row">
+
+<button class="preview-btn"
+onclick="previewTest()">
+👁 Preview
+</button>
+
+<button class="save-btn"
+onclick="createTest()">
+🚀 Create Test
+</button>
+
+</div>
+
+<!-- PREVIEW -->
+<div class="preview-card">
+
+<div class="section-title">
+Preview
+</div>
+
+<div id="previewBox">
+No Preview Yet
+</div>
+
+</div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module"
+src="js/create-test.js"></script>
 
 </body>
 </html>
