@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tests Dashboard</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/tests.css?v=1">
+
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar" class="sidebar">
+
+    <h2>⚡ Menu</h2>
+
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='tasks.html'">📋 Tasks</button>
+    <button onclick="location.href='goals.html'">🎯 Goals</button>
+    <button onclick="location.href='friends.html'">👥 Friends</button>
+    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+    <button onclick="location.href='tests.html'">📝 Tests</button>
+    <button onclick="location.href='profile.html'">👤 Profile</button>
+
+</div>
+
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <button class="menu-btn"
+        onclick="toggleSidebar()">
+        ☰
+        </button>
+
+        <div class="top-title">
+            <h1>📝 Test Dashboard</h1>
+            <p>Create • Attempt • Analyze • Improve</p>
+        </div>
+
+        <button class="refresh-btn"
+        onclick="refreshPage()">
+        ⟳
+        </button>
+
+    </div>
+
+    <!-- ================= HERO ================= -->
+    <div class="hero-card">
+
+        <h2>Welcome Back</h2>
+
+        <p>
+        Build smart tests from your question bank,
+        assign users, track scores and grow faster.
+        </p>
+
+    </div>
+
+    <!-- ================= MAIN CARDS ================= -->
+    <div class="card-wrap">
+
+        <div class="big-card create"
+        onclick="location.href='create-test.html'">
+
+            <div class="icon">➕</div>
+            <h2>Create Test</h2>
+            <p>Create new test from question bank or manual input</p>
+
+        </div>
+
+        <div class="big-card mine"
+        onclick="location.href='my-tests.html'">
+
+            <div class="icon">📋</div>
+            <h2>My Tests</h2>
+            <p>Manage created tests, edit and release results</p>
+
+        </div>
+
+        <div class="big-card give"
+        onclick="location.href='give-test.html'">
+
+            <div class="icon">📝</div>
+            <h2>Available Tests</h2>
+            <p>Start assigned tests and upcoming exams</p>
+
+        </div>
+
+        <div class="big-card result"
+        onclick="location.href='results.html'">
+
+            <div class="icon">📊</div>
+            <h2>Results</h2>
+            <p>See marks, rank and performance reports</p>
+
+        </div>
+
+        <div class="big-card history"
+        onclick="location.href='history.html'">
+
+            <div class="icon">🕒</div>
+            <h2>History</h2>
+            <p>Past attempts and completed tests</p>
+
+        </div>
+
+        <div class="big-card analytics"
+        onclick="location.href='analytics.html'">
+
+            <div class="icon">🚀</div>
+            <h2>Analytics</h2>
+            <p>Accuracy, trends and subject wise growth</p>
+
+        </div>
+
+    </div>
+
+    <!-- ================= UPCOMING ================= -->
+    <div class="section-box">
+
+        <div class="section-head">
+            <h2>🔥 Upcoming Tests</h2>
+            <span id="upcomingCount">0</span>
+        </div>
+
+        <div id="upcomingList" class="mini-list">
+
+            <div class="empty-row">
+                No upcoming tests
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= RECENT ================= -->
+    <div class="section-box">
+
+        <div class="section-head">
+            <h2>📌 Recent Activity</h2>
+        </div>
+
+        <div id="recentList" class="mini-list">
+
+            <div class="empty-row">
+                No recent activity
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast"></div>
+
+<script type="module" src="js/tests.js?v=1"></script>
+
+</body>
+</html>
