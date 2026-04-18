@@ -1,182 +1,274 @@
+/* ================= CREATE TEST PAGE ================= */
+
 import { auth, db } from "./firebase.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  collection,
-  addDoc,
-  query,
-  where,
-  onSnapshot,
-  deleteDoc,
-  doc,
-  serverTimestamp
+collection,
+getDocs,
+addDoc,
+query,
+where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= HELPERS ================= */
 const getEl = (id)=>document.getElementById(id);
 
 let currentUser = null;
+let mode = "bank";
 
-/* AUTH */
-onAuthStateChanged(auth,(user)=>{
+/* ================= AUTH ================= */
+onAuthStateChanged(auth, async(user)=>{
 
     if(!user){
-        location.href="index.html";
+        location.href = "index.html";
         return;
     }
 
     currentUser = user;
 
-    newCode();
-    loadMyTests();
+    await loadSubjects();
+    await loadFriends();
 });
 
-/* RANDOM CODE */
-window.newCode = ()=>{
+/* ================= MENU ================= */
+window.toggleSidebar = ()=>{
 
-    let code =
-        "T" +
-        Math.floor(Math.random()*9000 + 1000);
+    const sidebar = getEl("sidebar");
 
-    getEl("testCode").innerText = code;
-};
-
-/* PREVIEW */
-let previewOpen = false;
-
-window.previewTest = ()=>{
-
-    let area = getEl("previewArea");
-
-    /* CLOSE IF OPEN */
-    if(previewOpen){
-        area.innerHTML = "No preview yet";
-        previewOpen = false;
-        return;
-    }
-
-    let raw = getEl("jsonBox").value.trim();
-
-    if(!raw){
-        area.innerText="Paste JSON first";
-        return;
-    }
-
-    try{
-
-        let data = JSON.parse(raw);
-
-        let html = "";
-
-        data.forEach((q,i)=>{
-
-            html += `
-            <div style="margin-bottom:15px;">
-                <b>Q${i+1}. ${q.question}</b>
-            `;
-
-            q.options.forEach((op,index)=>{
-
-                html += `
-                <div class="option ${index===q.answer ? 'correct':''}">
-                    ${String.fromCharCode(65+index)}. ${op}
-                </div>`;
-            });
-
-            html += `</div>`;
-        });
-
-        area.innerHTML = html;
-        previewOpen = true;
-
-    }catch{
-        area.innerText="Invalid JSON";
+    if(sidebar){
+        sidebar.classList.toggle("active");
     }
 };
-/* CREATE */
-window.createTest = async ()=>{
 
-    let testName = getEl("testName").value.trim();
-    let topic = getEl("testTopic").value.trim();
-    let duration = Number(getEl("testDuration").value || 60);
-    let code = getEl("testCode").innerText;
-    let raw = getEl("jsonBox").value.trim();
+/* ================= MODE ================= */
+window.setMode = (type)=>{
 
-    if(!testName || !topic || !raw){
-        alert("Fill all fields");
-        return;
+    mode = type;
+
+    getEl("bankBtn").classList.remove("active");
+    getEl("manualBtn").classList.remove("active");
+
+    if(type === "bank"){
+
+        getEl("bankBtn").classList.add("active");
+
+        getEl("bankArea").style.display = "block";
+        getEl("manualArea").style.display = "none";
+
+    }else{
+
+        getEl("manualBtn").classList.add("active");
+
+        getEl("bankArea").style.display = "none";
+        getEl("manualArea").style.display = "block";
     }
+};
 
-    let questions = [];
+/* ================= LOAD SUBJECTS ================= */
+async function loadSubjects(){
 
-    try{
-        questions = JSON.parse(raw);
-    }catch{
-        alert("Invalid JSON");
-        return;
-    }
+    const snap = await getDocs(
+        query(
+            collection(db,"questionBank"),
+            where("uid","==",currentUser.uid)
+        )
+    );
 
-    await addDoc(collection(db,"tests"),{
-        createdBy: currentUser.uid,
-        testName,
-        topic,
-        duration,
-        code,
-        questions,
-        createdAt: serverTimestamp()
+    let subjects = [];
+
+    snap.forEach(doc=>{
+
+        const d = doc.data();
+
+        if(d.subject &&
+        !subjects.includes(d.subject)){
+
+            subjects.push(d.subject);
+        }
     });
 
-    alert("Test Created ✅");
+    subjects.sort();
 
-    getEl("testName").value="";
-    getEl("testTopic").value="";
-    getEl("testDuration").value="";
-    getEl("jsonBox").value="";
-    getEl("previewArea").innerText="No preview yet";
+    let html =
+    `<option value="">Select Subject</option>`;
 
-    newCode();
-};
+    subjects.forEach(name=>{
 
-/* LOAD MY TESTS */
-function loadMyTests(){
+        html += `
+        <option value="${name}">
+        ${name}
+        </option>`;
+    });
 
-    onSnapshot(
-        query(
-            collection(db,"tests"),
-            where("createdBy","==",currentUser.uid)
-        ),
-        snap=>{
-
-            let html = "";
-
-            snap.forEach(d=>{
-
-                let t = d.data();
-
-                html += `
-                <div class="test-item">
-                    <b>${t.testName}</b>
-
-                    <div class="small">📘 ${t.topic}</div>
-                    <div class="small">🔑 ${t.code}</div>
-                    <div class="small">⏱ ${t.duration} min</div>
-
-                    <div class="btn-row">
-                        <button onclick="deleteTest('${d.id}')">🗑 Delete</button>
-                    </div>
-                </div>`;
-            });
-
-            getEl("testList").innerHTML =
-                html || "No tests created yet";
-        }
-    );
+    getEl("subjectList").innerHTML = html;
 }
 
-/* DELETE */
-window.deleteTest = async(id)=>{
+/* ================= LOAD FRIENDS ================= */
+async function loadFriends(){
 
-    if(confirm("Delete this test?")){
-        await deleteDoc(doc(db,"tests",id));
+    const box = getEl("friendList");
+
+    if(!box) return;
+
+    let html = "";
+
+    const snap =
+    await getDocs(collection(db,"friends"));
+
+    for(const row of snap.docs){
+
+        const users =
+        row.data().users || [];
+
+        if(!users.includes(currentUser.uid))
+        continue;
+
+        const friendId =
+        users.find(id =>
+        id !== currentUser.uid);
+
+        html += `
+        <label class="friend-item">
+
+        <input type="checkbox"
+        class="friendCheck"
+        value="${friendId}">
+
+        Friend User
+
+        </label>`;
     }
+
+    box.innerHTML =
+    html || "No friends found";
+}
+
+/* ================= PREVIEW ================= */
+window.previewTest = ()=>{
+
+    const name =
+    getEl("testName").value.trim();
+
+    const duration =
+    getEl("duration").value || "0";
+
+    const total =
+    getEl("totalMarks").value || "0";
+
+    const pass =
+    getEl("passMarks").value || "0";
+
+    getEl("previewBox").innerHTML = `
+    <b>Test Name:</b> ${name || "Untitled"}<br>
+    <b>Duration:</b> ${duration} Minutes<br>
+    <b>Total Marks:</b> ${total}<br>
+    <b>Passing Marks:</b> ${pass}<br>
+    <b>Mode:</b>
+    ${mode === "bank"
+    ? "Question Bank"
+    : "Manual Input"}
+    `;
 };
+
+/* ================= CREATE TEST ================= */
+window.createTest = async ()=>{
+
+    const testName =
+    getEl("testName").value.trim();
+
+    if(!testName){
+        showToast("Enter Test Name");
+        return;
+    }
+
+    let assignedUsers = [];
+
+    if(getEl("selfCheck").checked){
+        assignedUsers.push(currentUser.uid);
+    }
+
+    document
+    .querySelectorAll(".friendCheck")
+    .forEach(box=>{
+
+        if(box.checked){
+            assignedUsers.push(box.value);
+        }
+    });
+
+    if(assignedUsers.length === 0){
+        showToast("Select user");
+        return;
+    }
+
+    await addDoc(
+        collection(db,"tests"),
+        {
+            ownerId: currentUser.uid,
+
+            testName,
+            description:
+            getEl("testDesc").value.trim(),
+
+            duration:
+            Number(getEl("duration").value || 0),
+
+            totalMarks:
+            Number(getEl("totalMarks").value || 0),
+
+            passMarks:
+            Number(getEl("passMarks").value || 0),
+
+            sourceMode: mode,
+
+            subject:
+            getEl("subjectList").value,
+
+            questionCount:
+            Number(getEl("questionCount").value || 0),
+
+            manualJson:
+            getEl("jsonBox").value.trim(),
+
+            assignedUsers,
+
+            shuffleQuestions:
+            getEl("shuffleQ").checked,
+
+            shuffleOptions:
+            getEl("shuffleO").checked,
+
+            instantResult:
+            getEl("instantResult").checked,
+
+            releaseLater:
+            getEl("releaseLater").checked,
+
+            createdAt: Date.now()
+        }
+    );
+
+    showToast("Test Created ✅");
+
+    setTimeout(()=>{
+        location.href =
+        "test-dashboard.html";
+    },1000);
+};
+
+/* ================= TOAST ================= */
+function showToast(msg){
+
+    const toast = getEl("toast");
+
+    toast.innerText = msg;
+    toast.className = "show";
+
+    setTimeout(()=>{
+        toast.className = "";
+    },2200);
+}
