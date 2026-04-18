@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>View Questions</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/view-question.css?v=1">
+
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar" class="sidebar">
+    <h2>⚡ Menu</h2>
+
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='tasks.html'">📋 Tasks</button>
+    <button onclick="location.href='goals.html'">🎯 Goals</button>
+    <button onclick="location.href='friends.html'">👥 Friends</button>
+    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+    <button onclick="location.href='create-test.html'">📝 Create Test</button>
+    <button onclick="location.href='give-test.html'">🎯 Give Test</button>
+    <button onclick="location.href='profile.html'">👤 Profile</button>
+</div>
+
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+        <div class="top-title">
+            <h1>📚 View Questions</h1>
+            <p>Browse Your Question Bank Like File Manager</p>
+        </div>
+
+        <button class="page-back-btn"
+            onclick="location.href='question-bank.html'">
+            ⬅
+        </button>
+
+    </div>
+
+    <!-- PATH BAR -->
+    <div class="path-bar">
+
+        <button id="folderBackBtn"
+            class="folder-back-btn"
+            onclick="goFolderBack()">
+            ↩ Folder Back
+        </button>
+
+        <div id="pathText" class="path-text">
+            Home
+        </div>
+
+    </div>
+
+    <!-- FILE AREA -->
+    <div class="main-card">
+
+        <div id="fileArea">
+
+            <!-- Dynamic folders / questions -->
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= POPUP ================= -->
+<div id="popup" class="popup">
+
+    <div class="popup-box">
+
+        <button class="close-btn" onclick="closePopup()">✕</button>
+
+        <h2 id="popupQuestion">
+            Question Here
+        </h2>
+
+        <div class="popup-btn-row">
+
+            <button class="preview-btn"
+                onclick="previewQuestion()">
+                👁 Preview
+            </button>
+
+            <button class="edit-btn"
+                onclick="editQuestion()">
+                ✏ Edit
+            </button>
+
+        </div>
+
+        <div id="popupContent">
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module" src="js/view-question.js?v=1"></script>
+
+</body>
+</html>
