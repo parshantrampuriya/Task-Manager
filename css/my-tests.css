@@ -3,8 +3,8 @@ body{
     margin:0;
     font-family:'Segoe UI',sans-serif;
     background:
-    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.94)),
-    url("../mahadev.png") center/cover no-repeat fixed;
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
+    url("../mahadev.png") center/cover fixed;
     color:#fff;
 }
 
@@ -18,13 +18,17 @@ body{
 .top-bar{
     display:flex;
     align-items:center;
-    gap:18px;
+    gap:16px;
     padding:18px 24px;
-    background:rgba(0,0,0,.42);
+    background:rgba(0,0,0,.45);
     backdrop-filter:blur(8px);
     position:sticky;
     top:0;
     z-index:999;
+}
+
+.top-title{
+    flex:1;
 }
 
 .top-title h1{
@@ -51,22 +55,18 @@ body{
     color:#000;
 }
 
-.back-btn{
-    margin-left:auto;
-}
-
-/* ================= FILTER BAR ================= */
+/* ================= FILTER ================= */
 .filter-bar{
     max-width:1200px;
-    margin:22px auto 0;
+    margin:20px auto 0;
     padding:0 18px;
 }
 
 .tabs{
     display:flex;
-    flex-wrap:wrap;
     gap:12px;
-    margin-bottom:16px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
 }
 
 .tab-btn{
@@ -93,11 +93,10 @@ body{
 .search-row input,
 .search-row select{
     width:100%;
+    padding:14px 16px;
     border:none;
     outline:none;
     border-radius:14px;
-    padding:14px 16px;
-    font-size:15px;
     background:rgba(255,255,255,.08);
     color:#fff;
     box-sizing:border-box;
@@ -118,9 +117,9 @@ body{
 }
 
 .stat-card{
-    padding:20px;
-    border-radius:20px;
     background:rgba(255,255,255,.06);
+    border-radius:20px;
+    padding:20px;
     text-align:center;
 }
 
@@ -135,7 +134,7 @@ body{
     color:#dfe7ea;
 }
 
-/* ================= MAIN CARD ================= */
+/* ================= MAIN ================= */
 .main-card{
     max-width:1200px;
     margin:0 auto 30px;
@@ -145,17 +144,16 @@ body{
 /* ================= TEST CARD ================= */
 .test-card{
     background:rgba(20,30,45,.88);
-    border-radius:22px;
+    border-radius:24px;
     padding:22px;
     margin-bottom:18px;
     border:1px solid rgba(255,255,255,.05);
-    box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
 
 .test-top{
     display:flex;
     justify-content:space-between;
-    gap:16px;
+    gap:14px;
     align-items:flex-start;
 }
 
@@ -189,14 +187,14 @@ body{
 .meta-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    gap:14px;
+    gap:12px;
     margin-top:18px;
 }
 
 .meta-box{
-    padding:14px;
-    border-radius:16px;
     background:rgba(255,255,255,.05);
+    border-radius:16px;
+    padding:14px;
 }
 
 .meta-box h4{
@@ -211,7 +209,6 @@ body{
     font-weight:700;
 }
 
-/* ================= ACTIONS ================= */
 .action-row{
     display:grid;
     grid-template-columns:repeat(5,1fr);
@@ -225,7 +222,6 @@ body{
     border-radius:14px;
     cursor:pointer;
     font-weight:700;
-    font-size:14px;
     background:rgba(255,255,255,.08);
     color:#fff;
 }
@@ -239,30 +235,156 @@ body{
     background:#ff5c5c;
 }
 
+/* ================= POPUP ================= */
+.popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    padding:16px;
+    z-index:9999;
+}
+
+.popup.show{
+    display:flex;
+}
+
+.popup-box{
+    width:100%;
+    max-width:760px;
+    max-height:92vh;
+    overflow:auto;
+    background:#111;
+    border-radius:24px;
+    padding:24px;
+    position:relative;
+    border:1px solid rgba(0,255,255,.12);
+}
+
+.popup-box.small{
+    max-width:420px;
+    text-align:center;
+}
+
+.close-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background:#222;
+    color:#fff;
+    font-size:18px;
+}
+
+.popup-box h2{
+    margin-top:0;
+}
+
+.popup-box input,
+.popup-box textarea,
+.popup-box select{
+    width:100%;
+    padding:13px;
+    margin-bottom:12px;
+    border:none;
+    outline:none;
+    border-radius:14px;
+    background:#1d1d1d;
+    color:#fff;
+    box-sizing:border-box;
+}
+
+.popup-box textarea{
+    min-height:120px;
+}
+
+.popup-btn-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:18px;
+}
+
+.cancel-btn,
+.delete-btn,
+.save-btn{
+    border:none;
+    padding:14px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.cancel-btn{
+    background:#2a2a2a;
+    color:#fff;
+}
+
+.delete-btn{
+    background:#ff5c5c;
+    color:#fff;
+}
+
+.save-btn{
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:#000;
+}
+
+/* ================= QUESTIONS IN EDIT ================= */
+.q-list{
+    margin-top:16px;
+}
+
+.q-item{
+    background:#1b1b1b;
+    padding:14px;
+    border-radius:16px;
+    margin-bottom:10px;
+}
+
+.q-item-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.remove-q{
+    border:none;
+    background:#ff5c5c;
+    color:#fff;
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+}
+
 /* ================= EMPTY ================= */
 .empty-box{
     padding:35px;
     text-align:center;
     border-radius:20px;
     background:rgba(255,255,255,.05);
-    color:#cfd8dc;
 }
 
 /* ================= TOAST ================= */
 #toast{
     position:fixed;
-    bottom:28px;
+    bottom:26px;
     left:50%;
     transform:translateX(-50%);
-    padding:12px 18px;
-    border-radius:12px;
     background:#00ffd0;
     color:#000;
+    padding:12px 18px;
+    border-radius:12px;
     font-weight:700;
     opacity:0;
     transition:.25s;
-    pointer-events:none;
-    z-index:9999;
+    z-index:99999;
 }
 
 #toast.show{
@@ -276,19 +398,11 @@ body{
         padding-left:0;
     }
 
-    .stats-grid{
-        grid-template-columns:1fr;
-    }
-
-    .meta-grid{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .action-row{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .search-row{
+    .stats-grid,
+    .meta-grid,
+    .action-row,
+    .search-row,
+    .popup-btn-row{
         grid-template-columns:1fr;
     }
 }
@@ -296,16 +410,11 @@ body{
 @media(max-width:600px){
 
     .top-title h1{
-        font-size:28px;
+        font-size:26px;
     }
 
     .test-top{
         flex-direction:column;
-    }
-
-    .meta-grid,
-    .action-row{
-        grid-template-columns:1fr;
     }
 
     .test-name{
