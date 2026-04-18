@@ -1,5 +1,5 @@
 /* ================= UPDATED view-question.js ================= */
-/* OLD FEATURES KEPT + NEW FEATURES ADDED */
+/* OLD FEATURES KEPT + DUPLICATE FIX + BEAUTIFUL RENAME POPUP */
 
 import { auth, db } from "./firebase.js";
 
@@ -113,11 +113,9 @@ function renderFiles(){
 
         if(levels.length > currentPath.length){
 
-            const nextFolder =
-                levels[currentPath.length];
+            const nextFolder = levels[currentPath.length];
 
-            if(nextFolder &&
-               !folders.includes(nextFolder)){
+            if(nextFolder && !folders.includes(nextFolder)){
                 folders.push(nextFolder);
             }
 
@@ -127,17 +125,11 @@ function renderFiles(){
     });
 
     folders.sort((a,b)=>a.localeCompare(b));
+    questions.sort((a,b)=>a.question.localeCompare(b.question));
 
-    questions.sort((a,b)=>
-        a.question.localeCompare(b.question)
-    );
-
-    /* SHOW VIEW ALL BUTTON */
     if(viewBtn){
         viewBtn.style.display =
-            questions.length>0
-            ? "inline-flex"
-            : "none";
+        questions.length>0 ? "inline-flex" : "none";
     }
 
     let html = "";
@@ -147,7 +139,6 @@ function renderFiles(){
 
         html += `
         <div class="file-item folder"
-
             onclick="openFolder('${safe(name)}')"
 
             onmousedown="startHold('${safe(name)}')"
@@ -164,7 +155,7 @@ function renderFiles(){
         `;
     });
 
-    /* QUESTIONS WITH NUMBER */
+    /* QUESTIONS */
     questions.forEach((q,index)=>{
 
         html += `
@@ -184,9 +175,7 @@ function renderFiles(){
     if(!html){
         html = `
         <div class="file-item">
-            <div class="file-name">
-                Empty Folder
-            </div>
+            <div class="file-name">Empty Folder</div>
         </div>`;
     }
 
@@ -204,9 +193,8 @@ window.openFolder = (name)=>{
     renderFiles();
 };
 
-/* ================= BACK FOLDER ================= */
+/* ================= BACK ================= */
 window.goFolderBack = ()=>{
-
     if(currentPath.length>0){
         currentPath.pop();
         renderFiles();
@@ -231,22 +219,24 @@ function folderPopup(name){
     getEl("popupQuestion").innerText =
         "📁 Folder : " + name;
 
+    getEl("popupContent").innerHTML = "";
+
     getEl("popupContent").innerHTML = `
         <div class="popup-btn-row">
 
             <button class="save-btn"
-                onclick="openFolder('${safe(name)}');closePopup();">
-                📂 Open Folder
+            onclick="openFolder('${safe(name)}');closePopup();">
+            📂 Open Folder
             </button>
 
             <button class="edit-btn"
-                onclick="renameFolder('${safe(name)}')">
-                ✏ Edit Name
+            onclick="renameFolder('${safe(name)}')">
+            ✏ Edit Name
             </button>
 
             <button class="delete-btn"
-                onclick="deleteFolder('${safe(name)}')">
-                🗑 Delete Folder
+            onclick="deleteFolder('${safe(name)}')">
+            🗑 Delete Folder
             </button>
 
         </div>
@@ -255,15 +245,39 @@ function folderPopup(name){
     getEl("popup").classList.add("show");
 }
 
-/* ================= RENAME FOLDER ================= */
-window.renameFolder = async (oldName)=>{
+/* ================= RENAME POPUP ================= */
+window.renameFolder = (oldName)=>{
+
+    getEl("popupQuestion").innerText =
+        "✏ Rename Folder";
+
+    getEl("popupContent").innerHTML = `
+        <label>Current Name</label>
+        <input value="${oldName}" disabled>
+
+        <label>New Name</label>
+        <input id="newFolderName"
+        placeholder="Enter New Folder Name">
+
+        <br><br>
+
+        <button class="save-btn"
+        onclick="saveRenameFolder('${safe(oldName)}')">
+        💾 Save Name
+        </button>
+    `;
+};
+
+/* ================= SAVE RENAME ================= */
+window.saveRenameFolder = async (oldName)=>{
 
     const newName =
-        prompt("Enter New Folder Name");
+    getEl("newFolderName").value.trim();
 
-    if(!newName || !newName.trim()) return;
-
-    const finalName = newName.trim();
+    if(!newName){
+        showToast("Enter Folder Name");
+        return;
+    }
 
     for(let q of allQuestions){
 
@@ -275,14 +289,9 @@ window.renameFolder = async (oldName)=>{
 
         if(levels[currentPath.length]===oldName){
 
-            if(currentPath.length===0)
-                levels[0]=finalName;
-
-            if(currentPath.length===1)
-                levels[1]=finalName;
-
-            if(currentPath.length===2)
-                levels[2]=finalName;
+            if(currentPath.length===0) levels[0]=newName;
+            if(currentPath.length===1) levels[1]=newName;
+            if(currentPath.length===2) levels[2]=newName;
 
             await updateDoc(
                 doc(db,"questionBank",q.id),
@@ -305,9 +314,8 @@ window.deleteFolder = async (name)=>{
 
     let targetPath = [...currentPath,name];
 
-    if(!confirm(
-        "Delete folder and all inside?"
-    )) return;
+    if(!confirm("Delete folder and all inside?"))
+        return;
 
     for(let q of allQuestions){
 
@@ -349,22 +357,24 @@ window.openQuestion = (id)=>{
     getEl("popupQuestion").innerText =
         selectedQuestion.question;
 
+    getEl("popupContent").innerHTML = "";
+
     getEl("popupContent").innerHTML = `
         <div class="popup-btn-row">
 
             <button class="preview-btn"
-                onclick="previewQuestion()">
-                👁 Preview
+            onclick="previewQuestion()">
+            👁 Preview
             </button>
 
             <button class="edit-btn"
-                onclick="editQuestion()">
-                ✏ Edit
+            onclick="editQuestion()">
+            ✏ Edit
             </button>
 
             <button class="delete-btn"
-                onclick="deleteQuestion()">
-                🗑 Delete
+            onclick="deleteQuestion()">
+            🗑 Delete
             </button>
 
         </div>
@@ -378,11 +388,11 @@ window.closePopup = ()=>{
     getEl("popup").classList.remove("show");
 };
 
-/* ================= PREVIEW ONE ================= */
+/* ================= PREVIEW ================= */
 window.previewQuestion = ()=>{
 
     let ans =
-        parseInt(selectedQuestion.answer);
+    parseInt(selectedQuestion.answer);
 
     if(isNaN(ans)) ans=0;
 
@@ -391,14 +401,10 @@ window.previewQuestion = ()=>{
     selectedQuestion.options.forEach((op,i)=>{
 
         html += `
-        <div class="option-box ${
-            i===ans ? "correct":""
-        }">
-
+        <div class="option-box ${i===ans?"correct":""}">
             ${String.fromCharCode(65+i)}.
             ${op}
-            ${i===ans ? " ✅ Correct":""}
-
+            ${i===ans?" ✅ Correct":""}
         </div>`;
     });
 
@@ -408,7 +414,7 @@ window.previewQuestion = ()=>{
 /* ================= VIEW ALL ================= */
 window.viewAllQuestions = ()=>{
 
-    let questions = [];
+    let questions=[];
 
     allQuestions.forEach(q=>{
 
@@ -418,7 +424,7 @@ window.viewAllQuestions = ()=>{
             q.topic || ""
         ].filter(v=>v!== "");
 
-        let ok = true;
+        let ok=true;
 
         for(let i=0;i<currentPath.length;i++){
             if(levels[i]!==currentPath[i]){
@@ -443,20 +449,16 @@ window.viewAllQuestions = ()=>{
         let ans=parseInt(q.answer);
         if(isNaN(ans)) ans=0;
 
-        html += `
-        <div class="all-box">
-        <h3>Q${no+1}. ${q.question}</h3>
-        `;
+        html += `<div class="all-box">
+        <h3>Q${no+1}. ${q.question}</h3>`;
 
         q.options.forEach((op,i)=>{
 
             html += `
-            <div class="option-box ${
-                i===ans ? "correct":""
-            }">
-                ${String.fromCharCode(65+i)}.
-                ${op}
-                ${i===ans ? " ✅":""}
+            <div class="option-box ${i===ans?"correct":""}">
+            ${String.fromCharCode(65+i)}.
+            ${op}
+            ${i===ans?" ✅":""}
             </div>`;
         });
 
@@ -464,7 +466,7 @@ window.viewAllQuestions = ()=>{
     });
 
     getEl("popupQuestion").innerText =
-        "All Questions Preview";
+    "All Questions Preview";
 
     getEl("popupContent").innerHTML = html;
 
@@ -475,7 +477,7 @@ window.viewAllQuestions = ()=>{
 window.editQuestion = ()=>{
 
     let ans =
-        parseInt(selectedQuestion.answer);
+    parseInt(selectedQuestion.answer);
 
     if(isNaN(ans)) ans=0;
 
@@ -505,22 +507,22 @@ window.editQuestion = ()=>{
     <br><br>
 
     <button class="save-btn"
-        onclick="saveEdit()">
-        💾 Save Changes
+    onclick="saveEdit()">
+    💾 Save Changes
     </button>
     `;
 
     getEl("popupContent").innerHTML = html;
 
     getEl("correctAns").value =
-        String(ans);
+    String(ans);
 };
 
-/* ================= SAVE ================= */
+/* ================= SAVE EDIT ================= */
 window.saveEdit = async ()=>{
 
     const newQ =
-        getEl("editQ").value.trim();
+    getEl("editQ").value.trim();
 
     const options = [
         getEl("op0").value.trim(),
@@ -530,7 +532,7 @@ window.saveEdit = async ()=>{
     ];
 
     const answer =
-        parseInt(getEl("correctAns").value);
+    parseInt(getEl("correctAns").value);
 
     await updateDoc(
         doc(db,"questionBank",selectedQuestion.id),
