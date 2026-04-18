@@ -9,9 +9,7 @@ onAuthStateChanged
 import {
 collection,
 getDocs,
-addDoc,
-query,
-where
+addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
@@ -44,7 +42,7 @@ window.toggleSidebar = ()=>{
     }
 };
 
-/* ================= MODE ================= */
+/* ================= MODE SWITCH ================= */
 window.setMode = (type)=>{
 
     mode = type;
@@ -71,32 +69,30 @@ window.setMode = (type)=>{
 /* ================= LOAD SUBJECTS ================= */
 async function loadSubjects(){
 
-    const snap = await getDocs(
-        query(
-            collection(db,"questionBank"),
-            where("uid","==",currentUser.uid)
-        )
-    );
+    const snap =
+    await getDocs(collection(db,"questionBank"));
 
-    let subjects = [];
+    let arr = [];
 
     snap.forEach(doc=>{
 
         const d = doc.data();
 
-        if(d.subject &&
-        !subjects.includes(d.subject)){
-
-            subjects.push(d.subject);
+        if(
+            d.uid === currentUser.uid &&
+            d.subject &&
+            !arr.includes(d.subject)
+        ){
+            arr.push(d.subject);
         }
     });
 
-    subjects.sort();
+    arr.sort();
 
     let html =
     `<option value="">Select Subject</option>`;
 
-    subjects.forEach(name=>{
+    arr.forEach(name=>{
 
         html += `
         <option value="${name}">
@@ -112,12 +108,10 @@ async function loadFriends(){
 
     const box = getEl("friendList");
 
-    if(!box) return;
-
-    let html = "";
-
     const snap =
     await getDocs(collection(db,"friends"));
+
+    let html = "";
 
     for(const row of snap.docs){
 
@@ -132,19 +126,19 @@ async function loadFriends(){
         id !== currentUser.uid);
 
         html += `
-        <label class="friend-item">
+        <label class="friend-item check-row">
 
-        <input type="checkbox"
-        class="friendCheck"
-        value="${friendId}">
+            <input type="checkbox"
+            class="friendCheck"
+            value="${friendId}">
 
-        Friend User
+            Friend User
 
         </label>`;
     }
 
     box.innerHTML =
-    html || "No friends found";
+    html || "No Friends Found";
 }
 
 /* ================= PREVIEW ================= */
@@ -154,23 +148,23 @@ window.previewTest = ()=>{
     getEl("testName").value.trim();
 
     const duration =
-    getEl("duration").value || "0";
+    getEl("duration").value || 0;
 
     const total =
-    getEl("totalMarks").value || "0";
+    getEl("totalMarks").value || 0;
 
     const pass =
-    getEl("passMarks").value || "0";
+    getEl("passMarks").value || 0;
 
     getEl("previewBox").innerHTML = `
     <b>Test Name:</b> ${name || "Untitled"}<br>
     <b>Duration:</b> ${duration} Minutes<br>
     <b>Total Marks:</b> ${total}<br>
     <b>Passing Marks:</b> ${pass}<br>
-    <b>Mode:</b>
+    <b>Question Source:</b>
     ${mode === "bank"
     ? "Question Bank"
-    : "Manual Input"}
+    : "Manual JSON"}
     `;
 };
 
@@ -201,35 +195,47 @@ window.createTest = async ()=>{
     });
 
     if(assignedUsers.length === 0){
-        showToast("Select user");
+        showToast("Select Users");
         return;
     }
 
     await addDoc(
         collection(db,"tests"),
         {
-            ownerId: currentUser.uid,
+
+            ownerId:
+            currentUser.uid,
 
             testName,
+
             description:
             getEl("testDesc").value.trim(),
 
             duration:
-            Number(getEl("duration").value || 0),
+            Number(
+            getEl("duration").value || 0
+            ),
 
             totalMarks:
-            Number(getEl("totalMarks").value || 0),
+            Number(
+            getEl("totalMarks").value || 0
+            ),
 
             passMarks:
-            Number(getEl("passMarks").value || 0),
+            Number(
+            getEl("passMarks").value || 0
+            ),
 
-            sourceMode: mode,
+            sourceMode:
+            mode,
 
             subject:
             getEl("subjectList").value,
 
             questionCount:
-            Number(getEl("questionCount").value || 0),
+            Number(
+            getEl("questionCount").value || 0
+            ),
 
             manualJson:
             getEl("jsonBox").value.trim(),
@@ -248,7 +254,8 @@ window.createTest = async ()=>{
             releaseLater:
             getEl("releaseLater").checked,
 
-            createdAt: Date.now()
+            createdAt:
+            Date.now()
         }
     );
 
