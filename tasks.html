@@ -6,31 +6,45 @@
 <title>Tasks</title>
 
 <link rel="stylesheet" href="css/tasks.css">
+<link rel="stylesheet" href="css/sidebar.css">
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= UNIVERSAL SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
 
     <button onclick="goHome()">🏠 Home</button>
+
     <button onclick="goTasks()">📋 Tasks</button>
+
     <button onclick="goGoals()">🎯 Goals</button>
+
     <button onclick="goFriends()">👥 Friends</button>
+
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+
+    <button onclick="goTests()">📝 Tests</button>
+
     <button onclick="goProfile()">👤 Profile</button>
+
     <button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 <div class="main">
 
     <!-- NAVBAR -->
     <div class="navbar">
+
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-        <h2 id="username">👤 Loading...</h2>
+
+        <h2 id="username">📋 Tasks</h2>
+
     </div>
 
     <div class="container">
@@ -40,17 +54,32 @@
 
         <!-- TABS -->
         <div class="tabs">
-            <button onclick="switchTab('pending', event)">📌 Pending</button>
-            <button onclick="switchTab('due', event)">🔥 Due</button>
-            <button onclick="switchTab('completed', event)">✅ Completed</button>
+
+            <button onclick="switchTab('pending',event)">
+            📌 Pending
+            </button>
+
+            <button onclick="switchTab('due',event)">
+            🔥 Due
+            </button>
+
+            <button onclick="switchTab('completed',event)">
+            ✅ Completed
+            </button>
+
         </div>
 
         <!-- ADD TASK -->
         <div class="add-task">
+
             <input id="taskInput" placeholder="New task...">
+
             <input type="date" id="dateInput">
+
             <input type="time" id="timeInput">
-            <button onclick="addTask()">Add</button>
+
+            <button onclick="addTask()">➕ Add</button>
+
         </div>
 
         <!-- TASK LIST -->
@@ -60,25 +89,25 @@
 
 </div>
 
-<!-- 🔥 ADVANCED MODAL (UPGRADED) -->
+<!-- ================= MODAL ================= -->
 <div id="modal" class="modal">
 
     <div class="modal-box">
 
         <h3 id="modalTitle">Edit Task</h3>
 
-        <!-- TEXT -->
         <input id="modalInput" placeholder="Task name">
 
-        <!-- DATE -->
         <input type="date" id="modalDate">
 
-        <!-- TIME -->
         <input type="time" id="modalTime">
 
         <div class="modal-actions">
+
             <button onclick="confirmAction()">💾 Save</button>
+
             <button onclick="closeModal()">❌ Cancel</button>
+
         </div>
 
     </div>
@@ -87,5 +116,6 @@
 
 <script type="module" src="js/tasks.js"></script>
 <script type="module" src="js/menu.js"></script>
+
 </body>
 </html>
