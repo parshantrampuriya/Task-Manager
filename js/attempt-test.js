@@ -12,31 +12,29 @@ addDoc
 
 /* ================= HELPERS ================= */
 const getEl = (id)=>document.getElementById(id);
-
 const params = new URLSearchParams(location.search);
 const testId = params.get("id");
 
-let currentUser = null;
-let testData = null;
-let questions = [];
+let currentUser=null;
+let testData=null;
+let questions=[];
 
-let currentIndex = 0;
-let answers = [];
-let reviewList = [];
+let currentIndex=0;
+let answers=[];
+let reviewList=[];
 
-let totalSeconds = 0;
-let timerInt = null;
+let totalSeconds=0;
+let timerInt=null;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser = user;
-
+currentUser=user;
 await loadTest();
 
 });
@@ -59,9 +57,7 @@ return;
 }
 
 testData = snap.data();
-
-questions =
-testData.questions || [];
+questions = testData.questions || [];
 
 answers =
 new Array(questions.length).fill(null);
@@ -81,7 +77,6 @@ totalSeconds =
 Number(testData.duration || 60) * 60;
 
 startTimer();
-
 renderPalette();
 renderQuestion();
 
@@ -128,7 +123,6 @@ String(s).padStart(2,"0");
 function renderQuestion(){
 
 const q = questions[currentIndex];
-
 if(!q) return;
 
 getEl("questionNo").innerText =
@@ -137,112 +131,100 @@ getEl("questionNo").innerText =
 getEl("questionText").innerText =
 q.question || "";
 
-let html = "";
+let html="";
 
 (q.options || []).forEach((op,i)=>{
 
 const active =
 answers[currentIndex]===i
-? "active" : "";
+? "active":"";
 
 html += `
 <button
 class="option-btn ${active}"
 onclick="selectOption(${i})">
-
 ${String.fromCharCode(65+i)}.
 ${op}
-
 </button>
 `;
 
 });
 
-getEl("optionList").innerHTML =
-html;
+getEl("optionList").innerHTML=html;
 
 renderPalette();
 
 }
 
 /* ================= SELECT ================= */
-window.selectOption = (i)=>{
+window.selectOption=(i)=>{
 
-answers[currentIndex] = i;
-
+answers[currentIndex]=i;
 renderQuestion();
 
 };
 
 /* ================= NAVIGATION ================= */
-window.nextQuestion = ()=>{
+window.nextQuestion=()=>{
 
-if(currentIndex <
-questions.length-1){
-
+if(currentIndex<questions.length-1){
 currentIndex++;
 renderQuestion();
-
 }
 
 };
 
-window.prevQuestion = ()=>{
+window.prevQuestion=()=>{
 
 if(currentIndex>0){
-
 currentIndex--;
 renderQuestion();
-
 }
 
 };
 
-window.jumpQuestion = (i)=>{
+window.jumpQuestion=(i)=>{
 
-currentIndex = i;
+currentIndex=i;
 renderQuestion();
 
 };
 
-window.clearAnswer = ()=>{
+window.clearAnswer=()=>{
 
-answers[currentIndex] = null;
+answers[currentIndex]=null;
 renderQuestion();
 
 };
 
-window.markReview = ()=>{
+window.markReview=()=>{
 
-reviewList[currentIndex] =
+reviewList[currentIndex]=
 !reviewList[currentIndex];
 
 renderPalette();
 
-showToast("Marked for review");
+showToast("Marked");
 
 };
 
 /* ================= PALETTE ================= */
 function renderPalette(){
 
-let html = "";
+let html="";
 
 questions.forEach((q,i)=>{
 
-let cls = "";
+let cls="";
 
-if(i===currentIndex){
+if(i===currentIndex)
 cls="current";
-}
-else if(reviewList[i]){
+
+else if(reviewList[i])
 cls="review";
-}
-else if(
-answers[i]!==null
-){
+
+else if(answers[i]!==null)
 cls="answered";
-}
 
 html += `
 <button
@@ -260,21 +242,21 @@ html;
 }
 
 /* ================= POPUP ================= */
-window.submitTest = ()=>{
+window.submitTest=()=>{
 
 getEl("submitPopup")
 .classList.add("show");
 
 };
 
-window.closePopup = ()=>{
+window.closePopup=()=>{
 
 getEl("submitPopup")
 .classList.remove("show");
 
 };
 
-/* ================= ANSWER INDEX ================= */
+/* ================= INDEX CONVERTER ================= */
 function idx(v){
 
 if(v===null || v===undefined)
@@ -291,7 +273,7 @@ if(s==="B") return 1;
 if(s==="C") return 2;
 if(s==="D") return 3;
 
-let n = parseInt(s);
+let n=parseInt(s);
 
 if(!isNaN(n)){
 
@@ -305,13 +287,28 @@ return -1;
 
 }
 
+/* ================= GET CORRECT ANSWER ================= */
+function getRight(q){
+
+if(q.answer!==undefined)
+return idx(q.answer);
+
+if(q.correct_option!==undefined)
+return idx(q.correct_option);
+
+if(q.correctAnswer!==undefined)
+return idx(q.correctAnswer);
+
+return -1;
+
+}
+
 /* ================= FINAL SUBMIT ================= */
 window.finalSubmit = async()=>{
 
 clearInterval(timerInt);
 
-let score = 0;
-
+/* FORMULA */
 const totalMarks =
 Number(testData.totalMarks || 0);
 
@@ -323,42 +320,37 @@ totalQ>0
 ? totalMarks / totalQ
 : 0;
 
+/* Example:
+100 marks / 10 Q = 10 each */
+
 const negPercent =
 Number(testData.negativeMarks || 0);
+
+/* Example:
+35% of 10 = 3.5 */
 
 const negPerWrong =
 perQ * (negPercent/100);
 
-let correct = 0;
-let wrong = 0;
-let skip = 0;
+let score=0;
+let correct=0;
+let wrong=0;
+let skip=0;
 
 questions.forEach((q,i)=>{
 
 const marked =
 idx(answers[i]);
 
-let real = -1;
-
-if(q.answer!==undefined)
-real = idx(q.answer);
-
-else if(
-q.correct_option!==undefined
-)
-real = idx(q.correct_option);
-
-else if(
-q.correctAnswer!==undefined
-)
-real = idx(q.correctAnswer);
+const right =
+getRight(q);
 
 if(marked===-1){
 
 skip++;
 
 }
-else if(marked===real){
+else if(marked===right){
 
 correct++;
 score += perQ;
@@ -387,14 +379,19 @@ Number(score.toFixed(2)),
 
 totalMarks,
 
+marksPerQuestion:
+Number(perQ.toFixed(2)),
+
+negativePerWrong:
+Number(negPerWrong.toFixed(2)),
+
 correct,
 wrong,
 skip,
 
 negativeMarks:
 Number(
-(wrong*negPerWrong)
-.toFixed(2)
+(wrong*negPerWrong).toFixed(2)
 ),
 
 submittedAt:
@@ -412,7 +409,7 @@ collection(db,"results"),
 resultData
 );
 
-/* update attempts */
+/* attempts */
 let arr =
 testData.attemptedUsers || [];
 
@@ -423,27 +420,24 @@ arr.push(currentUser.uid);
 await updateDoc(
 doc(db,"tests",testId),
 {
-attemptedUsers: arr,
-attemptCount:
-arr.length
+attemptedUsers:arr,
+attemptCount:arr.length
 }
 );
 
 }
 
 location.href =
-"result.html?id=" +
-testId;
+"result.html?id="+testId;
 
 };
 
 /* ================= TOAST ================= */
 function showToast(msg){
 
-const t = getEl("toast");
+const t=getEl("toast");
 
-t.innerText = msg;
-
+t.innerText=msg;
 t.classList.add("show");
 
 setTimeout(()=>{
