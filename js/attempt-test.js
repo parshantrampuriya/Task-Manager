@@ -57,7 +57,56 @@ return;
 }
 
 testData = snap.data();
-questions = testData.questions || [];
+
+/* one attempt only */
+const attemptedUsers =
+testData.attemptedUsers || [];
+
+if(
+attemptedUsers.includes(
+currentUser.uid
+)
+){
+showToast("Already Attempted");
+setTimeout(()=>{
+location.href="result.html?id="+testId;
+},900);
+return;
+}
+
+/* schedule check */
+const now=Date.now();
+
+const start=
+Number(testData.startAt || 0);
+
+const end=
+Number(testData.endAt || 0);
+
+if(start && now < start){
+
+showToast("Test not started yet");
+
+setTimeout(()=>{
+location.href="give-test.html";
+},1000);
+
+return;
+}
+
+if(end && now > end){
+
+showToast("Test expired");
+
+setTimeout(()=>{
+location.href="give-test.html";
+},1000);
+
+return;
+}
+
+questions =
+testData.questions || [];
 
 answers =
 new Array(questions.length).fill(null);
@@ -292,14 +341,12 @@ return -1;
 
 }
 
-/* ================= GET CORRECT ANSWER ================= */
+/* ================= RIGHT ANSWER ================= */
 function getRight(q){
 
-/* new best format */
 if(q.answerIndex!==undefined)
 return idx(q.answerIndex);
 
-/* text answer */
 if(
 typeof q.answer==="string" &&
 isNaN(q.answer)
@@ -322,7 +369,6 @@ return i;
 
 }
 
-/* old formats */
 if(q.answer!==undefined)
 return idx(q.answer);
 
@@ -344,7 +390,6 @@ window.finalSubmit = async()=>{
 
 clearInterval(timerInt);
 
-/* FORMULA */
 const totalMarks =
 Number(testData.totalMarks || 0);
 
@@ -356,7 +401,6 @@ totalQ>0
 ? totalMarks / totalQ
 : 0;
 
-/* Negative */
 const negPercent =
 Number(testData.negativeMarks || 0);
 
@@ -405,6 +449,9 @@ userName:
 currentUser.displayName ||
 currentUser.email,
 
+testName:
+testData.testName || "Test",
+
 score:
 Number(score.toFixed(2)),
 
@@ -429,9 +476,7 @@ submittedAt:
 Date.now(),
 
 answers,
-
-questionsSnapshot:
-questions
+questionsSnapshot:questions
 
 };
 
@@ -440,7 +485,7 @@ collection(db,"results"),
 resultData
 );
 
-/* attempts */
+/* attempt update */
 let arr =
 testData.attemptedUsers || [];
 
