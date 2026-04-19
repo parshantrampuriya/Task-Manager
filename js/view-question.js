@@ -1,5 +1,5 @@
 /* ================= UPDATED view-question.js ================= */
-/* FIXED: folder options + question preview + edit + delete */
+/* OLD FEATURES KEPT + NEW FEATURES ADDED */
 
 import { auth, db } from "./firebase.js";
 
@@ -18,15 +18,17 @@ deleteDoc
 /* ================= HELPERS ================= */
 const getEl = (id)=>document.getElementById(id);
 
-let currentUser=null;
-let allQuestions=[];
-let currentPath=[];
-let selectedQuestion=null;
+let currentUser = null;
+let allQuestions = [];
+let currentPath = [];
+let selectedQuestion = null;
+let holdTimer = null;
 
-const params=new URLSearchParams(location.search);
-const friendUid=params.get("uid");
+/* ================= FRIEND MODE ================= */
+const params = new URLSearchParams(window.location.search);
+const friendUid = params.get("uid");
 
-let readOnly=false;
+let readOnly = false;
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
@@ -49,51 +51,19 @@ await loadAllQuestions();
 /* ================= MENU ================= */
 window.toggleSidebar=()=>{
 
-getEl("sidebar")?.classList.toggle("active");
+const bar=getEl("sidebar");
+if(bar) bar.classList.toggle("active");
 
 };
-
-/* ================= LOAD ================= */
-async function loadAllQuestions(){
-
-const uid=
-(readOnly && friendUid)
-? friendUid
-: currentUser.uid;
-
-const snap=await getDocs(
-query(
-collection(db,"questionBank"),
-where("uid","==",uid)
-)
-);
-
-allQuestions=[];
-
-snap.forEach(d=>{
-
-allQuestions.push({
-id:d.id,
-...d.data()
-});
-
-});
-
-renderFiles();
-
-}
 
 /* ================= INDEX ================= */
 function idx(v){
 
-if(v===null || v===undefined)
-return -1;
+if(v===null || v===undefined) return -1;
 
 if(typeof v==="number"){
-
 if(v>=1 && v<=4) return v-1;
 return v;
-
 }
 
 let s=String(v).trim().toUpperCase();
@@ -106,17 +76,15 @@ if(s==="D") return 3;
 let n=parseInt(s);
 
 if(!isNaN(n)){
-
 if(n>=1 && n<=4) return n-1;
 return n;
-
 }
 
 return -1;
 
 }
 
-/* ================= ANSWER INDEX ================= */
+/* ================= ANSWER ================= */
 function getCorrectIndex(q){
 
 if(q.answerIndex!==undefined)
@@ -137,23 +105,56 @@ return i;
 
 }
 
-if(q.answer!==undefined)
-return idx(q.answer);
-
-if(q.correct_option!==undefined)
-return idx(q.correct_option);
-
-if(q.correctAnswer!==undefined)
-return idx(q.correctAnswer);
+if(q.answer!==undefined) return idx(q.answer);
+if(q.correct_option!==undefined) return idx(q.correct_option);
+if(q.correctAnswer!==undefined) return idx(q.correctAnswer);
+if(q.correct!==undefined) return idx(q.correct);
 
 return 0;
+
+}
+
+/* ================= LOAD ================= */
+async function loadAllQuestions(){
+
+const targetUid =
+(readOnly && friendUid)
+? friendUid
+: currentUser.uid;
+
+const snap=await getDocs(
+query(
+collection(db,"questionBank"),
+where("uid","==",targetUid)
+)
+);
+
+allQuestions=[];
+
+snap.forEach(d=>{
+
+allQuestions.push({
+id:d.id,
+...d.data()
+});
+
+});
+
+renderFiles();
 
 }
 
 /* ================= RENDER ================= */
 function renderFiles(){
 
-const area=getEl("fileArea");
+const fileArea=getEl("fileArea");
+const pathText=getEl("pathText");
+const viewBtn=getEl("viewAllBtn");
+
+pathText.innerText=
+currentPath.length===0
+? "Home"
+: currentPath.join(" > ");
 
 let folders=[];
 let questions=[];
@@ -164,7 +165,7 @@ const levels=[
 q.subject||"",
 q.chapter||"",
 q.topic||""
-].filter(Boolean);
+].filter(v=>v!="");
 
 let ok=true;
 
@@ -183,9 +184,8 @@ if(levels.length>currentPath.length){
 
 const next=levels[currentPath.length];
 
-if(next && !folders.includes(next)){
+if(next && !folders.includes(next))
 folders.push(next);
-}
 
 }else{
 questions.push(q);
@@ -193,32 +193,28 @@ questions.push(q);
 
 });
 
+if(viewBtn){
+viewBtn.style.display=
+questions.length>0
+? "inline-flex"
+: "none";
+}
+
 let html="";
 
 /* folders */
 folders.forEach(name=>{
 
 html += `
-<div class="file-item folder">
-
-<div onclick="openFolder('${name}')"
-style="flex:1;cursor:pointer">
+<div class="file-item folder"
+onclick="openFolder('${safe(name)}')"
+onmousedown="startHold('${safe(name)}')"
+ontouchstart="startHold('${safe(name)}')"
+onmouseup="cancelHold()"
+ontouchend="cancelHold()">
 
 <div class="file-icon">📁</div>
 <div class="file-name">${name}</div>
-
-</div>
-
-${
-!readOnly
-?
-`
-<button onclick="folderMenu('${name}')">
-⋮
-</button>
-`
-:""
-}
 
 </div>
 `;
@@ -247,13 +243,13 @@ if(!html){
 html=`<div class="file-item">Empty Folder</div>`;
 }
 
-area.innerHTML=html;
+fileArea.innerHTML=html;
 
-getEl("pathText").innerText=
-currentPath.length
-? currentPath.join(" > ")
-: "Home";
+}
 
+/* ================= SAFE ================= */
+function safe(text){
+return text.replace(/'/g,"\\'");
 }
 
 /* ================= FOLDER ================= */
@@ -273,43 +269,53 @@ renderFiles();
 
 };
 
-window.folderMenu=(name)=>{
+window.startHold=(name)=>{
 
-const action=prompt(
-`Folder: ${name}
+if(readOnly) return;
 
-1 = Open
-2 = Rename
-3 = Delete`
-);
-
-if(action==="1"){
-openFolder(name);
-}
-
-if(action==="2"){
-renameFolder(name);
-}
-
-if(action==="3"){
-deleteFolder(name);
-}
+holdTimer=setTimeout(()=>{
+folderOptions(name);
+},1000);
 
 };
 
-/* ================= RENAME FOLDER ================= */
-window.renameFolder=async(oldName)=>{
+window.cancelHold=()=>{
 
-const newName=prompt("New Folder Name");
+clearTimeout(holdTimer);
+
+};
+
+function folderOptions(name){
+
+let act=prompt(
+`Folder: ${name}
+
+1 = Rename
+2 = Delete`
+);
+
+if(act==="1"){
+renameFolder(name);
+}
+
+if(act==="2"){
+deleteFolder(name);
+}
+
+}
+
+async function renameFolder(oldName){
+
+const newName=prompt("New folder name");
 
 if(!newName) return;
 
 for(const q of allQuestions){
 
-const levels=[
-q.subject,
-q.chapter,
-q.topic
+let levels=[
+q.subject||"",
+q.chapter||"",
+q.topic||""
 ];
 
 if(levels[currentPath.length]===oldName){
@@ -319,9 +325,9 @@ levels[currentPath.length]=newName;
 await updateDoc(
 doc(db,"questionBank",q.id),
 {
-subject:levels[0]||"",
-chapter:levels[1]||"",
-topic:levels[2]||""
+subject:levels[0],
+chapter:levels[1],
+topic:levels[2]
 }
 );
 
@@ -331,20 +337,19 @@ topic:levels[2]||""
 
 await loadAllQuestions();
 
-};
+}
 
-/* ================= DELETE FOLDER ================= */
-window.deleteFolder=async(name)=>{
+async function deleteFolder(name){
 
 if(!confirm("Delete folder and all questions?"))
 return;
 
 for(const q of allQuestions){
 
-const levels=[
-q.subject,
-q.chapter,
-q.topic
+let levels=[
+q.subject||"",
+q.chapter||"",
+q.topic||""
 ];
 
 if(levels[currentPath.length]===name){
@@ -359,7 +364,7 @@ doc(db,"questionBank",q.id)
 
 await loadAllQuestions();
 
-};
+}
 
 /* ================= QUESTION ================= */
 window.openQuestion=(id)=>{
@@ -372,21 +377,34 @@ if(!selectedQuestion) return;
 getEl("popupQuestion").innerText=
 selectedQuestion.question;
 
-getEl("popupContent").innerHTML=`
+let html=`
+<div class="popup-btn-row">
 
-<button onclick="previewQuestion()">👁 Preview</button>
+<button class="preview-btn"
+onclick="previewQuestion()">
+👁 Preview
+</button>
+`;
 
-${
-!readOnly
-?
-`
-<button onclick="editQuestion()">✏ Edit</button>
-<button onclick="deleteQuestion()">🗑 Delete</button>
-`
-:""
+if(!readOnly){
+
+html += `
+<button class="edit-btn"
+onclick="editQuestion()">
+✏ Edit
+</button>
+
+<button class="delete-btn"
+onclick="deleteQuestion()">
+🗑 Delete
+</button>
+`;
+
 }
 
-`;
+html += `</div>`;
+
+getEl("popupContent").innerHTML=html;
 
 getEl("popup").classList.add("show");
 
@@ -395,9 +413,11 @@ getEl("popup").classList.add("show");
 /* ================= PREVIEW ================= */
 window.previewQuestion=()=>{
 
-let html="";
-
 const ans=getCorrectIndex(selectedQuestion);
+
+let html=`
+<h3>${selectedQuestion.question}</h3>
+`;
 
 (selectedQuestion.options||[])
 .forEach((op,i)=>{
@@ -415,29 +435,71 @@ getEl("popupContent").innerHTML=html;
 
 };
 
-/* ================= EDIT QUESTION ================= */
-window.editQuestion=async()=>{
+/* ================= EDIT ================= */
+window.editQuestion=()=>{
 
-const txt=prompt(
-"Edit Question",
-selectedQuestion.question
-);
+const ans=getCorrectIndex(selectedQuestion);
 
-if(!txt) return;
+let html=`
+<input id="editQ"
+value="${selectedQuestion.question}">
+`;
+
+(selectedQuestion.options||[])
+.forEach((op,i)=>{
+
+html += `
+<input id="op${i}" value="${op}">
+<label>
+<input type="radio"
+name="rightAns"
+value="${i}"
+${i===ans?"checked":""}>
+Correct Option
+</label>
+`;
+});
+
+html += `
+<button class="preview-btn"
+onclick="saveQuestionEdit()">
+💾 Save
+</button>
+`;
+
+getEl("popupContent").innerHTML=html;
+
+};
+
+window.saveQuestionEdit=async()=>{
+
+let newOptions=[];
+
+for(let i=0;i<4;i++){
+newOptions.push(getEl("op"+i).value);
+}
+
+let correct =
+document.querySelector(
+"input[name='rightAns']:checked"
+).value;
 
 await updateDoc(
 doc(db,"questionBank",selectedQuestion.id),
 {
-question:txt
+question:getEl("editQ").value,
+options:newOptions,
+answerIndex:Number(correct),
+answer:newOptions[correct]
 }
 );
 
-closePopup();
 await loadAllQuestions();
+closePopup();
 
 };
 
-/* ================= DELETE QUESTION ================= */
+/* ================= DELETE ================= */
 window.deleteQuestion=async()=>{
 
 if(!confirm("Delete question?"))
@@ -447,8 +509,8 @@ await deleteDoc(
 doc(db,"questionBank",selectedQuestion.id)
 );
 
-closePopup();
 await loadAllQuestions();
+closePopup();
 
 };
 
@@ -456,14 +518,15 @@ await loadAllQuestions();
 window.viewAllQuestions=()=>{
 
 let html="";
+let list=[];
 
-allQuestions.forEach((q,no)=>{
+allQuestions.forEach(q=>{
 
 const levels=[
 q.subject||"",
 q.chapter||"",
 q.topic||""
-].filter(Boolean);
+].filter(v=>v!="");
 
 let ok=true;
 
@@ -477,10 +540,20 @@ break;
 }
 
 if(ok && levels.length===currentPath.length){
+list.push(q);
+}
+
+});
+
+list.forEach((q,no)=>{
 
 const ans=getCorrectIndex(q);
 
-html += `<h3>Q${no+1}. ${q.question}</h3>`;
+html += `
+<div class="all-box">
+
+<h3>Q${no+1}. ${q.question}</h3>
+`;
 
 (q.options||[]).forEach((op,i)=>{
 
@@ -493,14 +566,16 @@ ${i===ans?" ✅ Correct":""}
 
 });
 
-html += "<hr>";
-
-}
+html += `</div>`;
 
 });
 
-getEl("popupQuestion").innerText="All Questions";
-getEl("popupContent").innerHTML=html;
+getEl("popupQuestion").innerText=
+"All Questions Preview";
+
+getEl("popupContent").innerHTML=
+html;
+
 getEl("popup").classList.add("show");
 
 };
