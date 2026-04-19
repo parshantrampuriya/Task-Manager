@@ -3,361 +3,444 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-    collection,
-    getDocs
+collection,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
 const getEl = (id)=>document.getElementById(id);
 
-let currentUser = null;
-let allTests = [];
-let activeTab = "available";
+let currentUser=null;
+let allTests=[];
+let activeTab="available";
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
-    if(!user){
-        location.href = "index.html";
-        return;
-    }
+if(!user){
+location.href="index.html";
+return;
+}
 
-    currentUser = user;
+currentUser=user;
+await loadTests();
 
-    await loadTests();
 });
 
 /* ================= SIDEBAR ================= */
-window.toggleSidebar = ()=>{
+window.toggleSidebar=()=>{
 
-    const sidebar = getEl("sidebar");
+const sidebar=getEl("sidebar");
 
-    if(sidebar){
-        sidebar.classList.toggle("active");
-    }
+if(sidebar){
+sidebar.classList.toggle("active");
+}
+
 };
 
 /* ================= TOAST ================= */
 function showToast(msg){
 
-    const t = getEl("toast");
+const t=getEl("toast");
 
-    t.innerText = msg;
-    t.classList.add("show");
+if(!t) return;
 
-    setTimeout(()=>{
-        t.classList.remove("show");
-    },1800);
+t.innerText=msg;
+t.classList.add("show");
+
+setTimeout(()=>{
+t.classList.remove("show");
+},1800);
+
 }
 
 /* ================= LOAD TESTS ================= */
 async function loadTests(){
 
-    const snap = await getDocs(
-        collection(db,"tests")
-    );
+const snap=
+await getDocs(collection(db,"tests"));
 
-    allTests = [];
+allTests=[];
 
-    snap.forEach(d=>{
+snap.forEach(d=>{
 
-        const data = d.data();
+const data=d.data();
 
-        const assigned =
-        data.assignedTo || [];
+const assigned=
+data.assignedTo || [];
 
-        if(
-            assigned.includes(currentUser.uid)
-        ){
-            allTests.push({
-                id:d.id,
-                ...data
-            });
-        }
-    });
+if(
+assigned.includes(currentUser.uid)
+){
+allTests.push({
+id:d.id,
+...data
+});
+}
 
-    renderTests();
+});
+
+renderTests();
+
 }
 
 /* ================= TAB ================= */
-window.changeTab = (tab,btn)=>{
+window.changeTab=(tab,btn)=>{
 
-    activeTab = tab;
+activeTab=tab;
 
-    document
-    .querySelectorAll(".tab-btn")
-    .forEach(x=>x.classList.remove("active"));
+document
+.querySelectorAll(".tab-btn")
+.forEach(x=>
+x.classList.remove("active")
+);
 
-    btn.classList.add("active");
+if(btn){
+btn.classList.add("active");
+}
 
-    renderTests();
+renderTests();
+
 };
 
 /* ================= STATUS ================= */
 function getStatus(test){
 
-    const now = Date.now();
+const now=Date.now();
 
-    const start =
-    Number(test.startAt || 0);
+const start=
+Number(test.startAt || 0);
 
-    const end =
-    Number(test.endAt || 0);
+const end=
+Number(test.endAt || 0);
 
-    const attemptedUsers =
-    test.attemptedUsers || [];
+const attemptedUsers=
+test.attemptedUsers || [];
 
-    if(
-        attemptedUsers.includes(
-            currentUser.uid
-        )
-    ){
-        return "attempted";
-    }
+if(
+attemptedUsers.includes(
+currentUser.uid
+)
+){
+return "attempted";
+}
 
-    if(start && now < start){
-        return "upcoming";
-    }
+if(start && now < start){
+return "upcoming";
+}
 
-    if(end && now > end){
-        return "expired";
-    }
+if(end && now > end){
+return "expired";
+}
 
-    return "available";
+return "available";
+
 }
 
 /* ================= RENDER ================= */
-window.renderTests = ()=>{
+window.renderTests=()=>{
 
-    let arr = [...allTests];
+let arr=[...allTests];
 
-    arr = arr.filter(x=>
-        getStatus(x) === activeTab
-    );
+arr=arr.filter(x=>
+getStatus(x)===activeTab
+);
 
-    /* Search */
-    const txt =
-    getEl("searchBox").value
-    .trim()
-    .toLowerCase();
+/* Search */
+const txt=
+(getEl("searchBox")?.value || "")
+.trim()
+.toLowerCase();
 
-    if(txt){
+if(txt){
 
-        arr = arr.filter(x=>
-            (x.testName || "")
-            .toLowerCase()
-            .includes(txt)
-        );
-    }
+arr=arr.filter(x=>
+(x.testName || "")
+.toLowerCase()
+.includes(txt)
+);
 
-    /* Sort */
-    const sort =
-    getEl("sortBox").value;
+}
 
-    if(sort === "name"){
-        arr.sort((a,b)=>
-            (a.testName || "")
-            .localeCompare(
-                b.testName || ""
-            )
-        );
-    }
+/* Sort */
+const sort=
+getEl("sortBox")?.value || "new";
 
-    if(sort === "marks"){
-        arr.sort((a,b)=>
-            Number(b.totalMarks||0) -
-            Number(a.totalMarks||0)
-        );
-    }
+if(sort==="name"){
 
-    if(sort === "new"){
-        arr.sort((a,b)=>
-            Number(b.createdAt||0) -
-            Number(a.createdAt||0)
-        );
-    }
+arr.sort((a,b)=>
+(a.testName || "")
+.localeCompare(
+b.testName || ""
+)
+);
 
-    /* Stats */
-    getEl("availableCount").innerText =
-        allTests.filter(x=>
-            getStatus(x)==="available"
-        ).length;
+}
 
-    getEl("attemptedCount").innerText =
-        allTests.filter(x=>
-            getStatus(x)==="attempted"
-        ).length;
+if(sort==="marks"){
 
-    getEl("pendingCount").innerText =
-        allTests.filter(x=>
-            getStatus(x)==="upcoming"
-        ).length;
+arr.sort((a,b)=>
+Number(b.totalMarks||0) -
+Number(a.totalMarks||0)
+);
 
-    /* Cards */
-    let html = "";
+}
 
-    arr.forEach(test=>{
+if(sort==="new"){
 
-        const status =
-        getStatus(test);
+arr.sort((a,b)=>
+Number(b.createdAt||0) -
+Number(a.createdAt||0)
+);
 
-        html += `
-        <div class="test-card">
+}
 
-            <div class="test-top">
+/* Counters */
+setText(
+"availableCount",
+allTests.filter(x=>
+getStatus(x)==="available"
+).length
+);
 
-                <div>
+setText(
+"attemptedCount",
+allTests.filter(x=>
+getStatus(x)==="attempted"
+).length
+);
 
-                    <div class="test-name">
-                        ${test.testName || "Untitled"}
-                    </div>
+setText(
+"pendingCount",
+allTests.filter(x=>
+getStatus(x)==="upcoming"
+).length
+);
 
-                    <div class="by-text">
-                        By: ${test.creatorName || "Admin"}
-                    </div>
+/* Cards */
+let html="";
 
-                </div>
+arr.forEach(test=>{
 
-                <div class="badge ${status}">
-                    ${cap(status)}
-                </div>
+const status=
+getStatus(test);
 
-            </div>
+const qCount=
+(test.questions || []).length;
 
-            <div class="meta-grid">
+const totalMarks=
+Number(test.totalMarks || 0);
 
-                <div class="meta-box">
-                    <h4>Questions</h4>
-                    <p>${
-                        (test.questions || []).length
-                    }</p>
-                </div>
+const perQ=
+qCount>0
+? (totalMarks/qCount).toFixed(2)
+: 0;
 
-                <div class="meta-box">
-                    <h4>Marks</h4>
-                    <p>${
-                        test.totalMarks || 0
-                    }</p>
-                </div>
+html += `
+<div class="test-card">
 
-                <div class="meta-box">
-                    <h4>Time</h4>
-                    <p>${
-                        test.duration || 0
-                    } min</p>
-                </div>
+<div class="test-top">
 
-                <div class="meta-box">
-                    <h4>Negative</h4>
-                    <p>${
-                        test.negativeMarks || 0
-                    }%</p>
-                </div>
+<div>
 
-            </div>
+<div class="test-name">
+${test.testName || "Untitled"}
+</div>
 
-            <div class="action-row">
+<div class="by-text">
+By: ${
+test.creatorName ||
+"Admin"
+}
+</div>
 
-                <button class="action-btn"
-                onclick="viewInfo('${test.id}')">
-                👁 Details
-                </button>
+</div>
 
-                ${
-                    status==="available"
-                    ?
-                    `
-                    <button
-                    class="action-btn primary"
-                    onclick="startTest('${test.id}')">
-                    🚀 Start Test
-                    </button>
-                    `
-                    :
-                    `
-                    <button
-                    class="action-btn primary"
-                    onclick="viewResult('${test.id}')">
-                    📊 Result
-                    </button>
-                    `
-                }
+<div class="badge ${status}">
+${cap(status)}
+</div>
 
-            </div>
+</div>
 
-        </div>
-        `;
-    });
+<div class="meta-grid">
 
-    if(!html){
+<div class="meta-box">
+<h4>Questions</h4>
+<p>${qCount}</p>
+</div>
 
-        html = `
-        <div class="empty-box">
-            No tests found.
-        </div>
-        `;
-    }
+<div class="meta-box">
+<h4>Total Marks</h4>
+<p>${totalMarks}</p>
+</div>
 
-    getEl("testList").innerHTML =
-    html;
+<div class="meta-box">
+<h4>Per Q</h4>
+<p>${perQ}</p>
+</div>
+
+<div class="meta-box">
+<h4>Negative</h4>
+<p>${
+test.negativeMarks || 0
+}%</p>
+</div>
+
+<div class="meta-box">
+<h4>Time</h4>
+<p>${
+test.duration || 0
+} min</p>
+</div>
+
+</div>
+
+<div class="action-row">
+
+<button class="action-btn"
+onclick="viewInfo('${test.id}')">
+👁 Details
+</button>
+
+${
+status==="available"
+?
+`
+<button class="action-btn primary"
+onclick="startTest('${test.id}')">
+🚀 Start Test
+</button>
+`
+:
+status==="attempted"
+?
+`
+<button class="action-btn primary"
+onclick="viewResult('${test.id}')">
+📊 Result
+</button>
+`
+:
+`
+<button class="action-btn"
+disabled>
+${cap(status)}
+</button>
+`
+}
+
+</div>
+
+</div>
+`;
+
+});
+
+if(!html){
+
+html=`
+<div class="empty-box">
+No tests found.
+</div>
+`;
+
+}
+
+getEl("testList").innerHTML=
+html;
+
 };
 
 /* ================= DETAILS ================= */
-window.viewInfo = (id)=>{
+window.viewInfo=(id)=>{
 
-    const test =
-    allTests.find(x=>x.id===id);
+const test=
+allTests.find(x=>x.id===id);
 
-    if(!test) return;
+if(!test) return;
 
-    getEl("popupTitle").innerText =
-        test.testName;
+const qCount=
+(test.questions || []).length;
 
-    getEl("popupBody").innerHTML = `
-        <p><b>Description:</b>
-        ${test.testDesc || "-"}</p>
+const totalMarks=
+Number(test.totalMarks || 0);
 
-        <p><b>Total Marks:</b>
-        ${test.totalMarks || 0}</p>
+const perQ=
+qCount>0
+? (totalMarks/qCount).toFixed(2)
+: 0;
 
-        <p><b>Duration:</b>
-        ${test.duration || 0} min</p>
+getEl("popupTitle").innerText=
+test.testName || "Test";
 
-        <p><b>Questions:</b>
-        ${(test.questions || []).length}</p>
+getEl("popupBody").innerHTML=`
 
-        <p><b>Negative:</b>
-        ${test.negativeMarks || 0}%</p>
-    `;
+<p><b>Description:</b>
+${test.testDesc || "-"}</p>
 
-    getEl("infoPopup")
-    .classList.add("show");
+<p><b>Questions:</b>
+${qCount}</p>
+
+<p><b>Total Marks:</b>
+${totalMarks}</p>
+
+<p><b>Marks / Question:</b>
+${perQ}</p>
+
+<p><b>Negative:</b>
+${test.negativeMarks || 0}%</p>
+
+<p><b>Duration:</b>
+${test.duration || 0} min</p>
+
+<p><b>Result Mode:</b>
+${test.resultMode || "manual"}</p>
+
+`;
+
+getEl("infoPopup")
+.classList.add("show");
+
 };
 
-window.closePopup = ()=>{
+window.closePopup=()=>{
 
-    getEl("infoPopup")
-    .classList.remove("show");
+getEl("infoPopup")
+.classList.remove("show");
+
 };
 
 /* ================= START TEST ================= */
-window.startTest = (id)=>{
+window.startTest=(id)=>{
 
-    location.href =
-    "attempt-test.html?id=" + id;
+location.href=
+"attempt-test.html?id="+id;
+
 };
 
 /* ================= RESULT ================= */
-window.viewResult = (id)=>{
+window.viewResult=(id)=>{
 
-    location.href =
-    "result.html?id=" + id;
+location.href=
+"result.html?id="+id;
+
 };
 
 /* ================= HELPERS ================= */
 function cap(txt){
 
-    return txt.charAt(0)
-    .toUpperCase()
-    + txt.slice(1);
+return txt.charAt(0)
+.toUpperCase()
++ txt.slice(1);
+
+}
+
+function setText(id,val){
+
+const el=getEl(id);
+
+if(el){
+el.innerText=val;
+}
+
 }
