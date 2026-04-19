@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
 doc,
 getDoc,
@@ -12,19 +13,19 @@ const getEl = (id)=>document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const testId = params.get("id");
 
-let currentUser=null;
-let testData=null;
-let resultData=null;
+let currentUser = null;
+let testData = null;
+let resultData = null;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser=user;
+currentUser = user;
 await loadData();
 
 });
@@ -45,20 +46,21 @@ showToast("Test not found");
 return;
 }
 
-testData=testSnap.data();
+testData = testSnap.data();
 
+/* load result */
 const snap =
 await getDocs(collection(db,"results"));
 
 snap.forEach(d=>{
 
-const x=d.data();
+const x = d.data();
 
 if(
 x.testId===testId &&
 x.uid===currentUser.uid
 ){
-resultData=x;
+resultData = x;
 }
 
 });
@@ -69,33 +71,41 @@ return;
 }
 
 renderResult();
+
 }
 
 /* ================= UNIVERSAL INDEX ================= */
 function idx(v){
 
-if(v===null || v===undefined) return -1;
+if(v===null || v===undefined)
+return -1;
 
-if(typeof v==="number") return v;
+if(typeof v==="number")
+return v;
 
-let s = String(v).trim().toUpperCase();
+let s =
+String(v).trim().toUpperCase();
 
 if(s==="A") return 0;
 if(s==="B") return 1;
 if(s==="C") return 2;
 if(s==="D") return 3;
 
-let n = parseInt(s);
+let n=parseInt(s);
 
 if(!isNaN(n)){
-if(n>=1 && n<=4) return n-1;
+
+if(n>=1 && n<=4)
+return n-1;
+
 return n;
 }
 
 return -1;
+
 }
 
-/* ================= GET CORRECT ANSWER ================= */
+/* ================= GET RIGHT ANSWER ================= */
 function getCorrectIndex(q){
 
 if(q.answer!==undefined)
@@ -107,10 +117,8 @@ return idx(q.correct_option);
 if(q.correctAnswer!==undefined)
 return idx(q.correctAnswer);
 
-if(q.correct!==undefined)
-return idx(q.correct);
-
 return -1;
+
 }
 
 /* ================= ANALYSIS ================= */
@@ -130,13 +138,16 @@ Number(resultData.totalMarks || 0);
 const passMarks =
 Number(testData.passMarks || 0);
 
-const negPercent =
-Number(testData.negativeMarks || 0);
-
+/* use saved values if available */
 const perQ =
-qs.length>0
-? total / qs.length
-: 0;
+Number(resultData.marksPerQuestion || 0) ||
+(qs.length>0 ? total/qs.length : 0);
+
+const negPerWrong =
+Number(resultData.negativePerWrong || 0) ||
+(perQ * (
+Number(testData.negativeMarks || 0) / 100
+));
 
 let correct=0;
 let wrong=0;
@@ -145,30 +156,34 @@ let score=0;
 
 qs.forEach((q,i)=>{
 
-const marked = idx(ans[i]);
-const right = getCorrectIndex(q);
+const marked =
+idx(ans[i]);
+
+const right =
+getCorrectIndex(q);
 
 if(marked===-1){
-skip++;
-return;
-}
 
-if(marked===right){
+skip++;
+
+}
+else if(marked===right){
 
 correct++;
 score += perQ;
 
-}else{
+}
+else{
 
 wrong++;
-score -= perQ * (negPercent/100);
+score -= negPerWrong;
 
 }
 
 });
 
 const negative =
-(wrong * perQ * (negPercent/100))
+(wrong * negPerWrong)
 .toFixed(2);
 
 const attempted =
@@ -177,14 +192,15 @@ correct + wrong;
 const accuracy =
 attempted>0
 ? ((correct/attempted)*100).toFixed(1)
-: 0;
+: "0";
 
 const percent =
 total>0
 ? ((score/total)*100).toFixed(1)
-: 0;
+: "0";
 
-return{
+return {
+
 qs,
 ans,
 score:Number(score.toFixed(2)),
@@ -195,7 +211,10 @@ wrong,
 skip,
 negative,
 accuracy,
-percent
+percent,
+perQ,
+negPerWrong
+
 };
 
 }
@@ -203,7 +222,7 @@ percent
 /* ================= RENDER ================= */
 function renderResult(){
 
-const d=getAnalysis();
+const d = getAnalysis();
 
 getEl("scoreText").innerText =
 d.score + " / " + d.total;
@@ -216,11 +235,21 @@ d.score >= d.passMarks
 ? "✅ Passed"
 : "❌ Failed";
 
-getEl("correctCount").innerText=d.correct;
-getEl("wrongCount").innerText=d.wrong;
-getEl("skipCount").innerText=d.skip;
-getEl("negativeCount").innerText=d.negative;
-getEl("accuracyText").innerText=d.accuracy+"%";
+getEl("correctCount").innerText =
+d.correct;
+
+getEl("wrongCount").innerText =
+d.wrong;
+
+getEl("skipCount").innerText =
+d.skip;
+
+getEl("negativeCount").innerText =
+d.negative;
+
+getEl("accuracyText").innerText =
+d.accuracy + "%";
+
 getEl("rankText").innerText="--";
 
 getEl("submitTime").innerText =
@@ -238,8 +267,11 @@ let html="";
 
 d.qs.forEach((q,no)=>{
 
-const marked = idx(d.ans[no]);
-const right = getCorrectIndex(q);
+const marked =
+idx(d.ans[no]);
+
+const right =
+getCorrectIndex(q);
 
 html += `
 <div class="answer-item">
@@ -253,16 +285,16 @@ let note="";
 
 if(i===right){
 cls="correct";
-note=" ✅ Correct Answer";
+note+=" ✅ Correct Answer";
 }
 
 if(i===marked){
 
 if(marked===right){
-note += " | Your Marked";
+note+=" | Your Marked";
 }else{
 cls="wrong";
-note += " ❌ Your Marked";
+note+=" ❌ Your Marked";
 }
 
 }
@@ -281,8 +313,11 @@ html += `</div>`;
 
 });
 
-getEl("answerList").innerHTML=html;
-getEl("answerPopup").classList.add("show");
+getEl("answerList").innerHTML =
+html;
+
+getEl("answerPopup")
+.classList.add("show");
 
 };
 
@@ -312,23 +347,28 @@ body{font-family:Arial;padding:30px}
 <body>
 
 <h1>${testData.testName || "Test Result"}</h1>
-<p><b>Name:</b> ${
-currentUser.displayName ||
-currentUser.email
-}</p>
+
+<p><b>Name:</b>
+${currentUser.displayName || currentUser.email}</p>
 
 <p><b>Score:</b> ${d.score}/${d.total}</p>
 <p><b>Correct:</b> ${d.correct}</p>
 <p><b>Wrong:</b> ${d.wrong}</p>
 <p><b>Skipped:</b> ${d.skip}</p>
 <p><b>Negative:</b> ${d.negative}</p>
+<p><b>Marks Per Question:</b> ${d.perQ}</p>
+<p><b>Negative Per Wrong:</b> ${d.negPerWrong}</p>
+
 <hr>
 `;
 
 d.qs.forEach((q,no)=>{
 
-const marked = idx(d.ans[no]);
-const right = getCorrectIndex(q);
+const marked =
+idx(d.ans[no]);
+
+const right =
+getCorrectIndex(q);
 
 html += `
 <div class="q">
@@ -363,9 +403,12 @@ html += `</div>`;
 
 });
 
-html += `</body></html>`;
+html += `
+</body>
+</html>
+`;
 
-const w=window.open("","_blank");
+const w = window.open("","_blank");
 w.document.write(html);
 w.document.close();
 w.print();
@@ -376,6 +419,7 @@ w.print();
 function showToast(msg){
 
 const t=getEl("toast");
+
 t.innerText=msg;
 t.classList.add("show");
 
