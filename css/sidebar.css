@@ -1,0 +1,144 @@
+/* ================= FINAL css/sidebar.css ================= */
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+
+position:fixed;
+top:0;
+left:0;
+
+width:230px;
+height:100vh;
+
+padding:20px;
+
+background:
+rgba(0,0,0,0.92);
+
+backdrop-filter:blur(10px);
+
+box-shadow:
+0 0 25px rgba(0,255,255,.22);
+
+transform:translateX(-100%);
+transition:.30s ease;
+
+z-index:9999;
+
+overflow-y:auto;
+
+}
+
+.sidebar.active{
+transform:translateX(0);
+}
+
+/* ================= TITLE ================= */
+
+.sidebar h2{
+
+margin:0 0 18px;
+font-size:24px;
+font-weight:700;
+color:#00eaff;
+text-align:center;
+
+}
+
+/* ================= BUTTONS ================= */
+
+.sidebar button{
+
+width:100%;
+
+margin:8px 0;
+padding:12px 14px;
+
+border:none;
+border-radius:12px;
+
+background:#182330;
+color:#fff;
+
+font-size:15px;
+font-weight:500;
+
+text-align:left;
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.sidebar button:hover{
+
+background:
+linear-gradient(45deg,#00cfff,#00ffcc);
+
+color:#000;
+
+transform:translateX(4px);
+
+}
+
+/* ================= MAIN SHIFT ================= */
+
+.main{
+transition:.30s ease;
+}
+
+.sidebar.active ~ .main{
+margin-left:230px;
+}
+
+/* ================= MENU BTN ================= */
+
+.menu-btn{
+
+cursor:pointer;
+
+}
+
+/* ================= SCROLLBAR ================= */
+
+.sidebar::-webkit-scrollbar{
+width:6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+background:#00cfff;
+border-radius:10px;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:900px){
+
+.sidebar.active ~ .main{
+margin-left:0;
+}
+
+.sidebar{
+width:240px;
+}
+
+}
+
+@media(max-width:600px){
+
+.sidebar{
+width:220px;
+padding:16px;
+}
+
+.sidebar h2{
+font-size:22px;
+}
+
+.sidebar button{
+font-size:14px;
+padding:11px;
+}
+
+}
