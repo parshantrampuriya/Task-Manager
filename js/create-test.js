@@ -136,7 +136,10 @@ ans=idx(q.correctAnswer);
 return{
 question:q.question || "",
 options:q.options || [],
-answer:ans
+answer:ans,
+subject:q.subject || "",
+chapter:q.chapter || "",
+topic:q.topic || ""
 };
 
 }
@@ -227,6 +230,63 @@ html += `<option value="${v}">${v}</option>`;
 getEl(id).innerHTML=html;
 
 }
+
+/* ================= SUBJECT CHANGE ================= */
+getEl("subjectList").addEventListener("change",()=>{
+
+const subject=
+getEl("subjectList").value;
+
+let chapters=[];
+
+allBankQuestions.forEach(q=>{
+
+if(
+q.subject===subject &&
+q.chapter &&
+!chapters.includes(q.chapter)
+){
+chapters.push(q.chapter);
+}
+
+});
+
+chapters.sort();
+
+fillSelect("chapterList",chapters);
+fillSelect("topicList",[]);
+
+});
+
+/* ================= CHAPTER CHANGE ================= */
+getEl("chapterList").addEventListener("change",()=>{
+
+const subject=
+getEl("subjectList").value;
+
+const chapter=
+getEl("chapterList").value;
+
+let topics=[];
+
+allBankQuestions.forEach(q=>{
+
+if(
+q.subject===subject &&
+q.chapter===chapter &&
+q.topic &&
+!topics.includes(q.topic)
+){
+topics.push(q.topic);
+}
+
+});
+
+topics.sort();
+
+fillSelect("topicList",topics);
+
+});
 
 /* ================= FILTER ================= */
 function getFilteredQuestions(){
