@@ -9,7 +9,9 @@ import {
 collection,
 getDocs,
 query,
-where
+where,
+doc,
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -32,6 +34,56 @@ await loadResults();
 
 });
 
+/* ================= INDEX ================= */
+function idx(v){
+
+if(v===null || v===undefined)
+return -1;
+
+if(typeof v==="number"){
+
+if(v>=1 && v<=4) return v-1;
+return v;
+
+}
+
+let s=
+String(v).trim().toUpperCase();
+
+if(s==="A") return 0;
+if(s==="B") return 1;
+if(s==="C") return 2;
+if(s==="D") return 3;
+
+let n=parseInt(s);
+
+if(!isNaN(n)){
+
+if(n>=1 && n<=4)
+return n-1;
+
+return n;
+}
+
+return -1;
+}
+
+/* ================= GET RIGHT ================= */
+function getRight(q){
+
+if(q.answer!==undefined)
+return idx(q.answer);
+
+if(q.correct_option!==undefined)
+return idx(q.correct_option);
+
+if(q.correctAnswer!==undefined)
+return idx(q.correctAnswer);
+
+return -1;
+
+}
+
 /* ================= LOAD RESULTS ================= */
 async function loadResults(){
 
@@ -44,16 +96,101 @@ where("uid","==",currentUser.uid)
 
 allResults=[];
 
-snap.forEach(doc=>{
+for(const item of snap.docs){
 
-allResults.push({
-id:doc.id,
-...doc.data()
+let r={
+id:item.id,
+...item.data()
+};
+
+/* load test name from tests collection */
+if(r.testId){
+
+try{
+
+const tsnap=
+await getDoc(
+doc(db,"tests",r.testId)
+);
+
+if(tsnap.exists()){
+
+const t=tsnap.data();
+
+r.testName =
+t.testName ||
+"Untitled Test";
+
+r.passMarks =
+Number(t.passMarks||0);
+
+r.totalMarks =
+Number(
+r.totalMarks ||
+t.totalMarks ||
+0
+);
+
+}
+
+}catch(e){}
+
+}
+
+/* recalculate correct wrong skip if old data missing */
+if(
+r.correct===undefined ||
+r.wrong===undefined ||
+r.skip===undefined
+){
+
+let correct=0;
+let wrong=0;
+let skip=0;
+
+const qs =
+r.questionsSnapshot || [];
+
+const ans =
+r.answers || [];
+
+qs.forEach((q,i)=>{
+
+const marked =
+idx(ans[i]);
+
+const right =
+getRight(q);
+
+if(marked===-1){
+
+skip++;
+
+}
+else if(marked===right){
+
+correct++;
+
+}
+else{
+
+wrong++;
+
+}
+
 });
 
-});
+r.correct=correct;
+r.wrong=wrong;
+r.skip=skip;
 
-/* sort by time */
+}
+
+allResults.push(r);
+
+}
+
+/* sort by date */
 allResults.sort((a,b)=>
 Number(a.submittedAt||0)-
 Number(b.submittedAt||0)
@@ -67,10 +204,10 @@ renderCharts();
 /* ================= SUMMARY ================= */
 function renderSummary(){
 
-const total = allResults.length;
+const total=allResults.length;
 
 let sum=0;
-let highest=0;
+let highest=-99999;
 let passed=0;
 
 let bestTest="-";
@@ -92,21 +229,25 @@ sum += score;
 if(score>highest)
 highest=score;
 
-if(score>=0)
+if(score>=Number(r.passMarks||0))
 passed++;
 
 if(score>bestVal){
+
 bestVal=score;
 bestTest=
 r.testName ||
 "Untitled Test";
+
 }
 
 if(score<lowVal){
+
 lowVal=score;
 lowTest=
 r.testName ||
 "Untitled Test";
+
 }
 
 totalCorrect +=
@@ -116,6 +257,9 @@ totalWrong +=
 Number(r.wrong||0);
 
 });
+
+if(highest===-99999)
+highest=0;
 
 const avg =
 total>0
@@ -152,7 +296,6 @@ improve=
 
 }
 
-/* set values */
 getEl("totalTests").innerText=total;
 getEl("avgScore").innerText=avg;
 getEl("highScore").innerText=highest;
@@ -197,13 +340,13 @@ Number(r.skip||0);
 
 });
 
-/* line chart */
+/* line */
 new Chart(
 document.getElementById("scoreChart"),
 {
 type:"line",
 data:{
-labels:labels,
+labels,
 datasets:[{
 label:"Score",
 data:scoreData,
@@ -217,24 +360,18 @@ options:{
 responsive:true,
 plugins:{
 legend:{
-labels:{
-color:"#fff"
-}
+labels:{color:"#fff"}
 }
 },
 scales:{
-x:{
-ticks:{color:"#fff"}
-},
-y:{
-ticks:{color:"#fff"}
-}
+x:{ticks:{color:"#fff"}},
+y:{ticks:{color:"#fff"}}
 }
 }
 }
 );
 
-/* bar chart */
+/* bar */
 new Chart(
 document.getElementById("barChart"),
 {
@@ -246,11 +383,7 @@ labels:[
 "Skipped"
 ],
 datasets:[{
-data:[
-correct,
-wrong,
-skip
-],
+data:[correct,wrong,skip],
 backgroundColor:[
 "#00ff99",
 "#ff4d6d",
@@ -261,17 +394,11 @@ backgroundColor:[
 options:{
 responsive:true,
 plugins:{
-legend:{
-display:false
-}
+legend:{display:false}
 },
 scales:{
-x:{
-ticks:{color:"#fff"}
-},
-y:{
-ticks:{color:"#fff"}
-}
+x:{ticks:{color:"#fff"}},
+y:{ticks:{color:"#fff"}}
 }
 }
 }
