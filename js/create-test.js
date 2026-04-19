@@ -94,16 +94,14 @@ function idx(v){
 if(v===null || v===undefined)
 return -1;
 
-/* Number case */
 if(typeof v==="number"){
 
 if(v>=1 && v<=4) return v-1;
-
 return v;
+
 }
 
-let s =
-String(v).trim().toUpperCase();
+let s=String(v).trim().toUpperCase();
 
 if(s==="A") return 0;
 if(s==="B") return 1;
@@ -118,62 +116,88 @@ if(n>=1 && n<=4)
 return n-1;
 
 return n;
+
 }
 
 return -1;
+
 }
 
 /* ================= NORMALIZE ================= */
 function normalizeQuestion(q){
 
-let ans = -1;
+const options=q.options || [];
 
-/* Try all possible fields */
-if(q.answer !== undefined)
-ans = idx(q.answer);
+let answerIndex=-1;
+let answerText="";
 
-else if(q.correct_option !== undefined)
-ans = idx(q.correct_option);
+/* text direct */
+if(
+typeof q.answer==="string" &&
+isNaN(q.answer)
+){
+answerText=q.answer.trim();
+}
 
-else if(q.correctAnswer !== undefined)
-ans = idx(q.correctAnswer);
+/* old fields */
+if(answerText===""){
 
-else if(q.correct !== undefined)
-ans = idx(q.correct);
+const raw =
+q.answer ??
+q.correct_option ??
+q.correctAnswer ??
+q.correct ??
+q.correctOption ??
+q.rightAnswer ??
+q.correct_index ??
+q.answerIndex;
 
-else if(q.correctOption !== undefined)
-ans = idx(q.correctOption);
+if(typeof raw==="string" && isNaN(raw)){
 
-else if(q.rightAnswer !== undefined)
-ans = idx(q.rightAnswer);
+answerText=raw.trim();
 
-else if(q.correct_index !== undefined)
-ans = idx(q.correct_index);
+}else{
 
-/* If still blank, detect by text */
-if(ans === -1 && q.answerText){
+answerIndex=idx(raw);
 
-(q.options || []).forEach((op,i)=>{
+}
+
+}
+
+/* text => index */
+if(answerText!==""){
+
+options.forEach((op,i)=>{
+
 if(
 String(op).trim().toLowerCase() ===
-String(q.answerText).trim().toLowerCase()
+answerText.toLowerCase()
 ){
-ans = i;
+answerIndex=i;
 }
+
 });
 
 }
 
+/* index => text */
+if(answerIndex>=0 && answerText===""){
+answerText=options[answerIndex] || "";
+}
+
 /* fallback */
-if(ans === -1) ans = 0;
+if(answerIndex<0) answerIndex=0;
+if(answerText==="") answerText=options[0] || "";
 
 return{
-question: q.question || "",
-options: q.options || [],
-answer: ans
+question:q.question || "",
+options,
+answer:answerText,
+answerIndex:answerIndex
 };
 
 }
+
 /* ================= LOAD SUBJECTS ================= */
 async function loadSubjects(){
 
@@ -357,14 +381,17 @@ questions=getFilteredQuestions();
 }else{
 
 try{
+
 questions=
 JSON.parse(
 getEl("manualJson").value.trim()
 ).map(normalizeQuestion);
 
 }catch{
+
 showError("Invalid JSON");
 return;
+
 }
 
 }
@@ -377,8 +404,7 @@ showError("Not sufficient questions");
 return;
 }
 
-questions=
-questions.slice(0,count);
+questions=questions.slice(0,count);
 
 let html="";
 
@@ -394,7 +420,7 @@ html += `
 html += `
 ${String.fromCharCode(65+i)}.
 ${op}
-${i===q.answer ? " ✅ Correct":""}
+${i===q.answerIndex ? " ✅ Correct":""}
 <br>
 `;
 
@@ -404,8 +430,7 @@ html += `</div>`;
 
 });
 
-getEl("previewBox").innerHTML =
-html;
+getEl("previewBox").innerHTML=html;
 
 };
 
@@ -432,14 +457,17 @@ questions=getFilteredQuestions();
 }else{
 
 try{
+
 questions=
 JSON.parse(
 getEl("manualJson").value.trim()
 ).map(normalizeQuestion);
 
 }catch{
+
 showError("Invalid JSON");
 return;
+
 }
 
 }
@@ -504,6 +532,7 @@ resultMode,
 
 assignedTo:assign,
 questions,
+
 createdAt:Date.now()
 
 }
