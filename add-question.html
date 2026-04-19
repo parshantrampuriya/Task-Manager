@@ -6,7 +6,7 @@
 <title>Add Questions</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/add-question.css?v=3">
+<link rel="stylesheet" href="css/add-question.css?v=4">
 
 </head>
 <body>
@@ -28,8 +28,8 @@
 <!-- ================= PAGE ================= -->
 <div class="page">
 
-    <!-- TOP BAR -->
- <div class="top-bar">
+<!-- TOP BAR -->
+<div class="top-bar">
 
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
@@ -46,51 +46,63 @@
 
 </div>
 
-    <!-- MAIN CARD -->
-    <div class="main-card">
+<!-- MAIN CARD -->
+<div class="main-card">
 
-        <!-- MODE -->
-        <div class="section-title">📁 Save Location</div>
+    <!-- MODE -->
+    <div class="section-title">📁 Save Location</div>
 
-        <label>Mode</label>
-        <select id="modeSelect">
-            <option value="new">Create New Folder</option>
-            <option value="existing">Use Existing Folder</option>
-        </select>
+    <label>Mode</label>
+    <select id="modeSelect">
+        <option value="new">Create New Folder</option>
+        <option value="existing">Use Existing Folder</option>
+    </select>
 
-        <!-- NEW -->
-        <div id="newArea">
+    <!-- NEW -->
+    <div id="newArea">
 
-            <label>Subject *</label>
-            <input id="subject" placeholder="Mechanical">
+        <label>Subject *</label>
+        <input id="subject" placeholder="Mechanical">
 
-            <label>Chapter</label>
-            <input id="chapter" placeholder="Thermodynamics">
+        <label>Chapter</label>
+        <input id="chapter" placeholder="Thermodynamics">
 
-            <label>Topic</label>
-            <input id="topic" placeholder="Entropy">
+        <label>Topic</label>
+        <input id="topic" placeholder="Entropy">
 
+    </div>
+
+    <!-- EXISTING -->
+    <div id="existingArea" style="display:none;">
+
+        <label>Select Subject *</label>
+        <select id="subjectList"></select>
+
+        <label>Select Chapter</label>
+        <select id="chapterList"></select>
+
+        <!-- NEW CHAPTER INPUT -->
+        <div id="newChapterWrap" style="display:none;">
+            <label>New Chapter Name</label>
+            <input id="newChapterInput" placeholder="Enter new chapter">
         </div>
 
-        <!-- EXISTING -->
-        <div id="existingArea" style="display:none;">
+        <label>Select Topic</label>
+        <select id="topicList"></select>
 
-            <label>Select Subject *</label>
-            <select id="subjectList"></select>
-
-            <label>Select Chapter</label>
-            <select id="chapterList"></select>
-
-            <label>Select Topic</label>
-            <select id="topicList"></select>
-
+        <!-- NEW TOPIC INPUT -->
+        <div id="newTopicWrap" style="display:none;">
+            <label>New Topic Name</label>
+            <input id="newTopicInput" placeholder="Enter new topic">
         </div>
 
-        <!-- JSON -->
-        <div class="section-title">🧠 Questions JSON</div>
+    </div>
 
-        <label>Paste JSON</label>
-        <textarea id="jsonBox" placeholder='[
+    <!-- JSON -->
+    <div class="section-title">🧠 Questions JSON</div>
+
+    <label>Paste JSON</label>
+    <textarea id="jsonBox" placeholder='[
  {
   "question":"Unit of Force?",
   "options":["Joule","Newton","Watt","Pascal"],
@@ -98,29 +110,29 @@
  }
 ]'></textarea>
 
-        <!-- BUTTON -->
-        <div class="btn-row">
-            <button class="preview-btn" onclick="previewQuestions()">👁 Preview</button>
-            <button class="save-btn" onclick="saveQuestions()">💾 Save Questions</button>
-        </div>
-
+    <!-- BUTTON -->
+    <div class="btn-row">
+        <button class="preview-btn" onclick="previewQuestions()">👁 Preview</button>
+        <button class="save-btn" onclick="saveQuestions()">💾 Save Questions</button>
     </div>
 
-    <!-- PREVIEW -->
-    <div class="preview-card">
+</div>
 
-        <div class="section-title">👁 Live Preview</div>
+<!-- PREVIEW -->
+<div class="preview-card">
 
-        <div id="previewBox">No Preview Yet</div>
+    <div class="section-title">👁 Live Preview</div>
 
-    </div>
+    <div id="previewBox">No Preview Yet</div>
+
+</div>
 
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script type="module" src="js/add-question.js?v=3"></script>
+<script type="module" src="js/add-question.js?v=4"></script>
 
 </body>
 </html>
