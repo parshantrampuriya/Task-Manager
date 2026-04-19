@@ -1,5 +1,5 @@
 /* ================= UPDATED view-question.js ================= */
-/* OLD FEATURES KEPT + NEW UNIVERSAL ANSWER SUPPORT */
+/* FIXED: folder options + question preview + edit + delete */
 
 import { auth, db } from "./firebase.js";
 
@@ -9,22 +9,24 @@ import {
 collection,
 getDocs,
 query,
-where
+where,
+doc,
+updateDoc,
+deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
 const getEl = (id)=>document.getElementById(id);
 
-let currentUser = null;
-let allQuestions = [];
-let currentPath = [];
-let selectedQuestion = null;
+let currentUser=null;
+let allQuestions=[];
+let currentPath=[];
+let selectedQuestion=null;
 
-/* ================= FRIEND MODE ================= */
-const params = new URLSearchParams(window.location.search);
-const friendUid = params.get("uid");
+const params=new URLSearchParams(location.search);
+const friendUid=params.get("uid");
 
-let readOnly = false;
+let readOnly=false;
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
@@ -36,11 +38,7 @@ return;
 
 currentUser=user;
 
-if(
-friendUid &&
-friendUid.trim()!=="" &&
-friendUid!==user.uid
-){
+if(friendUid && friendUid!==user.uid){
 readOnly=true;
 }
 
@@ -51,12 +49,41 @@ await loadAllQuestions();
 /* ================= MENU ================= */
 window.toggleSidebar=()=>{
 
-const bar=getEl("sidebar");
-if(bar) bar.classList.toggle("active");
+getEl("sidebar")?.classList.toggle("active");
 
 };
 
-/* ================= UNIVERSAL INDEX ================= */
+/* ================= LOAD ================= */
+async function loadAllQuestions(){
+
+const uid=
+(readOnly && friendUid)
+? friendUid
+: currentUser.uid;
+
+const snap=await getDocs(
+query(
+collection(db,"questionBank"),
+where("uid","==",uid)
+)
+);
+
+allQuestions=[];
+
+snap.forEach(d=>{
+
+allQuestions.push({
+id:d.id,
+...d.data()
+});
+
+});
+
+renderFiles();
+
+}
+
+/* ================= INDEX ================= */
 function idx(v){
 
 if(v===null || v===undefined)
@@ -80,9 +107,7 @@ let n=parseInt(s);
 
 if(!isNaN(n)){
 
-if(n>=1 && n<=4)
-return n-1;
-
+if(n>=1 && n<=4) return n-1;
 return n;
 
 }
@@ -91,27 +116,19 @@ return -1;
 
 }
 
-/* ================= GET CORRECT INDEX ================= */
+/* ================= ANSWER INDEX ================= */
 function getCorrectIndex(q){
 
-/* new format */
 if(q.answerIndex!==undefined)
 return idx(q.answerIndex);
 
-/* text answer */
-if(
-typeof q.answer==="string" &&
-isNaN(q.answer)
-){
-
-const txt=q.answer.trim().toLowerCase();
+if(typeof q.answer==="string" && isNaN(q.answer)){
 
 for(let i=0;i<(q.options||[]).length;i++){
 
 if(
-String(q.options[i])
-.trim()
-.toLowerCase()===txt
+String(q.options[i]).trim().toLowerCase() ===
+String(q.answer).trim().toLowerCase()
 ){
 return i;
 }
@@ -120,7 +137,6 @@ return i;
 
 }
 
-/* old format */
 if(q.answer!==undefined)
 return idx(q.answer);
 
@@ -130,54 +146,14 @@ return idx(q.correct_option);
 if(q.correctAnswer!==undefined)
 return idx(q.correctAnswer);
 
-if(q.correct!==undefined)
-return idx(q.correct);
-
 return 0;
-
-}
-
-/* ================= LOAD ================= */
-async function loadAllQuestions(){
-
-const targetUid =
-(readOnly && friendUid)
-? friendUid
-: currentUser.uid;
-
-const snap=await getDocs(
-query(
-collection(db,"questionBank"),
-where("uid","==",targetUid)
-)
-);
-
-allQuestions=[];
-
-snap.forEach(doc=>{
-
-allQuestions.push({
-id:doc.id,
-...doc.data()
-});
-
-});
-
-renderFiles();
 
 }
 
 /* ================= RENDER ================= */
 function renderFiles(){
 
-const fileArea=getEl("fileArea");
-const pathText=getEl("pathText");
-const viewBtn=getEl("viewAllBtn");
-
-pathText.innerText=
-currentPath.length===0
-? "Home"
-: currentPath.join(" > ");
+const area=getEl("fileArea");
 
 let folders=[];
 let questions=[];
@@ -185,10 +161,10 @@ let questions=[];
 allQuestions.forEach(q=>{
 
 const levels=[
-q.subject || "",
-q.chapter || "",
-q.topic || ""
-].filter(v=>v!=="");
+q.subject||"",
+q.chapter||"",
+q.topic||""
+].filter(Boolean);
 
 let ok=true;
 
@@ -205,11 +181,11 @@ if(!ok) return;
 
 if(levels.length>currentPath.length){
 
-const next=
-levels[currentPath.length];
+const next=levels[currentPath.length];
 
-if(next && !folders.includes(next))
+if(next && !folders.includes(next)){
 folders.push(next);
+}
 
 }else{
 questions.push(q);
@@ -217,33 +193,32 @@ questions.push(q);
 
 });
 
-folders.sort((a,b)=>a.localeCompare(b));
-
-questions.sort((a,b)=>
-(a.question||"")
-.localeCompare(b.question||"")
-);
-
-if(viewBtn){
-
-viewBtn.style.display=
-questions.length>0
-? "inline-flex"
-: "none";
-
-}
-
 let html="";
 
 /* folders */
 folders.forEach(name=>{
 
 html += `
-<div class="file-item folder"
-onclick="openFolder('${safe(name)}')">
+<div class="file-item folder">
+
+<div onclick="openFolder('${name}')"
+style="flex:1;cursor:pointer">
 
 <div class="file-icon">📁</div>
 <div class="file-name">${name}</div>
+
+</div>
+
+${
+!readOnly
+?
+`
+<button onclick="folderMenu('${name}')">
+⋮
+</button>
+`
+:""
+}
 
 </div>
 `;
@@ -269,24 +244,16 @@ Q${no+1}. ${q.question}
 });
 
 if(!html){
-
-html=`
-<div class="file-item">
-<div class="file-name">
-Empty Folder
-</div>
-</div>
-`;
-
+html=`<div class="file-item">Empty Folder</div>`;
 }
 
-fileArea.innerHTML=html;
+area.innerHTML=html;
 
-}
+getEl("pathText").innerText=
+currentPath.length
+? currentPath.join(" > ")
+: "Home";
 
-/* ================= SAFE ================= */
-function safe(text){
-return text.replace(/'/g,"\\'");
 }
 
 /* ================= FOLDER ================= */
@@ -306,7 +273,95 @@ renderFiles();
 
 };
 
-/* ================= OPEN QUESTION ================= */
+window.folderMenu=(name)=>{
+
+const action=prompt(
+`Folder: ${name}
+
+1 = Open
+2 = Rename
+3 = Delete`
+);
+
+if(action==="1"){
+openFolder(name);
+}
+
+if(action==="2"){
+renameFolder(name);
+}
+
+if(action==="3"){
+deleteFolder(name);
+}
+
+};
+
+/* ================= RENAME FOLDER ================= */
+window.renameFolder=async(oldName)=>{
+
+const newName=prompt("New Folder Name");
+
+if(!newName) return;
+
+for(const q of allQuestions){
+
+const levels=[
+q.subject,
+q.chapter,
+q.topic
+];
+
+if(levels[currentPath.length]===oldName){
+
+levels[currentPath.length]=newName;
+
+await updateDoc(
+doc(db,"questionBank",q.id),
+{
+subject:levels[0]||"",
+chapter:levels[1]||"",
+topic:levels[2]||""
+}
+);
+
+}
+
+}
+
+await loadAllQuestions();
+
+};
+
+/* ================= DELETE FOLDER ================= */
+window.deleteFolder=async(name)=>{
+
+if(!confirm("Delete folder and all questions?"))
+return;
+
+for(const q of allQuestions){
+
+const levels=[
+q.subject,
+q.chapter,
+q.topic
+];
+
+if(levels[currentPath.length]===name){
+
+await deleteDoc(
+doc(db,"questionBank",q.id)
+);
+
+}
+
+}
+
+await loadAllQuestions();
+
+};
+
+/* ================= QUESTION ================= */
 window.openQuestion=(id)=>{
 
 selectedQuestion=
@@ -317,41 +372,21 @@ if(!selectedQuestion) return;
 getEl("popupQuestion").innerText=
 selectedQuestion.question;
 
-if(readOnly){
-
 getEl("popupContent").innerHTML=`
-<div class="popup-btn-row">
 
-<button class="preview-btn"
-onclick="previewQuestion()">
-👁 Preview
-</button>
+<button onclick="previewQuestion()">👁 Preview</button>
 
-</div>
-`;
-
-}else{
-
-getEl("popupContent").innerHTML=`
-<div class="popup-btn-row">
-
-<button class="preview-btn"
-onclick="previewQuestion()">
-👁 Preview
-</button>
-
-<button class="edit-btn">
-✏ Edit
-</button>
-
-<button class="delete-btn">
-🗑 Delete
-</button>
-
-</div>
-`;
-
+${
+!readOnly
+?
+`
+<button onclick="editQuestion()">✏ Edit</button>
+<button onclick="deleteQuestion()">🗑 Delete</button>
+`
+:""
 }
+
+`;
 
 getEl("popup").classList.add("show");
 
@@ -360,24 +395,17 @@ getEl("popup").classList.add("show");
 /* ================= PREVIEW ================= */
 window.previewQuestion=()=>{
 
-const ans =
-getCorrectIndex(selectedQuestion);
-
 let html="";
 
-(selectedQuestion.options || [])
+const ans=getCorrectIndex(selectedQuestion);
+
+(selectedQuestion.options||[])
 .forEach((op,i)=>{
 
 html += `
-<div class="option-box ${
-i===ans ? "correct":""
-}">
-
-${String.fromCharCode(65+i)}.
-${op}
-
-${i===ans ? " ✅ Correct":""}
-
+<div class="option-box ${i===ans?"correct":""}">
+${String.fromCharCode(65+i)}. ${op}
+${i===ans?" ✅ Correct":""}
 </div>
 `;
 
@@ -387,19 +415,55 @@ getEl("popupContent").innerHTML=html;
 
 };
 
+/* ================= EDIT QUESTION ================= */
+window.editQuestion=async()=>{
+
+const txt=prompt(
+"Edit Question",
+selectedQuestion.question
+);
+
+if(!txt) return;
+
+await updateDoc(
+doc(db,"questionBank",selectedQuestion.id),
+{
+question:txt
+}
+);
+
+closePopup();
+await loadAllQuestions();
+
+};
+
+/* ================= DELETE QUESTION ================= */
+window.deleteQuestion=async()=>{
+
+if(!confirm("Delete question?"))
+return;
+
+await deleteDoc(
+doc(db,"questionBank",selectedQuestion.id)
+);
+
+closePopup();
+await loadAllQuestions();
+
+};
+
 /* ================= VIEW ALL ================= */
 window.viewAllQuestions=()=>{
 
 let html="";
-let list=[];
 
-allQuestions.forEach(q=>{
+allQuestions.forEach((q,no)=>{
 
 const levels=[
-q.subject || "",
-q.chapter || "",
-q.topic || ""
-].filter(v=>v!=="");
+q.subject||"",
+q.chapter||"",
+q.topic||""
+].filter(Boolean);
 
 let ok=true;
 
@@ -413,49 +477,30 @@ break;
 }
 
 if(ok && levels.length===currentPath.length){
-list.push(q);
-}
 
-});
+const ans=getCorrectIndex(q);
 
-list.forEach((q,no)=>{
+html += `<h3>Q${no+1}. ${q.question}</h3>`;
 
-const ans =
-getCorrectIndex(q);
+(q.options||[]).forEach((op,i)=>{
 
 html += `
-<div class="all-box">
-
-<h3>Q${no+1}. ${q.question}</h3>
-`;
-
-(q.options || []).forEach((op,i)=>{
-
-html += `
-<div class="option-box ${
-i===ans ? "correct":""
-}">
-
-${String.fromCharCode(65+i)}.
-${op}
-
-${i===ans ? " ✅ Correct":""}
-
+<div class="option-box ${i===ans?"correct":""}">
+${String.fromCharCode(65+i)}. ${op}
+${i===ans?" ✅ Correct":""}
 </div>
 `;
 
 });
 
-html += `</div>`;
+html += "<hr>";
+
+}
 
 });
 
-getEl("popupQuestion").innerText=
-"All Questions Preview";
-
-getEl("popupContent").innerHTML=
-html;
-
+getEl("popupQuestion").innerText="All Questions";
+getEl("popupContent").innerHTML=html;
 getEl("popup").classList.add("show");
 
 };
