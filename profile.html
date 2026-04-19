@@ -2,26 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Profile</title>
 
 <link rel="stylesheet" href="css/profile.css">
+<link rel="stylesheet" href="css/sidebar.css">
 
 <!-- remove favicon error -->
 <link rel="icon" href="data:,">
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
 
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button> <!-- 🔥 ADDED -->
+    <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+    <button onclick="goTests()">📝 Tests</button>
     <button onclick="goProfile()">👤 Profile</button>
     <button id="logoutBtn">🚪 Logout</button>
 
@@ -32,8 +38,12 @@
 
     <!-- NAVBAR -->
     <div class="navbar">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+        <button class="menu-btn"
+        onclick="toggleSidebar()">☰</button>
+
         <h2>👤 My Profile</h2>
+
     </div>
 
     <!-- PROFILE BOX -->
@@ -43,14 +53,18 @@
 
         <!-- NAME -->
         <label>Name</label>
-        <input id="name" placeholder="Enter your name">
+
+        <input id="name"
+        placeholder="Enter your name">
 
         <!-- EMAIL -->
         <label>Email</label>
+
         <input id="email" disabled>
 
         <!-- GENDER -->
         <label>Gender</label>
+
         <select id="gender">
             <option>Male</option>
             <option>Female</option>
@@ -58,31 +72,50 @@
 
         <!-- DOB -->
         <label>Date of Birth</label>
-        <input type="date" id="dob">
+
+        <input type="date"
+        id="dob">
 
         <!-- PASSWORD -->
         <label>New Password</label>
-        <input type="password" id="password" placeholder="Enter new password">
 
-        <!-- STRENGTH BAR -->
+        <input type="password"
+        id="password"
+        placeholder="Enter new password">
+
+        <!-- STRENGTH -->
         <div class="strength">
             <div id="strengthBar"></div>
         </div>
+
         <small id="strengthText"></small>
 
-        <small class="hint">Leave blank to keep current password</small>
+        <small class="hint">
+        Leave blank to keep current password
+        </small>
 
         <!-- BUTTONS -->
-        <button onclick="togglePassword()">👁 Show / Hide</button>
-        <button onclick="resetPassword()">📩 Reset via Email</button>
-        <button onclick="saveProfile()">💾 Save Changes</button>
+        <button onclick="togglePassword()">
+            👁 Show / Hide
+        </button>
+
+        <button onclick="resetPassword()">
+            📩 Reset via Email
+        </button>
+
+        <button onclick="saveProfile()">
+            💾 Save Changes
+        </button>
 
     </div>
 
 </div>
 
-<!-- ✅ CORRECT PLACE FOR JS -->
-<script type="module" src="js/profile.js"></script>
-<script type="module" src="js/menu.js"></script>
+<script type="module"
+src="js/profile.js"></script>
+
+<script type="module"
+src="js/menu.js"></script>
+
 </body>
 </html>
