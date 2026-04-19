@@ -134,14 +134,36 @@ return -1;
 }
 
 /* ================= RIGHT ANSWER ================= */
+/* ================= REPLACE ONLY getCorrectIndex FUNCTION ================= */
 function getCorrectIndex(q){
 
-/* new standard text */
-if(
-typeof q.answer==="string" &&
-isNaN(q.answer)
-){
+/* answerIndex direct */
+if(q.answerIndex !== undefined && q.answerIndex !== null){
+return Number(q.answerIndex);
+}
 
+/* old numeric fields */
+if(q.correct_option !== undefined) return idx(q.correct_option);
+if(q.correctAnswer !== undefined) return idx(q.correctAnswer);
+if(q.correct !== undefined) return idx(q.correct);
+
+/* answer field */
+if(q.answer !== undefined && q.answer !== null){
+
+let ans = String(q.answer).trim().toUpperCase();
+
+/* A B C D */
+if(ans==="A") return 0;
+if(ans==="B") return 1;
+if(ans==="C") return 2;
+if(ans==="D") return 3;
+
+/* 1 2 3 4 */
+if(!isNaN(ans)){
+return idx(Number(ans));
+}
+
+/* text match */
 for(let i=0;i<(q.options||[]).length;i++){
 
 if(
@@ -155,6 +177,8 @@ return i;
 
 }
 
+return -1;
+}
 /* direct index */
 if(q.answerIndex!==undefined)
 return idx(q.answerIndex);
