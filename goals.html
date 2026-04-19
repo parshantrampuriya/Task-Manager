@@ -2,17 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Goals</title>
 
 <link rel="stylesheet" href="css/goals.css">
+<link rel="stylesheet" href="css/sidebar.css">
 <link rel="icon" href="data:,">
+
 </head>
 
 <body>
 
-<!-- ================= SIDEBAR ================= -->
-
+<!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
@@ -21,29 +24,45 @@
     <button onclick="goTasks()">📋 Tasks</button>
     <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+    <button onclick="goTests()">📝 Tests</button>
     <button onclick="goProfile()">👤 Profile</button>
     <button onclick="logout()">🚪 Logout</button>
 
 </div>
 
-<!-- ================= MAIN ================= -->
-
+<!-- MAIN -->
 <div class="main">
 
     <!-- NAVBAR -->
     <div class="navbar">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+        <button class="menu-btn"
+        onclick="toggleSidebar()">☰</button>
+
         <h2>🎯 Goals</h2>
+
     </div>
 
     <div class="container">
 
         <!-- ADD GOAL -->
         <div class="add-box">
-            <input id="goalName" placeholder="Goal name (e.g. GATE Study)">
-            <input id="goalTotal" type="number" placeholder="Total target">
-            <input id="goalDeadline" type="date">
-            <button id="addBtn">Add Goal</button>
+
+            <input id="goalName"
+            placeholder="Goal name (e.g. GATE Study)">
+
+            <input id="goalTotal"
+            type="number"
+            placeholder="Total target">
+
+            <input id="goalDeadline"
+            type="date">
+
+            <button id="addBtn">
+                Add Goal
+            </button>
+
         </div>
 
         <!-- GOALS LIST -->
@@ -53,21 +72,33 @@
 
 </div>
 
-<!-- ================= MODAL ================= -->
-
+<!-- MODAL -->
 <div id="modal" class="modal">
 
     <div class="modal-box">
 
         <h3 id="modalTitle">Edit Goal</h3>
 
-        <input id="modalName" placeholder="Goal name">
-        <input id="modalInput" type="number" placeholder="Value">
-        <input id="modalDate" type="date">
+        <input id="modalName"
+        placeholder="Goal name">
+
+        <input id="modalInput"
+        type="number"
+        placeholder="Value">
+
+        <input id="modalDate"
+        type="date">
 
         <div class="modal-actions">
-            <button onclick="saveModal()">Save</button>
-            <button onclick="closeModal()">Cancel</button>
+
+            <button onclick="saveModal()">
+                Save
+            </button>
+
+            <button onclick="closeModal()">
+                Cancel
+            </button>
+
         </div>
 
     </div>
@@ -76,5 +107,6 @@
 
 <script type="module" src="js/goals.js"></script>
 <script type="module" src="js/menu.js"></script>
+
 </body>
 </html>
