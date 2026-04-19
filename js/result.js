@@ -48,7 +48,6 @@ return;
 
 testData = testSnap.data();
 
-/* load result */
 const snap =
 await getDocs(collection(db,"results"));
 
@@ -138,7 +137,6 @@ Number(resultData.totalMarks || 0);
 const passMarks =
 Number(testData.passMarks || 0);
 
-/* use saved values if available */
 const perQ =
 Number(resultData.marksPerQuestion || 0) ||
 (qs.length>0 ? total/qs.length : 0);
@@ -156,11 +154,8 @@ let score=0;
 
 qs.forEach((q,i)=>{
 
-const marked =
-idx(ans[i]);
-
-const right =
-getCorrectIndex(q);
+const marked = idx(ans[i]);
+const right = getCorrectIndex(q);
 
 if(marked===-1){
 
@@ -183,8 +178,7 @@ score -= negPerWrong;
 });
 
 const negative =
-(wrong * negPerWrong)
-.toFixed(2);
+(wrong * negPerWrong).toFixed(2);
 
 const attempted =
 correct + wrong;
@@ -200,7 +194,6 @@ total>0
 : "0";
 
 return {
-
 qs,
 ans,
 score:Number(score.toFixed(2)),
@@ -214,7 +207,6 @@ accuracy,
 percent,
 perQ,
 negPerWrong
-
 };
 
 }
@@ -222,7 +214,7 @@ negPerWrong
 /* ================= RENDER ================= */
 function renderResult(){
 
-const d = getAnalysis();
+const d=getAnalysis();
 
 getEl("scoreText").innerText =
 d.score + " / " + d.total;
@@ -235,21 +227,11 @@ d.score >= d.passMarks
 ? "✅ Passed"
 : "❌ Failed";
 
-getEl("correctCount").innerText =
-d.correct;
-
-getEl("wrongCount").innerText =
-d.wrong;
-
-getEl("skipCount").innerText =
-d.skip;
-
-getEl("negativeCount").innerText =
-d.negative;
-
-getEl("accuracyText").innerText =
-d.accuracy + "%";
-
+getEl("correctCount").innerText=d.correct;
+getEl("wrongCount").innerText=d.wrong;
+getEl("skipCount").innerText=d.skip;
+getEl("negativeCount").innerText=d.negative;
+getEl("accuracyText").innerText=d.accuracy + "%";
 getEl("rankText").innerText="--";
 
 getEl("submitTime").innerText =
@@ -267,11 +249,8 @@ let html="";
 
 d.qs.forEach((q,no)=>{
 
-const marked =
-idx(d.ans[no]);
-
-const right =
-getCorrectIndex(q);
+const marked = idx(d.ans[no]);
+const right = getCorrectIndex(q);
 
 html += `
 <div class="answer-item">
@@ -283,19 +262,25 @@ html += `
 let cls="";
 let note="";
 
-if(i===right){
+const isRight = i===right;
+const isMarked = i===marked;
+
+if(isRight && isMarked){
+
 cls="correct";
-note+=" ✅ Correct Answer";
+note=" ✅ Correct Answer | Your Selected";
+
 }
+else if(isRight){
 
-if(i===marked){
+cls="correct";
+note=" ✅ Correct Answer";
 
-if(marked===right){
-note+=" | Your Marked";
-}else{
+}
+else if(isMarked){
+
 cls="wrong";
-note+=" ❌ Your Marked";
-}
+note=" ❌ Your Selected";
 
 }
 
@@ -313,8 +298,7 @@ html += `</div>`;
 
 });
 
-getEl("answerList").innerHTML =
-html;
+getEl("answerList").innerHTML=html;
 
 getEl("answerPopup")
 .classList.add("show");
@@ -338,10 +322,24 @@ let html=`
 <head>
 <title>Result</title>
 <style>
-body{font-family:Arial;padding:30px}
-.q{border:1px solid #999;padding:15px;margin-top:20px}
-.green{color:green;font-weight:bold}
-.red{color:red;font-weight:bold}
+body{
+font-family:Arial;
+padding:30px;
+line-height:1.6;
+}
+.q{
+border:1px solid #999;
+padding:15px;
+margin-top:20px;
+}
+.green{
+color:green;
+font-weight:bold;
+}
+.red{
+color:red;
+font-weight:bold;
+}
 </style>
 </head>
 <body>
@@ -364,11 +362,8 @@ ${currentUser.displayName || currentUser.email}</p>
 
 d.qs.forEach((q,no)=>{
 
-const marked =
-idx(d.ans[no]);
-
-const right =
-getCorrectIndex(q);
+const marked = idx(d.ans[no]);
+const right = getCorrectIndex(q);
 
 html += `
 <div class="q">
@@ -379,15 +374,25 @@ html += `
 
 let note="";
 
-if(i===right)
-note += ` <span class="green">(Correct)</span>`;
+const isRight = i===right;
+const isMarked = i===marked;
 
-if(i===marked){
+if(isRight && isMarked){
 
-if(marked===right)
-note += ` <span class="green">(Your Marked)</span>`;
-else
-note += ` <span class="red">(Your Marked)</span>`;
+note =
+` <span class="green">(Correct + Your Selected)</span>`;
+
+}
+else if(isRight){
+
+note =
+` <span class="green">(Correct Answer)</span>`;
+
+}
+else if(isMarked){
+
+note =
+` <span class="red">(Your Selected)</span>`;
 
 }
 
