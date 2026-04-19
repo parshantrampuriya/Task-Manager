@@ -3,439 +3,629 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-    collection,
-    getDocs,
-    query,
-    where,
-    doc,
-    getDoc,
-    updateDoc,
-    deleteDoc
+collection,
+getDocs,
+query,
+where,
+addDoc,
+doc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= HELPERS ================= */
-const getEl = (id)=>document.getElementById(id);
+const getEl=(id)=>document.getElementById(id);
 
-let currentUser = null;
-let allTests = [];
-let activeTab = "all";
-
-let editingTest = null;
-let deletingId = null;
+let currentUser=null;
+let allBankQuestions=[];
+let sourceMode="bank";
+let selectedOwnerUid="";
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
-    if(!user){
-        location.href = "index.html";
-        return;
-    }
+if(!user){
+location.href="index.html";
+return;
+}
 
-    currentUser = user;
+currentUser=user;
+selectedOwnerUid=user.uid;
 
-    await loadMyTests();
+await loadFriends();
+await loadSubjects();
+
 });
 
-/* ================= SIDEBAR ================= */
-window.toggleSidebar = ()=>{
+/* ================= MODE ================= */
+window.setSourceMode=(mode)=>{
 
-    const sidebar = getEl("sidebar");
+sourceMode=mode;
 
-    if(sidebar){
-        sidebar.classList.toggle("active");
-    }
+getEl("btnBank").classList.remove("active");
+getEl("btnManual").classList.remove("active");
+
+if(mode==="bank"){
+
+getEl("btnBank").classList.add("active");
+getEl("bankArea").style.display="block";
+getEl("manualArea").style.display="none";
+
+}else{
+
+getEl("btnManual").classList.add("active");
+getEl("bankArea").style.display="none";
+getEl("manualArea").style.display="block";
+
+}
+
 };
 
 /* ================= TOAST ================= */
 function showToast(msg){
 
-    const t = getEl("toast");
+const t=getEl("toast");
+t.innerText=msg;
+t.classList.add("show");
 
-    t.innerText = msg;
-    t.classList.add("show");
+setTimeout(()=>{
+t.classList.remove("show");
+},1800);
 
-    setTimeout(()=>{
-        t.classList.remove("show");
-    },1800);
 }
 
-/* ================= LOAD TESTS ================= */
-window.loadMyTests = async ()=>{
+function showError(msg){
 
-    const snap = await getDocs(
-        query(
-            collection(db,"tests"),
-            where("createdBy","==",currentUser.uid)
-        )
-    );
+const p=getEl("errorPopup");
+p.innerText=msg;
+p.classList.add("show");
 
-    allTests = [];
+setTimeout(()=>{
+p.classList.remove("show");
+},1600);
 
-    snap.forEach(d=>{
-        allTests.push({
-            id:d.id,
-            ...d.data()
-        });
-    });
-
-    renderTests();
-};
-
-/* ================= TAB ================= */
-window.changeTab = (tab,btn)=>{
-
-    activeTab = tab;
-
-    document.querySelectorAll(".tab-btn")
-    .forEach(x=>x.classList.remove("active"));
-
-    btn.classList.add("active");
-
-    renderTests();
-};
-
-window.searchTests = ()=>{
-    renderTests();
-};
-
-/* ================= RENDER ================= */
-function renderTests(){
-
-    let arr = [...allTests];
-
-    if(activeTab !== "all"){
-        arr = arr.filter(x=>
-            (x.status || "active") === activeTab
-        );
-    }
-
-    const txt =
-    getEl("searchBox").value
-    .trim()
-    .toLowerCase();
-
-    if(txt){
-        arr = arr.filter(x=>
-            (x.testName || "")
-            .toLowerCase()
-            .includes(txt)
-        );
-    }
-
-    const sort = getEl("sortBox").value;
-
-    if(sort === "new"){
-        arr.sort((a,b)=>
-            (b.createdAt||0) -
-            (a.createdAt||0)
-        );
-    }
-
-    if(sort === "old"){
-        arr.sort((a,b)=>
-            (a.createdAt||0) -
-            (b.createdAt||0)
-        );
-    }
-
-    if(sort === "name"){
-        arr.sort((a,b)=>
-            (a.testName||"")
-            .localeCompare(b.testName||"")
-        );
-    }
-
-    /* stats */
-    getEl("totalTests").innerText =
-        allTests.length;
-
-    getEl("activeTests").innerText =
-        allTests.filter(x=>
-            (x.status || "active")==="active"
-        ).length;
-
-    let attempts = 0;
-
-    allTests.forEach(x=>{
-        attempts += Number(x.attemptCount||0);
-    });
-
-    getEl("attemptCount").innerText =
-        attempts;
-
-    /* cards */
-    let html = "";
-
-    arr.forEach(test=>{
-
-        const status =
-        test.status || "active";
-
-        const assigned =
-        (test.assignedTo || []).length;
-
-        html += `
-        <div class="test-card">
-
-            <div class="test-top">
-
-                <div class="test-name">
-                    ${test.testName || "Untitled Test"}
-                </div>
-
-                <div class="status ${status}">
-                    ${cap(status)}
-                </div>
-
-            </div>
-
-            <div class="meta-grid">
-
-                <div class="meta-box">
-                    <h4>Users</h4>
-                    <p>${assigned}</p>
-                </div>
-
-                <div class="meta-box">
-                    <h4>Attempts</h4>
-                    <p>${test.attemptCount || 0}</p>
-                </div>
-
-                <div class="meta-box">
-                    <h4>Marks</h4>
-                    <p>${test.totalMarks || 0}</p>
-                </div>
-
-                <div class="meta-box">
-                    <h4>Time</h4>
-                    <p>${test.duration || 0} min</p>
-                </div>
-
-            </div>
-
-            <div class="action-row">
-
-                <button class="action-btn primary"
-                onclick="editTest('${test.id}')">
-                ✏ Edit
-                </button>
-
-                <button class="action-btn"
-                onclick="openResults('${test.id}')">
-                📊 Results
-                </button>
-
-                <button class="action-btn"
-                onclick="duplicateTest('${test.id}')">
-                📄 Duplicate
-                </button>
-
-                <button class="action-btn"
-                onclick="assignTest('${test.id}')">
-                👥 Assign
-                </button>
-
-                <button class="action-btn delete"
-                onclick="askDelete('${test.id}')">
-                🗑 Delete
-                </button>
-
-            </div>
-
-        </div>
-        `;
-    });
-
-    if(!html){
-        html = `
-        <div class="empty-box">
-            No tests found.
-        </div>`;
-    }
-
-    getEl("testList").innerHTML = html;
 }
 
-/* ================= EDIT TEST ================= */
-window.editTest = async(id)=>{
+/* ================= INDEX ================= */
+function idx(v){
 
-    const ref = doc(db,"tests",id);
-    const snap = await getDoc(ref);
+if(v===null || v===undefined) return -1;
 
-    if(!snap.exists()) return;
+if(typeof v==="number"){
 
-    editingTest = {
-        id,
-        ...snap.data()
-    };
+if(v>=1 && v<=4) return v-1;
+return v;
 
-    let questions =
-    editingTest.questions || [];
+}
 
-    let qHtml = "";
+let s=String(v).trim().toUpperCase();
 
-    questions.forEach((q,i)=>{
+if(s==="A") return 0;
+if(s==="B") return 1;
+if(s==="C") return 2;
+if(s==="D") return 3;
 
-        qHtml += `
-        <div class="q-item">
+let n=parseInt(s);
 
-            <div class="q-item-top">
+if(!isNaN(n)){
 
-                <div>
-                    Q${i+1}. ${q.question || ""}
-                </div>
+if(n>=1 && n<=4) return n-1;
+return n;
 
-                <button class="remove-q"
-                onclick="removeQuestion(${i})">
-                Remove
-                </button>
+}
 
-            </div>
+return -1;
 
-        </div>
-        `;
-    });
+}
 
-    getEl("editArea").innerHTML = `
-        <label>Test Name</label>
-        <input id="eName"
-        value="${editingTest.testName || ""}">
+/* ================= NORMALIZE ================= */
+function normalizeQuestion(q){
 
-        <label>Duration (Min)</label>
-        <input id="eTime"
-        type="number"
-        value="${editingTest.duration || 0}">
+const options=q.options || [];
 
-        <label>Total Marks</label>
-        <input id="eMarks"
-        type="number"
-        value="${editingTest.totalMarks || 0}">
+let answerIndex=-1;
+let answerText="";
 
-        <label>Negative Marking (%)</label>
-        <input id="eNegative"
-        type="number"
-        value="${editingTest.negativeMarks || 0}">
+if(typeof q.answer==="string" && isNaN(q.answer)){
+answerText=q.answer.trim();
+}
 
-        <div class="q-list">
-            <h3>Questions</h3>
-            ${qHtml || "No Questions"}
-        </div>
+if(answerText===""){
 
-        <div class="popup-btn-row">
+const raw =
+q.answer ??
+q.correct_option ??
+q.correctAnswer ??
+q.correct ??
+q.correctOption ??
+q.rightAnswer ??
+q.correct_index ??
+q.answerIndex;
 
-            <button class="cancel-btn"
-            onclick="closeEditPopup()">
-            Cancel
-            </button>
+if(typeof raw==="string" && isNaN(raw)){
+answerText=raw.trim();
+}else{
+answerIndex=idx(raw);
+}
 
-            <button class="save-btn"
-            onclick="saveEditTest()">
-            Save
-            </button>
+}
 
-        </div>
-    `;
+if(answerText!==""){
 
-    getEl("editPopup")
-    .classList.add("show");
+options.forEach((op,i)=>{
+
+if(
+String(op).trim().toLowerCase() ===
+answerText.toLowerCase()
+){
+answerIndex=i;
+}
+
+});
+
+}
+
+if(answerIndex<0) answerIndex=0;
+if(answerText==="") answerText=options[answerIndex] || "";
+
+return{
+question:q.question || "",
+options,
+answer:answerText,
+answerIndex
 };
 
-/* ================= REMOVE QUESTION ================= */
-window.removeQuestion = (index)=>{
+}
 
-    editingTest.questions.splice(index,1);
+/* ================= LOAD FRIENDS ================= */
+async function loadFriends(){
 
-    editTest(editingTest.id);
+const snap=await getDocs(collection(db,"friends"));
+
+let html="";
+let optionHtml=`<option value="">Select Friend</option>`;
+
+for(const item of snap.docs){
+
+const users=item.data().users || [];
+
+if(!users.includes(currentUser.uid))
+continue;
+
+const fid=users.find(x=>x!==currentUser.uid);
+
+if(!fid) continue;
+
+let name="Friend";
+
+try{
+
+const u=await getDoc(doc(db,"users",fid));
+
+if(u.exists()){
+
+const d=u.data();
+
+name=
+d.name ||
+d.username ||
+d.email ||
+"Friend";
+
+}
+
+}catch(err){}
+
+html += `
+<label class="friend-item">
+<input type="checkbox"
+class="friendCheck"
+value="${fid}">
+<span>👤 ${name}</span>
+</label>
+`;
+
+optionHtml += `
+<option value="${fid}">
+${name}
+</option>
+`;
+
+}
+
+getEl("friendList").innerHTML =
+html || "No Friends";
+
+if(getEl("friendBankList")){
+getEl("friendBankList").innerHTML =
+optionHtml;
+}
+
+}
+
+/* ================= OWNER MODE ================= */
+if(getEl("ownerMode")){
+
+getEl("ownerMode").addEventListener("change",async()=>{
+
+const mode=getEl("ownerMode").value;
+
+if(mode==="self"){
+
+selectedOwnerUid=currentUser.uid;
+getEl("friendBankWrap").style.display="none";
+
+}else{
+
+selectedOwnerUid=
+getEl("friendBankList").value;
+
+getEl("friendBankWrap").style.display="block";
+
+}
+
+await loadSubjects();
+
+});
+
+}
+
+if(getEl("friendBankList")){
+
+getEl("friendBankList").addEventListener("change",async()=>{
+
+selectedOwnerUid=
+getEl("friendBankList").value;
+
+await loadSubjects();
+
+});
+
+}
+
+/* ================= LOAD SUBJECTS ================= */
+async function loadSubjects(){
+
+if(!selectedOwnerUid){
+fillSelect("subjectList",[]);
+fillSelect("chapterList",[]);
+fillSelect("topicList",[]);
+return;
+}
+
+const snap=await getDocs(
+query(
+collection(db,"questionBank"),
+where("uid","==",selectedOwnerUid)
+)
+);
+
+allBankQuestions=[];
+
+let subjects=[];
+
+snap.forEach(doc=>{
+
+const d=doc.data();
+
+allBankQuestions.push(d);
+
+if(
+d.subject &&
+!subjects.includes(d.subject)
+){
+subjects.push(d.subject);
+}
+
+});
+
+subjects.sort();
+
+fillSelect("subjectList",subjects);
+fillSelect("chapterList",[]);
+fillSelect("topicList",[]);
+
+}
+
+/* ================= FILL ================= */
+function fillSelect(id,arr){
+
+let html=`<option value="">All</option>`;
+
+arr.forEach(v=>{
+html += `<option value="${v}">${v}</option>`;
+});
+
+getEl(id).innerHTML=html;
+
+}
+
+/* ================= SUBJECT CHANGE ================= */
+getEl("subjectList").addEventListener("change",()=>{
+
+const subject=getEl("subjectList").value;
+
+let chapters=[];
+
+allBankQuestions.forEach(q=>{
+
+if(
+q.subject===subject &&
+q.chapter &&
+!chapters.includes(q.chapter)
+){
+chapters.push(q.chapter);
+}
+
+});
+
+chapters.sort();
+
+fillSelect("chapterList",chapters);
+fillSelect("topicList",[]);
+
+});
+
+/* ================= CHAPTER CHANGE ================= */
+getEl("chapterList").addEventListener("change",()=>{
+
+const subject=getEl("subjectList").value;
+const chapter=getEl("chapterList").value;
+
+let topics=[];
+
+allBankQuestions.forEach(q=>{
+
+if(
+q.subject===subject &&
+q.chapter===chapter &&
+q.topic &&
+!topics.includes(q.topic)
+){
+topics.push(q.topic);
+}
+
+});
+
+topics.sort();
+
+fillSelect("topicList",topics);
+
+});
+
+/* ================= FILTER ================= */
+function getFilteredQuestions(){
+
+const subject=getEl("subjectList").value.trim();
+const chapter=getEl("chapterList").value.trim();
+const topic=getEl("topicList").value.trim();
+
+let arr=[...allBankQuestions];
+
+if(subject)
+arr=arr.filter(x=>x.subject===subject);
+
+if(chapter)
+arr=arr.filter(x=>x.chapter===chapter);
+
+if(topic)
+arr=arr.filter(x=>x.topic===topic);
+
+return arr.map(normalizeQuestion);
+
+}
+
+/* ================= PREVIEW ================= */
+window.previewTest=()=>{
+
+let questions=[];
+
+if(sourceMode==="bank"){
+
+questions=getFilteredQuestions();
+
+}else{
+
+try{
+
+questions=
+JSON.parse(
+getEl("manualJson").value.trim()
+).map(normalizeQuestion);
+
+}catch{
+showError("Invalid JSON");
+return;
+}
+
+}
+
+const count=
+Number(getEl("questionCount").value);
+
+if(questions.length<count){
+showError("Not sufficient questions");
+return;
+}
+
+questions=questions.slice(0,count);
+
+let html="";
+
+questions.forEach((q,no)=>{
+
+html += `
+<div style="padding:12px;border:1px solid #333;margin-bottom:12px">
+<b>Q${no+1}. ${q.question}</b><br><br>
+`;
+
+q.options.forEach((op,i)=>{
+
+html += `
+${String.fromCharCode(65+i)}.
+${op}
+${i===q.answerIndex ? " ✅ Correct":""}
+<br>
+`;
+
+});
+
+html += `</div>`;
+
+});
+
+getEl("previewBox").innerHTML=html;
+
 };
 
-/* ================= SAVE EDIT ================= */
-window.saveEditTest = async()=>{
+/* ================= DATE HELPER ================= */
+function getTimeStamp(dateId,timeId){
 
-    await updateDoc(
-        doc(db,"tests",editingTest.id),
-        {
-            testName:
-            getEl("eName").value.trim(),
+const d=getEl(dateId).value;
+const t=getEl(timeId).value;
 
-            duration:
-            Number(getEl("eTime").value),
+if(!d || !t) return null;
 
-            totalMarks:
-            Number(getEl("eMarks").value),
+return new Date(d+"T"+t).getTime();
 
-            negativeMarks:
-            Number(getEl("eNegative").value),
+}
 
-            questions:
-            editingTest.questions || []
-        }
-    );
+/* ================= CREATE ================= */
+window.createTest=async()=>{
 
-    closeEditPopup();
+const testName=
+getEl("testName").value.trim();
 
-    showToast("Updated ✅");
+if(!testName){
+showError("Enter Test Name");
+return;
+}
 
-    await loadMyTests();
+const count=
+Number(getEl("questionCount").value || 0);
+
+let questions=[];
+
+if(sourceMode==="bank"){
+
+questions=getFilteredQuestions();
+
+}else{
+
+try{
+
+questions=
+JSON.parse(
+getEl("manualJson").value.trim()
+).map(normalizeQuestion);
+
+}catch{
+showError("Invalid JSON");
+return;
+}
+
+}
+
+if(questions.length<count){
+showError("Not sufficient questions");
+return;
+}
+
+questions=
+questions
+.sort(()=>Math.random()-0.5)
+.slice(0,count);
+
+/* assign */
+const assign=[];
+
+if(getEl("assignSelf").checked)
+assign.push(currentUser.uid);
+
+document
+.querySelectorAll(".friendCheck:checked")
+.forEach(x=>assign.push(x.value));
+
+if(assign.length===0){
+showError("Select Candidate");
+return;
+}
+
+/* result mode */
+let resultMode="manual";
+
+if(getEl("instantResult").checked)
+resultMode="instant";
+
+if(getEl("releaseLater").checked)
+resultMode="later";
+
+/* schedule */
+const startAt =
+getTimeStamp("startDate","startTime");
+
+const endAt =
+getTimeStamp("endDate","endTime");
+
+if(startAt && endAt && endAt<=startAt){
+showError("End must be after Start");
+return;
+}
+
+await addDoc(
+collection(db,"tests"),
+{
+
+createdBy:currentUser.uid,
+testName,
+
+testDesc:
+getEl("testDesc").value.trim(),
+
+totalMarks:
+Number(getEl("totalMarks").value || 0),
+
+passMarks:
+Number(getEl("passMarks").value || 0),
+
+duration:
+Number(getEl("duration").value || 0),
+
+negativeMarks:
+Number(getEl("negativeMarks").value || 0),
+
+shuffleQuestions:
+getEl("shuffleQuestions").checked,
+
+shuffleOptions:
+getEl("shuffleOptions").checked,
+
+resultMode,
+resultReleased:
+resultMode==="instant",
+
+assignedTo:assign,
+questions,
+
+sourceMode,
+sourceOwner:selectedOwnerUid,
+
+startAt:startAt || null,
+endAt:endAt || null,
+
+attemptedUsers:[],
+attemptCount:0,
+
+createdAt:Date.now()
+
+}
+);
+
+showToast("Test Created ✅");
+
 };
 
-/* ================= DELETE ================= */
-window.askDelete = (id)=>{
+/* default */
+setSourceMode("bank");
 
-    deletingId = id;
-
-    getEl("deletePopup")
-    .classList.add("show");
-};
-
-window.closeDeletePopup = ()=>{
-
-    getEl("deletePopup")
-    .classList.remove("show");
-};
-
-getEl("confirmDeleteBtn")
-.onclick = async()=>{
-
-    if(!deletingId) return;
-
-    await deleteDoc(
-        doc(db,"tests",deletingId)
-    );
-
-    deletingId = null;
-
-    closeDeletePopup();
-
-    showToast("Deleted ✅");
-
-    await loadMyTests();
-};
-
-/* ================= CLOSE EDIT ================= */
-window.closeEditPopup = ()=>{
-
-    getEl("editPopup")
-    .classList.remove("show");
-};
-
-/* ================= OTHER BUTTONS ================= */
-window.openResults = (id)=>{
-    location.href =
-    "admin-results.html?id="+id;
-};
-
-window.assignTest = (id)=>{
-    location.href =
-    "assign-test.html?id="+id;
-};
-
-window.duplicateTest = (id)=>{
-    location.href =
-    "create-test.html?copy="+id;
-};
-
-/* ================= HELPERS ================= */
-function cap(t){
-    return t.charAt(0).toUpperCase()
-    + t.slice(1);
+if(getEl("friendBankWrap")){
+getEl("friendBankWrap").style.display="none";
 }
