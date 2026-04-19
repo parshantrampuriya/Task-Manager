@@ -8,7 +8,7 @@ content="width=device-width,initial-scale=1.0">
 <title>Result</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/result.css?v=1">
+<link rel="stylesheet" href="css/result.css?v=2">
 
 </head>
 <body>
@@ -19,8 +19,9 @@ content="width=device-width,initial-scale=1.0">
     <!-- TOP BAR -->
     <div class="top-bar">
 
+        <!-- BACK BUTTON -->
         <button class="menu-btn"
-        onclick="location.href='give-test.html'">
+        onclick="history.back()">
         ⬅
         </button>
 
@@ -29,9 +30,10 @@ content="width=device-width,initial-scale=1.0">
             <p>Your performance summary</p>
         </div>
 
+        <!-- ALL TESTS BUTTON -->
         <button class="home-btn"
-        onclick="location.href='home.html'">
-        🏠
+        onclick="location.href='give-test.html'">
+        📋
         </button>
 
     </div>
@@ -180,7 +182,7 @@ content="width=device-width,initial-scale=1.0">
 <div id="toast"></div>
 
 <script type="module"
-src="js/result.js?v=1"></script>
+src="js/result.js?v=2"></script>
 
 </body>
 </html>
