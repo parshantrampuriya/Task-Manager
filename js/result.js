@@ -48,6 +48,7 @@ return;
 
 testData = testSnap.data();
 
+/* find my result */
 const snap =
 await getDocs(collection(db,"results"));
 
@@ -69,17 +70,41 @@ showToast("Result not found");
 return;
 }
 
+/* RESULT RELEASE CONTROL */
+if(
+testData.resultMode==="later" &&
+!testData.resultReleased
+){
+
+getEl("scoreText").innerText="--";
+getEl("percentText").innerText="--";
+getEl("statusText").innerText=
+"⏳ Result will release later";
+
+getEl("correctCount").innerText="--";
+getEl("wrongCount").innerText="--";
+getEl("skipCount").innerText="--";
+getEl("negativeCount").innerText="--";
+getEl("accuracyText").innerText="--";
+getEl("rankText").innerText="--";
+
+getEl("submitTime").innerText =
+new Date(resultData.submittedAt)
+.toLocaleString();
+
+return;
+}
+
 renderResult();
 
 }
 
-/* ================= UNIVERSAL INDEX ================= */
+/* ================= INDEX ================= */
 function idx(v){
 
 if(v===null || v===undefined)
 return -1;
 
-/* Number */
 if(typeof v==="number"){
 
 if(v>=1 && v<=4) return v-1;
@@ -90,13 +115,11 @@ return v;
 let s =
 String(v).trim().toUpperCase();
 
-/* Letter */
 if(s==="A") return 0;
 if(s==="B") return 1;
 if(s==="C") return 2;
 if(s==="D") return 3;
 
-/* Number string */
 let n=parseInt(s);
 
 if(!isNaN(n)){
@@ -110,12 +133,10 @@ return -1;
 
 }
 
-/* ================= GET RIGHT ANSWER ================= */
+/* ================= RIGHT ANSWER ================= */
 function getCorrectIndex(q){
 
-/* New standard format:
-answer:"Hardening"
-*/
+/* new standard text */
 if(
 typeof q.answer==="string" &&
 isNaN(q.answer)
@@ -134,11 +155,11 @@ return i;
 
 }
 
-/* Optional direct index */
+/* direct index */
 if(q.answerIndex!==undefined)
 return idx(q.answerIndex);
 
-/* Old formats */
+/* old formats */
 if(q.answer!==undefined)
 return idx(q.answer);
 
@@ -239,9 +260,7 @@ wrong,
 skip,
 negative,
 accuracy,
-percent,
-perQ,
-negPerWrong
+percent
 };
 
 }
@@ -278,6 +297,14 @@ new Date(resultData.submittedAt)
 /* ================= VIEW ANSWERS ================= */
 window.viewAnswers = ()=>{
 
+if(
+testData.resultMode==="later" &&
+!testData.resultReleased
+){
+showToast("Result not released yet");
+return;
+}
+
 const d=getAnalysis();
 
 let html="";
@@ -303,13 +330,13 @@ const isMarked = i===marked;
 if(isRight && isMarked){
 
 cls="correct";
-note=" ✅ Correct Answer | Your Selected";
+note=" ✅ Correct | Your Selected";
 
 }
 else if(isRight){
 
 cls="correct";
-note=" ✅ Correct Answer";
+note=" ✅ Correct";
 
 }
 else if(isMarked){
@@ -350,6 +377,14 @@ getEl("answerPopup")
 /* ================= PDF ================= */
 window.downloadPDF = ()=>{
 
+if(
+testData.resultMode==="later" &&
+!testData.resultReleased
+){
+showToast("Result not released yet");
+return;
+}
+
 const d=getAnalysis();
 
 let html=`
@@ -357,24 +392,10 @@ let html=`
 <head>
 <title>Result</title>
 <style>
-body{
-font-family:Arial;
-padding:30px;
-line-height:1.6;
-}
-.q{
-border:1px solid #999;
-padding:15px;
-margin-top:20px;
-}
-.green{
-color:green;
-font-weight:bold;
-}
-.red{
-color:red;
-font-weight:bold;
-}
+body{font-family:Arial;padding:30px;line-height:1.6}
+.q{border:1px solid #999;padding:15px;margin-top:20px}
+.green{color:green;font-weight:bold}
+.red{color:red;font-weight:bold}
 </style>
 </head>
 <body>
@@ -388,7 +409,6 @@ ${currentUser.displayName || currentUser.email}</p>
 <p><b>Correct:</b> ${d.correct}</p>
 <p><b>Wrong:</b> ${d.wrong}</p>
 <p><b>Skipped:</b> ${d.skip}</p>
-<p><b>Negative:</b> ${d.negative}</p>
 
 <hr>
 `;
@@ -407,27 +427,14 @@ html += `
 
 let note="";
 
-const isRight = i===right;
-const isMarked = i===marked;
+if(i===right)
+note+=` <span class="green">(Correct)</span>`;
 
-if(isRight && isMarked){
+if(i===marked && i!==right)
+note+=` <span class="red">(Your Selected)</span>`;
 
-note =
-` <span class="green">(Correct + Your Selected)</span>`;
-
-}
-else if(isRight){
-
-note =
-` <span class="green">(Correct Answer)</span>`;
-
-}
-else if(isMarked){
-
-note =
-` <span class="red">(Your Selected)</span>`;
-
-}
+if(i===marked && i===right)
+note+=` <span class="green">(Your Selected)</span>`;
 
 html += `
 ${String.fromCharCode(65+i)}.
