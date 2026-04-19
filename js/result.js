@@ -136,43 +136,49 @@ return -1;
 /* ================= RIGHT ANSWER ================= */
 function getCorrectIndex(q){
 
-    /* direct answerIndex */
-    if(q.answerIndex !== undefined && q.answerIndex !== null){
-        return Number(q.answerIndex);
-    }
+    const options = q.options || [];
 
-    /* old fields */
-    if(q.correct_option !== undefined) return idx(q.correct_option);
-    if(q.correctAnswer !== undefined) return idx(q.correctAnswer);
-    if(q.correct !== undefined) return idx(q.correct);
+    const tryValue = (val)=>{
 
-    /* answer field exists */
-    if(q.answer !== undefined && q.answer !== null){
+        if(val === undefined || val === null) return -1;
 
-        let ans = String(q.answer).trim();
+        let s = String(val).trim();
 
-        /* A B C D */
-        if(ans.toUpperCase() === "A") return 0;
-        if(ans.toUpperCase() === "B") return 1;
-        if(ans.toUpperCase() === "C") return 2;
-        if(ans.toUpperCase() === "D") return 3;
+        // A B C D
+        if(s.toUpperCase()==="A") return 0;
+        if(s.toUpperCase()==="B") return 1;
+        if(s.toUpperCase()==="C") return 2;
+        if(s.toUpperCase()==="D") return 3;
 
-        /* 1 2 3 4 */
-        if(!isNaN(ans)){
-            return idx(Number(ans));
+        // 1 2 3 4
+        if(!isNaN(s)){
+            let n = Number(s);
+            if(n>=1 && n<=4) return n-1;
+            if(n>=0 && n<=3) return n;
         }
 
-        /* text match with options */
-        for(let i=0;i<(q.options || []).length;i++){
-
-            if(
-                String(q.options[i]).trim().toLowerCase() ===
-                ans.toLowerCase()
-            ){
+        // text compare
+        for(let i=0;i<options.length;i++){
+            if(String(options[i]).trim().toLowerCase() === s.toLowerCase()){
                 return i;
             }
-
         }
+
+        return -1;
+    };
+
+    let fields = [
+        q.answerIndex,
+        q.answer,
+        q.correct_option,
+        q.correctAnswer,
+        q.correct,
+        q.rightAnswer
+    ];
+
+    for(let f of fields){
+        let r = tryValue(f);
+        if(r !== -1) return r;
     }
 
     return -1;
