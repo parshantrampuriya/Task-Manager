@@ -1,0 +1,305 @@
+/* ================= BODY ================= */
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:
+    linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
+    url("../mahadev.png") center/cover fixed;
+    color:#fff;
+}
+
+/* ================= PAGE ================= */
+.page{
+    min-height:100vh;
+    padding:18px;
+    max-width:1200px;
+    margin:auto;
+}
+
+/* ================= TOP BAR ================= */
+.top-bar{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:18px 22px;
+    border-radius:22px;
+    background:rgba(15,15,15,.88);
+    border:1px solid rgba(0,255,255,.10);
+    margin-bottom:18px;
+}
+
+.top-title{
+    flex:1;
+}
+
+.top-title h1{
+    margin:0;
+    font-size:32px;
+}
+
+.top-title p{
+    margin:4px 0 0;
+    color:#cfd8dc;
+    font-size:14px;
+}
+
+.menu-btn,
+.home-btn{
+    width:52px;
+    height:52px;
+    border:none;
+    border-radius:16px;
+    cursor:pointer;
+    font-size:20px;
+    font-weight:700;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:#000;
+}
+
+/* ================= MAIN CARD ================= */
+.main-card{
+    background:rgba(16,16,16,.92);
+    border-radius:24px;
+    padding:22px;
+    border:1px solid rgba(0,255,255,.08);
+}
+
+/* ================= LOCK ================= */
+.lock-box{
+    text-align:center;
+    padding:45px 20px;
+    border-radius:20px;
+    background:rgba(255,255,255,.04);
+}
+
+.lock-box h2{
+    margin-top:0;
+    color:#ffd54f;
+}
+
+/* ================= SCORE CARD ================= */
+.score-card{
+    display:grid;
+    grid-template-columns:1fr 220px;
+    gap:20px;
+    align-items:center;
+    background:rgba(255,255,255,.04);
+    border-radius:24px;
+    padding:24px;
+}
+
+.score-left h2{
+    margin:0;
+    font-size:48px;
+    color:#00ffd0;
+}
+
+.score-left p{
+    margin:8px 0 0;
+    font-size:18px;
+    color:#dfe7ea;
+}
+
+.circle-box{
+    width:170px;
+    height:170px;
+    margin:auto;
+    border-radius:50%;
+    border:10px solid #00ffd0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    font-weight:700;
+}
+
+/* ================= STATS ================= */
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-top:20px;
+}
+
+.stat-card{
+    background:rgba(255,255,255,.05);
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.stat-card h3{
+    margin:0;
+    font-size:34px;
+    color:#00ffd0;
+}
+
+.stat-card p{
+    margin:8px 0 0;
+    color:#cfd8dc;
+}
+
+/* ================= INFO ================= */
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-top:20px;
+}
+
+.info-box{
+    background:rgba(255,255,255,.04);
+    padding:18px;
+    border-radius:18px;
+}
+
+.info-box h4{
+    margin:0;
+    font-size:13px;
+    color:#b0bec5;
+}
+
+.info-box p{
+    margin:8px 0 0;
+    font-size:18px;
+    font-weight:700;
+}
+
+/* ================= BUTTONS ================= */
+.btn-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:22px;
+}
+
+.main-btn{
+    border:none;
+    padding:15px;
+    border-radius:16px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:15px;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+    color:#000;
+}
+
+/* ================= POPUP ================= */
+.popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    padding:16px;
+    z-index:9999;
+}
+
+.popup.show{
+    display:flex;
+}
+
+.popup-box{
+    width:100%;
+    max-width:760px;
+    max-height:92vh;
+    overflow:auto;
+    background:#111;
+    border-radius:24px;
+    padding:24px;
+    position:relative;
+}
+
+.close-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background:#222;
+    color:#fff;
+    font-size:18px;
+}
+
+/* ================= ANSWER BOX ================= */
+.answer-item{
+    background:#1b1b1b;
+    border-radius:18px;
+    padding:16px;
+    margin-bottom:14px;
+}
+
+.answer-item h3{
+    margin-top:0;
+}
+
+.opt-line{
+    padding:10px;
+    border-radius:12px;
+    margin-bottom:8px;
+    background:#242424;
+}
+
+.correct{
+    border-left:4px solid #00e676;
+}
+
+.wrong{
+    border-left:4px solid #ff5c5c;
+}
+
+/* ================= TOAST ================= */
+#toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#00ffd0;
+    color:#000;
+    padding:12px 18px;
+    border-radius:12px;
+    font-weight:700;
+    opacity:0;
+    transition:.25s;
+    z-index:99999;
+}
+
+#toast.show{
+    opacity:1;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:900px){
+
+    .score-card,
+    .stats-grid,
+    .info-grid,
+    .btn-row{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+
+    .page{
+        padding:12px;
+    }
+
+    .top-title h1{
+        font-size:26px;
+    }
+
+    .score-left h2{
+        font-size:38px;
+    }
+
+    .circle-box{
+        width:140px;
+        height:140px;
+        font-size:28px;
+    }
+}
