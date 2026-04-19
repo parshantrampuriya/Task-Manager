@@ -79,38 +79,66 @@ function idx(v){
 if(v===null || v===undefined)
 return -1;
 
-/* Number case */
+/* Number */
 if(typeof v==="number"){
 
 if(v>=1 && v<=4) return v-1;
-
 return v;
+
 }
 
 let s =
 String(v).trim().toUpperCase();
 
+/* Letter */
 if(s==="A") return 0;
 if(s==="B") return 1;
 if(s==="C") return 2;
 if(s==="D") return 3;
 
+/* Number string */
 let n=parseInt(s);
 
 if(!isNaN(n)){
 
-if(n>=1 && n<=4)
-return n-1;
-
+if(n>=1 && n<=4) return n-1;
 return n;
+
 }
 
 return -1;
+
 }
 
 /* ================= GET RIGHT ANSWER ================= */
 function getCorrectIndex(q){
 
+/* New standard format:
+answer:"Hardening"
+*/
+if(
+typeof q.answer==="string" &&
+isNaN(q.answer)
+){
+
+for(let i=0;i<(q.options||[]).length;i++){
+
+if(
+String(q.options[i]).trim().toLowerCase() ===
+String(q.answer).trim().toLowerCase()
+){
+return i;
+}
+
+}
+
+}
+
+/* Optional direct index */
+if(q.answerIndex!==undefined)
+return idx(q.answerIndex);
+
+/* Old formats */
 if(q.answer!==undefined)
 return idx(q.answer);
 
@@ -119,6 +147,9 @@ return idx(q.correct_option);
 
 if(q.correctAnswer!==undefined)
 return idx(q.correctAnswer);
+
+if(q.correct!==undefined)
+return idx(q.correct);
 
 return -1;
 
@@ -358,8 +389,6 @@ ${currentUser.displayName || currentUser.email}</p>
 <p><b>Wrong:</b> ${d.wrong}</p>
 <p><b>Skipped:</b> ${d.skip}</p>
 <p><b>Negative:</b> ${d.negative}</p>
-<p><b>Marks Per Question:</b> ${d.perQ}</p>
-<p><b>Negative Per Wrong:</b> ${d.negPerWrong}</p>
 
 <hr>
 `;
