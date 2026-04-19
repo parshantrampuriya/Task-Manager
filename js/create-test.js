@@ -10,8 +10,7 @@ where,
 addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= HELPERS ================= */
-const getEl = (id)=>document.getElementById(id);
+const getEl=(id)=>document.getElementById(id);
 
 let currentUser=null;
 let allBankQuestions=[];
@@ -35,8 +34,8 @@ await loadFriends();
 /* ================= MENU ================= */
 window.toggleSidebar=()=>{
 
-const bar=getEl("sidebar");
-if(bar) bar.classList.toggle("active");
+getEl("sidebar")
+.classList.toggle("active");
 
 };
 
@@ -73,7 +72,7 @@ t.classList.add("show");
 
 setTimeout(()=>{
 t.classList.remove("show");
-},1800);
+},1600);
 
 }
 
@@ -86,6 +85,59 @@ p.classList.add("show");
 setTimeout(()=>{
 p.classList.remove("show");
 },1500);
+
+}
+
+/* ================= INDEX ================= */
+function idx(v){
+
+if(v===null || v===undefined)
+return 0;
+
+if(typeof v==="number")
+return v;
+
+let s=
+String(v).trim().toUpperCase();
+
+if(s==="A") return 0;
+if(s==="B") return 1;
+if(s==="C") return 2;
+if(s==="D") return 3;
+
+let n=parseInt(s);
+
+if(!isNaN(n)){
+
+if(n>=1 && n<=4)
+return n-1;
+
+return n;
+}
+
+return 0;
+
+}
+
+/* ================= NORMALIZE ================= */
+function normalizeQuestion(q){
+
+let ans=0;
+
+if(q.answer!==undefined)
+ans=idx(q.answer);
+
+else if(q.correct_option!==undefined)
+ans=idx(q.correct_option);
+
+else if(q.correctAnswer!==undefined)
+ans=idx(q.correctAnswer);
+
+return{
+question:q.question || "",
+options:q.options || [],
+answer:ans
+};
 
 }
 
@@ -126,49 +178,33 @@ fillSelect("topicList",[]);
 
 }
 
-/* ================= LOAD FRIENDS ================= */
+/* ================= FRIENDS ================= */
 async function loadFriends(){
 
-const snap =
+const snap=
 await getDocs(collection(db,"friends"));
 
 let html="";
 
 for(const item of snap.docs){
 
-const users =
+const users=
 item.data().users || [];
 
 if(!users.includes(currentUser.uid))
 continue;
 
-const fid =
+const fid=
 users.find(x=>x!==currentUser.uid);
 
 if(!fid) continue;
-
-let name="Friend";
-
-const u =
-await getDocs(
-query(
-collection(db,"users"),
-where("__name__","==",fid)
-)
-);
-
-if(!u.empty){
-name =
-u.docs[0].data().name ||
-"Friend";
-}
 
 html += `
 <label class="friend-item">
 <input type="checkbox"
 class="friendCheck"
 value="${fid}">
-<span>👤 ${name}</span>
+<span>👤 Friend</span>
 </label>
 `;
 
@@ -195,13 +231,13 @@ getEl(id).innerHTML=html;
 /* ================= FILTER ================= */
 function getFilteredQuestions(){
 
-const subject =
+const subject=
 getEl("subjectList").value.trim();
 
-const chapter =
+const chapter=
 getEl("chapterList").value.trim();
 
-const topic =
+const topic=
 getEl("topicList").value.trim();
 
 let arr=[...allBankQuestions];
@@ -215,68 +251,78 @@ arr=arr.filter(x=>x.chapter===chapter);
 if(topic)
 arr=arr.filter(x=>x.topic===topic);
 
-return arr;
+return arr.map(normalizeQuestion);
 
 }
 
-/* ================= NORMALIZE ANSWER ================= */
-function idx(v){
+/* ================= PREVIEW ================= */
+window.previewTest=()=>{
 
-if(v===null || v===undefined)
-return 0;
+let questions=[];
 
-if(typeof v==="number")
-return v;
+if(sourceMode==="bank"){
 
-let s=
-String(v).trim().toUpperCase();
+questions=getFilteredQuestions();
 
-if(s==="A") return 0;
-if(s==="B") return 1;
-if(s==="C") return 2;
-if(s==="D") return 3;
+}else{
 
-let n=parseInt(s);
+try{
+questions=
+JSON.parse(
+getEl("manualJson").value.trim()
+).map(normalizeQuestion);
 
-if(!isNaN(n)){
-
-if(n>=1 && n<=4)
-return n-1;
-
-return n;
+}catch{
+showError("Invalid JSON");
+return;
 }
-
-return 0;
 
 }
 
-function normalizeQuestion(q){
+const count=
+Number(getEl("questionCount").value);
 
-let ans = 0;
+if(questions.length<count){
+showError("Not sufficient questions");
+return;
+}
 
-if(q.answer!==undefined)
-ans = idx(q.answer);
+questions=
+questions.slice(0,count);
 
-else if(q.correct_option!==undefined)
-ans = idx(q.correct_option);
+let html="";
 
-else if(q.correctAnswer!==undefined)
-ans = idx(q.correctAnswer);
+questions.forEach((q,no)=>{
 
-return{
+html += `
+<div style="padding:12px;border:1px solid #ddd;margin-bottom:12px">
+<b>Q${no+1}. ${q.question}</b><br><br>
+`;
 
-question:q.question || "",
-options:q.options || [],
-answer:ans
+(q.options || []).forEach((op,i)=>{
+
+html += `
+${String.fromCharCode(65+i)}.
+${op}
+${i===q.answer ? " ✅ Correct":""}
+<br>
+`;
+
+});
+
+html += `</div>`;
+
+});
+
+getEl("previewBox").innerHTML =
+html;
 
 };
 
-}
-
 /* ================= CREATE ================= */
-window.createTest = async()=>{
+window.createTest=async()=>{
 
-const testName =
+const testName=
 getEl("testName").value.trim();
 
 if(!testName){
@@ -284,22 +330,23 @@ showError("Enter Test Name");
 return;
 }
 
-const count =
+const count=
 Number(getEl("questionCount").value);
 
 let questions=[];
 
 if(sourceMode==="bank"){
 
-questions =
-getFilteredQuestions();
+questions=getFilteredQuestions();
 
 }else{
 
 try{
-questions = JSON.parse(
+questions=
+JSON.parse(
 getEl("manualJson").value.trim()
-);
+).map(normalizeQuestion);
+
 }catch{
 showError("Invalid JSON");
 return;
@@ -312,14 +359,11 @@ showError("Not sufficient questions");
 return;
 }
 
-/* random pick */
-questions =
+questions=
 questions
 .sort(()=>Math.random()-0.5)
-.slice(0,count)
-.map(normalizeQuestion);
+.slice(0,count);
 
-/* assign users */
 const assign=[];
 
 if(getEl("assignSelf").checked)
@@ -336,13 +380,11 @@ showError("Select Candidate");
 return;
 }
 
-/* result mode */
 let resultMode="manual";
 
 if(getEl("instantResult").checked)
 resultMode="instant";
 
-/* SAVE */
 await addDoc(
 collection(db,"tests"),
 {
@@ -371,9 +413,7 @@ getEl("shuffleOptions").checked,
 resultMode,
 
 assignedTo:assign,
-
 questions,
-
 createdAt:Date.now()
 
 }
@@ -383,5 +423,4 @@ showToast("Test Created ✅");
 
 };
 
-/* ================= DEFAULT ================= */
 setSourceMode("bank");
