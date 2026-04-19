@@ -5,7 +5,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/fi
 import {
     doc,
     getDoc,
-    setDoc,
     updateDoc,
     collection,
     addDoc
@@ -32,7 +31,7 @@ let timerInt = null;
 onAuthStateChanged(auth, async(user)=>{
 
     if(!user){
-        location.href = "index.html";
+        location.href="index.html";
         return;
     }
 
@@ -45,7 +44,7 @@ onAuthStateChanged(auth, async(user)=>{
 async function loadTest(){
 
     if(!testId){
-        location.href = "give-test.html";
+        location.href="give-test.html";
         return;
     }
 
@@ -60,8 +59,7 @@ async function loadTest(){
 
     testData = snap.data();
 
-    questions =
-    testData.questions || [];
+    questions = testData.questions || [];
 
     answers =
     new Array(questions.length).fill(null);
@@ -89,39 +87,38 @@ async function loadTest(){
 /* ================= TIMER ================= */
 function startTimer(){
 
-    updateTimerUI();
+    updateTimer();
 
     timerInt = setInterval(()=>{
 
         totalSeconds--;
 
-        updateTimerUI();
+        updateTimer();
 
         if(totalSeconds <= 0){
 
             clearInterval(timerInt);
-
             finalSubmit();
         }
 
     },1000);
 }
 
-function updateTimerUI(){
+function updateTimer(){
 
-    const min =
+    const m =
     Math.floor(totalSeconds/60);
 
-    const sec =
+    const s =
     totalSeconds % 60;
 
     getEl("timer").innerText =
-        String(min).padStart(2,"0")
+        String(m).padStart(2,"0")
         + ":" +
-        String(sec).padStart(2,"0");
+        String(s).padStart(2,"0");
 }
 
-/* ================= QUESTION ================= */
+/* ================= RENDER QUESTION ================= */
 function renderQuestion(){
 
     const q = questions[currentIndex];
@@ -132,11 +129,11 @@ function renderQuestion(){
         "Question " + (currentIndex+1);
 
     getEl("questionText").innerText =
-        q.question || "";
+        q.question;
 
     let html = "";
 
-    (q.options || []).forEach((op,i)=>{
+    q.options.forEach((op,i)=>{
 
         const active =
         answers[currentIndex] === i
@@ -160,7 +157,7 @@ function renderQuestion(){
     renderPalette();
 }
 
-/* ================= SELECT ================= */
+/* ================= SELECT OPTION ================= */
 window.selectOption = (i)=>{
 
     answers[currentIndex] = i;
@@ -172,10 +169,9 @@ window.selectOption = (i)=>{
 window.nextQuestion = ()=>{
 
     if(currentIndex <
-        questions.length - 1){
+       questions.length-1){
 
         currentIndex++;
-
         renderQuestion();
     }
 };
@@ -185,15 +181,19 @@ window.prevQuestion = ()=>{
     if(currentIndex > 0){
 
         currentIndex--;
-
         renderQuestion();
     }
+};
+
+window.jumpQuestion = (i)=>{
+
+    currentIndex = i;
+    renderQuestion();
 };
 
 window.clearAnswer = ()=>{
 
     answers[currentIndex] = null;
-
     renderQuestion();
 };
 
@@ -216,41 +216,31 @@ function renderPalette(){
 
         let cls = "";
 
-        if(i === currentIndex){
-            cls = "current";
+        if(i===currentIndex){
+            cls="current";
         }
         else if(reviewList[i]){
-            cls = "review";
+            cls="review";
         }
         else if(
-            answers[i] !== null
+            answers[i]!==null
         ){
-            cls = "answered";
+            cls="answered";
         }
 
         html += `
         <button
         class="pal-btn ${cls}"
         onclick="jumpQuestion(${i})">
-
         ${i+1}
-
-        </button>
-        `;
+        </button>`;
     });
 
     getEl("paletteGrid").innerHTML =
         html;
 }
 
-window.jumpQuestion = (i)=>{
-
-    currentIndex = i;
-
-    renderQuestion();
-};
-
-/* ================= POPUP ================= */
+/* ================= SUBMIT POPUP ================= */
 window.submitTest = ()=>{
 
     getEl("submitPopup")
@@ -273,29 +263,47 @@ window.finalSubmit = async()=>{
     const totalMarks =
     Number(testData.totalMarks || 0);
 
+    const totalQ =
+    questions.length;
+
     const perQ =
-    questions.length > 0
-    ? totalMarks / questions.length
+    totalQ>0
+    ? totalMarks / totalQ
     : 0;
 
-    const neg =
+    const negPercent =
     Number(testData.negativeMarks || 0);
+
+    const negPerWrong =
+    perQ * (negPercent / 100);
+
+    let correct = 0;
+    let wrong = 0;
+    let skip = 0;
 
     questions.forEach((q,i)=>{
 
-        const correct =
+        const real =
         Number(q.answer);
 
-        if(answers[i] === correct){
+        const marked =
+        answers[i];
 
-            score += perQ;
-
-        }else if(
-            answers[i] !== null
+        if(
+            marked===null ||
+            marked===undefined
         ){
-
-            score -=
-            perQ * (neg/100);
+            skip++;
+        }
+        else if(
+            Number(marked)===real
+        ){
+            score += perQ;
+            correct++;
+        }
+        else{
+            score -= negPerWrong;
+            wrong++;
         }
     });
 
@@ -315,10 +323,24 @@ window.finalSubmit = async()=>{
 
         totalMarks,
 
+        correct,
+        wrong,
+        skip,
+
+        negativeMarks:
+        Number(
+            (wrong * negPerWrong)
+            .toFixed(2)
+        ),
+
         submittedAt:
         Date.now(),
 
-        answers
+        answers,
+
+        /* IMPORTANT */
+        questionsSnapshot:
+        questions
     };
 
     await addDoc(
@@ -326,7 +348,6 @@ window.finalSubmit = async()=>{
         resultData
     );
 
-    /* update attempted users */
     let arr =
     testData.attemptedUsers || [];
 
@@ -345,8 +366,7 @@ window.finalSubmit = async()=>{
     }
 
     location.href =
-    "result.html?id=" +
-    testId;
+    "result.html?id=" + testId;
 };
 
 /* ================= TOAST ================= */
@@ -360,5 +380,5 @@ function showToast(msg){
 
     setTimeout(()=>{
         t.classList.remove("show");
-    },1400);
+    },1500);
 }
