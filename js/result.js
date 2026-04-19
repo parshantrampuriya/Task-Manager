@@ -1,7 +1,5 @@
 import { auth, db } from "./firebase.js";
-
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
 import {
 doc,
 getDoc,
@@ -11,7 +9,6 @@ collection
 
 /* ================= HELPERS ================= */
 const getEl = (id)=>document.getElementById(id);
-
 const params = new URLSearchParams(location.search);
 const testId = params.get("id");
 
@@ -74,72 +71,46 @@ return;
 renderResult();
 }
 
-/* ================= ANSWER NORMALIZER ================= */
-function getAnswerIndex(val){
+/* ================= UNIVERSAL INDEX ================= */
+function idx(v){
 
-if(val===null || val===undefined) return -1;
+if(v===null || v===undefined) return -1;
 
-if(typeof val==="number") return val;
+if(typeof v==="number") return v;
 
-let v = String(val).trim().toUpperCase();
+let s = String(v).trim().toUpperCase();
 
-if(v==="A") return 0;
-if(v==="B") return 1;
-if(v==="C") return 2;
-if(v==="D") return 3;
+if(s==="A") return 0;
+if(s==="B") return 1;
+if(s==="C") return 2;
+if(s==="D") return 3;
 
-if(v==="OPTION1") return 0;
-if(v==="OPTION2") return 1;
-if(v==="OPTION3") return 2;
-if(v==="OPTION4") return 3;
+let n = parseInt(s);
 
-let num = Number(v);
-
-if(!isNaN(num)){
-
-if(num>=1 && num<=4) return num-1;
-return num;
+if(!isNaN(n)){
+if(n>=1 && n<=4) return n-1;
+return n;
 }
 
 return -1;
 }
 
-/* ================= RESULT ================= */
-function renderResult(){
+/* ================= GET CORRECT ANSWER ================= */
+function getCorrectIndex(q){
 
-const data=getAnalysis();
+if(q.answer!==undefined)
+return idx(q.answer);
 
-getEl("scoreText").innerText =
-data.score + " / " + data.total;
+if(q.correct_option!==undefined)
+return idx(q.correct_option);
 
-getEl("percentText").innerText =
-data.percent + "%";
+if(q.correctAnswer!==undefined)
+return idx(q.correctAnswer);
 
-getEl("statusText").innerText =
-data.score >= data.passMarks
-? "✅ Passed"
-: "❌ Failed";
+if(q.correct!==undefined)
+return idx(q.correct);
 
-getEl("correctCount").innerText =
-data.correct;
-
-getEl("wrongCount").innerText =
-data.wrong;
-
-getEl("skipCount").innerText =
-data.skip;
-
-getEl("negativeCount").innerText =
-data.negative;
-
-getEl("accuracyText").innerText =
-data.accuracy + "%";
-
-getEl("rankText").innerText="--";
-
-getEl("submitTime").innerText =
-formatDate(resultData.submittedAt);
-
+return -1;
 }
 
 /* ================= ANALYSIS ================= */
@@ -174,11 +145,8 @@ let score=0;
 
 qs.forEach((q,i)=>{
 
-const marked =
-getAnswerIndex(ans[i]);
-
-const right =
-getAnswerIndex(q.answer);
+const marked = idx(ans[i]);
+const right = getCorrectIndex(q);
 
 if(marked===-1){
 skip++;
@@ -232,46 +200,69 @@ percent
 
 }
 
+/* ================= RENDER ================= */
+function renderResult(){
+
+const d=getAnalysis();
+
+getEl("scoreText").innerText =
+d.score + " / " + d.total;
+
+getEl("percentText").innerText =
+d.percent + "%";
+
+getEl("statusText").innerText =
+d.score >= d.passMarks
+? "✅ Passed"
+: "❌ Failed";
+
+getEl("correctCount").innerText=d.correct;
+getEl("wrongCount").innerText=d.wrong;
+getEl("skipCount").innerText=d.skip;
+getEl("negativeCount").innerText=d.negative;
+getEl("accuracyText").innerText=d.accuracy+"%";
+getEl("rankText").innerText="--";
+
+getEl("submitTime").innerText =
+new Date(resultData.submittedAt)
+.toLocaleString();
+
+}
+
 /* ================= VIEW ANSWERS ================= */
 window.viewAnswers = ()=>{
 
-const data=getAnalysis();
+const d=getAnalysis();
 
 let html="";
 
-data.qs.forEach((q,no)=>{
+d.qs.forEach((q,no)=>{
 
-const marked =
-getAnswerIndex(data.ans[no]);
-
-const right =
-getAnswerIndex(q.answer);
+const marked = idx(d.ans[no]);
+const right = getCorrectIndex(q);
 
 html += `
 <div class="answer-item">
 <h3>Q${no+1}. ${q.question}</h3>
 `;
 
-q.options.forEach((op,i)=>{
+(q.options || []).forEach((op,i)=>{
 
-let note="";
 let cls="";
+let note="";
 
 if(i===right){
-note += " ✅ Correct Answer";
 cls="correct";
+note=" ✅ Correct Answer";
 }
 
 if(i===marked){
 
 if(marked===right){
 note += " | Your Marked";
-}
-else{
-note += " ❌ Your Marked";
-if(cls!=="correct"){
+}else{
 cls="wrong";
-}
+note += " ❌ Your Marked";
 }
 
 }
@@ -291,9 +282,7 @@ html += `</div>`;
 });
 
 getEl("answerList").innerHTML=html;
-
-getEl("answerPopup")
-.classList.add("show");
+getEl("answerPopup").classList.add("show");
 
 };
 
@@ -304,107 +293,89 @@ getEl("answerPopup")
 
 };
 
-/* ================= DOWNLOAD REPORT ================= */
+/* ================= PDF ================= */
 window.downloadPDF = ()=>{
 
-const data=getAnalysis();
+const d=getAnalysis();
 
-let report=`
+let html=`
 <html>
 <head>
-<title>Result Report</title>
+<title>Result</title>
 <style>
-body{font-family:Arial;padding:30px;line-height:1.6;}
-.q{margin-top:20px;padding:15px;border:1px solid #999;}
-.green{color:green;font-weight:bold;}
-.red{color:red;font-weight:bold;}
+body{font-family:Arial;padding:30px}
+.q{border:1px solid #999;padding:15px;margin-top:20px}
+.green{color:green;font-weight:bold}
+.red{color:red;font-weight:bold}
 </style>
 </head>
 <body>
 
-<h1>Test Result Report</h1>
-<h2>${testData.testName || ""}</h2>
-
+<h1>${testData.testName || "Test Result"}</h1>
 <p><b>Name:</b> ${
 currentUser.displayName ||
 currentUser.email
 }</p>
 
-<p><b>Score:</b> ${data.score}/${data.total}</p>
-<p><b>Correct:</b> ${data.correct}</p>
-<p><b>Wrong:</b> ${data.wrong}</p>
-<p><b>Skipped:</b> ${data.skip}</p>
-<p><b>Negative:</b> ${data.negative}</p>
-<p><b>Accuracy:</b> ${data.accuracy}%</p>
+<p><b>Score:</b> ${d.score}/${d.total}</p>
+<p><b>Correct:</b> ${d.correct}</p>
+<p><b>Wrong:</b> ${d.wrong}</p>
+<p><b>Skipped:</b> ${d.skip}</p>
+<p><b>Negative:</b> ${d.negative}</p>
 <hr>
 `;
 
-data.qs.forEach((q,no)=>{
+d.qs.forEach((q,no)=>{
 
-const marked =
-getAnswerIndex(data.ans[no]);
+const marked = idx(d.ans[no]);
+const right = getCorrectIndex(q);
 
-const right =
-getAnswerIndex(q.answer);
-
-report += `
+html += `
 <div class="q">
 <b>Q${no+1}. ${q.question}</b><br><br>
 `;
 
-q.options.forEach((op,i)=>{
+(q.options || []).forEach((op,i)=>{
 
-let txt="";
+let note="";
 
-if(i===right){
-txt += ` <span class="green">(Correct)</span>`;
-}
+if(i===right)
+note += ` <span class="green">(Correct)</span>`;
 
 if(i===marked){
 
-if(marked===right){
-txt += ` <span class="green">(Your Marked)</span>`;
-}else{
-txt += ` <span class="red">(Your Marked)</span>`;
-}
+if(marked===right)
+note += ` <span class="green">(Your Marked)</span>`;
+else
+note += ` <span class="red">(Your Marked)</span>`;
 
 }
 
-report += `
+html += `
 ${String.fromCharCode(65+i)}.
 ${op}
-${txt}<br>
+${note}<br>
 `;
 
 });
 
-report += `</div>`;
+html += `</div>`;
 
 });
 
-report += `</body></html>`;
+html += `</body></html>`;
 
 const w=window.open("","_blank");
-
-w.document.write(report);
+w.document.write(html);
 w.document.close();
 w.print();
 
 };
 
-/* ================= HELPERS ================= */
-function formatDate(ms){
-
-if(!ms) return "--";
-
-return new Date(ms).toLocaleString();
-
-}
-
+/* ================= TOAST ================= */
 function showToast(msg){
 
 const t=getEl("toast");
-
 t.innerText=msg;
 t.classList.add("show");
 
