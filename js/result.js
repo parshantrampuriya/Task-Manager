@@ -40,10 +40,8 @@ async function loadData(){
         return;
     }
 
-    /* Test */
-    const testSnap = await getDoc(
-        doc(db,"tests",testId)
-    );
+    const testSnap =
+    await getDoc(doc(db,"tests",testId));
 
     if(!testSnap.exists()){
         showToast("Test not found");
@@ -52,10 +50,8 @@ async function loadData(){
 
     testData = testSnap.data();
 
-    /* Result */
-    const resSnap = await getDocs(
-        collection(db,"results")
-    );
+    const resSnap =
+    await getDocs(collection(db,"results"));
 
     resSnap.forEach(d=>{
 
@@ -83,31 +79,22 @@ function checkReleaseMode(){
     const mode =
     testData.resultMode || "instant";
 
-    getEl("modeText").innerText =
-        mode;
+    getEl("modeText").innerText = mode;
 
-    if(mode === "manual"){
-        getEl("lockBox").style.display =
-        "block";
+    if(mode==="manual"){
 
-        getEl("resultArea").style.display =
-        "none";
-
+        getEl("lockBox").style.display="block";
+        getEl("resultArea").style.display="none";
         return;
     }
 
     if(
-        mode === "enddate" &&
+        mode==="enddate" &&
         testData.endAt &&
-        Date.now() <
-        Number(testData.endAt)
+        Date.now() < Number(testData.endAt)
     ){
-        getEl("lockBox").style.display =
-        "block";
-
-        getEl("resultArea").style.display =
-        "none";
-
+        getEl("lockBox").style.display="block";
+        getEl("resultArea").style.display="none";
         return;
     }
 
@@ -117,162 +104,161 @@ function checkReleaseMode(){
 /* ================= RESULT ================= */
 function renderResult(){
 
+    const data = getAnalysis();
+
+    getEl("scoreText").innerText =
+        data.score + " / " + data.total;
+
+    getEl("percentText").innerText =
+        data.percent + "%";
+
+    getEl("statusText").innerText =
+        data.score >= data.passMarks
+        ? "✅ Passed"
+        : "❌ Failed";
+
+    getEl("correctCount").innerText =
+        data.correct;
+
+    getEl("wrongCount").innerText =
+        data.wrong;
+
+    getEl("skipCount").innerText =
+        data.skip;
+
+    getEl("negativeCount").innerText =
+        data.negative;
+
+    getEl("accuracyText").innerText =
+        data.accuracy + "%";
+
+    getEl("rankText").innerText = "--";
+
+    getEl("submitTime").innerText =
+        formatDate(resultData.submittedAt);
+}
+
+/* ================= ANALYSIS ================= */
+function getAnalysis(){
+
+    const qs =
+    testData.questions || [];
+
+    const ans =
+    resultData.answers || [];
+
     const score =
     Number(resultData.score || 0);
 
     const total =
     Number(resultData.totalMarks || 0);
 
-    const percent =
-    total > 0
-    ? ((score/total)*100).toFixed(1)
-    : 0;
-
-    getEl("scoreText").innerText =
-        score + " / " + total;
-
-    getEl("percentText").innerText =
-        percent + "%";
-
     const passMarks =
     Number(testData.passMarks || 0);
 
-    getEl("statusText").innerText =
-        score >= passMarks
-        ? "✅ Passed"
-        : "❌ Failed";
+    const neg =
+    Number(testData.negativeMarks || 0);
 
-    /* Analysis */
-    const qs =
-    testData.questions || [];
+    const perQ =
+    qs.length>0 ? total/qs.length : 0;
 
-    const ans =
-    resultData.answers || [];
-
-    let correct = 0;
-    let wrong = 0;
-    let skip = 0;
+    let correct=0;
+    let wrong=0;
+    let skip=0;
 
     qs.forEach((q,i)=>{
 
-        const user =
-        ans[i];
+        const user = ans[i];
 
-        const real =
-        Number(q.answer);
-
-        if(user === null ||
-           user === undefined){
+        if(user===null ||
+           user===undefined){
 
             skip++;
 
         }else if(
-            Number(user) === real
+            Number(user)===Number(q.answer)
         ){
             correct++;
-
         }else{
             wrong++;
         }
     });
 
-    getEl("correctCount").innerText =
-        correct;
-
-    getEl("wrongCount").innerText =
-        wrong;
-
-    getEl("skipCount").innerText =
-        skip;
-
-    const neg =
-    Number(testData.negativeMarks||0);
-
-    const perQ =
-    qs.length>0
-    ? total / qs.length
-    : 0;
-
     const negative =
     (wrong * perQ * (neg/100))
     .toFixed(2);
 
-    getEl("negativeCount").innerText =
-        negative;
-
     const attempted =
     correct + wrong;
 
-    const acc =
+    const accuracy =
     attempted>0
     ? ((correct/attempted)*100)
       .toFixed(1)
     : 0;
 
-    getEl("accuracyText").innerText =
-        acc + "%";
+    const percent =
+    total>0
+    ? ((score/total)*100)
+      .toFixed(1)
+    : 0;
 
-    getEl("rankText").innerText =
-        "--";
-
-    getEl("submitTime").innerText =
-        formatDate(
-            resultData.submittedAt
-        );
+    return {
+        qs,
+        ans,
+        score,
+        total,
+        passMarks,
+        correct,
+        wrong,
+        skip,
+        negative,
+        accuracy,
+        percent
+    };
 }
 
-/* ================= ANSWERS ================= */
+/* ================= VIEW ANSWERS ================= */
 window.viewAnswers = ()=>{
 
-    const qs =
-    testData.questions || [];
-
-    const ans =
-    resultData.answers || [];
+    const data = getAnalysis();
 
     let html = "";
 
-    qs.forEach((q,no)=>{
+    data.qs.forEach((q,no)=>{
 
         html += `
         <div class="answer-item">
-
-            <h3>
-            Q${no+1}. ${q.question}
-            </h3>
+        <h3>Q${no+1}. ${q.question}</h3>
         `;
 
-        (q.options || [])
-        .forEach((op,i)=>{
+        q.options.forEach((op,i)=>{
 
-            let cls = "";
+            let cls="";
 
-            if(
-                Number(q.answer)===i
-            ){
-                cls = "correct";
+            if(Number(q.answer)===i){
+                cls="correct";
             }
 
             if(
-                ans[no]===i &&
+                data.ans[no]===i &&
                 Number(q.answer)!==i
             ){
-                cls = "wrong";
+                cls="wrong";
             }
 
             html += `
             <div class="opt-line ${cls}">
-                ${String.fromCharCode(65+i)}.
-                ${op}
-            </div>
-            `;
+            ${String.fromCharCode(65+i)}.
+            ${op}
+            </div>`;
         });
 
         html += `</div>`;
     });
 
     getEl("answerList").innerHTML =
-        html;
+    html;
 
     getEl("answerPopup")
     .classList.add("show");
@@ -284,10 +270,112 @@ window.closePopup = ()=>{
     .classList.remove("show");
 };
 
-/* ================= PDF ================= */
+/* ================= REAL PDF / REPORT ================= */
 window.downloadPDF = ()=>{
 
-    window.print();
+    const data = getAnalysis();
+
+    let report = `
+<html>
+<head>
+<title>Result Report</title>
+<style>
+body{
+font-family:Arial;
+padding:30px;
+line-height:1.6;
+}
+h1,h2{
+margin-bottom:8px;
+}
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+td,th{
+border:1px solid #000;
+padding:8px;
+text-align:left;
+}
+.qbox{
+margin-top:25px;
+padding:15px;
+border:1px solid #999;
+}
+.correct{color:green;font-weight:bold;}
+.wrong{color:red;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<h1>Test Result Report</h1>
+<h2>${testData.testName || ""}</h2>
+
+<p><b>Name:</b> ${
+currentUser.displayName ||
+currentUser.email
+}</p>
+
+<p><b>Score:</b> ${data.score}/${data.total}</p>
+<p><b>Percentage:</b> ${data.percent}%</p>
+<p><b>Correct:</b> ${data.correct}</p>
+<p><b>Wrong:</b> ${data.wrong}</p>
+<p><b>Skipped:</b> ${data.skip}</p>
+<p><b>Negative:</b> ${data.negative}</p>
+<p><b>Accuracy:</b> ${data.accuracy}%</p>
+<p><b>Submitted:</b> ${
+formatDate(resultData.submittedAt)
+}</p>
+
+<hr>
+<h2>Question Review</h2>
+`;
+
+    data.qs.forEach((q,no)=>{
+
+        report += `
+        <div class="qbox">
+        <b>Q${no+1}. ${q.question}</b><br><br>
+        `;
+
+        q.options.forEach((op,i)=>{
+
+            let txt = "";
+
+            if(Number(q.answer)===i){
+                txt +=
+                ` <span class="correct">(Correct)</span>`;
+            }
+
+            if(
+                data.ans[no]===i &&
+                Number(q.answer)!==i
+            ){
+                txt +=
+                ` <span class="wrong">(Your Marked)</span>`;
+            }
+
+            report += `
+            ${String.fromCharCode(65+i)}.
+            ${op}
+            ${txt}<br>
+            `;
+        });
+
+        report += `</div>`;
+    });
+
+    report += `
+</body>
+</html>`;
+
+    const w =
+    window.open("","_blank");
+
+    w.document.write(report);
+    w.document.close();
+    w.print();
 };
 
 /* ================= HELPERS ================= */
@@ -295,9 +383,8 @@ function formatDate(ms){
 
     if(!ms) return "--";
 
-    const d = new Date(ms);
-
-    return d.toLocaleString();
+    return new Date(ms)
+    .toLocaleString();
 }
 
 function showToast(msg){
