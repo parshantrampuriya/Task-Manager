@@ -7,7 +7,9 @@ collection,
 getDocs,
 query,
 where,
-addDoc
+addDoc,
+doc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const getEl=(id)=>document.getElementById(id);
@@ -15,6 +17,7 @@ const getEl=(id)=>document.getElementById(id);
 let currentUser=null;
 let allBankQuestions=[];
 let sourceMode="bank";
+let selectedOwnerUid="";
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
@@ -25,19 +28,12 @@ return;
 }
 
 currentUser=user;
+selectedOwnerUid=user.uid;
 
-await loadSubjects();
 await loadFriends();
+await loadSubjects();
 
 });
-
-/* ================= MENU ================= */
-window.toggleSidebar=()=>{
-
-getEl("sidebar")
-.classList.toggle("active");
-
-};
 
 /* ================= MODE ================= */
 window.setSourceMode=(mode)=>{
@@ -72,7 +68,7 @@ t.classList.add("show");
 
 setTimeout(()=>{
 t.classList.remove("show");
-},1600);
+},1800);
 
 }
 
@@ -84,15 +80,14 @@ p.classList.add("show");
 
 setTimeout(()=>{
 p.classList.remove("show");
-},1500);
+},1600);
 
 }
 
 /* ================= INDEX ================= */
 function idx(v){
 
-if(v===null || v===undefined)
-return -1;
+if(v===null || v===undefined) return -1;
 
 if(typeof v==="number"){
 
@@ -112,9 +107,7 @@ let n=parseInt(s);
 
 if(!isNaN(n)){
 
-if(n>=1 && n<=4)
-return n-1;
-
+if(n>=1 && n<=4) return n-1;
 return n;
 
 }
@@ -131,15 +124,10 @@ const options=q.options || [];
 let answerIndex=-1;
 let answerText="";
 
-/* text direct */
-if(
-typeof q.answer==="string" &&
-isNaN(q.answer)
-){
+if(typeof q.answer==="string" && isNaN(q.answer)){
 answerText=q.answer.trim();
 }
 
-/* old fields */
 if(answerText===""){
 
 const raw =
@@ -153,18 +141,13 @@ q.correct_index ??
 q.answerIndex;
 
 if(typeof raw==="string" && isNaN(raw)){
-
 answerText=raw.trim();
-
 }else{
-
 answerIndex=idx(raw);
-
 }
 
 }
 
-/* text => index */
 if(answerText!==""){
 
 options.forEach((op,i)=>{
@@ -180,37 +163,144 @@ answerIndex=i;
 
 }
 
-/* index => text */
-if(answerIndex>=0 && answerText===""){
-answerText=options[answerIndex] || "";
-}
-
-/* fallback */
 if(answerIndex<0) answerIndex=0;
-if(answerText==="") answerText=options[0] || "";
+if(answerText==="") answerText=options[answerIndex] || "";
 
 return{
 question:q.question || "",
 options,
 answer:answerText,
-answerIndex:answerIndex
+answerIndex
 };
+
+}
+
+/* ================= LOAD FRIENDS ================= */
+async function loadFriends(){
+
+const snap=await getDocs(collection(db,"friends"));
+
+let html="";
+let optionHtml=`<option value="">Select Friend</option>`;
+
+for(const item of snap.docs){
+
+const users=item.data().users || [];
+
+if(!users.includes(currentUser.uid))
+continue;
+
+const fid=users.find(x=>x!==currentUser.uid);
+
+if(!fid) continue;
+
+let name="Friend";
+
+try{
+
+const u=await getDoc(doc(db,"users",fid));
+
+if(u.exists()){
+
+const d=u.data();
+
+name=
+d.name ||
+d.username ||
+d.email ||
+"Friend";
+
+}
+
+}catch(err){}
+
+html += `
+<label class="friend-item">
+<input type="checkbox"
+class="friendCheck"
+value="${fid}">
+<span>👤 ${name}</span>
+</label>
+`;
+
+optionHtml += `
+<option value="${fid}">
+${name}
+</option>
+`;
+
+}
+
+getEl("friendList").innerHTML =
+html || "No Friends";
+
+if(getEl("friendBankList")){
+getEl("friendBankList").innerHTML =
+optionHtml;
+}
+
+}
+
+/* ================= OWNER MODE ================= */
+if(getEl("ownerMode")){
+
+getEl("ownerMode").addEventListener("change",async()=>{
+
+const mode=getEl("ownerMode").value;
+
+if(mode==="self"){
+
+selectedOwnerUid=currentUser.uid;
+getEl("friendBankWrap").style.display="none";
+
+}else{
+
+selectedOwnerUid=
+getEl("friendBankList").value;
+
+getEl("friendBankWrap").style.display="block";
+
+}
+
+await loadSubjects();
+
+});
+
+}
+
+if(getEl("friendBankList")){
+
+getEl("friendBankList").addEventListener("change",async()=>{
+
+selectedOwnerUid=
+getEl("friendBankList").value;
+
+await loadSubjects();
+
+});
 
 }
 
 /* ================= LOAD SUBJECTS ================= */
 async function loadSubjects(){
 
+if(!selectedOwnerUid){
+fillSelect("subjectList",[]);
+fillSelect("chapterList",[]);
+fillSelect("topicList",[]);
+return;
+}
+
 const snap=await getDocs(
 query(
 collection(db,"questionBank"),
-where("uid","==",currentUser.uid)
+where("uid","==",selectedOwnerUid)
 )
 );
 
-let subjects=[];
-
 allBankQuestions=[];
+
+let subjects=[];
 
 snap.forEach(doc=>{
 
@@ -235,43 +325,6 @@ fillSelect("topicList",[]);
 
 }
 
-/* ================= FRIENDS ================= */
-async function loadFriends(){
-
-const snap=
-await getDocs(collection(db,"friends"));
-
-let html="";
-
-for(const item of snap.docs){
-
-const users=
-item.data().users || [];
-
-if(!users.includes(currentUser.uid))
-continue;
-
-const fid=
-users.find(x=>x!==currentUser.uid);
-
-if(!fid) continue;
-
-html += `
-<label class="friend-item">
-<input type="checkbox"
-class="friendCheck"
-value="${fid}">
-<span>👤 Friend</span>
-</label>
-`;
-
-}
-
-getEl("friendList").innerHTML =
-html || "No Friends";
-
-}
-
 /* ================= FILL ================= */
 function fillSelect(id,arr){
 
@@ -288,8 +341,7 @@ getEl(id).innerHTML=html;
 /* ================= SUBJECT CHANGE ================= */
 getEl("subjectList").addEventListener("change",()=>{
 
-const subject=
-getEl("subjectList").value;
+const subject=getEl("subjectList").value;
 
 let chapters=[];
 
@@ -315,11 +367,8 @@ fillSelect("topicList",[]);
 /* ================= CHAPTER CHANGE ================= */
 getEl("chapterList").addEventListener("change",()=>{
 
-const subject=
-getEl("subjectList").value;
-
-const chapter=
-getEl("chapterList").value;
+const subject=getEl("subjectList").value;
+const chapter=getEl("chapterList").value;
 
 let topics=[];
 
@@ -345,14 +394,9 @@ fillSelect("topicList",topics);
 /* ================= FILTER ================= */
 function getFilteredQuestions(){
 
-const subject=
-getEl("subjectList").value.trim();
-
-const chapter=
-getEl("chapterList").value.trim();
-
-const topic=
-getEl("topicList").value.trim();
+const subject=getEl("subjectList").value.trim();
+const chapter=getEl("chapterList").value.trim();
+const topic=getEl("topicList").value.trim();
 
 let arr=[...allBankQuestions];
 
@@ -388,10 +432,8 @@ getEl("manualJson").value.trim()
 ).map(normalizeQuestion);
 
 }catch{
-
 showError("Invalid JSON");
 return;
-
 }
 
 }
@@ -411,11 +453,11 @@ let html="";
 questions.forEach((q,no)=>{
 
 html += `
-<div style="padding:12px;border:1px solid #ddd;margin-bottom:12px">
+<div style="padding:12px;border:1px solid #333;margin-bottom:12px">
 <b>Q${no+1}. ${q.question}</b><br><br>
 `;
 
-(q.options || []).forEach((op,i)=>{
+q.options.forEach((op,i)=>{
 
 html += `
 ${String.fromCharCode(65+i)}.
@@ -434,6 +476,18 @@ getEl("previewBox").innerHTML=html;
 
 };
 
+/* ================= DATE HELPER ================= */
+function getTimeStamp(dateId,timeId){
+
+const d=getEl(dateId).value;
+const t=getEl(timeId).value;
+
+if(!d || !t) return null;
+
+return new Date(d+"T"+t).getTime();
+
+}
+
 /* ================= CREATE ================= */
 window.createTest=async()=>{
 
@@ -446,7 +500,7 @@ return;
 }
 
 const count=
-Number(getEl("questionCount").value);
+Number(getEl("questionCount").value || 0);
 
 let questions=[];
 
@@ -464,10 +518,8 @@ getEl("manualJson").value.trim()
 ).map(normalizeQuestion);
 
 }catch{
-
 showError("Invalid JSON");
 return;
-
 }
 
 }
@@ -482,6 +534,7 @@ questions
 .sort(()=>Math.random()-0.5)
 .slice(0,count);
 
+/* assign */
 const assign=[];
 
 if(getEl("assignSelf").checked)
@@ -489,19 +542,33 @@ assign.push(currentUser.uid);
 
 document
 .querySelectorAll(".friendCheck:checked")
-.forEach(x=>{
-assign.push(x.value);
-});
+.forEach(x=>assign.push(x.value));
 
 if(assign.length===0){
 showError("Select Candidate");
 return;
 }
 
+/* result mode */
 let resultMode="manual";
 
 if(getEl("instantResult").checked)
 resultMode="instant";
+
+if(getEl("releaseLater").checked)
+resultMode="later";
+
+/* schedule */
+const startAt =
+getTimeStamp("startDate","startTime");
+
+const endAt =
+getTimeStamp("endDate","endTime");
+
+if(startAt && endAt && endAt<=startAt){
+showError("End must be after Start");
+return;
+}
 
 await addDoc(
 collection(db,"tests"),
@@ -510,17 +577,20 @@ collection(db,"tests"),
 createdBy:currentUser.uid,
 testName,
 
+testDesc:
+getEl("testDesc").value.trim(),
+
 totalMarks:
-Number(getEl("totalMarks").value),
+Number(getEl("totalMarks").value || 0),
 
 passMarks:
-Number(getEl("passMarks").value),
+Number(getEl("passMarks").value || 0),
 
 duration:
-Number(getEl("duration").value),
+Number(getEl("duration").value || 0),
 
 negativeMarks:
-Number(getEl("negativeMarks").value),
+Number(getEl("negativeMarks").value || 0),
 
 shuffleQuestions:
 getEl("shuffleQuestions").checked,
@@ -529,9 +599,20 @@ shuffleOptions:
 getEl("shuffleOptions").checked,
 
 resultMode,
+resultReleased:
+resultMode==="instant",
 
 assignedTo:assign,
 questions,
+
+sourceMode,
+sourceOwner:selectedOwnerUid,
+
+startAt:startAt || null,
+endAt:endAt || null,
+
+attemptedUsers:[],
+attemptCount:0,
 
 createdAt:Date.now()
 
@@ -542,4 +623,9 @@ showToast("Test Created ✅");
 
 };
 
+/* default */
 setSourceMode("bank");
+
+if(getEl("friendBankWrap")){
+getEl("friendBankWrap").style.display="none";
+}
