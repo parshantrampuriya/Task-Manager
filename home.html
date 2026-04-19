@@ -6,11 +6,13 @@
 <title>Home</title>
 
 <link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/sidebar.css">
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
@@ -19,6 +21,8 @@
     <button onclick="goTasks()">📋 Tasks</button>
     <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+    <button onclick="goTests()">📝 Tests</button>
     <button onclick="goProfile()">👤 Profile</button>
     <button id="logoutBtn">🚪 Logout</button>
 
@@ -29,8 +33,11 @@
 
     <!-- NAVBAR -->
     <div class="navbar">
+
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
         <h2 id="username">👤 Loading...</h2>
+
     </div>
 
     <!-- DASHBOARD -->
@@ -50,10 +57,15 @@
 
                 <!-- QUICK ADD -->
                 <div class="quick-add" id="quickAddBox">
+
                     <input id="quickTaskInput" placeholder="Add new task...">
+
                     <input type="date" id="quickDateInput">
+
                     <input type="time" id="quickTimeInput">
+
                     <button onclick="quickAddTask()">➕ Add</button>
+
                 </div>
 
                 <!-- TASK LIST -->
@@ -65,9 +77,13 @@
             <div class="right-panel">
 
                 <h2>🎯 Goals Progress</h2>
-                <small style="color:#aaa;">Drag to reorder goals</small>
 
-                <div id="goalsHomeContainer" class="goal-container"></div>
+                <small style="color:#aaa;">
+                    Drag to reorder goals
+                </small>
+
+                <div id="goalsHomeContainer"
+                class="goal-container"></div>
 
             </div>
 
@@ -77,21 +93,32 @@
 
 </div>
 
-<!-- ================= 🔥 MODAL ================= -->
-
+<!-- MODAL -->
 <div id="modal" class="modal">
 
     <div class="modal-box">
 
         <h3 id="modalTitle">Edit Task</h3>
 
-        <input id="modalText" placeholder="Task name">
-        <input type="date" id="modalDate">
-        <input type="time" id="modalTime">
+        <input id="modalText"
+        placeholder="Task name">
+
+        <input type="date"
+        id="modalDate">
+
+        <input type="time"
+        id="modalTime">
 
         <div class="modal-actions">
-            <button onclick="confirmAction()">💾 Save</button>
-            <button onclick="closeModal()">❌ Cancel</button>
+
+            <button onclick="confirmAction()">
+                💾 Save
+            </button>
+
+            <button onclick="closeModal()">
+                ❌ Cancel
+            </button>
+
         </div>
 
     </div>
@@ -100,5 +127,6 @@
 
 <script type="module" src="js/home.js"></script>
 <script type="module" src="js/menu.js"></script>
+
 </body>
 </html>
