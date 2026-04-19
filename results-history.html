@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Results</title>
+<link rel="stylesheet" href="css/results-history.css">
+</head>
+<body>
+<div class="topbar">
+<button onclick="location.href='tests.html'">⬅</button>
+<h1>My Results</h1>
+</div>
+<div class="search-row">
+<input id="searchBox" placeholder="Search test name..." oninput="renderResults()">
+<select id="sortBox" onchange="renderResults()">
+<option value="new">Newest</option>
+<option value="high">Highest Score</option>
+<option value="low">Lowest Score</option>
+</select>
+</div>
+<div id="resultList" class="list"></div>
+<script type="module" src="js/results-history.js"></script>
+</body>
+</html>
