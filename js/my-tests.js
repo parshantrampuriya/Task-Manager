@@ -458,7 +458,7 @@ await loadMyTests();
 
 /* ================= OTHER ================= */
 window.openResults = (id)=>{
-location.href="admin-results.html?id="+id;
+location.href="admin-result.html?id="+id;
 };
 
 window.assignTest = (id)=>{
