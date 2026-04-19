@@ -4,7 +4,9 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/fi
 
 import {
 collection,
-getDocs
+getDocs,
+doc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
@@ -62,7 +64,7 @@ await getDocs(collection(db,"tests"));
 
 allTests=[];
 
-snap.forEach(d=>{
+for(const d of snap.docs){
 
 const data=d.data();
 
@@ -72,13 +74,43 @@ data.assignedTo || [];
 if(
 assigned.includes(currentUser.uid)
 ){
-allTests.push({
-id:d.id,
-...data
-});
+
+let creatorName="Admin";
+
+try{
+
+if(data.createdBy){
+
+const uSnap=
+await getDoc(
+doc(db,"users",data.createdBy)
+);
+
+if(uSnap.exists()){
+
+const u=uSnap.data();
+
+creatorName=
+u.name ||
+u.username ||
+u.email ||
+"Admin";
+
 }
 
+}
+
+}catch(err){}
+
+allTests.push({
+id:d.id,
+...data,
+creatorName
 });
+
+}
+
+}
 
 renderTests();
 
@@ -117,6 +149,7 @@ Number(test.endAt || 0);
 const attemptedUsers=
 test.attemptedUsers || [];
 
+/* one attempt only */
 if(
 attemptedUsers.includes(
 currentUser.uid
@@ -125,6 +158,7 @@ currentUser.uid
 return "attempted";
 }
 
+/* scheduled */
 if(start && now < start){
 return "upcoming";
 }
@@ -134,6 +168,40 @@ return "expired";
 }
 
 return "available";
+
+}
+
+/* ================= TIME TEXT ================= */
+function getScheduleText(test){
+
+const start=
+Number(test.startAt || 0);
+
+const end=
+Number(test.endAt || 0);
+
+if(!start && !end){
+return "Anytime";
+}
+
+if(start && !end){
+return "Starts: " +
+new Date(start).toLocaleString();
+}
+
+if(start && end){
+return "Window: " +
+new Date(start).toLocaleDateString() +
+" - " +
+new Date(end).toLocaleDateString();
+}
+
+if(!start && end){
+return "Till: " +
+new Date(end).toLocaleString();
+}
+
+return "-";
 
 }
 
@@ -244,14 +312,15 @@ html += `
 <div>
 
 <div class="test-name">
-${test.testName || "Untitled"}
+${test.testName || "Untitled Test"}
 </div>
 
 <div class="by-text">
-By: ${
-test.creatorName ||
-"Admin"
-}
+By: ${test.creatorName}
+</div>
+
+<div class="by-text">
+${getScheduleText(test)}
 </div>
 
 </div>
@@ -281,16 +350,12 @@ ${cap(status)}
 
 <div class="meta-box">
 <h4>Negative</h4>
-<p>${
-test.negativeMarks || 0
-}%</p>
+<p>${test.negativeMarks || 0}%</p>
 </div>
 
 <div class="meta-box">
 <h4>Time</h4>
-<p>${
-test.duration || 0
-} min</p>
+<p>${test.duration || 0} min</p>
 </div>
 
 </div>
@@ -370,6 +435,17 @@ qCount>0
 ? (totalMarks/qCount).toFixed(2)
 : 0;
 
+let resultText="Instant";
+
+if(test.resultMode==="later"){
+
+resultText=
+test.resultReleased
+? "Released"
+: "Will Release Later";
+
+}
+
 getEl("popupTitle").innerText=
 test.testName || "Test";
 
@@ -393,8 +469,11 @@ ${test.negativeMarks || 0}%</p>
 <p><b>Duration:</b>
 ${test.duration || 0} min</p>
 
-<p><b>Result Mode:</b>
-${test.resultMode || "manual"}</p>
+<p><b>Schedule:</b>
+${getScheduleText(test)}</p>
+
+<p><b>Result:</b>
+${resultText}</p>
 
 `;
 
@@ -429,8 +508,7 @@ location.href=
 /* ================= HELPERS ================= */
 function cap(txt){
 
-return txt.charAt(0)
-.toUpperCase()
+return txt.charAt(0).toUpperCase()
 + txt.slice(1);
 
 }
