@@ -1,0 +1,75 @@
+<!-- admin-result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Results</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/admin-result.css?v=1">
+</head>
+<body>
+
+<div id="sidebar" class="sidebar">
+    <h2>⚡ Menu</h2>
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='my-tests.html'">📝 My Tests</button>
+    <button onclick="location.href='create-test.html'">➕ Create Test</button>
+</div>
+
+<div class="page">
+
+    <div class="top-bar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+        <div class="top-title">
+            <h1 id="pageTitle">📊 Admin Results</h1>
+            <p id="subText">Student performance analysis</p>
+        </div>
+
+        <button class="page-back-btn"
+        onclick="history.back()">⬅</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3 id="totalStudents">0</h3>
+            <p>Students</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="avgScore">0</h3>
+            <p>Average</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="topScore">0</h3>
+            <p>Top Score</p>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <div id="studentList"></div>
+    </div>
+
+</div>
+
+<!-- popup -->
+<div class="popup" id="popup">
+<div class="popup-box">
+
+<button class="close-btn"
+onclick="closePopup()">✕</button>
+
+<h2 id="popupTitle">Result</h2>
+<div id="popupContent"></div>
+
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module" src="js/admin-result.js?v=1"></script>
+</body>
+</html>
