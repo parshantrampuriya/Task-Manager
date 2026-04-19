@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Give Test</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/give-test.css?v=1">
+
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar" class="sidebar">
+
+    <h2>⚡ Menu</h2>
+
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='tests.html'">📝 Tests</button>
+    <button onclick="location.href='create-test.html'">➕ Create Test</button>
+    <button onclick="location.href='my-tests.html'">📋 My Tests</button>
+    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+    <button onclick="location.href='friends.html'">👥 Friends</button>
+    <button onclick="location.href='profile.html'">👤 Profile</button>
+
+</div>
+
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <button class="menu-btn"
+        onclick="toggleSidebar()">☰</button>
+
+        <div class="top-title">
+            <h1>🎯 Give Test</h1>
+            <p>Available tests assigned to you</p>
+        </div>
+
+        <button class="back-btn"
+        onclick="location.href='tests.html'">⬅</button>
+
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+
+        <div class="tabs">
+
+            <button class="tab-btn active"
+            onclick="changeTab('available',this)">
+            Available
+            </button>
+
+            <button class="tab-btn"
+            onclick="changeTab('upcoming',this)">
+            Upcoming
+            </button>
+
+            <button class="tab-btn"
+            onclick="changeTab('attempted',this)">
+            Attempted
+            </button>
+
+            <button class="tab-btn"
+            onclick="changeTab('expired',this)">
+            Expired
+            </button>
+
+        </div>
+
+        <div class="search-row">
+
+            <input type="text"
+            id="searchBox"
+            placeholder="Search test..."
+            onkeyup="renderTests()">
+
+            <select id="sortBox"
+            onchange="renderTests()">
+
+                <option value="new">Newest</option>
+                <option value="name">Name A-Z</option>
+                <option value="marks">Marks High</option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3 id="availableCount">0</h3>
+            <p>Available</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="attemptedCount">0</h3>
+            <p>Attempted</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="pendingCount">0</h3>
+            <p>Pending</p>
+        </div>
+
+    </div>
+
+    <!-- TEST LIST -->
+    <div class="main-card">
+
+        <div id="testList"></div>
+
+    </div>
+
+</div>
+
+<!-- TEST INFO POPUP -->
+<div id="infoPopup" class="popup">
+
+    <div class="popup-box">
+
+        <button class="close-btn"
+        onclick="closePopup()">✕</button>
+
+        <h2 id="popupTitle">
+            Test Details
+        </h2>
+
+        <div id="popupBody"></div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module"
+src="js/give-test.js?v=1"></script>
+
+</body>
+</html>
