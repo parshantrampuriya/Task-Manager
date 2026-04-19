@@ -1,5 +1,5 @@
 /* ================= UPDATED view-question.js ================= */
-/* OLD FEATURES KEPT + PREMIUM POPUPS + FIXED CORRECT OPTION */
+/* OLD FEATURES KEPT + PREMIUM POPUPS + FIXED CORRECT OPTION + PREMIUM RENAME */
 
 import { auth, db } from "./firebase.js";
 
@@ -99,33 +99,27 @@ return -1;
 /* ================= ANSWER ================= */
 function getCorrectIndex(q){
 
-/* direct index */
 if(q.answerIndex !== undefined && q.answerIndex !== null){
 return Number(q.answerIndex);
 }
 
-/* old numeric fields */
 if(q.correct_option !== undefined) return idx(q.correct_option);
 if(q.correctAnswer !== undefined) return idx(q.correctAnswer);
 if(q.correct !== undefined) return idx(q.correct);
 
-/* answer field */
 if(q.answer !== undefined && q.answer !== null){
 
 let ans = String(q.answer).trim();
 
-/* A B C D */
-if(ans.toUpperCase()==="A") return 0;
-if(ans.toUpperCase()==="B") return 1;
-if(ans.toUpperCase()==="C") return 2;
-if(ans.toUpperCase()==="D") return 3;
+if(ans==="A") return 0;
+if(ans==="B") return 1;
+if(ans==="C") return 2;
+if(ans==="D") return 3;
 
-/* 1 2 3 4 */
 if(!isNaN(ans)){
 return idx(Number(ans));
 }
 
-/* text match */
 for(let i=0;i<(q.options || []).length;i++){
 
 if(
@@ -219,6 +213,7 @@ questions.push(q);
 
 let html="";
 
+/* folders */
 folders.forEach(name=>{
 
 html+=`
@@ -237,6 +232,7 @@ ontouchend="cancelHold()">
 
 });
 
+/* questions */
 questions.forEach((q,no)=>{
 
 html+=`
@@ -328,11 +324,51 @@ getEl("popup").classList.add("show");
 
 }
 
-window.renameFolder=async(oldName)=>{
+/* ================= PREMIUM RENAME ================= */
+window.renameFolder=(oldName)=>{
 
-const newName=prompt("Enter new folder name");
+getEl("popupQuestion").innerText="📁 Rename Folder";
 
-if(!newName) return;
+getEl("popupContent").innerHTML=`
+<label>Current Folder</label>
+<input value="${oldName}" disabled>
+
+<label>New Folder Name</label>
+<input id="newFolderName"
+placeholder="Enter new folder name">
+
+<div class="popup-btn-row">
+
+<button class="preview-btn"
+onclick="showFolderPopup('${safe(oldName)}')">
+Cancel
+</button>
+
+<button class="save-btn"
+onclick="saveFolderRename('${safe(oldName)}')">
+💾 Save
+</button>
+
+</div>
+`;
+
+};
+
+window.saveFolderRename=async(oldName)=>{
+
+const box=getEl("newFolderName");
+
+if(!box){
+showToast("Input not found");
+return;
+}
+
+const newName=box.value.trim();
+
+if(!newName){
+showToast("Enter folder name");
+return;
+}
 
 for(const q of allQuestions){
 
@@ -361,7 +397,7 @@ topic:levels[2]
 
 closePopup();
 await loadAllQuestions();
-showToast("Folder Renamed");
+showToast("Folder Renamed ✅");
 
 };
 
