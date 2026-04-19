@@ -1,5 +1,3 @@
-// js/analytics.js
-
 import { auth, db } from "./firebase.js";
 
 import {
@@ -9,7 +7,9 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
 collection,
-getDocs
+getDocs,
+query,
+where
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -18,7 +18,7 @@ const getEl=(id)=>document.getElementById(id);
 let currentUser=null;
 let allResults=[];
 
-/* auth */
+/* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
@@ -27,36 +27,36 @@ return;
 }
 
 currentUser=user;
+
 await loadResults();
 
 });
 
-/* load results */
+/* ================= LOAD RESULTS ================= */
 async function loadResults(){
 
-const snap=
-await getDocs(collection(db,"results"));
+const snap = await getDocs(
+query(
+collection(db,"results"),
+where("uid","==",currentUser.uid)
+)
+);
 
 allResults=[];
 
 snap.forEach(doc=>{
 
-const d=doc.data();
-
-if(d.uid===currentUser.uid){
-
 allResults.push({
 id:doc.id,
-...d
+...doc.data()
 });
 
-}
-
 });
 
+/* sort by time */
 allResults.sort((a,b)=>
-(a.submittedAt||0)-
-(b.submittedAt||0)
+Number(a.submittedAt||0)-
+Number(b.submittedAt||0)
 );
 
 renderSummary();
@@ -64,11 +64,10 @@ renderCharts();
 
 }
 
-/* summary */
+/* ================= SUMMARY ================= */
 function renderSummary(){
 
-const total=
-allResults.length;
+const total = allResults.length;
 
 let sum=0;
 let highest=0;
@@ -80,20 +79,20 @@ let lowTest="-";
 let bestVal=-99999;
 let lowVal=99999;
 
+let totalCorrect=0;
+let totalWrong=0;
+
 allResults.forEach(r=>{
 
 const score=
 Number(r.score||0);
-
-const totalMarks=
-Number(r.totalMarks||0);
 
 sum += score;
 
 if(score>highest)
 highest=score;
 
-if(score>=Number(r.passMarks||0))
+if(score>=0)
 passed++;
 
 if(score>bestVal){
@@ -110,33 +109,32 @@ r.testName ||
 "Untitled Test";
 }
 
+totalCorrect +=
+Number(r.correct||0);
+
+totalWrong +=
+Number(r.wrong||0);
+
 });
 
-const avg=
+const avg =
 total>0
 ? (sum/total).toFixed(1)
 : 0;
 
-const passRate=
+const passRate =
 total>0
 ? ((passed/total)*100).toFixed(1)
 : 0;
 
-/* accuracy */
-let correct=0;
-let wrong=0;
-
-allResults.forEach(r=>{
-correct += Number(r.correct||0);
-wrong += Number(r.wrong||0);
-});
-
-const acc=
-(correct+wrong)>0
-? ((correct/(correct+wrong))*100).toFixed(1)
+const accuracy =
+(totalCorrect+totalWrong)>0
+? (
+(totalCorrect/
+(totalCorrect+totalWrong))*100
+).toFixed(1)
 : 0;
 
-/* improvement */
 let improve=0;
 
 if(total>=2){
@@ -149,50 +147,33 @@ Number(
 allResults[total-1].score||0
 );
 
-if(first!==0){
-
 improve=
-(((last-first)/Math.abs(first))*100)
-.toFixed(1);
-
-}else{
-improve=last*100;
-}
+(last-first).toFixed(1);
 
 }
 
-getEl("totalTests").innerText=
-total;
+/* set values */
+getEl("totalTests").innerText=total;
+getEl("avgScore").innerText=avg;
+getEl("highScore").innerText=highest;
+getEl("passRate").innerText=passRate+"%";
 
-getEl("avgScore").innerText=
-avg;
-
-getEl("highScore").innerText=
-highest;
-
-getEl("passRate").innerText=
-passRate + "%";
-
-getEl("bestTest").innerText=
-bestTest;
-
-getEl("lowTest").innerText=
-lowTest;
-
-getEl("accuracy").innerText=
-acc + "%";
-
-getEl("improve").innerText=
-improve + "%";
+getEl("bestTest").innerText=bestTest;
+getEl("lowTest").innerText=lowTest;
+getEl("accuracy").innerText=accuracy+"%";
+getEl("improve").innerText=improve;
 
 }
 
-/* charts */
+/* ================= CHARTS ================= */
 function renderCharts(){
 
-/* line chart */
 const labels=[];
-const scores=[];
+const scoreData=[];
+
+let correct=0;
+let wrong=0;
+let skip=0;
 
 allResults.forEach((r,i)=>{
 
@@ -201,25 +182,35 @@ r.testName ||
 ("Test "+(i+1))
 );
 
-scores.push(
+scoreData.push(
 Number(r.score||0)
 );
 
+correct +=
+Number(r.correct||0);
+
+wrong +=
+Number(r.wrong||0);
+
+skip +=
+Number(r.skip||0);
+
 });
 
+/* line chart */
 new Chart(
 document.getElementById("scoreChart"),
 {
 type:"line",
 data:{
-labels,
+labels:labels,
 datasets:[{
 label:"Score",
-data:scores,
+data:scoreData,
 borderColor:"#00ffff",
 backgroundColor:"rgba(0,255,255,.15)",
 fill:true,
-tension:.35
+tension:0.4
 }]
 },
 options:{
@@ -244,16 +235,6 @@ ticks:{color:"#fff"}
 );
 
 /* bar chart */
-let c=0,w=0,s=0;
-
-allResults.forEach(r=>{
-
-c += Number(r.correct||0);
-w += Number(r.wrong||0);
-s += Number(r.skip||0);
-
-});
-
 new Chart(
 document.getElementById("barChart"),
 {
@@ -265,7 +246,11 @@ labels:[
 "Skipped"
 ],
 datasets:[{
-data:[c,w,s],
+data:[
+correct,
+wrong,
+skip
+],
 backgroundColor:[
 "#00ff99",
 "#ff4d6d",
