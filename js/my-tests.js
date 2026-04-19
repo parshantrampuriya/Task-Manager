@@ -7,54 +7,42 @@ collection,
 getDocs,
 query,
 where,
-addDoc,
 doc,
-getDoc
+getDoc,
+updateDoc,
+deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const getEl=(id)=>document.getElementById(id);
+/* ================= HELPERS ================= */
+const getEl = (id)=>document.getElementById(id);
 
-let currentUser=null;
-let allBankQuestions=[];
-let sourceMode="bank";
-let selectedOwnerUid="";
+let currentUser = null;
+let allTests = [];
+let activeTab = "all";
+
+let editingTest = null;
+let deletingId = null;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser=user;
-selectedOwnerUid=user.uid;
-
-await loadFriends();
-await loadSubjects();
+currentUser = user;
+await loadMyTests();
 
 });
 
-/* ================= MODE ================= */
-window.setSourceMode=(mode)=>{
+/* ================= SIDEBAR ================= */
+window.toggleSidebar = ()=>{
 
-sourceMode=mode;
+const sidebar = getEl("sidebar");
 
-getEl("btnBank").classList.remove("active");
-getEl("btnManual").classList.remove("active");
-
-if(mode==="bank"){
-
-getEl("btnBank").classList.add("active");
-getEl("bankArea").style.display="block";
-getEl("manualArea").style.display="none";
-
-}else{
-
-getEl("btnManual").classList.add("active");
-getEl("bankArea").style.display="none";
-getEl("manualArea").style.display="block";
-
+if(sidebar){
+sidebar.classList.toggle("active");
 }
 
 };
@@ -62,8 +50,11 @@ getEl("manualArea").style.display="block";
 /* ================= TOAST ================= */
 function showToast(msg){
 
-const t=getEl("toast");
-t.innerText=msg;
+const t = getEl("toast");
+
+if(!t) return;
+
+t.innerText = msg;
 t.classList.add("show");
 
 setTimeout(()=>{
@@ -72,560 +63,423 @@ t.classList.remove("show");
 
 }
 
-function showError(msg){
+/* ================= LOAD TESTS ================= */
+window.loadMyTests = async()=>{
 
-const p=getEl("errorPopup");
-p.innerText=msg;
-p.classList.add("show");
-
-setTimeout(()=>{
-p.classList.remove("show");
-},1600);
-
-}
-
-/* ================= INDEX ================= */
-function idx(v){
-
-if(v===null || v===undefined) return -1;
-
-if(typeof v==="number"){
-
-if(v>=1 && v<=4) return v-1;
-return v;
-
-}
-
-let s=String(v).trim().toUpperCase();
-
-if(s==="A") return 0;
-if(s==="B") return 1;
-if(s==="C") return 2;
-if(s==="D") return 3;
-
-let n=parseInt(s);
-
-if(!isNaN(n)){
-
-if(n>=1 && n<=4) return n-1;
-return n;
-
-}
-
-return -1;
-
-}
-
-/* ================= NORMALIZE ================= */
-function normalizeQuestion(q){
-
-const options=q.options || [];
-
-let answerIndex=-1;
-let answerText="";
-
-if(typeof q.answer==="string" && isNaN(q.answer)){
-answerText=q.answer.trim();
-}
-
-if(answerText===""){
-
-const raw =
-q.answer ??
-q.correct_option ??
-q.correctAnswer ??
-q.correct ??
-q.correctOption ??
-q.rightAnswer ??
-q.correct_index ??
-q.answerIndex;
-
-if(typeof raw==="string" && isNaN(raw)){
-answerText=raw.trim();
-}else{
-answerIndex=idx(raw);
-}
-
-}
-
-if(answerText!==""){
-
-options.forEach((op,i)=>{
-
-if(
-String(op).trim().toLowerCase() ===
-answerText.toLowerCase()
-){
-answerIndex=i;
-}
-
-});
-
-}
-
-if(answerIndex<0) answerIndex=0;
-if(answerText==="") answerText=options[answerIndex] || "";
-
-return{
-question:q.question || "",
-options,
-answer:answerText,
-answerIndex
-};
-
-}
-
-/* ================= LOAD FRIENDS ================= */
-async function loadFriends(){
-
-const snap=await getDocs(collection(db,"friends"));
-
-let html="";
-let optionHtml=`<option value="">Select Friend</option>`;
-
-for(const item of snap.docs){
-
-const users=item.data().users || [];
-
-if(!users.includes(currentUser.uid))
-continue;
-
-const fid=users.find(x=>x!==currentUser.uid);
-
-if(!fid) continue;
-
-let name="Friend";
-
-try{
-
-const u=await getDoc(doc(db,"users",fid));
-
-if(u.exists()){
-
-const d=u.data();
-
-name=
-d.name ||
-d.username ||
-d.email ||
-"Friend";
-
-}
-
-}catch(err){}
-
-html += `
-<label class="friend-item">
-<input type="checkbox"
-class="friendCheck"
-value="${fid}">
-<span>👤 ${name}</span>
-</label>
-`;
-
-optionHtml += `
-<option value="${fid}">
-${name}
-</option>
-`;
-
-}
-
-getEl("friendList").innerHTML =
-html || "No Friends";
-
-if(getEl("friendBankList")){
-getEl("friendBankList").innerHTML =
-optionHtml;
-}
-
-}
-
-/* ================= OWNER MODE ================= */
-if(getEl("ownerMode")){
-
-getEl("ownerMode").addEventListener("change",async()=>{
-
-const mode=getEl("ownerMode").value;
-
-if(mode==="self"){
-
-selectedOwnerUid=currentUser.uid;
-getEl("friendBankWrap").style.display="none";
-
-}else{
-
-selectedOwnerUid=
-getEl("friendBankList").value;
-
-getEl("friendBankWrap").style.display="block";
-
-}
-
-await loadSubjects();
-
-});
-
-}
-
-if(getEl("friendBankList")){
-
-getEl("friendBankList").addEventListener("change",async()=>{
-
-selectedOwnerUid=
-getEl("friendBankList").value;
-
-await loadSubjects();
-
-});
-
-}
-
-/* ================= LOAD SUBJECTS ================= */
-async function loadSubjects(){
-
-if(!selectedOwnerUid){
-fillSelect("subjectList",[]);
-fillSelect("chapterList",[]);
-fillSelect("topicList",[]);
-return;
-}
-
-const snap=await getDocs(
+const snap = await getDocs(
 query(
-collection(db,"questionBank"),
-where("uid","==",selectedOwnerUid)
+collection(db,"tests"),
+where("createdBy","==",currentUser.uid)
 )
 );
 
-allBankQuestions=[];
+allTests = [];
 
-let subjects=[];
+snap.forEach(d=>{
 
-snap.forEach(doc=>{
-
-const d=doc.data();
-
-allBankQuestions.push(d);
-
-if(
-d.subject &&
-!subjects.includes(d.subject)
-){
-subjects.push(d.subject);
-}
+allTests.push({
+id:d.id,
+...d.data()
+});
 
 });
 
-subjects.sort();
-
-fillSelect("subjectList",subjects);
-fillSelect("chapterList",[]);
-fillSelect("topicList",[]);
-
-}
-
-/* ================= FILL ================= */
-function fillSelect(id,arr){
-
-let html=`<option value="">All</option>`;
-
-arr.forEach(v=>{
-html += `<option value="${v}">${v}</option>`;
-});
-
-getEl(id).innerHTML=html;
-
-}
-
-/* ================= SUBJECT CHANGE ================= */
-getEl("subjectList").addEventListener("change",()=>{
-
-const subject=getEl("subjectList").value;
-
-let chapters=[];
-
-allBankQuestions.forEach(q=>{
-
-if(
-q.subject===subject &&
-q.chapter &&
-!chapters.includes(q.chapter)
-){
-chapters.push(q.chapter);
-}
-
-});
-
-chapters.sort();
-
-fillSelect("chapterList",chapters);
-fillSelect("topicList",[]);
-
-});
-
-/* ================= CHAPTER CHANGE ================= */
-getEl("chapterList").addEventListener("change",()=>{
-
-const subject=getEl("subjectList").value;
-const chapter=getEl("chapterList").value;
-
-let topics=[];
-
-allBankQuestions.forEach(q=>{
-
-if(
-q.subject===subject &&
-q.chapter===chapter &&
-q.topic &&
-!topics.includes(q.topic)
-){
-topics.push(q.topic);
-}
-
-});
-
-topics.sort();
-
-fillSelect("topicList",topics);
-
-});
-
-/* ================= FILTER ================= */
-function getFilteredQuestions(){
-
-const subject=getEl("subjectList").value.trim();
-const chapter=getEl("chapterList").value.trim();
-const topic=getEl("topicList").value.trim();
-
-let arr=[...allBankQuestions];
-
-if(subject)
-arr=arr.filter(x=>x.subject===subject);
-
-if(chapter)
-arr=arr.filter(x=>x.chapter===chapter);
-
-if(topic)
-arr=arr.filter(x=>x.topic===topic);
-
-return arr.map(normalizeQuestion);
-
-}
-
-/* ================= PREVIEW ================= */
-window.previewTest=()=>{
-
-let questions=[];
-
-if(sourceMode==="bank"){
-
-questions=getFilteredQuestions();
-
-}else{
-
-try{
-
-questions=
-JSON.parse(
-getEl("manualJson").value.trim()
-).map(normalizeQuestion);
-
-}catch{
-showError("Invalid JSON");
-return;
-}
-
-}
-
-const count=
-Number(getEl("questionCount").value);
-
-if(questions.length<count){
-showError("Not sufficient questions");
-return;
-}
-
-questions=questions.slice(0,count);
-
-let html="";
-
-questions.forEach((q,no)=>{
-
-html += `
-<div style="padding:12px;border:1px solid #333;margin-bottom:12px">
-<b>Q${no+1}. ${q.question}</b><br><br>
-`;
-
-q.options.forEach((op,i)=>{
-
-html += `
-${String.fromCharCode(65+i)}.
-${op}
-${i===q.answerIndex ? " ✅ Correct":""}
-<br>
-`;
-
-});
-
-html += `</div>`;
-
-});
-
-getEl("previewBox").innerHTML=html;
+renderTests();
 
 };
 
-/* ================= DATE HELPER ================= */
-function getTimeStamp(dateId,timeId){
+/* ================= TAB ================= */
+window.changeTab = (tab,btn)=>{
 
-const d=getEl(dateId).value;
-const t=getEl(timeId).value;
-
-if(!d || !t) return null;
-
-return new Date(d+"T"+t).getTime();
-
-}
-
-/* ================= CREATE ================= */
-window.createTest=async()=>{
-
-const testName=
-getEl("testName").value.trim();
-
-if(!testName){
-showError("Enter Test Name");
-return;
-}
-
-const count=
-Number(getEl("questionCount").value || 0);
-
-let questions=[];
-
-if(sourceMode==="bank"){
-
-questions=getFilteredQuestions();
-
-}else{
-
-try{
-
-questions=
-JSON.parse(
-getEl("manualJson").value.trim()
-).map(normalizeQuestion);
-
-}catch{
-showError("Invalid JSON");
-return;
-}
-
-}
-
-if(questions.length<count){
-showError("Not sufficient questions");
-return;
-}
-
-questions=
-questions
-.sort(()=>Math.random()-0.5)
-.slice(0,count);
-
-/* assign */
-const assign=[];
-
-if(getEl("assignSelf").checked)
-assign.push(currentUser.uid);
+activeTab = tab;
 
 document
-.querySelectorAll(".friendCheck:checked")
-.forEach(x=>assign.push(x.value));
+.querySelectorAll(".tab-btn")
+.forEach(x=>x.classList.remove("active"));
 
-if(assign.length===0){
-showError("Select Candidate");
-return;
+if(btn){
+btn.classList.add("active");
 }
 
-/* result mode */
-let resultMode="manual";
+renderTests();
 
-if(getEl("instantResult").checked)
-resultMode="instant";
+};
 
-if(getEl("releaseLater").checked)
-resultMode="later";
+window.searchTests = ()=>{
+renderTests();
+};
 
-/* schedule */
-const startAt =
-getTimeStamp("startDate","startTime");
+/* ================= STATUS ================= */
+function getStatus(test){
 
-const endAt =
-getTimeStamp("endDate","endTime");
+const now = Date.now();
 
-if(startAt && endAt && endAt<=startAt){
-showError("End must be after Start");
-return;
+const start = Number(test.startAt || 0);
+const end   = Number(test.endAt || 0);
+
+if(end && now > end){
+return "completed";
 }
 
-await addDoc(
-collection(db,"tests"),
+if(start && now < start){
+return "draft";
+}
+
+return "active";
+
+}
+
+/* ================= RENDER ================= */
+function renderTests(){
+
+let arr = [...allTests];
+
+/* filter */
+if(activeTab !== "all"){
+
+arr = arr.filter(x=>
+getStatus(x)===activeTab
+);
+
+}
+
+/* search */
+const txt =
+(getEl("searchBox")?.value || "")
+.trim()
+.toLowerCase();
+
+if(txt){
+
+arr = arr.filter(x=>
+(x.testName || "")
+.toLowerCase()
+.includes(txt)
+);
+
+}
+
+/* sort */
+const sort =
+getEl("sortBox")?.value || "new";
+
+if(sort==="new"){
+arr.sort((a,b)=>
+(b.createdAt||0) -
+(a.createdAt||0)
+);
+}
+
+if(sort==="old"){
+arr.sort((a,b)=>
+(a.createdAt||0) -
+(b.createdAt||0)
+);
+}
+
+if(sort==="name"){
+arr.sort((a,b)=>
+(a.testName||"")
+.localeCompare(b.testName||"")
+);
+}
+
+/* stats */
+setText("totalTests",allTests.length);
+
+setText(
+"activeTests",
+allTests.filter(x=>
+getStatus(x)==="active"
+).length
+);
+
+let attempts = 0;
+
+allTests.forEach(x=>{
+attempts += Number(x.attemptCount || 0);
+});
+
+setText("attemptCount",attempts);
+
+/* cards */
+let html = "";
+
+arr.forEach(test=>{
+
+const status = getStatus(test);
+
+const assigned =
+(test.assignedTo || []).length;
+
+const releaseBtn =
+test.resultMode==="later" &&
+!test.resultReleased
+?
+`
+<button class="action-btn"
+onclick="releaseResult('${test.id}')">
+📢 Release Result
+</button>
+`
+:"";
+
+html += `
+<div class="test-card">
+
+<div class="test-top">
+
+<div class="test-name">
+${test.testName || "Untitled Test"}
+</div>
+
+<div class="status ${status}">
+${cap(status)}
+</div>
+
+</div>
+
+<div class="meta-grid">
+
+<div class="meta-box">
+<h4>Users</h4>
+<p>${assigned}</p>
+</div>
+
+<div class="meta-box">
+<h4>Attempts</h4>
+<p>${test.attemptCount || 0}</p>
+</div>
+
+<div class="meta-box">
+<h4>Marks</h4>
+<p>${test.totalMarks || 0}</p>
+</div>
+
+<div class="meta-box">
+<h4>Time</h4>
+<p>${test.duration || 0} min</p>
+</div>
+
+</div>
+
+<div class="action-row">
+
+<button class="action-btn primary"
+onclick="editTest('${test.id}')">
+✏ Edit
+</button>
+
+<button class="action-btn"
+onclick="openResults('${test.id}')">
+📊 Results
+</button>
+
+<button class="action-btn"
+onclick="duplicateTest('${test.id}')">
+📄 Duplicate
+</button>
+
+<button class="action-btn"
+onclick="assignTest('${test.id}')">
+👥 Assign
+</button>
+
+${releaseBtn}
+
+<button class="action-btn delete"
+onclick="askDelete('${test.id}')">
+🗑 Delete
+</button>
+
+</div>
+
+</div>
+`;
+
+});
+
+if(!html){
+
+html = `
+<div class="empty-box">
+No tests found.
+</div>
+`;
+
+}
+
+const list = getEl("testList");
+
+if(list){
+list.innerHTML = html;
+}
+
+}
+
+/* ================= RELEASE RESULT ================= */
+window.releaseResult = async(id)=>{
+
+await updateDoc(
+doc(db,"tests",id),
 {
-
-createdBy:currentUser.uid,
-testName,
-
-testDesc:
-getEl("testDesc").value.trim(),
-
-totalMarks:
-Number(getEl("totalMarks").value || 0),
-
-passMarks:
-Number(getEl("passMarks").value || 0),
-
-duration:
-Number(getEl("duration").value || 0),
-
-negativeMarks:
-Number(getEl("negativeMarks").value || 0),
-
-shuffleQuestions:
-getEl("shuffleQuestions").checked,
-
-shuffleOptions:
-getEl("shuffleOptions").checked,
-
-resultMode,
-resultReleased:
-resultMode==="instant",
-
-assignedTo:assign,
-questions,
-
-sourceMode,
-sourceOwner:selectedOwnerUid,
-
-startAt:startAt || null,
-endAt:endAt || null,
-
-attemptedUsers:[],
-attemptCount:0,
-
-createdAt:Date.now()
-
+resultReleased:true
 }
 );
 
-showToast("Test Created ✅");
+showToast("Result Released ✅");
+
+await loadMyTests();
 
 };
 
-/* default */
-setSourceMode("bank");
+/* ================= EDIT ================= */
+window.editTest = async(id)=>{
 
-if(getEl("friendBankWrap")){
-getEl("friendBankWrap").style.display="none";
+const snap =
+await getDoc(doc(db,"tests",id));
+
+if(!snap.exists()) return;
+
+editingTest = {
+id,
+...snap.data()
+};
+
+getEl("editArea").innerHTML = `
+
+<label>Test Name</label>
+<input id="eName"
+value="${editingTest.testName || ""}">
+
+<label>Duration</label>
+<input id="eTime"
+type="number"
+value="${editingTest.duration || 0}">
+
+<label>Total Marks</label>
+<input id="eMarks"
+type="number"
+value="${editingTest.totalMarks || 0}">
+
+<label>Negative %</label>
+<input id="eNegative"
+type="number"
+value="${editingTest.negativeMarks || 0}">
+
+<div class="popup-btn-row">
+
+<button class="cancel-btn"
+onclick="closeEditPopup()">
+Cancel
+</button>
+
+<button class="save-btn"
+onclick="saveEditTest()">
+Save
+</button>
+
+</div>
+`;
+
+getEl("editPopup")
+?.classList.add("show");
+
+};
+
+/* ================= SAVE EDIT ================= */
+window.saveEditTest = async()=>{
+
+await updateDoc(
+doc(db,"tests",editingTest.id),
+{
+testName:getEl("eName").value.trim(),
+duration:Number(getEl("eTime").value),
+totalMarks:Number(getEl("eMarks").value),
+negativeMarks:Number(getEl("eNegative").value)
+}
+);
+
+closeEditPopup();
+
+showToast("Updated ✅");
+
+await loadMyTests();
+
+};
+
+/* ================= DELETE ================= */
+window.askDelete = (id)=>{
+
+deletingId = id;
+
+getEl("deletePopup")
+?.classList.add("show");
+
+};
+
+window.closeDeletePopup = ()=>{
+
+getEl("deletePopup")
+?.classList.remove("show");
+
+};
+
+window.closeEditPopup = ()=>{
+
+getEl("editPopup")
+?.classList.remove("show");
+
+};
+
+const delBtn = getEl("confirmDeleteBtn");
+
+if(delBtn){
+
+delBtn.onclick = async()=>{
+
+if(!deletingId) return;
+
+await deleteDoc(
+doc(db,"tests",deletingId)
+);
+
+deletingId = null;
+
+closeDeletePopup();
+
+showToast("Deleted ✅");
+
+await loadMyTests();
+
+};
+
+}
+
+/* ================= OTHER ================= */
+window.openResults = (id)=>{
+location.href="admin-results.html?id="+id;
+};
+
+window.assignTest = (id)=>{
+location.href="assign-test.html?id="+id;
+};
+
+window.duplicateTest = (id)=>{
+location.href="create-test.html?copy="+id;
+};
+
+/* ================= HELPERS ================= */
+function cap(t){
+return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function setText(id,val){
+
+const el = getEl(id);
+
+if(el){
+el.innerText = val;
+}
+
 }
