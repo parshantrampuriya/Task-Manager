@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Result</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/result.css?v=1">
+
+</head>
+<body>
+
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <button class="menu-btn"
+        onclick="location.href='give-test.html'">
+        ⬅
+        </button>
+
+        <div class="top-title">
+            <h1>📊 Test Result</h1>
+            <p>Your performance summary</p>
+        </div>
+
+        <button class="home-btn"
+        onclick="location.href='home.html'">
+        🏠
+        </button>
+
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="main-card">
+
+        <!-- RELEASE BLOCK -->
+        <div id="lockBox"
+        class="lock-box"
+        style="display:none;">
+
+            <h2>🔒 Result Not Released</h2>
+
+            <p>
+                Admin has not released score yet.
+            </p>
+
+        </div>
+
+        <!-- RESULT AREA -->
+        <div id="resultArea">
+
+            <!-- TOP SCORE -->
+            <div class="score-card">
+
+                <div class="score-left">
+
+                    <h2 id="scoreText">
+                        0 / 0
+                    </h2>
+
+                    <p id="statusText">
+                        Loading...
+                    </p>
+
+                </div>
+
+                <div class="score-right">
+
+                    <div class="circle-box">
+                        <span id="percentText">
+                            0%
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <h3 id="correctCount">0</h3>
+                    <p>Correct</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3 id="wrongCount">0</h3>
+                    <p>Wrong</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3 id="skipCount">0</h3>
+                    <p>Skipped</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3 id="negativeCount">0</h3>
+                    <p>Negative</p>
+                </div>
+
+            </div>
+
+            <!-- EXTRA -->
+            <div class="info-grid">
+
+                <div class="info-box">
+                    <h4>Accuracy</h4>
+                    <p id="accuracyText">0%</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>Rank</h4>
+                    <p id="rankText">--</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>Submitted</h4>
+                    <p id="submitTime">--</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>Result Mode</h4>
+                    <p id="modeText">Instant</p>
+                </div>
+
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="btn-row">
+
+                <button class="main-btn"
+                onclick="viewAnswers()">
+                👁 View Answers
+                </button>
+
+                <button class="main-btn"
+                onclick="downloadPDF()">
+                📄 Download PDF
+                </button>
+
+                <button class="main-btn"
+                onclick="location.href='give-test.html'">
+                📋 All Tests
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ANSWER POPUP -->
+<div id="answerPopup" class="popup">
+
+    <div class="popup-box">
+
+        <button class="close-btn"
+        onclick="closePopup()">
+        ✕
+        </button>
+
+        <h2>Answer Review</h2>
+
+        <div id="answerList"></div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module"
+src="js/result.js?v=1"></script>
+
+</body>
+</html>
