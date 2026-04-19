@@ -3,371 +3,384 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  collection,
-  getDocs,
-  query,
-  where,
-  addDoc
+collection,
+getDocs,
+query,
+where,
+addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
-const getEl = (id) => document.getElementById(id);
+const getEl = (id)=>document.getElementById(id);
 
-let currentUser = null;
-let allBankQuestions = [];
-let myFriends = [];
-let sourceMode = "bank";
+let currentUser=null;
+let allBankQuestions=[];
+let sourceMode="bank";
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        location.href = "index.html";
-        return;
-    }
+onAuthStateChanged(auth,async(user)=>{
 
-    currentUser = user;
+if(!user){
+location.href="index.html";
+return;
+}
 
-    await loadSubjects();
-    await loadFriends();
+currentUser=user;
+
+await loadSubjects();
+await loadFriends();
+
 });
 
 /* ================= MENU ================= */
-window.toggleSidebar = () => {
-    const bar = getEl("sidebar");
-    if(bar) bar.classList.toggle("active");
+window.toggleSidebar=()=>{
+
+const bar=getEl("sidebar");
+if(bar) bar.classList.toggle("active");
+
 };
 
-/* ================= MODE BUTTON ================= */
-window.setSourceMode = (mode) => {
+/* ================= MODE ================= */
+window.setSourceMode=(mode)=>{
 
-    sourceMode = mode;
+sourceMode=mode;
 
-    getEl("btnBank").classList.remove("active");
-    getEl("btnManual").classList.remove("active");
+getEl("btnBank").classList.remove("active");
+getEl("btnManual").classList.remove("active");
 
-    if(mode === "bank"){
-        getEl("btnBank").classList.add("active");
-        getEl("bankArea").style.display = "block";
-        getEl("manualArea").style.display = "none";
-    }else{
-        getEl("btnManual").classList.add("active");
-        getEl("bankArea").style.display = "none";
-        getEl("manualArea").style.display = "block";
-    }
+if(mode==="bank"){
+
+getEl("btnBank").classList.add("active");
+getEl("bankArea").style.display="block";
+getEl("manualArea").style.display="none";
+
+}else{
+
+getEl("btnManual").classList.add("active");
+getEl("bankArea").style.display="none";
+getEl("manualArea").style.display="block";
+
+}
+
 };
 
 /* ================= TOAST ================= */
 function showToast(msg){
-    const t = getEl("toast");
-    t.innerText = msg;
-    t.classList.add("show");
 
-    setTimeout(()=>{
-        t.classList.remove("show");
-    },2000);
+const t=getEl("toast");
+t.innerText=msg;
+t.classList.add("show");
+
+setTimeout(()=>{
+t.classList.remove("show");
+},1800);
+
 }
 
-/* ================= CENTER ERROR ================= */
 function showError(msg){
-    const p = getEl("errorPopup");
-    p.innerText = msg;
-    p.classList.add("show");
 
-    setTimeout(()=>{
-        p.classList.remove("show");
-    },1200);
+const p=getEl("errorPopup");
+p.innerText=msg;
+p.classList.add("show");
+
+setTimeout(()=>{
+p.classList.remove("show");
+},1500);
+
 }
 
 /* ================= LOAD SUBJECTS ================= */
 async function loadSubjects(){
 
-    const snap = await getDocs(
-        query(
-            collection(db,"questionBank"),
-            where("uid","==",currentUser.uid)
-        )
-    );
+const snap=await getDocs(
+query(
+collection(db,"questionBank"),
+where("uid","==",currentUser.uid)
+)
+);
 
-    allBankQuestions = [];
+let subjects=[];
 
-    let subjects = [];
+allBankQuestions=[];
 
-    snap.forEach(doc=>{
+snap.forEach(doc=>{
 
-        const d = doc.data();
+const d=doc.data();
 
-        allBankQuestions.push(d);
+allBankQuestions.push(d);
 
-        if(d.subject && !subjects.includes(d.subject)){
-            subjects.push(d.subject);
-        }
-    });
+if(
+d.subject &&
+!subjects.includes(d.subject)
+){
+subjects.push(d.subject);
+}
 
-    subjects.sort();
+});
 
-    fillSelect("subjectList",subjects);
-    fillSelect("chapterList",[]);
-    fillSelect("topicList",[]);
+subjects.sort();
+
+fillSelect("subjectList",subjects);
+fillSelect("chapterList",[]);
+fillSelect("topicList",[]);
+
 }
 
 /* ================= LOAD FRIENDS ================= */
 async function loadFriends(){
 
-    const snap = await getDocs(collection(db,"friends"));
+const snap =
+await getDocs(collection(db,"friends"));
 
-    let html = "";
+let html="";
 
-    for(const item of snap.docs){
+for(const item of snap.docs){
 
-        const users = item.data().users || [];
+const users =
+item.data().users || [];
 
-        if(!users.includes(currentUser.uid)) continue;
+if(!users.includes(currentUser.uid))
+continue;
 
-        const fid = users.find(x=>x !== currentUser.uid);
+const fid =
+users.find(x=>x!==currentUser.uid);
 
-        if(!fid) continue;
+if(!fid) continue;
 
-        myFriends.push(fid);
+let name="Friend";
 
-        let name = "Friend";
+const u =
+await getDocs(
+query(
+collection(db,"users"),
+where("__name__","==",fid)
+)
+);
 
-        const userSnap = await getDocs(
-            query(
-                collection(db,"users"),
-                where("__name__","==",fid)
-            )
-        );
-
-        if(!userSnap.empty){
-            name = userSnap.docs[0].data().name || "Friend";
-        }
-
-        html += `
-        <label class="friend-item">
-            <input type="checkbox" value="${fid}" class="friendCheck">
-            <span>👤 ${name}</span>
-        </label>`;
-    }
-
-    getEl("friendList").innerHTML =
-        html || `<div>No Friends Found</div>`;
+if(!u.empty){
+name =
+u.docs[0].data().name ||
+"Friend";
 }
 
-/* ================= FILL SELECT ================= */
-function fillSelect(id, arr){
+html += `
+<label class="friend-item">
+<input type="checkbox"
+class="friendCheck"
+value="${fid}">
+<span>👤 ${name}</span>
+</label>
+`;
 
-    let html = `<option value="">All</option>`;
-
-    arr.forEach(v=>{
-        html += `<option value="${v}">${v}</option>`;
-    });
-
-    getEl(id).innerHTML = html;
 }
 
-/* ================= SUBJECT CHANGE ================= */
-getEl("subjectList").addEventListener("change", ()=>{
+getEl("friendList").innerHTML =
+html || "No Friends";
 
-    const subject = getEl("subjectList").value;
+}
 
-    let chapters = [];
+/* ================= FILL ================= */
+function fillSelect(id,arr){
 
-    allBankQuestions.forEach(q=>{
-        if(q.subject === subject && q.chapter){
-            if(!chapters.includes(q.chapter)){
-                chapters.push(q.chapter);
-            }
-        }
-    });
+let html=`<option value="">All</option>`;
 
-    chapters.sort();
-
-    fillSelect("chapterList",chapters);
-    fillSelect("topicList",[]);
+arr.forEach(v=>{
+html += `<option value="${v}">${v}</option>`;
 });
 
-/* ================= CHAPTER CHANGE ================= */
-getEl("chapterList").addEventListener("change", ()=>{
+getEl(id).innerHTML=html;
 
-    const subject = getEl("subjectList").value;
-    const chapter = getEl("chapterList").value;
+}
 
-    let topics = [];
-
-    allBankQuestions.forEach(q=>{
-        if(
-            q.subject === subject &&
-            q.chapter === chapter &&
-            q.topic
-        ){
-            if(!topics.includes(q.topic)){
-                topics.push(q.topic);
-            }
-        }
-    });
-
-    topics.sort();
-
-    fillSelect("topicList",topics);
-});
-
-/* ================= RESULT OPTION ================= */
-window.handleResultMode = (type)=>{
-
-    const instant = getEl("instantResult");
-    const release = getEl("releaseLater");
-
-    if(type === "instant" && instant.checked){
-        release.checked = false;
-    }
-
-    if(type === "release" && release.checked){
-        instant.checked = false;
-    }
-};
-
-/* ================= GET FILTERED QUESTIONS ================= */
+/* ================= FILTER ================= */
 function getFilteredQuestions(){
 
-    const subject = getEl("subjectList").value.trim();
-    const chapter = getEl("chapterList").value.trim();
-    const topic   = getEl("topicList").value.trim();
+const subject =
+getEl("subjectList").value.trim();
 
-    let arr = [...allBankQuestions];
+const chapter =
+getEl("chapterList").value.trim();
 
-    if(subject){
-        arr = arr.filter(x=>x.subject === subject);
-    }
+const topic =
+getEl("topicList").value.trim();
 
-    if(chapter){
-        arr = arr.filter(x=>x.chapter === chapter);
-    }
+let arr=[...allBankQuestions];
 
-    if(topic){
-        arr = arr.filter(x=>x.topic === topic);
-    }
+if(subject)
+arr=arr.filter(x=>x.subject===subject);
 
-    return arr;
+if(chapter)
+arr=arr.filter(x=>x.chapter===chapter);
+
+if(topic)
+arr=arr.filter(x=>x.topic===topic);
+
+return arr;
+
 }
 
-/* ================= PREVIEW ================= */
-window.previewTest = ()=>{
+/* ================= NORMALIZE ANSWER ================= */
+function idx(v){
 
-    let questions = [];
+if(v===null || v===undefined)
+return 0;
 
-    if(sourceMode === "bank"){
-        questions = getFilteredQuestions();
-    }else{
+if(typeof v==="number")
+return v;
 
-        try{
-            questions = JSON.parse(
-                getEl("manualJson").value.trim()
-            );
-        }catch{
-            showError("Invalid JSON");
-            return;
-        }
-    }
+let s=
+String(v).trim().toUpperCase();
 
-    const count = Number(getEl("questionCount").value);
+if(s==="A") return 0;
+if(s==="B") return 1;
+if(s==="C") return 2;
+if(s==="D") return 3;
 
-    if(questions.length < count){
-        showError("Not sufficient questions");
-        return;
-    }
+let n=parseInt(s);
 
-    let html = `
-    <b>Total Available:</b> ${questions.length}<br>
-    <b>Test Questions:</b> ${count}<br><br>
-    Ready to Create Test ✅
-    `;
+if(!isNaN(n)){
 
-    getEl("previewBox").innerHTML = html;
+if(n>=1 && n<=4)
+return n-1;
+
+return n;
+}
+
+return 0;
+
+}
+
+function normalizeQuestion(q){
+
+let ans = 0;
+
+if(q.answer!==undefined)
+ans = idx(q.answer);
+
+else if(q.correct_option!==undefined)
+ans = idx(q.correct_option);
+
+else if(q.correctAnswer!==undefined)
+ans = idx(q.correctAnswer);
+
+return{
+
+question:q.question || "",
+options:q.options || [],
+answer:ans
+
 };
 
-/* ================= CREATE TEST ================= */
-window.createTest = async ()=>{
+}
 
-    const testName = getEl("testName").value.trim();
+/* ================= CREATE ================= */
+window.createTest = async()=>{
 
-    if(!testName){
-        showError("Enter Test Name");
-        return;
-    }
+const testName =
+getEl("testName").value.trim();
 
-    const count = Number(getEl("questionCount").value);
+if(!testName){
+showError("Enter Test Name");
+return;
+}
 
-    let questions = [];
+const count =
+Number(getEl("questionCount").value);
 
-    if(sourceMode === "bank"){
+let questions=[];
 
-        questions = getFilteredQuestions();
+if(sourceMode==="bank"){
 
-    }else{
+questions =
+getFilteredQuestions();
 
-        try{
-            questions = JSON.parse(
-                getEl("manualJson").value.trim()
-            );
-        }catch{
-            showError("Invalid JSON");
-            return;
-        }
-    }
+}else{
 
-    if(questions.length < count){
-        showError("Not sufficient questions");
-        return;
-    }
+try{
+questions = JSON.parse(
+getEl("manualJson").value.trim()
+);
+}catch{
+showError("Invalid JSON");
+return;
+}
 
-    questions = questions.sort(()=>Math.random()-0.5)
-                         .slice(0,count);
+}
 
-    const assign = [];
+if(questions.length<count){
+showError("Not sufficient questions");
+return;
+}
 
-    if(getEl("assignSelf").checked){
-        assign.push(currentUser.uid);
-    }
+/* random pick */
+questions =
+questions
+.sort(()=>Math.random()-0.5)
+.slice(0,count)
+.map(normalizeQuestion);
 
-    document
-    .querySelectorAll(".friendCheck:checked")
-    .forEach(ch=>{
-        assign.push(ch.value);
-    });
+/* assign users */
+const assign=[];
 
-    if(assign.length === 0){
-        showError("Select Candidate");
-        return;
-    }
+if(getEl("assignSelf").checked)
+assign.push(currentUser.uid);
 
-    await addDoc(collection(db,"tests"),{
+document
+.querySelectorAll(".friendCheck:checked")
+.forEach(x=>{
+assign.push(x.value);
+});
 
-        createdBy : currentUser.uid,
-        testName,
-        totalMarks : Number(getEl("totalMarks").value),
-        passMarks : Number(getEl("passMarks").value),
-        duration : Number(getEl("duration").value),
-        negativePercent :
-            Number(getEl("negativeMarks").value),
+if(assign.length===0){
+showError("Select Candidate");
+return;
+}
 
-        shuffleQuestions :
-            getEl("shuffleQuestions").checked,
+/* result mode */
+let resultMode="manual";
 
-        shuffleOptions :
-            getEl("shuffleOptions").checked,
+if(getEl("instantResult").checked)
+resultMode="instant";
 
-        instantResult :
-            getEl("instantResult").checked,
+/* SAVE */
+await addDoc(
+collection(db,"tests"),
+{
 
-        releaseLater :
-            getEl("releaseLater").checked,
+createdBy:currentUser.uid,
+testName,
 
-        assignedTo : assign,
-        questions,
-        createdAt : Date.now()
-    });
+totalMarks:
+Number(getEl("totalMarks").value),
 
-    showToast("Test Created ✅");
+passMarks:
+Number(getEl("passMarks").value),
+
+duration:
+Number(getEl("duration").value),
+
+negativeMarks:
+Number(getEl("negativeMarks").value),
+
+shuffleQuestions:
+getEl("shuffleQuestions").checked,
+
+shuffleOptions:
+getEl("shuffleOptions").checked,
+
+resultMode,
+
+assignedTo:assign,
+
+questions,
+
+createdAt:Date.now()
+
+}
+);
+
+showToast("Test Created ✅");
+
 };
 
 /* ================= DEFAULT ================= */
