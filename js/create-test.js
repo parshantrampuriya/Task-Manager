@@ -92,12 +92,17 @@ p.classList.remove("show");
 function idx(v){
 
 if(v===null || v===undefined)
-return 0;
+return -1;
 
-if(typeof v==="number")
+/* Number case */
+if(typeof v==="number"){
+
+if(v>=1 && v<=4) return v-1;
+
 return v;
+}
 
-let s=
+let s =
 String(v).trim().toUpperCase();
 
 if(s==="A") return 0;
@@ -115,8 +120,7 @@ return n-1;
 return n;
 }
 
-return 0;
-
+return -1;
 }
 
 /* ================= NORMALIZE ================= */
