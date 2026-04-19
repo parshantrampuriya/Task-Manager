@@ -8,21 +8,26 @@ content="width=device-width,initial-scale=1.0">
 <title>Create Test</title>
 
 <link rel="stylesheet" href="css/home.css">
-<link rel="stylesheet" href="css/create-test.css?v=11">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/create-test.css?v=12">
 
 </head>
+
 <body>
 
-<!-- ================= SIDEBAR ================= -->
+<!-- ================= UNIVERSAL SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
     <h2>⚡ Menu</h2>
 
-    <button onclick="location.href='home.html'">🏠 Home</button>
-    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
-    <button onclick="location.href='tests.html'">📝 Tests</button>
-    <button onclick="location.href='friends.html'">👥 Friends</button>
-    <button onclick="location.href='profile.html'">👤 Profile</button>
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+    <button onclick="goTests()">📝 Tests</button>
+    <button onclick="goProfile()">👤 Profile</button>
+    <button onclick="logout()">🚪 Logout</button>
 
 </div>
 
@@ -36,12 +41,19 @@ content="width=device-width,initial-scale=1.0">
         onclick="toggleSidebar()">☰</button>
 
         <div class="top-title">
+
             <h1>📝 Create Test</h1>
-            <p>Create smart tests from question bank or manual input</p>
+
+            <p>
+            Create smart tests from question bank or manual input
+            </p>
+
         </div>
 
         <button class="back-btn"
-        onclick="location.href='tests.html'">⬅</button>
+        onclick="location.href='tests.html'">
+        ⬅
+        </button>
 
     </div>
 
@@ -49,12 +61,15 @@ content="width=device-width,initial-scale=1.0">
     <div class="main-card">
 
         <!-- BASIC DETAILS -->
-        <h2 class="section-title">Basic Details</h2>
+        <h2 class="section-title">
+        Basic Details
+        </h2>
 
         <div class="grid-2">
 
             <div>
                 <label>Test Name</label>
+
                 <input type="text"
                 id="testName"
                 placeholder="Enter test name">
@@ -62,6 +77,7 @@ content="width=device-width,initial-scale=1.0">
 
             <div>
                 <label>Description</label>
+
                 <input type="text"
                 id="testDesc"
                 placeholder="Optional">
@@ -69,6 +85,7 @@ content="width=device-width,initial-scale=1.0">
 
             <div>
                 <label>Duration (Minutes)</label>
+
                 <input type="number"
                 id="duration"
                 placeholder="60">
@@ -76,6 +93,7 @@ content="width=device-width,initial-scale=1.0">
 
             <div>
                 <label>Total Marks</label>
+
                 <input type="number"
                 id="totalMarks"
                 placeholder="100">
@@ -83,6 +101,7 @@ content="width=device-width,initial-scale=1.0">
 
             <div>
                 <label>Passing Marks</label>
+
                 <input type="number"
                 id="passMarks"
                 placeholder="40">
@@ -90,6 +109,7 @@ content="width=device-width,initial-scale=1.0">
 
             <div>
                 <label>Negative Marking (%)</label>
+
                 <input type="number"
                 id="negativeMarks"
                 placeholder="25">
@@ -97,8 +117,48 @@ content="width=device-width,initial-scale=1.0">
 
         </div>
 
+        <!-- ================= SCHEDULE NEW ================= -->
+        <h2 class="section-title">
+        Test Schedule (Optional)
+        </h2>
+
+        <div class="grid-2">
+
+            <div>
+                <label>Start Date</label>
+                <input type="date"
+                id="startDate">
+            </div>
+
+            <div>
+                <label>Start Time</label>
+                <input type="time"
+                id="startTime">
+            </div>
+
+            <div>
+                <label>End Date</label>
+                <input type="date"
+                id="endDate">
+            </div>
+
+            <div>
+                <label>End Time</label>
+                <input type="time"
+                id="endTime">
+            </div>
+
+        </div>
+
+        <div class="hint-box">
+        Leave blank if users can attempt anytime.
+        If filled, users can attempt only in this interval.
+        </div>
+
         <!-- SOURCE -->
-        <h2 class="section-title">Question Source</h2>
+        <h2 class="section-title">
+        Question Source
+        </h2>
 
         <div class="mode-row">
 
@@ -116,34 +176,72 @@ content="width=device-width,initial-scale=1.0">
 
         </div>
 
-        <!-- BANK AREA -->
+        <!-- ================= NEW OWNER SELECTOR ================= -->
         <div id="bankArea">
 
             <div class="grid-2">
 
                 <div>
+                    <label>Select Question Bank</label>
+
+                    <select id="ownerMode">
+
+                        <option value="self">
+                        My Question Bank
+                        </option>
+
+                        <option value="friend">
+                        Friend Question Bank
+                        </option>
+
+                    </select>
+                </div>
+
+                <div id="friendBankWrap">
+
+                    <label>Select Friend</label>
+
+                    <select id="friendBankList">
+                        <option value="">
+                        Select Friend
+                        </option>
+                    </select>
+
+                </div>
+
+                <div>
                     <label>Subject</label>
+
                     <select id="subjectList">
-                        <option value="">All</option>
+                        <option value="">
+                        All
+                        </option>
                     </select>
                 </div>
 
                 <div>
                     <label>Chapter</label>
+
                     <select id="chapterList">
-                        <option value="">All</option>
+                        <option value="">
+                        All
+                        </option>
                     </select>
                 </div>
 
                 <div>
                     <label>Topic</label>
+
                     <select id="topicList">
-                        <option value="">All</option>
+                        <option value="">
+                        All
+                        </option>
                     </select>
                 </div>
 
                 <div>
                     <label>No. of Questions</label>
+
                     <input type="number"
                     id="questionCount"
                     placeholder="20">
@@ -152,16 +250,26 @@ content="width=device-width,initial-scale=1.0">
             </div>
 
             <div class="hint-box">
-                If only Subject selected, random questions will come from all chapters/topics.<br>
-                If Subject + Topic selected, questions will come from matching topic across all folders.
+
+                If only Subject selected,
+                random questions come from all folders.
+
+                <br><br>
+
+                If Friend Question Bank selected,
+                questions load from selected friend's data.
+
             </div>
 
         </div>
 
-        <!-- MANUAL AREA -->
-        <div id="manualArea" style="display:none;">
+        <!-- MANUAL -->
+        <div id="manualArea"
+        style="display:none;">
 
-            <label>Paste JSON Questions</label>
+            <label>
+            Paste JSON Questions
+            </label>
 
             <textarea id="manualJson"
             placeholder='[{"question":"2+2?","options":["1","2","3","4"],"answer":3}]'></textarea>
@@ -169,15 +277,20 @@ content="width=device-width,initial-scale=1.0">
         </div>
 
         <!-- ASSIGN -->
-        <h2 class="section-title">Assign Test</h2>
+        <h2 class="section-title">
+        Assign Test
+        </h2>
 
         <div class="assign-card">
 
             <label class="tick-row">
+
                 <input type="checkbox"
                 id="assignSelf"
                 checked>
+
                 <span>Myself</span>
+
             </label>
 
             <div id="friendList"
@@ -186,36 +299,59 @@ content="width=device-width,initial-scale=1.0">
         </div>
 
         <!-- SETTINGS -->
-        <h2 class="section-title">Settings</h2>
+        <h2 class="section-title">
+        Settings
+        </h2>
 
         <div class="settings-grid">
 
             <label class="tick-row">
+
                 <input type="checkbox"
                 id="shuffleQuestions"
                 checked>
-                <span>Shuffle Questions</span>
+
+                <span>
+                Shuffle Questions
+                </span>
+
             </label>
 
             <label class="tick-row">
+
                 <input type="checkbox"
                 id="shuffleOptions"
                 checked>
-                <span>Shuffle Options</span>
+
+                <span>
+                Shuffle Options
+                </span>
+
             </label>
 
             <label class="tick-row">
+
                 <input type="radio"
                 name="resultMode"
-                id="instantResult">
-                <span>Instant Result</span>
+                id="instantResult"
+                checked>
+
+                <span>
+                Instant Result
+                </span>
+
             </label>
 
             <label class="tick-row">
+
                 <input type="radio"
                 name="resultMode"
                 id="releaseLater">
-                <span>Release Score Later</span>
+
+                <span>
+                Release Score Later
+                </span>
+
             </label>
 
         </div>
@@ -238,7 +374,9 @@ content="width=device-width,initial-scale=1.0">
         <!-- PREVIEW -->
         <div class="preview-card">
 
-            <h2 class="section-title">Preview</h2>
+            <h2 class="section-title">
+            Preview
+            </h2>
 
             <div id="previewBox">
                 No Preview Yet
@@ -253,13 +391,17 @@ content="width=device-width,initial-scale=1.0">
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- CENTER ERROR -->
-<div id="errorPopup" class="center-popup">
+<!-- ERROR -->
+<div id="errorPopup"
+class="center-popup">
 Message
 </div>
 
 <script type="module"
-src="js/create-test.js?v=11"></script>
+src="js/menu.js"></script>
+
+<script type="module"
+src="js/create-test.js?v=12"></script>
 
 </body>
 </html>
