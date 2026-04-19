@@ -1,15 +1,15 @@
 /* ================= UPDATED view-question.js ================= */
-/* FRIEND MODE FIXED + DEBUG + OLD FEATURES SAFE */
+/* OLD FEATURES KEPT + NEW UNIVERSAL ANSWER SUPPORT */
 
 import { auth, db } from "./firebase.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  collection,
-  getDocs,
-  query,
-  where
+collection,
+getDocs,
+query,
+where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
@@ -27,322 +27,442 @@ const friendUid = params.get("uid");
 let readOnly = false;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async (user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
-    if(!user){
-        location.href="index.html";
-        return;
-    }
+if(!user){
+location.href="index.html";
+return;
+}
 
-    currentUser = user;
+currentUser=user;
 
-    console.log("My UID =", user.uid);
-    console.log("Friend UID =", friendUid);
+if(
+friendUid &&
+friendUid.trim()!=="" &&
+friendUid!==user.uid
+){
+readOnly=true;
+}
 
-    if(
-        friendUid &&
-        friendUid.trim() !== "" &&
-        friendUid !== user.uid
-    ){
-        readOnly = true;
-    }
+await loadAllQuestions();
 
-    console.log("Read Only =", readOnly);
-
-    await loadAllQuestions();
 });
 
 /* ================= MENU ================= */
-window.toggleSidebar = ()=>{
-    const sidebar = getEl("sidebar");
-    if(sidebar) sidebar.classList.toggle("active");
+window.toggleSidebar=()=>{
+
+const bar=getEl("sidebar");
+if(bar) bar.classList.toggle("active");
+
 };
+
+/* ================= UNIVERSAL INDEX ================= */
+function idx(v){
+
+if(v===null || v===undefined)
+return -1;
+
+if(typeof v==="number"){
+
+if(v>=1 && v<=4) return v-1;
+return v;
+
+}
+
+let s=String(v).trim().toUpperCase();
+
+if(s==="A") return 0;
+if(s==="B") return 1;
+if(s==="C") return 2;
+if(s==="D") return 3;
+
+let n=parseInt(s);
+
+if(!isNaN(n)){
+
+if(n>=1 && n<=4)
+return n-1;
+
+return n;
+
+}
+
+return -1;
+
+}
+
+/* ================= GET CORRECT INDEX ================= */
+function getCorrectIndex(q){
+
+/* new format */
+if(q.answerIndex!==undefined)
+return idx(q.answerIndex);
+
+/* text answer */
+if(
+typeof q.answer==="string" &&
+isNaN(q.answer)
+){
+
+const txt=q.answer.trim().toLowerCase();
+
+for(let i=0;i<(q.options||[]).length;i++){
+
+if(
+String(q.options[i])
+.trim()
+.toLowerCase()===txt
+){
+return i;
+}
+
+}
+
+}
+
+/* old format */
+if(q.answer!==undefined)
+return idx(q.answer);
+
+if(q.correct_option!==undefined)
+return idx(q.correct_option);
+
+if(q.correctAnswer!==undefined)
+return idx(q.correctAnswer);
+
+if(q.correct!==undefined)
+return idx(q.correct);
+
+return 0;
+
+}
 
 /* ================= LOAD ================= */
 async function loadAllQuestions(){
 
-    const targetUid =
-    (readOnly && friendUid)
-    ? friendUid
-    : currentUser.uid;
+const targetUid =
+(readOnly && friendUid)
+? friendUid
+: currentUser.uid;
 
-    console.log("Loading Questions UID =", targetUid);
+const snap=await getDocs(
+query(
+collection(db,"questionBank"),
+where("uid","==",targetUid)
+)
+);
 
-    const snap = await getDocs(
-        query(
-            collection(db,"questionBank"),
-            where("uid","==",targetUid)
-        )
-    );
+allQuestions=[];
 
-    allQuestions = [];
+snap.forEach(doc=>{
 
-    snap.forEach(doc=>{
-        allQuestions.push({
-            id:doc.id,
-            ...doc.data()
-        });
-    });
+allQuestions.push({
+id:doc.id,
+...doc.data()
+});
 
-    renderFiles();
+});
+
+renderFiles();
+
 }
 
 /* ================= RENDER ================= */
 function renderFiles(){
 
-    const fileArea = getEl("fileArea");
-    const pathText = getEl("pathText");
-    const viewBtn = getEl("viewAllBtn");
+const fileArea=getEl("fileArea");
+const pathText=getEl("pathText");
+const viewBtn=getEl("viewAllBtn");
 
-    pathText.innerText =
-    currentPath.length===0
-    ? "Home"
-    : currentPath.join(" > ");
+pathText.innerText=
+currentPath.length===0
+? "Home"
+: currentPath.join(" > ");
 
-    let folders = [];
-    let questions = [];
+let folders=[];
+let questions=[];
 
-    allQuestions.forEach(q=>{
+allQuestions.forEach(q=>{
 
-        const levels = [
-            q.subject || "",
-            q.chapter || "",
-            q.topic || ""
-        ].filter(v=>v!== "");
+const levels=[
+q.subject || "",
+q.chapter || "",
+q.topic || ""
+].filter(v=>v!=="");
 
-        let ok = true;
+let ok=true;
 
-        for(let i=0;i<currentPath.length;i++){
-            if(levels[i] !== currentPath[i]){
-                ok = false;
-                break;
-            }
-        }
+for(let i=0;i<currentPath.length;i++){
 
-        if(!ok) return;
+if(levels[i]!==currentPath[i]){
+ok=false;
+break;
+}
 
-        if(levels.length > currentPath.length){
+}
 
-            const next =
-            levels[currentPath.length];
+if(!ok) return;
 
-            if(next && !folders.includes(next)){
-                folders.push(next);
-            }
+if(levels.length>currentPath.length){
 
-        }else{
-            questions.push(q);
-        }
-    });
+const next=
+levels[currentPath.length];
 
-    folders.sort((a,b)=>a.localeCompare(b));
-    questions.sort((a,b)=>
-        a.question.localeCompare(b.question)
-    );
+if(next && !folders.includes(next))
+folders.push(next);
 
-    if(viewBtn){
-        viewBtn.style.display =
-        questions.length>0
-        ? "inline-flex"
-        : "none";
-    }
+}else{
+questions.push(q);
+}
 
-    let html = "";
+});
 
-    folders.forEach(name=>{
+folders.sort((a,b)=>a.localeCompare(b));
 
-        html += `
-        <div class="file-item folder"
-        onclick="openFolder('${safe(name)}')">
+questions.sort((a,b)=>
+(a.question||"")
+.localeCompare(b.question||"")
+);
 
-        <div class="file-icon">📁</div>
-        <div class="file-name">${name}</div>
+if(viewBtn){
 
-        </div>`;
-    });
+viewBtn.style.display=
+questions.length>0
+? "inline-flex"
+: "none";
 
-    questions.forEach((q,index)=>{
+}
 
-        html += `
-        <div class="file-item question"
-        onclick="openQuestion('${q.id}')">
+let html="";
 
-        <div class="file-icon">📄</div>
+/* folders */
+folders.forEach(name=>{
 
-        <div class="file-name">
-        Q${index+1}. ${q.question}
-        </div>
+html += `
+<div class="file-item folder"
+onclick="openFolder('${safe(name)}')">
 
-        </div>`;
-    });
+<div class="file-icon">📁</div>
+<div class="file-name">${name}</div>
 
-    if(!html){
-        html = `
-        <div class="file-item">
-        <div class="file-name">
-        Empty Folder
-        </div>
-        </div>`;
-    }
+</div>
+`;
 
-    fileArea.innerHTML = html;
+});
+
+/* questions */
+questions.forEach((q,no)=>{
+
+html += `
+<div class="file-item question"
+onclick="openQuestion('${q.id}')">
+
+<div class="file-icon">📄</div>
+
+<div class="file-name">
+Q${no+1}. ${q.question}
+</div>
+
+</div>
+`;
+
+});
+
+if(!html){
+
+html=`
+<div class="file-item">
+<div class="file-name">
+Empty Folder
+</div>
+</div>
+`;
+
+}
+
+fileArea.innerHTML=html;
+
 }
 
 /* ================= SAFE ================= */
 function safe(text){
-    return text.replace(/'/g,"\\'");
+return text.replace(/'/g,"\\'");
 }
 
 /* ================= FOLDER ================= */
-window.openFolder = (name)=>{
-    currentPath.push(name);
-    renderFiles();
+window.openFolder=(name)=>{
+
+currentPath.push(name);
+renderFiles();
+
 };
 
-window.goFolderBack = ()=>{
-    if(currentPath.length>0){
-        currentPath.pop();
-        renderFiles();
-    }
+window.goFolderBack=()=>{
+
+if(currentPath.length>0){
+currentPath.pop();
+renderFiles();
+}
+
 };
 
 /* ================= OPEN QUESTION ================= */
-window.openQuestion = (id)=>{
+window.openQuestion=(id)=>{
 
-    selectedQuestion =
-    allQuestions.find(q=>q.id===id);
+selectedQuestion=
+allQuestions.find(x=>x.id===id);
 
-    if(!selectedQuestion) return;
+if(!selectedQuestion) return;
 
-    getEl("popupQuestion").innerText =
-    selectedQuestion.question;
+getEl("popupQuestion").innerText=
+selectedQuestion.question;
 
-    if(readOnly){
+if(readOnly){
 
-        getEl("popupContent").innerHTML = `
-        <div class="popup-btn-row">
+getEl("popupContent").innerHTML=`
+<div class="popup-btn-row">
 
-        <button class="preview-btn"
-        onclick="previewQuestion()">
-        👁 Preview
-        </button>
+<button class="preview-btn"
+onclick="previewQuestion()">
+👁 Preview
+</button>
 
-        </div>`;
+</div>
+`;
 
-    }else{
+}else{
 
-        getEl("popupContent").innerHTML = `
-        <div class="popup-btn-row">
+getEl("popupContent").innerHTML=`
+<div class="popup-btn-row">
 
-        <button class="preview-btn"
-        onclick="previewQuestion()">
-        👁 Preview
-        </button>
+<button class="preview-btn"
+onclick="previewQuestion()">
+👁 Preview
+</button>
 
-        <button class="edit-btn">
-        ✏ Edit
-        </button>
+<button class="edit-btn">
+✏ Edit
+</button>
 
-        <button class="delete-btn">
-        🗑 Delete
-        </button>
+<button class="delete-btn">
+🗑 Delete
+</button>
 
-        </div>`;
-    }
+</div>
+`;
 
-    getEl("popup").classList.add("show");
+}
+
+getEl("popup").classList.add("show");
+
 };
 
 /* ================= PREVIEW ================= */
-window.previewQuestion = ()=>{
+window.previewQuestion=()=>{
 
-    let ans =
-    parseInt(selectedQuestion.answer);
+const ans =
+getCorrectIndex(selectedQuestion);
 
-    if(isNaN(ans)) ans = 0;
+let html="";
 
-    let html = "";
+(selectedQuestion.options || [])
+.forEach((op,i)=>{
 
-    selectedQuestion.options.forEach((op,i)=>{
+html += `
+<div class="option-box ${
+i===ans ? "correct":""
+}">
 
-        html += `
-        <div class="option-box ${
-        i===ans ? "correct":""
-        }">
+${String.fromCharCode(65+i)}.
+${op}
 
-        ${String.fromCharCode(65+i)}.
-        ${op}
+${i===ans ? " ✅ Correct":""}
 
-        ${i===ans ? " ✅ Correct":""}
+</div>
+`;
 
-        </div>`;
-    });
+});
 
-    getEl("popupContent").innerHTML = html;
+getEl("popupContent").innerHTML=html;
+
 };
 
 /* ================= VIEW ALL ================= */
-window.viewAllQuestions = ()=>{
+window.viewAllQuestions=()=>{
 
-    let html = "";
+let html="";
+let list=[];
 
-    let list = [];
+allQuestions.forEach(q=>{
 
-    allQuestions.forEach(q=>{
+const levels=[
+q.subject || "",
+q.chapter || "",
+q.topic || ""
+].filter(v=>v!=="");
 
-        const levels = [
-            q.subject || "",
-            q.chapter || "",
-            q.topic || ""
-        ].filter(v=>v!== "");
+let ok=true;
 
-        let ok = true;
+for(let i=0;i<currentPath.length;i++){
 
-        for(let i=0;i<currentPath.length;i++){
-            if(levels[i]!==currentPath[i]){
-                ok = false;
-                break;
-            }
-        }
+if(levels[i]!==currentPath[i]){
+ok=false;
+break;
+}
 
-        if(ok && levels.length===currentPath.length){
-            list.push(q);
-        }
-    });
+}
 
-    list.forEach((q,no)=>{
+if(ok && levels.length===currentPath.length){
+list.push(q);
+}
 
-        let ans = parseInt(q.answer);
-        if(isNaN(ans)) ans = 0;
+});
 
-        html += `
-        <div class="all-box">
-        <h3>Q${no+1}. ${q.question}</h3>`;
+list.forEach((q,no)=>{
 
-        q.options.forEach((op,i)=>{
+const ans =
+getCorrectIndex(q);
 
-            html += `
-            <div class="option-box ${
-            i===ans ? "correct":""
-            }">
-            ${String.fromCharCode(65+i)}.
-            ${op}
-            ${i===ans ? " ✅":""}
-            </div>`;
-        });
+html += `
+<div class="all-box">
 
-        html += `</div>`;
-    });
+<h3>Q${no+1}. ${q.question}</h3>
+`;
 
-    getEl("popupQuestion").innerText =
-    "All Questions Preview";
+(q.options || []).forEach((op,i)=>{
 
-    getEl("popupContent").innerHTML = html;
+html += `
+<div class="option-box ${
+i===ans ? "correct":""
+}">
 
-    getEl("popup").classList.add("show");
+${String.fromCharCode(65+i)}.
+${op}
+
+${i===ans ? " ✅ Correct":""}
+
+</div>
+`;
+
+});
+
+html += `</div>`;
+
+});
+
+getEl("popupQuestion").innerText=
+"All Questions Preview";
+
+getEl("popupContent").innerHTML=
+html;
+
+getEl("popup").classList.add("show");
+
 };
 
 /* ================= CLOSE ================= */
-window.closePopup = ()=>{
-    getEl("popup").classList.remove("show");
+window.closePopup=()=>{
+
+getEl("popup").classList.remove("show");
+
 };
