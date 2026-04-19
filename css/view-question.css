@@ -77,7 +77,8 @@ body{
 .path-bar{
     display:flex;
     align-items:center;
-    gap:14px;
+    gap:12px;
+    flex-wrap:wrap;
     margin-bottom:18px;
     padding:14px 18px;
     border-radius:18px;
@@ -93,11 +94,6 @@ body{
     font-weight:700;
     color:#fff;
     background:#252525;
-    transition:.25s;
-}
-
-.folder-back-btn:hover{
-    background:#333;
 }
 
 .path-text{
@@ -107,13 +103,35 @@ body{
     word-break:break-word;
 }
 
+.view-all-btn,
+.preview-btn,
+.edit-btn,
+.save-btn{
+    border:none;
+    padding:12px 18px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:700;
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
+.delete-btn{
+    border:none;
+    padding:12px 18px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(45deg,#ff4d4d,#ff7777);
+}
+
 /* ================= MAIN CARD ================= */
 .main-card{
     background:rgba(16,16,16,.92);
     border:1px solid rgba(0,255,255,.10);
     border-radius:24px;
     padding:18px;
-    box-shadow:0 0 22px rgba(0,255,255,.05);
 }
 
 /* ================= FILE ITEMS ================= */
@@ -135,10 +153,6 @@ body{
     background:#222;
 }
 
-.file-item:active{
-    transform:scale(.98);
-}
-
 .file-icon{
     font-size:24px;
     width:34px;
@@ -149,7 +163,6 @@ body{
     flex:1;
     font-size:16px;
     font-weight:600;
-    word-break:break-word;
 }
 
 .folder{
@@ -164,12 +177,12 @@ body{
 .popup{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.72);
+    background:rgba(0,0,0,.76);
     display:none;
     justify-content:center;
     align-items:center;
     z-index:9999;
-    padding:14px;
+    padding:16px;
 }
 
 .popup.show{
@@ -178,15 +191,15 @@ body{
 
 .popup-box{
     width:100%;
-    max-width:650px;
-    max-height:90vh;
+    max-width:700px;
+    max-height:92vh;
     overflow:auto;
     background:#111;
-    border-radius:22px;
-    padding:22px;
+    border-radius:24px;
+    padding:24px;
     position:relative;
     border:1px solid rgba(0,255,255,.12);
-    box-shadow:0 0 26px rgba(0,255,255,.10);
+    box-shadow:0 0 26px rgba(0,255,255,.12);
 }
 
 .close-btn{
@@ -201,91 +214,39 @@ body{
     background:#222;
     color:#fff;
     font-size:18px;
-    transition:.2s;
-}
-
-.close-btn:hover{
-    background:#333;
 }
 
 .popup-box h2{
     margin-top:0;
-    padding-right:52px;
-    font-size:24px;
+    padding-right:55px;
     line-height:1.4;
-    word-break:break-word;
 }
 
 /* ================= BUTTON ROW ================= */
 .popup-btn-row{
     display:flex;
     gap:12px;
-    margin:18px 0;
     flex-wrap:wrap;
-}
-
-/* ================= BUTTONS ================= */
-.preview-btn,
-.edit-btn,
-.save-btn,
-.delete-btn{
-    border:none;
-    padding:12px 18px;
-    border-radius:14px;
-    cursor:pointer;
-    font-weight:700;
-    transition:.22s;
-}
-
-.preview-btn{
-    background:#252525;
-    color:#fff;
-}
-
-.preview-btn:hover{
-    background:#333;
-}
-
-.edit-btn,
-.save-btn{
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-    color:#000;
-}
-
-.edit-btn:hover,
-.save-btn:hover{
-    transform:translateY(-2px);
-}
-
-.delete-btn{
-    background:linear-gradient(45deg,#ff4d4d,#ff7676);
-    color:#fff;
-}
-
-.delete-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 0 14px rgba(255,0,0,.20);
+    margin:18px 0;
 }
 
 /* ================= OPTIONS ================= */
 .option-box{
-    padding:12px;
+    padding:14px;
     border-radius:14px;
     background:#1b1b1b;
     margin-bottom:10px;
-    line-height:1.5;
 }
 
 .correct{
-    border-left:4px solid #00ff99;
     background:#153026;
+    border-left:4px solid #00ff99;
 }
 
-/* ================= FORM ================= */
+/* ================= EDIT FORM ================= */
 .popup-box label{
     display:block;
     margin:10px 0 6px;
-    font-size:14px;
     color:#9eeeff;
     font-weight:700;
 }
@@ -298,16 +259,37 @@ body{
     border:none;
     outline:none;
     border-radius:14px;
-    box-sizing:border-box;
     background:#1b1b1b;
     color:#fff;
+    box-sizing:border-box;
     margin-bottom:10px;
-    font-size:15px;
 }
 
 .popup-box textarea{
     min-height:100px;
-    resize:vertical;
+}
+
+/* option edit row */
+.edit-opt{
+    display:grid;
+    grid-template-columns:42px 1fr;
+    gap:10px;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.edit-opt input[type="radio"]{
+    width:20px;
+    height:20px;
+}
+
+/* ================= ALL PREVIEW ================= */
+.all-box{
+    background:#161616;
+    padding:16px;
+    border-radius:18px;
+    margin-bottom:16px;
+    border-left:4px solid #00eaff;
 }
 
 /* ================= TOAST ================= */
@@ -316,11 +298,9 @@ body{
     top:18px;
     right:18px;
     padding:14px 18px;
-    min-width:220px;
     border-radius:14px;
     background:#111;
     border:1px solid rgba(0,255,255,.2);
-    box-shadow:0 0 18px rgba(0,255,255,.12);
     transform:translateY(-120px);
     opacity:0;
     transition:.3s;
@@ -335,54 +315,17 @@ body{
 /* ================= MOBILE ================= */
 @media(max-width:768px){
 
-    .page{
-        padding:12px;
-    }
-
-    .top-bar{
-        padding:14px;
-        gap:10px;
-        border-radius:18px;
-    }
-
     .top-title h1{
         font-size:24px;
     }
 
-    .top-title p{
-        font-size:12px;
-    }
-
-    .menu-btn,
-    .page-back-btn{
-        width:48px;
-        height:48px;
-        font-size:20px;
-        border-radius:14px;
-    }
-
-    .path-bar{
-        flex-direction:column;
-        align-items:stretch;
-    }
-
-    .folder-back-btn{
-        width:100%;
-    }
-
-    .file-item{
-        padding:14px;
-    }
-
-    .popup-box{
-        padding:18px;
-        border-radius:18px;
-    }
-
+    .path-bar,
     .popup-btn-row{
         flex-direction:column;
     }
 
+    .folder-back-btn,
+    .view-all-btn,
     .preview-btn,
     .edit-btn,
     .save-btn,
@@ -390,60 +333,11 @@ body{
         width:100%;
     }
 
-    #toast{
-        left:12px;
-        right:12px;
-        min-width:auto;
+    .popup-box{
+        padding:18px;
     }
-}
-/* ================= ADD THIS IN YOUR view-question.css ================= */
 
-/* PATH BAR RIGHT BUTTON */
-.path-bar{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    flex-wrap:wrap;
-}
-
-.path-text{
-    flex:1;
-}
-
-/* VIEW ALL BUTTON */
-.view-all-btn{
-    border:none;
-    padding:12px 18px;
-    border-radius:14px;
-    cursor:pointer;
-    font-weight:700;
-    color:#000;
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-    transition:.25s;
-}
-
-.view-all-btn:hover{
-    transform:translateY(-2px);
-}
-
-/* ALL QUESTIONS PREVIEW */
-.all-box{
-    background:#161616;
-    padding:16px;
-    border-radius:18px;
-    margin-bottom:16px;
-    border-left:4px solid #00eaff;
-}
-
-.all-box h3{
-    margin:0 0 12px;
-    font-size:18px;
-}
-
-/* MOBILE */
-@media(max-width:768px){
-
-    .view-all-btn{
-        width:100%;
+    .edit-opt{
+        grid-template-columns:34px 1fr;
     }
 }
