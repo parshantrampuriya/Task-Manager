@@ -136,38 +136,38 @@ return -1;
 /* ================= RIGHT ANSWER ================= */
 function getCorrectIndex(q){
 
-    /* answerIndex direct */
+    /* direct answerIndex */
     if(q.answerIndex !== undefined && q.answerIndex !== null){
         return Number(q.answerIndex);
     }
 
-    /* old numeric fields */
+    /* old fields */
     if(q.correct_option !== undefined) return idx(q.correct_option);
     if(q.correctAnswer !== undefined) return idx(q.correctAnswer);
     if(q.correct !== undefined) return idx(q.correct);
 
-    /* answer field */
+    /* answer field exists */
     if(q.answer !== undefined && q.answer !== null){
 
-        let ans = String(q.answer).trim().toUpperCase();
+        let ans = String(q.answer).trim();
 
         /* A B C D */
-        if(ans === "A") return 0;
-        if(ans === "B") return 1;
-        if(ans === "C") return 2;
-        if(ans === "D") return 3;
+        if(ans.toUpperCase() === "A") return 0;
+        if(ans.toUpperCase() === "B") return 1;
+        if(ans.toUpperCase() === "C") return 2;
+        if(ans.toUpperCase() === "D") return 3;
 
         /* 1 2 3 4 */
         if(!isNaN(ans)){
             return idx(Number(ans));
         }
 
-        /* text match */
+        /* text match with options */
         for(let i=0;i<(q.options || []).length;i++){
 
             if(
                 String(q.options[i]).trim().toLowerCase() ===
-                String(q.answer).trim().toLowerCase()
+                ans.toLowerCase()
             ){
                 return i;
             }
@@ -177,7 +177,6 @@ function getCorrectIndex(q){
 
     return -1;
 }
-
 /* ================= ANALYSIS ================= */
 function getAnalysis(){
 
