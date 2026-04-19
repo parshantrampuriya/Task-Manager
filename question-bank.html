@@ -2,41 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Question Bank</title>
 
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/question-bank.css?v=2">
+<link rel="stylesheet" href="css/sidebar.css">
 
 </head>
+
 <body>
 
-<!-- Sidebar -->
+<!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
+
     <h2>⚡ Menu</h2>
 
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="goTasks()">📋 Tasks</button>
     <button onclick="goGoals()">🎯 Goals</button>
     <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+    <button onclick="goTests()">📝 Tests</button>
     <button onclick="goProfile()">👤 Profile</button>
-    <button onclick="goCreateTest()">📝 Create Test</button>
-    <button onclick="goGiveTest()">🎯 Give Test</button>
     <button onclick="logout()">🚪 Logout</button>
+
 </div>
 
-<!-- Main -->
+<!-- MAIN -->
 <div class="page">
 
-    <!-- Top Bar -->
+    <!-- TOP BAR -->
     <div class="top-bar">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+        <button class="menu-btn"
+        onclick="toggleSidebar()">☰</button>
+
         <h1>📚 Question Bank</h1>
+
     </div>
 
-    <!-- Hero -->
+    <!-- HERO -->
     <div class="hero">
-        <p>Store Questions • Organize Folders • Build Smart Tests</p>
+
+        <p>
+        Store Questions • Organize Folders • Build Smart Tests
+        </p>
+
     </div>
 
     <!-- MAIN BUTTONS -->
@@ -46,8 +60,12 @@
         onclick="location.href='add-question.html'">
 
             <div class="icon">➕</div>
+
             <h2>Add Questions</h2>
-            <p>Paste JSON and save into folders</p>
+
+            <p>
+            Paste JSON and save into folders
+            </p>
 
         </div>
 
@@ -55,8 +73,12 @@
         onclick="location.href='view-question.html'">
 
             <div class="icon">📂</div>
+
             <h2>View Questions</h2>
-            <p>Browse subjects and preview stored questions</p>
+
+            <p>
+            Browse subjects and preview stored questions
+            </p>
 
         </div>
 
@@ -69,9 +91,8 @@
             👥 Friends Question Banks
         </h2>
 
-        <div id="friendCards" class="card-wrap">
-
-            <!-- Dynamic friend buttons here -->
+        <div id="friendCards"
+        class="card-wrap">
 
         </div>
 
@@ -79,11 +100,12 @@
 
 </div>
 
-<!-- MENU JS -->
-<script type="module" src="js/menu.js"></script>
+<!-- JS -->
+<script type="module"
+src="js/menu.js"></script>
 
-<!-- QUESTION BANK JS -->
-<script type="module" src="js/question-bank.js?v=2"></script>
+<script type="module"
+src="js/question-bank.js?v=2"></script>
 
 </body>
 </html>
