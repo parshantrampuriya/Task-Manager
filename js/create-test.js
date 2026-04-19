@@ -126,28 +126,54 @@ return -1;
 /* ================= NORMALIZE ================= */
 function normalizeQuestion(q){
 
-let ans=0;
+let ans = -1;
 
-if(q.answer!==undefined)
-ans=idx(q.answer);
+/* Try all possible fields */
+if(q.answer !== undefined)
+ans = idx(q.answer);
 
-else if(q.correct_option!==undefined)
-ans=idx(q.correct_option);
+else if(q.correct_option !== undefined)
+ans = idx(q.correct_option);
 
-else if(q.correctAnswer!==undefined)
-ans=idx(q.correctAnswer);
+else if(q.correctAnswer !== undefined)
+ans = idx(q.correctAnswer);
 
-return{
-question:q.question || "",
-options:q.options || [],
-answer:ans,
-subject:q.subject || "",
-chapter:q.chapter || "",
-topic:q.topic || ""
-};
+else if(q.correct !== undefined)
+ans = idx(q.correct);
+
+else if(q.correctOption !== undefined)
+ans = idx(q.correctOption);
+
+else if(q.rightAnswer !== undefined)
+ans = idx(q.rightAnswer);
+
+else if(q.correct_index !== undefined)
+ans = idx(q.correct_index);
+
+/* If still blank, detect by text */
+if(ans === -1 && q.answerText){
+
+(q.options || []).forEach((op,i)=>{
+if(
+String(op).trim().toLowerCase() ===
+String(q.answerText).trim().toLowerCase()
+){
+ans = i;
+}
+});
 
 }
 
+/* fallback */
+if(ans === -1) ans = 0;
+
+return{
+question: q.question || "",
+options: q.options || [],
+answer: ans
+};
+
+}
 /* ================= LOAD SUBJECTS ================= */
 async function loadSubjects(){
 
