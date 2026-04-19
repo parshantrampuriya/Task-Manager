@@ -9,7 +9,9 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
 collection,
-getDocs
+getDocs,
+doc,
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -40,20 +42,45 @@ await getDocs(collection(db,"results"));
 
 allResults=[];
 
-snap.forEach(doc=>{
+for(const item of snap.docs){
 
-const d=doc.data();
+const d=item.data();
 
-if(d.uid===currentUser.uid){
+if(d.uid!==currentUser.uid)
+continue;
 
-allResults.push({
-id:doc.id,
-...d
-});
+/* if result has no testName then fetch from tests table */
+let testName =
+d.testName || "";
+
+if(!testName && d.testId){
+
+try{
+
+const testSnap =
+await getDoc(
+doc(db,"tests",d.testId)
+);
+
+if(testSnap.exists()){
+
+testName =
+testSnap.data().testName || "";
 
 }
 
+}catch(err){}
+
+}
+
+allResults.push({
+id:item.id,
+...d,
+testName:
+testName || "Untitled Test"
 });
+
+}
 
 renderResults();
 
@@ -72,7 +99,7 @@ getEl("searchBox").value
 if(txt){
 
 arr=arr.filter(x=>
-(x.testName || "Untitled Test")
+(x.testName || "")
 .toLowerCase()
 .includes(txt)
 );
@@ -104,7 +131,6 @@ arr.sort((a,b)=>
 );
 }
 
-/* html */
 let html="";
 
 arr.forEach(r=>{
@@ -120,15 +146,11 @@ total>0
 ? ((score/total)*100).toFixed(1)
 : 0;
 
-const name=
-r.testName ||
-"Untitled Test";
-
 html += `
 <div class="card">
 
 <div class="test-name">
-${name}
+${r.testName}
 </div>
 
 <div class="meta">
