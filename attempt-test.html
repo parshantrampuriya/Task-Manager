@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Attempt Test</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/attempt-test.css?v=1">
+
+</head>
+<body>
+
+<!-- ================= PAGE ================= -->
+<div class="exam-page">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <div class="left-top">
+
+            <h1 id="testTitle">
+                Test Name
+            </h1>
+
+            <p id="candidateName">
+                Candidate
+            </p>
+
+        </div>
+
+        <div class="right-top">
+
+            <div class="timer-box">
+                ⏰ <span id="timer">00:00</span>
+            </div>
+
+            <button class="submit-btn"
+            onclick="submitTest()">
+            🚀 Submit
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="main-layout">
+
+        <!-- QUESTION PANEL -->
+        <div class="question-panel">
+
+            <div class="question-card">
+
+                <div class="q-no"
+                id="questionNo">
+                Question 1
+                </div>
+
+                <div class="question-text"
+                id="questionText">
+                Loading...
+                </div>
+
+                <div class="option-list"
+                id="optionList">
+
+                </div>
+
+            </div>
+
+            <!-- NAV BUTTONS -->
+            <div class="bottom-nav">
+
+                <button class="nav-btn"
+                onclick="prevQuestion()">
+                ⬅ Previous
+                </button>
+
+                <button class="nav-btn review-btn"
+                onclick="markReview()">
+                ⭐ Review
+                </button>
+
+                <button class="nav-btn clear-btn"
+                onclick="clearAnswer()">
+                ❌ Clear
+                </button>
+
+                <button class="nav-btn next-btn"
+                onclick="nextQuestion()">
+                Save & Next ➡
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- PALETTE -->
+        <div class="palette-panel">
+
+            <h3>Question Palette</h3>
+
+            <div id="paletteGrid"
+            class="palette-grid">
+
+            </div>
+
+            <div class="legend">
+
+                <div><span class="lg answered"></span> Answered</div>
+                <div><span class="lg review"></span> Review</div>
+                <div><span class="lg current"></span> Current</div>
+                <div><span class="lg normal"></span> Pending</div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SUBMIT POPUP -->
+<div id="submitPopup" class="popup">
+
+    <div class="popup-box">
+
+        <h2>Submit Test?</h2>
+
+        <p>
+            Are you sure you want to submit now?
+        </p>
+
+        <div class="popup-btn-row">
+
+            <button class="cancel-btn"
+            onclick="closePopup()">
+            Cancel
+            </button>
+
+            <button class="submit-btn"
+            onclick="finalSubmit()">
+            Submit
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module"
+src="js/attempt-test.js?v=1"></script>
+
+</body>
+</html>
