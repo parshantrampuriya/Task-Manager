@@ -256,18 +256,17 @@ getEl("submitPopup")
 
 };
 
-/* ================= INDEX CONVERTER ================= */
+/* ================= INDEX ================= */
 function idx(v){
 
 if(v===null || v===undefined)
 return -1;
 
-/* Number case */
 if(typeof v==="number"){
 
 if(v>=1 && v<=4) return v-1;
-
 return v;
+
 }
 
 let s =
@@ -286,14 +285,44 @@ if(n>=1 && n<=4)
 return n-1;
 
 return n;
+
 }
 
 return -1;
+
 }
 
 /* ================= GET CORRECT ANSWER ================= */
 function getRight(q){
 
+/* new best format */
+if(q.answerIndex!==undefined)
+return idx(q.answerIndex);
+
+/* text answer */
+if(
+typeof q.answer==="string" &&
+isNaN(q.answer)
+){
+
+const txt =
+q.answer.trim().toLowerCase();
+
+for(let i=0;i<(q.options||[]).length;i++){
+
+if(
+String(q.options[i])
+.trim()
+.toLowerCase()===txt
+){
+return i;
+}
+
+}
+
+}
+
+/* old formats */
 if(q.answer!==undefined)
 return idx(q.answer);
 
@@ -302,6 +331,9 @@ return idx(q.correct_option);
 
 if(q.correctAnswer!==undefined)
 return idx(q.correctAnswer);
+
+if(q.correct!==undefined)
+return idx(q.correct);
 
 return -1;
 
@@ -324,14 +356,9 @@ totalQ>0
 ? totalMarks / totalQ
 : 0;
 
-/* Example:
-100 marks / 10 Q = 10 each */
-
+/* Negative */
 const negPercent =
 Number(testData.negativeMarks || 0);
-
-/* Example:
-35% of 10 = 3.5 */
 
 const negPerWrong =
 perQ * (negPercent/100);
