@@ -262,8 +262,13 @@ function idx(v){
 if(v===null || v===undefined)
 return -1;
 
-if(typeof v==="number")
+/* Number case */
+if(typeof v==="number"){
+
+if(v>=1 && v<=4) return v-1;
+
 return v;
+}
 
 let s =
 String(v).trim().toUpperCase();
@@ -284,7 +289,6 @@ return n;
 }
 
 return -1;
-
 }
 
 /* ================= GET CORRECT ANSWER ================= */
