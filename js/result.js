@@ -74,6 +74,36 @@ return;
 renderResult();
 }
 
+/* ================= ANSWER NORMALIZER ================= */
+function getAnswerIndex(val){
+
+if(val===null || val===undefined) return -1;
+
+if(typeof val==="number") return val;
+
+let v = String(val).trim().toUpperCase();
+
+if(v==="A") return 0;
+if(v==="B") return 1;
+if(v==="C") return 2;
+if(v==="D") return 3;
+
+if(v==="OPTION1") return 0;
+if(v==="OPTION2") return 1;
+if(v==="OPTION3") return 2;
+if(v==="OPTION4") return 3;
+
+let num = Number(v);
+
+if(!isNaN(num)){
+
+if(num>=1 && num<=4) return num-1;
+return num;
+}
+
+return -1;
+}
+
 /* ================= RESULT ================= */
 function renderResult(){
 
@@ -144,25 +174,27 @@ let score=0;
 
 qs.forEach((q,i)=>{
 
-const marked = ans[i];
+const marked =
+getAnswerIndex(ans[i]);
 
-if(
-marked===null ||
-marked===undefined
-){
+const right =
+getAnswerIndex(q.answer);
+
+if(marked===-1){
 skip++;
 return;
 }
 
-if(
-Number(marked)===Number(q.answer)
-){
+if(marked===right){
+
 correct++;
 score += perQ;
-}
-else{
+
+}else{
+
 wrong++;
 score -= perQ * (negPercent/100);
+
 }
 
 });
@@ -209,7 +241,11 @@ let html="";
 
 data.qs.forEach((q,no)=>{
 
-const marked = data.ans[no];
+const marked =
+getAnswerIndex(data.ans[no]);
+
+const right =
+getAnswerIndex(q.answer);
 
 html += `
 <div class="answer-item">
@@ -221,19 +257,21 @@ q.options.forEach((op,i)=>{
 let note="";
 let cls="";
 
-if(Number(q.answer)===i){
+if(i===right){
 note += " ✅ Correct Answer";
 cls="correct";
 }
 
-if(marked===i){
+if(i===marked){
 
-if(Number(q.answer)===i){
+if(marked===right){
 note += " | Your Marked";
 }
 else{
 note += " ❌ Your Marked";
+if(cls!=="correct"){
 cls="wrong";
+}
 }
 
 }
@@ -276,27 +314,10 @@ let report=`
 <head>
 <title>Result Report</title>
 <style>
-body{
-font-family:Arial;
-padding:30px;
-line-height:1.6;
-}
-h1,h2{
-margin:0 0 10px;
-}
-.q{
-margin-top:20px;
-padding:15px;
-border:1px solid #999;
-}
-.green{
-color:green;
-font-weight:bold;
-}
-.red{
-color:red;
-font-weight:bold;
-}
+body{font-family:Arial;padding:30px;line-height:1.6;}
+.q{margin-top:20px;padding:15px;border:1px solid #999;}
+.green{color:green;font-weight:bold;}
+.red{color:red;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -320,7 +341,11 @@ currentUser.email
 
 data.qs.forEach((q,no)=>{
 
-const marked = data.ans[no];
+const marked =
+getAnswerIndex(data.ans[no]);
+
+const right =
+getAnswerIndex(q.answer);
 
 report += `
 <div class="q">
@@ -331,20 +356,16 @@ q.options.forEach((op,i)=>{
 
 let txt="";
 
-if(Number(q.answer)===i){
-txt +=
-` <span class="green">(Correct)</span>`;
+if(i===right){
+txt += ` <span class="green">(Correct)</span>`;
 }
 
-if(marked===i){
+if(i===marked){
 
-if(Number(q.answer)===i){
-txt +=
-` <span class="green">(Your Marked)</span>`;
-}
-else{
-txt +=
-` <span class="red">(Your Marked)</span>`;
+if(marked===right){
+txt += ` <span class="green">(Your Marked)</span>`;
+}else{
+txt += ` <span class="red">(Your Marked)</span>`;
 }
 
 }
@@ -361,10 +382,7 @@ report += `</div>`;
 
 });
 
-report += `
-</body>
-</html>
-`;
+report += `</body></html>`;
 
 const w=window.open("","_blank");
 
@@ -379,8 +397,7 @@ function formatDate(ms){
 
 if(!ms) return "--";
 
-return new Date(ms)
-.toLocaleString();
+return new Date(ms).toLocaleString();
 
 }
 
