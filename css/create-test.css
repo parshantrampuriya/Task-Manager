@@ -163,37 +163,50 @@ textarea::placeholder{
     background:rgba(255,255,255,.05);
 }
 
+/* Vertical proper list */
 .friend-list{
-    display:grid;
-    gap:10px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
     margin-top:14px;
 }
 
-.friend-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:12px 14px;
-    border-radius:14px;
-    background:rgba(255,255,255,.05);
-}
-
-/* ================= CUSTOM TICK ================= */
+/* Same style for myself + friend */
+.friend-item,
 .tick-row{
     display:flex;
     align-items:center;
-    gap:12px;
-    padding:10px 12px;
-    border-radius:14px;
-    background:rgba(255,255,255,.04);
-    cursor:pointer;
+    gap:14px;
+    width:100%;
+    padding:14px 16px;
+    border-radius:16px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.03);
+    box-sizing:border-box;
+    font-size:17px;
+    font-weight:600;
+    color:#fff;
 }
 
-.tick-row input{
-    width:20px;
-    height:20px;
-    accent-color:#00ffd0;
+.friend-item span,
+.tick-row span{
+    flex:1;
+    text-align:left;
+}
+
+.friend-item input[type="checkbox"],
+.tick-row input[type="checkbox"]{
+    width:22px;
+    height:22px;
     cursor:pointer;
+    accent-color:#00ffd0;
+    flex-shrink:0;
+}
+
+.friend-item:hover,
+.tick-row:hover{
+    background:rgba(0,255,255,.08);
+    transition:.2s;
 }
 
 /* ================= BUTTONS ================= */
@@ -280,6 +293,92 @@ textarea::placeholder{
     transform:translate(-50%,-50%) scale(1);
 }
 
+/* ===================================================== */
+/* ============ NEW ADVANCED MULTI SOURCE UI ============ */
+/* ===================================================== */
+
+.multi-source-box{
+    margin-top:18px;
+    padding:20px;
+    border-radius:20px;
+    background:linear-gradient(135deg,
+    rgba(0,255,255,.07),
+    rgba(255,255,255,.03));
+    border:1px solid rgba(0,255,255,.12);
+    box-shadow:0 10px 30px rgba(0,0,0,.22);
+}
+
+.multi-source-box h3{
+    margin:0 0 8px;
+    font-size:22px;
+    color:#ffffff;
+}
+
+.multi-source-box p{
+    margin:0 0 16px;
+    color:#d6eef2;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.source-list-box{
+    margin-top:16px;
+    padding:14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.04);
+    min-height:56px;
+}
+
+/* each added filter row */
+.source-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.04);
+}
+
+.source-item:last-child{
+    margin-bottom:0;
+}
+
+.source-label{
+    flex:1;
+    color:#fff;
+    font-weight:600;
+    line-height:1.5;
+    word-break:break-word;
+}
+
+.remove-source-btn{
+    border:none;
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(45deg,#ff4d4d,#ff7676);
+}
+
+.remove-source-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* distribution dropdown special */
+#distributionMode{
+    background:
+    linear-gradient(135deg,
+    rgba(255,255,255,.10),
+    rgba(0,255,255,.08));
+    font-weight:700;
+}
+
 /* ================= MOBILE ================= */
 @media(max-width:900px){
 
@@ -302,66 +401,12 @@ textarea::placeholder{
         margin:14px;
         padding:18px;
     }
+
+    .multi-source-box{
+        padding:16px;
+    }
 }
 
-/* ================= ASSIGN TEST FIX ================= */
-
-.assign-card{
-    padding:18px;
-    border-radius:18px;
-    background:rgba(255,255,255,.05);
-}
-
-/* Vertical proper list */
-.friend-list{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    margin-top:14px;
-}
-
-/* Same style for myself + friend */
-.friend-item,
-.tick-row{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    width:100%;
-    padding:14px 16px;
-    border-radius:16px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.03);
-    box-sizing:border-box;
-    font-size:17px;
-    font-weight:600;
-    color:#fff;
-}
-
-/* Push name left */
-.friend-item span,
-.tick-row span{
-    flex:1;
-    text-align:left;
-}
-
-/* Same checkbox style */
-.friend-item input[type="checkbox"],
-.tick-row input[type="checkbox"]{
-    width:22px;
-    height:22px;
-    cursor:pointer;
-    accent-color:#00ffd0;
-    flex-shrink:0;
-}
-
-/* Hover */
-.friend-item:hover,
-.tick-row:hover{
-    background:rgba(0,255,255,.08);
-    transition:.2s;
-}
-
-/* Mobile */
 @media(max-width:768px){
 
     .friend-item,
@@ -374,5 +419,16 @@ textarea::placeholder{
     .tick-row input[type="checkbox"]{
         width:20px;
         height:20px;
+    }
+
+    .source-item{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .remove-source-btn{
+        width:100%;
+        height:auto;
+        padding:10px;
     }
 }
