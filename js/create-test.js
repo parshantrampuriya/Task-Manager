@@ -19,6 +19,9 @@ let allBankQuestions=[];
 let sourceMode="bank";
 let selectedOwnerUid="";
 
+/* ================= NEW MULTI SOURCE ================= */
+let sourceFilters=[];
+
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
 
@@ -188,7 +191,10 @@ return{
 question:q.question || "",
 options,
 answer:answerText,
-answerIndex
+answerIndex,
+subject:q.subject || "",
+chapter:q.chapter || "",
+topic:q.topic || ""
 };
 
 }
@@ -280,6 +286,9 @@ getEl("friendBankWrap").style.display="block";
 
 }
 
+sourceFilters=[];
+renderSourceFilters();
+
 await loadSubjects();
 
 });
@@ -292,6 +301,9 @@ getEl("friendBankList").addEventListener("change",async()=>{
 
 selectedOwnerUid=
 getEl("friendBankList").value;
+
+sourceFilters=[];
+renderSourceFilters();
 
 await loadSubjects();
 
@@ -406,7 +418,7 @@ fillSelect("topicList",topics);
 
 });
 
-/* ================= FILTER ================= */
+/* ================= OLD FILTER ================= */
 function getFilteredQuestions(){
 
 const subject=getEl("subjectList").value.trim();
@@ -428,13 +440,124 @@ return arr.map(normalizeQuestion);
 
 }
 
+/* ================= NEW MULTI FILTER ================= */
+function getSmartFilteredQuestions(){
+
+if(sourceFilters.length===0){
+return getFilteredQuestions();
+}
+
+let finalList=[];
+
+sourceFilters.forEach(f=>{
+
+let arr=[...allBankQuestions];
+
+if(f.subject)
+arr=arr.filter(x=>x.subject===f.subject);
+
+if(f.chapter)
+arr=arr.filter(x=>x.chapter===f.chapter);
+
+if(f.topic)
+arr=arr.filter(x=>x.topic===f.topic);
+
+finalList.push(...arr);
+
+});
+
+/* duplicate remove */
+let unique=[];
+let seen=new Set();
+
+finalList.forEach(q=>{
+
+const key=
+(q.question||"")+
+JSON.stringify(q.options||[]);
+
+if(!seen.has(key)){
+seen.add(key);
+unique.push(q);
+}
+
+});
+
+return unique.map(normalizeQuestion);
+
+}
+
+/* ================= NEW ADD FILTER ================= */
+window.addSourceFilter=()=>{
+
+const subject=getEl("subjectList").value.trim();
+const chapter=getEl("chapterList").value.trim();
+const topic=getEl("topicList").value.trim();
+
+if(!subject && !chapter && !topic){
+showError("Select any filter first");
+return;
+}
+
+sourceFilters.push({
+subject,
+chapter,
+topic
+});
+
+renderSourceFilters();
+showToast("Source Added ✅");
+
+};
+
+function renderSourceFilters(){
+
+const box=getEl("sourceListBox");
+if(!box) return;
+
+if(sourceFilters.length===0){
+box.innerHTML="No extra sources added";
+return;
+}
+
+let html="";
+
+sourceFilters.forEach((x,i)=>{
+
+html+=`
+<div style="padding:10px;margin-bottom:8px;border:1px solid #333;border-radius:10px;display:flex;justify-content:space-between;gap:10px;">
+<div>
+${x.subject || "All"} /
+${x.chapter || "All"} /
+${x.topic || "All"}
+</div>
+
+<button onclick="removeSourceFilter(${i})">❌</button>
+</div>
+`;
+
+});
+
+box.innerHTML=html;
+
+}
+
+window.removeSourceFilter=(i)=>{
+
+sourceFilters.splice(i,1);
+renderSourceFilters();
+
+};
+
 /* ================= PREVIEW ================= */
 window.previewTest=()=>{
 
 let questions=[];
 
 if(sourceMode==="bank"){
-questions=getFilteredQuestions();
+
+questions=getSmartFilteredQuestions();
+
 }else{
 
 try{
@@ -457,7 +580,6 @@ showError("Not sufficient questions");
 return;
 }
 
-/* RANDOM PREVIEW */
 questions=
 shuffleArray(questions)
 .slice(0,count);
@@ -519,7 +641,9 @@ Number(getEl("questionCount").value || 0);
 let questions=[];
 
 if(sourceMode==="bank"){
-questions=getFilteredQuestions();
+
+questions=getSmartFilteredQuestions();
+
 }else{
 
 try{
@@ -539,7 +663,6 @@ showError("Not sufficient questions");
 return;
 }
 
-/* RANDOM QUESTION PICK EVERY TIME */
 questions=
 shuffleArray(questions)
 .slice(0,count);
@@ -618,6 +741,8 @@ questions,
 sourceMode,
 sourceOwner:selectedOwnerUid,
 
+multiSources:sourceFilters,
+
 startAt:startAt || null,
 endAt:endAt || null,
 
@@ -639,3 +764,5 @@ setSourceMode("bank");
 if(getEl("friendBankWrap")){
 getEl("friendBankWrap").style.display="none";
 }
+
+renderSourceFilters();
