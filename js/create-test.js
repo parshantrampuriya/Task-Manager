@@ -47,23 +47,20 @@ window.setTestMode=(mode)=>{
 
 testMode=mode;
 
-if(getEl("simpleModeBtn"))
-getEl("simpleModeBtn").classList.remove("active");
-
-if(getEl("sectionModeBtn"))
-getEl("sectionModeBtn").classList.remove("active");
+getEl("simpleModeBtn")?.classList.remove("active");
+getEl("sectionModeBtn")?.classList.remove("active");
 
 if(mode==="simple"){
 
-getEl("simpleModeBtn").classList.add("active");
+getEl("simpleModeBtn")?.classList.add("active");
 getEl("sectionArea").style.display="none";
 getEl("bankArea").style.display="block";
 
 }else{
 
-getEl("sectionModeBtn").classList.add("active");
+getEl("sectionModeBtn")?.classList.add("active");
 getEl("sectionArea").style.display="block";
-getEl("bankArea").style.display="none";
+getEl("bankArea").style.display="block";
 
 }
 
@@ -252,7 +249,6 @@ const u=await getDoc(doc(db,"users",fid));
 if(u.exists()){
 
 const d=u.data();
-
 name=d.name || d.username || d.email || "Friend";
 
 }
@@ -285,9 +281,7 @@ getEl("friendBankList").innerHTML=optionHtml;
 }
 
 /* ================= OWNER MODE ================= */
-if(getEl("ownerMode")){
-
-getEl("ownerMode").addEventListener("change",async()=>{
+getEl("ownerMode")?.addEventListener("change",async()=>{
 
 const mode=getEl("ownerMode").value;
 
@@ -307,18 +301,12 @@ await loadSubjects();
 
 });
 
-}
-
-if(getEl("friendBankList")){
-
-getEl("friendBankList").addEventListener("change",async()=>{
+getEl("friendBankList")?.addEventListener("change",async()=>{
 
 selectedOwnerUid=getEl("friendBankList").value;
 await loadSubjects();
 
 });
-
-}
 
 /* ================= LOAD SUBJECTS ================= */
 async function loadSubjects(){
@@ -428,24 +416,30 @@ fillSelect("topicList",topics);
 });
 
 /* ================= FILTER ================= */
-function getFilteredQuestions(){
-
-const subject=getEl("subjectList").value.trim();
-const chapter=getEl("chapterList").value.trim();
-const topic=getEl("topicList").value.trim();
+function applyFilter(filter){
 
 let arr=[...allBankQuestions];
 
-if(subject)
-arr=arr.filter(x=>x.subject===subject);
+if(filter.subject)
+arr=arr.filter(x=>x.subject===filter.subject);
 
-if(chapter)
-arr=arr.filter(x=>x.chapter===chapter);
+if(filter.chapter)
+arr=arr.filter(x=>x.chapter===filter.chapter);
 
-if(topic)
-arr=arr.filter(x=>x.topic===topic);
+if(filter.topic)
+arr=arr.filter(x=>x.topic===filter.topic);
 
-return arr.map(normalizeQuestion);
+return arr;
+
+}
+
+function getFilteredQuestions(){
+
+return applyFilter({
+subject:getEl("subjectList").value.trim(),
+chapter:getEl("chapterList").value.trim(),
+topic:getEl("topicList").value.trim()
+}).map(normalizeQuestion);
 
 }
 
@@ -459,20 +453,7 @@ return getFilteredQuestions();
 let final=[];
 
 sourceFilters.forEach(f=>{
-
-let arr=[...allBankQuestions];
-
-if(f.subject)
-arr=arr.filter(x=>x.subject===f.subject);
-
-if(f.chapter)
-arr=arr.filter(x=>x.chapter===f.chapter);
-
-if(f.topic)
-arr=arr.filter(x=>x.topic===f.topic);
-
-final.push(...arr);
-
+final.push(...applyFilter(f));
 });
 
 let unique=[];
@@ -500,9 +481,7 @@ const subject=getEl("subjectList").value.trim();
 const chapter=getEl("chapterList").value.trim();
 const topic=getEl("topicList").value.trim();
 
-sourceFilters.push({
-subject,chapter,topic
-});
+sourceFilters.push({subject,chapter,topic});
 
 renderSourceFilters();
 showToast("Source Added ✅");
@@ -552,10 +531,26 @@ window.addSectionBlock=()=>{
 
 sections.push({
 name:"Section "+(sections.length+1),
-count:10
+count:10,
+sources:[]
 });
 
 renderSections();
+
+};
+
+window.addCurrentSelectionToSection=(i)=>{
+
+const subject=getEl("subjectList").value.trim();
+const chapter=getEl("chapterList").value.trim();
+const topic=getEl("topicList").value.trim();
+
+sections[i].sources.push({
+subject,chapter,topic
+});
+
+renderSections();
+showToast("Added To Section ✅");
 
 };
 
@@ -573,8 +568,30 @@ let html="";
 
 sections.forEach((s,i)=>{
 
+let rows="";
+
+if(s.sources.length===0){
+rows="No sources added";
+}else{
+
+s.sources.forEach((r,n)=>{
+
+rows+=`
+<div style="margin-top:6px;padding:8px;border:1px solid #444;border-radius:8px;">
+${r.subject||"All"} /
+${r.chapter||"All"} /
+${r.topic||"All"}
+<button onclick="removeSectionSource(${i},${n})" style="float:right;">❌</button>
+</div>
+`;
+
+});
+
+}
+
 html+=`
 <div style="padding:14px;border:1px solid #333;border-radius:12px;margin-bottom:10px;">
+
 <input
 value="${s.name}"
 oninput="updateSectionName(${i},this.value)"
@@ -588,7 +605,16 @@ oninput="updateSectionCount(${i},this.value)"
 placeholder="Questions"
 style="margin-bottom:10px;width:100%;">
 
+<button onclick="addCurrentSelectionToSection(${i})" style="margin-bottom:10px;width:100%;">
+➕ Add Current Selection
+</button>
+
+<div style="margin-bottom:10px;">
+${rows}
+</div>
+
 <button onclick="removeSection(${i})">❌ Remove</button>
+
 </div>
 `;
 
@@ -597,6 +623,13 @@ style="margin-bottom:10px;width:100%;">
 box.innerHTML=html;
 
 }
+
+window.removeSectionSource=(i,n)=>{
+
+sections[i].sources.splice(n,1);
+renderSections();
+
+};
 
 window.updateSectionName=(i,v)=>{
 sections[i].name=v;
@@ -618,12 +651,22 @@ let questions=[];
 
 if(testMode==="section"){
 
-let total=0;
-sections.forEach(x=>total+=x.count);
+sections.forEach(sec=>{
 
-questions=
-shuffleArray(getSmartFilteredQuestions())
-.slice(0,total);
+let pool=[];
+
+if(sec.sources.length===0){
+pool=getSmartFilteredQuestions();
+}else{
+sec.sources.forEach(f=>pool.push(...applyFilter(f)));
+pool=pool.map(normalizeQuestion);
+}
+
+questions.push(
+...shuffleArray(pool).slice(0,sec.count)
+);
+
+});
 
 }else{
 
@@ -715,28 +758,33 @@ showError("Add section first");
 return;
 }
 
-let pool=shuffleArray(getSmartFilteredQuestions());
-let pointer=0;
-
 for(const s of sections){
 
-const arr=pool.slice(pointer,pointer+s.count);
-pointer+=s.count;
+let pool=[];
+
+if(s.sources.length===0){
+pool=getSmartFilteredQuestions();
+}else{
+s.sources.forEach(f=>pool.push(...applyFilter(f)));
+pool=pool.map(normalizeQuestion);
+}
+
+pool=shuffleArray(pool).slice(0,s.count);
 
 sectionData.push({
 name:s.name,
 count:s.count,
-questions:arr
+sources:s.sources,
+questions:pool
 });
 
-questions.push(...arr);
+questions.push(...pool);
 
 }
 
 }else{
 
-const count=
-Number(getEl("questionCount").value||0);
+const count=Number(getEl("questionCount").value||0);
 
 if(sourceMode==="bank"){
 questions=getSmartFilteredQuestions();
@@ -758,9 +806,7 @@ showError("Not sufficient questions");
 return;
 }
 
-questions=
-shuffleArray(questions)
-.slice(0,count);
+questions=shuffleArray(questions).slice(0,count);
 
 }
 
@@ -795,7 +841,6 @@ collection(db,"tests"),
 
 createdBy:currentUser.uid,
 testName,
-
 testDesc:getEl("testDesc").value.trim(),
 
 totalMarks:Number(getEl("totalMarks").value||0),
