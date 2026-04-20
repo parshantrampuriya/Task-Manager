@@ -123,30 +123,7 @@ textarea::placeholder{
 }
 
 /* ================= MODE ================= */
-.mode-row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    margin-bottom:18px;
-}
-
-.mode-btn{
-    border:none;
-    padding:16px;
-    border-radius:16px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:700;
-    color:#fff;
-    background:rgba(255,255,255,.08);
-}
-
-.mode-btn.active{
-    color:#000;
-    background:linear-gradient(45deg,#00cfff,#00ffcc);
-}
-
-/* ================= NEW TEST MODE ================= */
+.mode-row,
 .test-mode-row{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -154,6 +131,7 @@ textarea::placeholder{
     margin-bottom:18px;
 }
 
+.mode-btn,
 .test-mode-btn{
     border:none;
     padding:16px;
@@ -165,6 +143,7 @@ textarea::placeholder{
     background:rgba(255,255,255,.08);
 }
 
+.mode-btn.active,
 .test-mode-btn.active{
     color:#000;
     background:linear-gradient(45deg,#00cfff,#00ffcc);
@@ -351,6 +330,7 @@ textarea::placeholder{
     min-height:56px;
 }
 
+/* ================= SOURCE ROWS ================= */
 .source-item{
     display:flex;
     justify-content:space-between;
@@ -452,6 +432,45 @@ textarea::placeholder{
 }
 
 /* ===================================================== */
+/* NEW SECTION INNER SOURCE ROWS */
+/* ===================================================== */
+
+.section-source-list{
+    margin-top:12px;
+}
+
+.section-source-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    border-radius:12px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.03);
+}
+
+.section-source-text{
+    flex:1;
+    font-size:14px;
+    color:#eafcff;
+    line-height:1.5;
+    word-break:break-word;
+}
+
+.section-source-remove{
+    border:none;
+    min-width:36px;
+    height:36px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(45deg,#ff4d4d,#ff7676);
+}
+
+/* ===================================================== */
 /* MOBILE */
 /* ===================================================== */
 
@@ -500,12 +519,14 @@ textarea::placeholder{
         height:20px;
     }
 
-    .source-item{
+    .source-item,
+    .section-source-item{
         flex-direction:column;
         align-items:stretch;
     }
 
-    .remove-source-btn{
+    .remove-source-btn,
+    .section-source-remove{
         width:100%;
         height:auto;
         padding:10px;
