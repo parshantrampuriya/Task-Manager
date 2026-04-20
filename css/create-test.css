@@ -146,6 +146,30 @@ textarea::placeholder{
     background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
 
+/* ================= NEW TEST MODE ================= */
+.test-mode-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:18px;
+}
+
+.test-mode-btn{
+    border:none;
+    padding:16px;
+    border-radius:16px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    background:rgba(255,255,255,.08);
+}
+
+.test-mode-btn.active{
+    color:#000;
+    background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
 /* ================= HINT ================= */
 .hint-box{
     margin-top:16px;
@@ -163,7 +187,6 @@ textarea::placeholder{
     background:rgba(255,255,255,.05);
 }
 
-/* Vertical proper list */
 .friend-list{
     display:flex;
     flex-direction:column;
@@ -171,7 +194,6 @@ textarea::placeholder{
     margin-top:14px;
 }
 
-/* Same style for myself + friend */
 .friend-item,
 .tick-row{
     display:flex;
@@ -195,7 +217,8 @@ textarea::placeholder{
 }
 
 .friend-item input[type="checkbox"],
-.tick-row input[type="checkbox"]{
+.tick-row input[type="checkbox"],
+.tick-row input[type="radio"]{
     width:22px;
     height:22px;
     cursor:pointer;
@@ -271,7 +294,7 @@ textarea::placeholder{
     opacity:1;
 }
 
-/* ================= CENTER ERROR POPUP ================= */
+/* ================= ERROR ================= */
 .center-popup{
     position:fixed;
     top:50%;
@@ -294,7 +317,7 @@ textarea::placeholder{
 }
 
 /* ===================================================== */
-/* ============ NEW ADVANCED MULTI SOURCE UI ============ */
+/* MULTI SOURCE BOX */
 /* ===================================================== */
 
 .multi-source-box{
@@ -311,7 +334,6 @@ textarea::placeholder{
 .multi-source-box h3{
     margin:0 0 8px;
     font-size:22px;
-    color:#ffffff;
 }
 
 .multi-source-box p{
@@ -329,7 +351,6 @@ textarea::placeholder{
     min-height:56px;
 }
 
-/* each added filter row */
 .source-item{
     display:flex;
     justify-content:space-between;
@@ -342,16 +363,10 @@ textarea::placeholder{
     border:1px solid rgba(255,255,255,.04);
 }
 
-.source-item:last-child{
-    margin-bottom:0;
-}
-
 .source-label{
     flex:1;
-    color:#fff;
     font-weight:600;
     line-height:1.5;
-    word-break:break-word;
 }
 
 .remove-source-btn{
@@ -360,26 +375,86 @@ textarea::placeholder{
     height:38px;
     border-radius:12px;
     cursor:pointer;
-    font-size:16px;
-    font-weight:700;
     color:#fff;
     background:linear-gradient(45deg,#ff4d4d,#ff7676);
 }
 
-.remove-source-btn:hover{
-    transform:translateY(-2px);
+/* ===================================================== */
+/* NEW SECTION BUILDER */
+/* ===================================================== */
+
+.section-builder{
+    margin-top:22px;
+    padding:22px;
+    border-radius:22px;
+    background:linear-gradient(135deg,
+    rgba(255,215,0,.06),
+    rgba(255,255,255,.03));
+    border:1px solid rgba(255,215,0,.12);
 }
 
-/* distribution dropdown special */
-#distributionMode{
-    background:
-    linear-gradient(135deg,
-    rgba(255,255,255,.10),
-    rgba(0,255,255,.08));
+.section-builder h3{
+    margin:0 0 10px;
+    font-size:22px;
+    color:#fff6d5;
+}
+
+.section-builder p{
+    margin:0 0 16px;
+    color:#dfe7ea;
+    line-height:1.5;
+    font-size:14px;
+}
+
+.section-list-box{
+    margin-top:16px;
+}
+
+.section-card{
+    padding:16px;
+    border-radius:18px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.04);
+    margin-bottom:14px;
+}
+
+.section-card h4{
+    margin:0 0 12px;
+    font-size:18px;
+}
+
+.section-tools{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.section-meta{
+    margin-top:12px;
+    padding:12px;
+    border-radius:14px;
+    background:rgba(0,0,0,.18);
+    font-size:14px;
+    color:#d8f6ff;
+    line-height:1.6;
+}
+
+.remove-section-btn{
+    margin-top:12px;
+    border:none;
+    padding:12px;
+    width:100%;
+    border-radius:14px;
+    cursor:pointer;
     font-weight:700;
+    background:linear-gradient(45deg,#ff4d4d,#ff7676);
+    color:#fff;
 }
 
-/* ================= MOBILE ================= */
+/* ===================================================== */
+/* MOBILE */
+/* ===================================================== */
+
 @media(max-width:900px){
 
     .page{
@@ -389,7 +464,9 @@ textarea::placeholder{
     .grid-2,
     .settings-grid,
     .btn-row,
-    .mode-row{
+    .mode-row,
+    .test-mode-row,
+    .section-tools{
         grid-template-columns:1fr;
     }
 
@@ -402,7 +479,8 @@ textarea::placeholder{
         padding:18px;
     }
 
-    .multi-source-box{
+    .multi-source-box,
+    .section-builder{
         padding:16px;
     }
 }
@@ -416,7 +494,8 @@ textarea::placeholder{
     }
 
     .friend-item input[type="checkbox"],
-    .tick-row input[type="checkbox"]{
+    .tick-row input[type="checkbox"],
+    .tick-row input[type="radio"]{
         width:20px;
         height:20px;
     }
