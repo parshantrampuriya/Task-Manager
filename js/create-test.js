@@ -19,8 +19,12 @@ let allBankQuestions=[];
 let sourceMode="bank";
 let selectedOwnerUid="";
 
-/* ================= NEW MULTI SOURCE ================= */
+/* ================= KEEP OLD ================= */
 let sourceFilters=[];
+
+/* ================= NEW SECTION MODE ================= */
+let testMode="simple";
+let sections=[];
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
@@ -37,6 +41,33 @@ await loadFriends();
 await loadSubjects();
 
 });
+
+/* ================= TEST MODE ================= */
+window.setTestMode=(mode)=>{
+
+testMode=mode;
+
+if(getEl("simpleModeBtn"))
+getEl("simpleModeBtn").classList.remove("active");
+
+if(getEl("sectionModeBtn"))
+getEl("sectionModeBtn").classList.remove("active");
+
+if(mode==="simple"){
+
+getEl("simpleModeBtn").classList.add("active");
+getEl("sectionArea").style.display="none";
+getEl("bankArea").style.display="block";
+
+}else{
+
+getEl("sectionModeBtn").classList.add("active");
+getEl("sectionArea").style.display="block";
+getEl("bankArea").style.display="none";
+
+}
+
+};
 
 /* ================= MODE ================= */
 window.setSourceMode=(mode)=>{
@@ -93,10 +124,8 @@ function idx(v){
 if(v===null || v===undefined) return -1;
 
 if(typeof v==="number"){
-
 if(v>=1 && v<=4) return v-1;
 return v;
-
 }
 
 let s=String(v).trim().toUpperCase();
@@ -109,31 +138,27 @@ if(s==="D") return 3;
 let n=parseInt(s);
 
 if(!isNaN(n)){
-
 if(n>=1 && n<=4) return n-1;
 return n;
-
 }
 
 return -1;
 
 }
 
-/* ================= RANDOM SHUFFLE ================= */
+/* ================= SHUFFLE ================= */
 function shuffleArray(arr){
 
-let newArr=[...arr];
+let a=[...arr];
 
-for(let i=newArr.length-1;i>0;i--){
+for(let i=a.length-1;i>0;i--){
 
 let j=Math.floor(Math.random()*(i+1));
-
-[newArr[i],newArr[j]]=
-[newArr[j],newArr[i]];
+[a[i],a[j]]=[a[j],a[i]];
 
 }
 
-return newArr;
+return a;
 
 }
 
@@ -228,17 +253,13 @@ if(u.exists()){
 
 const d=u.data();
 
-name=
-d.name ||
-d.username ||
-d.email ||
-"Friend";
+name=d.name || d.username || d.email || "Friend";
 
 }
 
 }catch(err){}
 
-html += `
+html+=`
 <label class="friend-item">
 <input type="checkbox"
 class="friendCheck"
@@ -247,7 +268,7 @@ value="${fid}">
 </label>
 `;
 
-optionHtml += `
+optionHtml+=`
 <option value="${fid}">
 ${name}
 </option>
@@ -255,12 +276,10 @@ ${name}
 
 }
 
-getEl("friendList").innerHTML =
-html || "No Friends";
+getEl("friendList").innerHTML=html || "No Friends";
 
 if(getEl("friendBankList")){
-getEl("friendBankList").innerHTML =
-optionHtml;
+getEl("friendBankList").innerHTML=optionHtml;
 }
 
 }
@@ -279,15 +298,10 @@ getEl("friendBankWrap").style.display="none";
 
 }else{
 
-selectedOwnerUid=
-getEl("friendBankList").value;
-
+selectedOwnerUid=getEl("friendBankList").value;
 getEl("friendBankWrap").style.display="block";
 
 }
-
-sourceFilters=[];
-renderSourceFilters();
 
 await loadSubjects();
 
@@ -299,12 +313,7 @@ if(getEl("friendBankList")){
 
 getEl("friendBankList").addEventListener("change",async()=>{
 
-selectedOwnerUid=
-getEl("friendBankList").value;
-
-sourceFilters=[];
-renderSourceFilters();
-
+selectedOwnerUid=getEl("friendBankList").value;
 await loadSubjects();
 
 });
@@ -358,7 +367,7 @@ function fillSelect(id,arr){
 let html=`<option value="">All</option>`;
 
 arr.forEach(v=>{
-html += `<option value="${v}">${v}</option>`;
+html+=`<option value="${v}">${v}</option>`;
 });
 
 getEl(id).innerHTML=html;
@@ -418,7 +427,7 @@ fillSelect("topicList",topics);
 
 });
 
-/* ================= OLD FILTER ================= */
+/* ================= FILTER ================= */
 function getFilteredQuestions(){
 
 const subject=getEl("subjectList").value.trim();
@@ -440,14 +449,14 @@ return arr.map(normalizeQuestion);
 
 }
 
-/* ================= NEW MULTI FILTER ================= */
+/* ================= MULTI FILTER ================= */
 function getSmartFilteredQuestions(){
 
 if(sourceFilters.length===0){
 return getFilteredQuestions();
 }
 
-let finalList=[];
+let final=[];
 
 sourceFilters.forEach(f=>{
 
@@ -462,19 +471,16 @@ arr=arr.filter(x=>x.chapter===f.chapter);
 if(f.topic)
 arr=arr.filter(x=>x.topic===f.topic);
 
-finalList.push(...arr);
+final.push(...arr);
 
 });
 
-/* duplicate remove */
 let unique=[];
 let seen=new Set();
 
-finalList.forEach(q=>{
+final.forEach(q=>{
 
-const key=
-(q.question||"")+
-JSON.stringify(q.options||[]);
+const key=(q.question||"")+JSON.stringify(q.options||[]);
 
 if(!seen.has(key)){
 seen.add(key);
@@ -487,22 +493,15 @@ return unique.map(normalizeQuestion);
 
 }
 
-/* ================= NEW ADD FILTER ================= */
+/* ================= MULTI SOURCE ================= */
 window.addSourceFilter=()=>{
 
 const subject=getEl("subjectList").value.trim();
 const chapter=getEl("chapterList").value.trim();
 const topic=getEl("topicList").value.trim();
 
-if(!subject && !chapter && !topic){
-showError("Select any filter first");
-return;
-}
-
 sourceFilters.push({
-subject,
-chapter,
-topic
+subject,chapter,topic
 });
 
 renderSourceFilters();
@@ -525,13 +524,12 @@ let html="";
 sourceFilters.forEach((x,i)=>{
 
 html+=`
-<div style="padding:10px;margin-bottom:8px;border:1px solid #333;border-radius:10px;display:flex;justify-content:space-between;gap:10px;">
+<div style="padding:10px;margin-bottom:8px;border:1px solid #333;border-radius:10px;display:flex;justify-content:space-between;">
 <div>
-${x.subject || "All"} /
-${x.chapter || "All"} /
-${x.topic || "All"}
+${x.subject||"All"} /
+${x.chapter||"All"} /
+${x.topic||"All"}
 </div>
-
 <button onclick="removeSourceFilter(${i})">❌</button>
 </div>
 `;
@@ -549,22 +547,94 @@ renderSourceFilters();
 
 };
 
+/* ================= SECTIONS ================= */
+window.addSectionBlock=()=>{
+
+sections.push({
+name:"Section "+(sections.length+1),
+count:10
+});
+
+renderSections();
+
+};
+
+function renderSections(){
+
+const box=getEl("sectionListBox");
+if(!box) return;
+
+if(sections.length===0){
+box.innerHTML="No sections added";
+return;
+}
+
+let html="";
+
+sections.forEach((s,i)=>{
+
+html+=`
+<div style="padding:14px;border:1px solid #333;border-radius:12px;margin-bottom:10px;">
+<input
+value="${s.name}"
+oninput="updateSectionName(${i},this.value)"
+placeholder="Section Name"
+style="margin-bottom:10px;width:100%;">
+
+<input
+type="number"
+value="${s.count}"
+oninput="updateSectionCount(${i},this.value)"
+placeholder="Questions"
+style="margin-bottom:10px;width:100%;">
+
+<button onclick="removeSection(${i})">❌ Remove</button>
+</div>
+`;
+
+});
+
+box.innerHTML=html;
+
+}
+
+window.updateSectionName=(i,v)=>{
+sections[i].name=v;
+};
+
+window.updateSectionCount=(i,v)=>{
+sections[i].count=Number(v||0);
+};
+
+window.removeSection=(i)=>{
+sections.splice(i,1);
+renderSections();
+};
+
 /* ================= PREVIEW ================= */
 window.previewTest=()=>{
 
 let questions=[];
 
+if(testMode==="section"){
+
+let total=0;
+sections.forEach(x=>total+=x.count);
+
+questions=
+shuffleArray(getSmartFilteredQuestions())
+.slice(0,total);
+
+}else{
+
 if(sourceMode==="bank"){
-
 questions=getSmartFilteredQuestions();
-
 }else{
 
 try{
 questions=
-JSON.parse(
-getEl("manualJson").value.trim()
-).map(normalizeQuestion);
+JSON.parse(getEl("manualJson").value.trim())
+.map(normalizeQuestion);
 }catch{
 showError("Invalid JSON");
 return;
@@ -572,8 +642,7 @@ return;
 
 }
 
-const count=
-Number(getEl("questionCount").value);
+const count=Number(getEl("questionCount").value);
 
 if(questions.length<count){
 showError("Not sufficient questions");
@@ -584,27 +653,29 @@ questions=
 shuffleArray(questions)
 .slice(0,count);
 
+}
+
 let html="";
 
 questions.forEach((q,no)=>{
 
-html += `
+html+=`
 <div style="padding:12px;border:1px solid #333;margin-bottom:12px">
 <b>Q${no+1}. ${q.question}</b><br><br>
 `;
 
 q.options.forEach((op,i)=>{
 
-html += `
+html+=`
 ${String.fromCharCode(65+i)}.
 ${op}
-${i===q.answerIndex ? " ✅ Correct":""}
+${i===q.answerIndex?" ✅ Correct":""}
 <br>
 `;
 
 });
 
-html += `</div>`;
+html+=`</div>`;
 
 });
 
@@ -612,7 +683,7 @@ getEl("previewBox").innerHTML=html;
 
 };
 
-/* ================= DATE HELPER ================= */
+/* ================= DATE ================= */
 function getTimeStamp(dateId,timeId){
 
 const d=getEl(dateId).value;
@@ -627,30 +698,54 @@ return new Date(d+"T"+t).getTime();
 /* ================= CREATE ================= */
 window.createTest=async()=>{
 
-const testName=
-getEl("testName").value.trim();
+const testName=getEl("testName").value.trim();
 
 if(!testName){
 showError("Enter Test Name");
 return;
 }
 
-const count=
-Number(getEl("questionCount").value || 0);
-
 let questions=[];
+let sectionData=[];
+
+if(testMode==="section"){
+
+if(sections.length===0){
+showError("Add section first");
+return;
+}
+
+let pool=shuffleArray(getSmartFilteredQuestions());
+let pointer=0;
+
+for(const s of sections){
+
+const arr=pool.slice(pointer,pointer+s.count);
+pointer+=s.count;
+
+sectionData.push({
+name:s.name,
+count:s.count,
+questions:arr
+});
+
+questions.push(...arr);
+
+}
+
+}else{
+
+const count=
+Number(getEl("questionCount").value||0);
 
 if(sourceMode==="bank"){
-
 questions=getSmartFilteredQuestions();
-
 }else{
 
 try{
 questions=
-JSON.parse(
-getEl("manualJson").value.trim()
-).map(normalizeQuestion);
+JSON.parse(getEl("manualJson").value.trim())
+.map(normalizeQuestion);
 }catch{
 showError("Invalid JSON");
 return;
@@ -667,7 +762,8 @@ questions=
 shuffleArray(questions)
 .slice(0,count);
 
-/* assign */
+}
+
 const assign=[];
 
 if(getEl("assignSelf").checked)
@@ -682,7 +778,6 @@ showError("Select Candidate");
 return;
 }
 
-/* result mode */
 let resultMode="manual";
 
 if(getEl("instantResult").checked)
@@ -691,17 +786,8 @@ resultMode="instant";
 if(getEl("releaseLater").checked)
 resultMode="later";
 
-/* schedule */
-const startAt =
-getTimeStamp("startDate","startTime");
-
-const endAt =
-getTimeStamp("endDate","endTime");
-
-if(startAt && endAt && endAt<=startAt){
-showError("End must be after Start");
-return;
-}
+const startAt=getTimeStamp("startDate","startTime");
+const endAt=getTimeStamp("endDate","endTime");
 
 await addDoc(
 collection(db,"tests"),
@@ -710,38 +796,32 @@ collection(db,"tests"),
 createdBy:currentUser.uid,
 testName,
 
-testDesc:
-getEl("testDesc").value.trim(),
+testDesc:getEl("testDesc").value.trim(),
 
-totalMarks:
-Number(getEl("totalMarks").value || 0),
+totalMarks:Number(getEl("totalMarks").value||0),
+passMarks:Number(getEl("passMarks").value||0),
+duration:Number(getEl("duration").value||0),
+negativeMarks:Number(getEl("negativeMarks").value||0),
 
-passMarks:
-Number(getEl("passMarks").value || 0),
-
-duration:
-Number(getEl("duration").value || 0),
-
-negativeMarks:
-Number(getEl("negativeMarks").value || 0),
-
-shuffleQuestions:
-getEl("shuffleQuestions").checked,
-
-shuffleOptions:
-getEl("shuffleOptions").checked,
+shuffleQuestions:getEl("shuffleQuestions").checked,
+shuffleOptions:getEl("shuffleOptions").checked,
 
 resultMode,
-resultReleased:
-resultMode==="instant",
+resultReleased:resultMode==="instant",
 
 assignedTo:assign,
+
 questions,
+multiSources:sourceFilters,
+
+testMode,
+sections:sectionData,
+
+timerMode:getEl("timerMode")?.value || "common",
+navMode:getEl("navMode")?.value || "free",
 
 sourceMode,
 sourceOwner:selectedOwnerUid,
-
-multiSources:sourceFilters,
 
 startAt:startAt || null,
 endAt:endAt || null,
@@ -758,11 +838,13 @@ showToast("Test Created ✅");
 
 };
 
-/* default */
+/* ================= DEFAULT ================= */
 setSourceMode("bank");
+setTestMode("simple");
 
 if(getEl("friendBankWrap")){
 getEl("friendBankWrap").style.display="none";
 }
 
 renderSourceFilters();
+renderSections();
