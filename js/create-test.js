@@ -116,6 +116,24 @@ return -1;
 
 }
 
+/* ================= RANDOM SHUFFLE ================= */
+function shuffleArray(arr){
+
+let newArr=[...arr];
+
+for(let i=newArr.length-1;i>0;i--){
+
+let j=Math.floor(Math.random()*(i+1));
+
+[newArr[i],newArr[j]]=
+[newArr[j],newArr[i]];
+
+}
+
+return newArr;
+
+}
+
 /* ================= NORMALIZE ================= */
 function normalizeQuestion(q){
 
@@ -308,10 +326,7 @@ const d=doc.data();
 
 allBankQuestions.push(d);
 
-if(
-d.subject &&
-!subjects.includes(d.subject)
-){
+if(d.subject && !subjects.includes(d.subject)){
 subjects.push(d.subject);
 }
 
@@ -419,18 +434,14 @@ window.previewTest=()=>{
 let questions=[];
 
 if(sourceMode==="bank"){
-
 questions=getFilteredQuestions();
-
 }else{
 
 try{
-
 questions=
 JSON.parse(
 getEl("manualJson").value.trim()
 ).map(normalizeQuestion);
-
 }catch{
 showError("Invalid JSON");
 return;
@@ -446,7 +457,10 @@ showError("Not sufficient questions");
 return;
 }
 
-questions=questions.slice(0,count);
+/* RANDOM PREVIEW */
+questions=
+shuffleArray(questions)
+.slice(0,count);
 
 let html="";
 
@@ -505,18 +519,14 @@ Number(getEl("questionCount").value || 0);
 let questions=[];
 
 if(sourceMode==="bank"){
-
 questions=getFilteredQuestions();
-
 }else{
 
 try{
-
 questions=
 JSON.parse(
 getEl("manualJson").value.trim()
 ).map(normalizeQuestion);
-
 }catch{
 showError("Invalid JSON");
 return;
@@ -529,9 +539,9 @@ showError("Not sufficient questions");
 return;
 }
 
+/* RANDOM QUESTION PICK EVERY TIME */
 questions=
-questions
-.sort(()=>Math.random()-0.5)
+shuffleArray(questions)
 .slice(0,count);
 
 /* assign */
