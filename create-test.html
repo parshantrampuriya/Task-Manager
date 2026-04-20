@@ -8,7 +8,7 @@
 
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/sidebar.css">
-<link rel="stylesheet" href="css/create-test.css?v=13">
+<link rel="stylesheet" href="css/create-test.css?v=14">
 
 </head>
 
@@ -106,6 +106,81 @@
                 <input type="number"
                 id="negativeMarks"
                 placeholder="25">
+            </div>
+
+        </div>
+
+        <!-- ================= NEW TEST TYPE ================= -->
+        <h2 class="section-title">
+        Test Type
+        </h2>
+
+        <div class="mode-row">
+
+            <button id="simpleModeBtn"
+            class="mode-btn active"
+            onclick="setTestMode('simple')">
+            🧾 Simple Test
+            </button>
+
+            <button id="sectionModeBtn"
+            class="mode-btn"
+            onclick="setTestMode('section')">
+            📚 Section Wise Test
+            </button>
+
+        </div>
+
+        <!-- ================= SECTION BUILDER ================= -->
+        <div id="sectionArea" style="display:none;">
+
+            <div class="multi-source-box">
+
+                <h3>📚 Section Builder</h3>
+
+                <p>
+                Create sections like Physics / Chemistry / Maths
+                with separate question sources.
+                </p>
+
+                <div class="grid-2">
+
+                    <div>
+                        <label>Timer Mode</label>
+
+                        <select id="timerMode">
+                            <option value="common">⏱ Common Timer</option>
+                            <option value="section">📍 Section Timer</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Navigation Mode</label>
+
+                        <select id="navMode">
+                            <option value="free">🔓 Free Switch</option>
+                            <option value="lockback">🔒 Lock Previous</option>
+                            <option value="sequence">➡ Strict Sequence</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button type="button"
+                class="save-btn"
+                style="margin-top:14px;width:100%;"
+                onclick="addSectionBlock()">
+                ➕ Add Section
+                </button>
+
+                <div id="sectionListBox"
+                class="source-list-box"
+                style="margin-top:14px;">
+
+                    No sections added
+
+                </div>
+
             </div>
 
         </div>
@@ -232,7 +307,7 @@
 
             </div>
 
-            <!-- ================= NEW ADVANCED SOURCE BLOCK ================= -->
+            <!-- ADVANCED MULTI SOURCE -->
             <div class="multi-source-box">
 
                 <h3>🎯 Advanced Multi Topic Selection</h3>
@@ -253,7 +328,16 @@
                         </select>
                     </div>
 
-                    <div style="display:flex;align-items:end;">
+                    <div>
+                        <label>Question Count Mode</label>
+
+                        <select id="countMode">
+                            <option value="total">📦 Total Count</option>
+                            <option value="rowwise">📍 Per Row Count</option>
+                        </select>
+                    </div>
+
+                    <div style="grid-column:1/-1;">
                         <button type="button"
                         class="save-btn"
                         onclick="addSourceFilter()"
@@ -429,7 +513,7 @@ Message
 src="js/menu.js"></script>
 
 <script type="module"
-src="js/create-test.js?v=13"></script>
+src="js/create-test.js?v=14"></script>
 
 </body>
 </html>
