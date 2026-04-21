@@ -99,33 +99,45 @@ renderResult();
 
 }
 
-/* ================= INDEX ================= */
+/* ================================================= */
+/* STANDARD SYSTEM EVERYWHERE                        */
+/* 1 = A                                             */
+/* 2 = B                                             */
+/* 3 = C                                             */
+/* 4 = D                                             */
+/* -1 = Skip                                         */
+/* ================================================= */
+
 function idx(v){
 
 if(v===null || v===undefined)
 return -1;
 
+/* direct number */
 if(typeof v==="number"){
 
-if(v>=1 && v<=4) return v-1;
-return v;
+if(v>=1 && v<=4) return v;
 
+/* old saved 0-3 support */
+if(v>=0 && v<=3) return v+1;
+
+return -1;
 }
 
 let s =
 String(v).trim().toUpperCase();
 
-if(s==="A") return 0;
-if(s==="B") return 1;
-if(s==="C") return 2;
-if(s==="D") return 3;
+if(s==="A") return 1;
+if(s==="B") return 2;
+if(s==="C") return 3;
+if(s==="D") return 4;
 
 let n=parseInt(s);
 
 if(!isNaN(n)){
 
-if(n>=1 && n<=4) return n-1;
-return n;
+if(n>=1 && n<=4) return n;
+if(n>=0 && n<=3) return n+1;
 
 }
 
@@ -134,55 +146,71 @@ return -1;
 }
 
 /* ================= RIGHT ANSWER ================= */
-function getCorrectIndex(q){
+function getCorrectValue(q){
 
-    const options = q.options || [];
+const options = q.options || [];
 
-    const tryValue = (val)=>{
+const tryValue = (val)=>{
 
-        if(val === undefined || val === null) return -1;
+if(val===undefined || val===null)
+return -1;
 
-        let s = String(val).trim();
+let s = String(val).trim();
+let u = s.toUpperCase();
 
-        // A B C D
-        if(s.toUpperCase()==="A") return 0;
-        if(s.toUpperCase()==="B") return 1;
-        if(s.toUpperCase()==="C") return 2;
-        if(s.toUpperCase()==="D") return 3;
+/* A B C D */
+if(u==="A") return 1;
+if(u==="B") return 2;
+if(u==="C") return 3;
+if(u==="D") return 4;
 
-        // 1 2 3 4
-        if(!isNaN(s)){
-            let n = Number(s);
-            if(n>=1 && n<=4) return n-1;
-            if(n>=0 && n<=3) return n;
-        }
+/* 1 2 3 4 */
+if(!isNaN(s)){
 
-        // text compare
-        for(let i=0;i<options.length;i++){
-            if(String(options[i]).trim().toLowerCase() === s.toLowerCase()){
-                return i;
-            }
-        }
+let n = Number(s);
 
-        return -1;
-    };
+if(n>=1 && n<=4) return n;
+if(n>=0 && n<=3) return n+1;
 
-    let fields = [
-        q.answerIndex,
-        q.answer,
-        q.correct_option,
-        q.correctAnswer,
-        q.correct,
-        q.rightAnswer
-    ];
-
-    for(let f of fields){
-        let r = tryValue(f);
-        if(r !== -1) return r;
-    }
-
-    return -1;
 }
+
+/* text compare */
+for(let i=0;i<options.length;i++){
+
+if(
+String(options[i]).trim().toLowerCase()
+===
+s.toLowerCase()
+){
+return i+1;
+}
+
+}
+
+return -1;
+};
+
+let fields = [
+q.answer,
+q.correct_option,
+q.correctAnswer,
+q.correct,
+q.rightAnswer,
+q.answerIndex
+];
+
+for(let f of fields){
+
+let r = tryValue(f);
+
+if(r!==-1) return r;
+
+}
+
+return -1;
+
+}
+
 /* ================= ANALYSIS ================= */
 function getAnalysis(){
 
@@ -206,9 +234,10 @@ Number(resultData.marksPerQuestion || 0) ||
 
 const negPerWrong =
 Number(resultData.negativePerWrong || 0) ||
-(perQ * (
-Number(testData.negativeMarks || 0) / 100
-));
+(
+perQ *
+(Number(testData.negativeMarks || 0)/100)
+);
 
 let correct=0;
 let wrong=0;
@@ -218,7 +247,7 @@ let score=0;
 qs.forEach((q,i)=>{
 
 const marked = idx(ans[i]);
-const right = getCorrectIndex(q);
+const right = getCorrectValue(q);
 
 if(marked===-1){
 
@@ -319,7 +348,7 @@ let html="";
 d.qs.forEach((q,no)=>{
 
 const marked = idx(d.ans[no]);
-const right = getCorrectIndex(q);
+const right = getCorrectValue(q);
 
 html += `
 <div class="answer-item">
@@ -328,11 +357,13 @@ html += `
 
 (q.options || []).forEach((op,i)=>{
 
+const val = i+1;
+
 let cls="";
 let note="";
 
-const isRight = i===right;
-const isMarked = i===marked;
+const isRight = val===right;
+const isMarked = val===marked;
 
 if(isRight && isMarked){
 
@@ -423,7 +454,7 @@ ${currentUser.displayName || currentUser.email}</p>
 d.qs.forEach((q,no)=>{
 
 const marked = idx(d.ans[no]);
-const right = getCorrectIndex(q);
+const right = getCorrectValue(q);
 
 html += `
 <div class="q">
@@ -432,15 +463,17 @@ html += `
 
 (q.options || []).forEach((op,i)=>{
 
+const val = i+1;
+
 let note="";
 
-if(i===right)
+if(val===right)
 note+=` <span class="green">(Correct)</span>`;
 
-if(i===marked && i!==right)
+if(val===marked && val!==right)
 note+=` <span class="red">(Your Selected)</span>`;
 
-if(i===marked && i===right)
+if(val===marked && val===right)
 note+=` <span class="green">(Your Selected)</span>`;
 
 html += `
@@ -471,6 +504,8 @@ w.print();
 function showToast(msg){
 
 const t=getEl("toast");
+
+if(!t) return;
 
 t.innerText=msg;
 t.classList.add("show");
