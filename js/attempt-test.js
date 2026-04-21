@@ -11,9 +11,9 @@ addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= HELPERS ================= */
-const getEl = (id)=>document.getElementById(id);
-const params = new URLSearchParams(location.search);
-const testId = params.get("id");
+const getEl=(id)=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const testId=params.get("id");
 
 let currentUser=null;
 let testData=null;
@@ -47,7 +47,7 @@ location.href="give-test.html";
 return;
 }
 
-const snap = await getDoc(
+const snap=await getDoc(
 doc(db,"tests",testId)
 );
 
@@ -56,15 +56,14 @@ showToast("Test not found");
 return;
 }
 
-testData = snap.data();
+testData=snap.data();
 
-/* one attempt only */
-const attemptedUsers =
+/* already attempted */
+const attemptedUsers=
 testData.attemptedUsers || [];
 
-if(
-attemptedUsers.includes(currentUser.uid)
-){
+if(attemptedUsers.includes(currentUser.uid)){
+
 showToast("Already Attempted");
 
 setTimeout(()=>{
@@ -74,7 +73,7 @@ location.href="result.html?id="+testId;
 return;
 }
 
-/* schedule check */
+/* schedule */
 const now=Date.now();
 
 const start=
@@ -83,7 +82,7 @@ Number(testData.startAt || 0);
 const end=
 Number(testData.endAt || 0);
 
-if(start && now < start){
+if(start && now<start){
 
 showToast("Test not started yet");
 
@@ -94,7 +93,7 @@ location.href="give-test.html";
 return;
 }
 
-if(end && now > end){
+if(end && now>end){
 
 showToast("Test expired");
 
@@ -105,28 +104,30 @@ location.href="give-test.html";
 return;
 }
 
-questions =
+/* load questions */
+questions=
 JSON.parse(
 JSON.stringify(testData.questions || [])
 );
 
-/* IMPORTANT FIX */
-answers =
-new Array(questions.length).fill("");
+/* IMPORTANT:
+store selected option INDEX only */
+answers=
+new Array(questions.length).fill(-1);
 
-reviewList =
+reviewList=
 new Array(questions.length).fill(false);
 
-getEl("testTitle").innerText =
+getEl("testTitle").innerText=
 testData.testName || "Test";
 
-getEl("candidateName").innerText =
+getEl("candidateName").innerText=
 currentUser.displayName ||
 currentUser.email ||
 "Candidate";
 
-totalSeconds =
-Number(testData.duration || 60) * 60;
+totalSeconds=
+Number(testData.duration || 60)*60;
 
 startTimer();
 renderPalette();
@@ -158,15 +159,12 @@ finalSubmit();
 
 function updateTimer(){
 
-const m =
-Math.floor(totalSeconds/60);
+const m=Math.floor(totalSeconds/60);
+const s=totalSeconds%60;
 
-const s =
-totalSeconds % 60;
-
-getEl("timer").innerText =
+getEl("timer").innerText=
 String(m).padStart(2,"0")
-+ ":" +
++":"+
 String(s).padStart(2,"0");
 
 }
@@ -174,24 +172,24 @@ String(s).padStart(2,"0");
 /* ================= QUESTION ================= */
 function renderQuestion(){
 
-const q = questions[currentIndex];
+const q=questions[currentIndex];
 if(!q) return;
 
-getEl("questionNo").innerText =
-"Question " + (currentIndex+1);
+getEl("questionNo").innerText=
+"Question "+(currentIndex+1);
 
-getEl("questionText").innerText =
+getEl("questionText").innerText=
 q.question || "";
 
 let html="";
 
 (q.options || []).forEach((op,i)=>{
 
-const active =
-answers[currentIndex]===String(op)
+const active=
+answers[currentIndex]===i
 ? "active":"";
 
-html += `
+html+=`
 <button
 class="option-btn ${active}"
 onclick="selectOption(${i})">
@@ -211,10 +209,8 @@ renderPalette();
 /* ================= SELECT ================= */
 window.selectOption=(i)=>{
 
-const q=questions[currentIndex];
-
-answers[currentIndex] =
-String(q.options[i]);
+/* FIXED */
+answers[currentIndex]=Number(i);
 
 renderQuestion();
 
@@ -248,7 +244,7 @@ renderQuestion();
 
 window.clearAnswer=()=>{
 
-answers[currentIndex]="";
+answers[currentIndex]=-1;
 renderQuestion();
 
 };
@@ -279,10 +275,10 @@ cls="current";
 else if(reviewList[i])
 cls="review";
 
-else if(answers[i]!=="" )
+else if(answers[i]!==-1)
 cls="answered";
 
-html += `
+html+=`
 <button
 class="pal-btn ${cls}"
 onclick="jumpQuestion(${i})">
@@ -292,8 +288,7 @@ ${i+1}
 
 });
 
-getEl("paletteGrid").innerHTML =
-html;
+getEl("paletteGrid").innerHTML=html;
 
 }
 
@@ -366,7 +361,7 @@ for(let i=0;i<(q.options||[]).length;i++){
 
 if(
 String(q.options[i])
-.trim()
+trim()
 .toLowerCase()===txt
 ){
 return i;
@@ -393,26 +388,26 @@ return -1;
 }
 
 /* ================= FINAL SUBMIT ================= */
-window.finalSubmit = async()=>{
+window.finalSubmit=async()=>{
 
 clearInterval(timerInt);
 
-const totalMarks =
+const totalMarks=
 Number(testData.totalMarks || 0);
 
-const totalQ =
+const totalQ=
 questions.length;
 
-const perQ =
+const perQ=
 totalQ>0
-? totalMarks / totalQ
-: 0;
+? totalMarks/totalQ
+:0;
 
-const negPercent =
+const negPercent=
 Number(testData.negativeMarks || 0);
 
-const negPerWrong =
-perQ * (negPercent/100);
+const negPerWrong=
+perQ*(negPercent/100);
 
 let score=0;
 let correct=0;
@@ -421,40 +416,33 @@ let skip=0;
 
 questions.forEach((q,i)=>{
 
-const markedText =
-String(answers[i] || "").trim();
+const marked=
+Number(answers[i]);
 
-const right =
+const right=
 getRight(q);
 
-const rightText =
-String(q.options[right] || "")
-.trim();
-
-if(markedText===""){
+if(marked===-1){
 
 skip++;
 
 }
-else if(
-markedText.toLowerCase()===
-rightText.toLowerCase()
-){
+else if(marked===right){
 
 correct++;
-score += perQ;
+score+=perQ;
 
 }
 else{
 
 wrong++;
-score -= negPerWrong;
+score-=negPerWrong;
 
 }
 
 });
 
-const resultData = {
+const resultData={
 
 testId,
 uid:currentUser.uid,
@@ -499,8 +487,8 @@ collection(db,"results"),
 resultData
 );
 
-/* attempt update */
-let arr =
+/* update attempts */
+let arr=
 testData.attemptedUsers || [];
 
 if(!arr.includes(currentUser.uid)){
@@ -517,7 +505,7 @@ attemptCount:arr.length
 
 }
 
-location.href =
+location.href=
 "result.html?id="+testId;
 
 };
