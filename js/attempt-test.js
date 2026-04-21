@@ -109,7 +109,11 @@ questions = JSON.parse(
 JSON.stringify(testData.questions || [])
 );
 
-/* keep same features */
+/* IMPORTANT:
+Use 1234 system everywhere
+A=1 B=2 C=3 D=4
+-1 = skipped
+*/
 answers =
 new Array(questions.length).fill(-1);
 
@@ -186,14 +190,17 @@ let html="";
 
 (q.options || []).forEach((op,i)=>{
 
+/* i=0 means A -> stored 1 */
+const optionValue = i + 1;
+
 const active =
-answers[currentIndex]===i
+answers[currentIndex]===optionValue
 ? "active":"";
 
 html += `
 <button
 class="option-btn ${active}"
-onclick="selectOption(${i})">
+onclick="selectOption(${optionValue})">
 ${String.fromCharCode(65+i)}.
 ${op}
 </button>
@@ -208,9 +215,10 @@ renderPalette();
 }
 
 /* ================= SELECT ================= */
-window.selectOption=(i)=>{
+window.selectOption=(val)=>{
 
-answers[currentIndex]=Number(i);
+/* save 1 2 3 4 */
+answers[currentIndex]=Number(val);
 
 renderQuestion();
 
@@ -309,7 +317,14 @@ getEl("submitPopup")
 
 };
 
-/* ================= INDEX ================= */
+/* ================= STANDARD ANSWER FORMAT ================= */
+/*
+Returns only:
+1=A
+2=B
+3=C
+4=D
+*/
 function idx(v){
 
 if(v===null || v===undefined)
@@ -317,27 +332,29 @@ return -1;
 
 if(typeof v==="number"){
 
-if(v>=1 && v<=4) return v-1;
+if(v>=1 && v<=4) return v;
 
-return v;
+if(v>=0 && v<=3) return v+1;
+
+return -1;
 }
 
 let s =
 String(v).trim().toUpperCase();
 
-if(s==="A") return 0;
-if(s==="B") return 1;
-if(s==="C") return 2;
-if(s==="D") return 3;
+if(s==="A") return 1;
+if(s==="B") return 2;
+if(s==="C") return 3;
+if(s==="D") return 4;
 
 let n = parseInt(s);
 
 if(!isNaN(n)){
 
-if(n>=1 && n<=4)
-return n-1;
+if(n>=1 && n<=4) return n;
 
-return n;
+if(n>=0 && n<=3) return n+1;
+
 }
 
 return -1;
@@ -347,9 +364,22 @@ return -1;
 /* ================= RIGHT ANSWER ================= */
 function getRight(q){
 
+if(q.answer!==undefined)
+return idx(q.answer);
+
+if(q.correct_option!==undefined)
+return idx(q.correct_option);
+
+if(q.correctAnswer!==undefined)
+return idx(q.correctAnswer);
+
+if(q.correct!==undefined)
+return idx(q.correct);
+
 if(q.answerIndex!==undefined)
 return idx(q.answerIndex);
 
+/* text answer support */
 if(
 typeof q.answer==="string" &&
 isNaN(q.answer)
@@ -363,24 +393,12 @@ for(let i=0;i<(q.options || []).length;i++){
 if(
 String(q.options[i]).trim().toLowerCase()===txt
 ){
-return i;
+return i+1;
 }
 
 }
 
 }
-
-if(q.answer!==undefined)
-return idx(q.answer);
-
-if(q.correct_option!==undefined)
-return idx(q.correct_option);
-
-if(q.correctAnswer!==undefined)
-return idx(q.correctAnswer);
-
-if(q.correct!==undefined)
-return idx(q.correct);
 
 return -1;
 
