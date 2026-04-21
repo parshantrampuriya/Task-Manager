@@ -66,7 +66,7 @@ getEl("bankArea").style.display="block";
 
 };
 
-/* ================= MODE ================= */
+/* ================= SOURCE MODE ================= */
 window.setSourceMode=(mode)=>{
 
 sourceMode=mode;
@@ -94,6 +94,8 @@ getEl("manualArea").style.display="block";
 function showToast(msg){
 
 const t=getEl("toast");
+if(!t) return;
+
 t.innerText=msg;
 t.classList.add("show");
 
@@ -106,6 +108,8 @@ t.classList.remove("show");
 function showError(msg){
 
 const p=getEl("errorPopup");
+if(!p) return;
+
 p.innerText=msg;
 p.classList.add("show");
 
@@ -115,28 +119,38 @@ p.classList.remove("show");
 
 }
 
-/* ================= INDEX ================= */
+/* ================================================= */
+/* ANSWER SYSTEM FIXED                               */
+/* STORE EVERYWHERE: 1=A 2=B 3=C 4=D                 */
+/* ================================================= */
 function idx(v){
 
 if(v===null || v===undefined) return -1;
 
 if(typeof v==="number"){
-if(v>=1 && v<=4) return v-1;
-return v;
+
+if(v>=1 && v<=4) return v;
+
+/* old 0-3 support */
+if(v>=0 && v<=3) return v+1;
+
+return -1;
 }
 
 let s=String(v).trim().toUpperCase();
 
-if(s==="A") return 0;
-if(s==="B") return 1;
-if(s==="C") return 2;
-if(s==="D") return 3;
+if(s==="A") return 1;
+if(s==="B") return 2;
+if(s==="C") return 3;
+if(s==="D") return 4;
 
 let n=parseInt(s);
 
 if(!isNaN(n)){
-if(n>=1 && n<=4) return n-1;
-return n;
+
+if(n>=1 && n<=4) return n;
+if(n>=0 && n<=3) return n+1;
+
 }
 
 return -1;
@@ -164,7 +178,7 @@ function normalizeQuestion(q){
 
 const options=q.options || [];
 
-let answerIndex=-1;
+let answerValue=-1;
 let answerText="";
 
 if(typeof q.answer==="string" && isNaN(q.answer)){
@@ -186,11 +200,12 @@ q.answerIndex;
 if(typeof raw==="string" && isNaN(raw)){
 answerText=raw.trim();
 }else{
-answerIndex=idx(raw);
+answerValue=idx(raw);
 }
 
 }
 
+/* text compare */
 if(answerText!==""){
 
 options.forEach((op,i)=>{
@@ -199,21 +214,21 @@ if(
 String(op).trim().toLowerCase() ===
 answerText.toLowerCase()
 ){
-answerIndex=i;
+answerValue=i+1;
 }
 
 });
 
 }
 
-if(answerIndex<0) answerIndex=0;
-if(answerText==="") answerText=options[answerIndex] || "";
+if(answerValue<1) answerValue=1;
+if(answerText==="") answerText=options[answerValue-1] || "";
 
 return{
 question:q.question || "",
 options,
-answer:answerText,
-answerIndex,
+answer:answerValue,       /* 1-4 */
+answerIndex:answerValue,  /* keep same for old pages */
 subject:q.subject || "",
 chapter:q.chapter || "",
 topic:q.topic || ""
@@ -329,9 +344,9 @@ allBankQuestions=[];
 
 let subjects=[];
 
-snap.forEach(doc=>{
+snap.forEach(docu=>{
 
-const d=doc.data();
+const d=docu.data();
 
 allBankQuestions.push(d);
 
@@ -363,7 +378,7 @@ getEl(id).innerHTML=html;
 }
 
 /* ================= SUBJECT CHANGE ================= */
-getEl("subjectList").addEventListener("change",()=>{
+getEl("subjectList")?.addEventListener("change",()=>{
 
 const subject=getEl("subjectList").value;
 
@@ -389,7 +404,7 @@ fillSelect("topicList",[]);
 });
 
 /* ================= CHAPTER CHANGE ================= */
-getEl("chapterList").addEventListener("change",()=>{
+getEl("chapterList")?.addEventListener("change",()=>{
 
 const subject=getEl("subjectList").value;
 const chapter=getEl("chapterList").value;
@@ -712,7 +727,7 @@ q.options.forEach((op,i)=>{
 html+=`
 ${String.fromCharCode(65+i)}.
 ${op}
-${i===q.answerIndex?" ✅ Correct":""}
+${(i+1)===q.answerIndex?" ✅ Correct":""}
 <br>
 `;
 
