@@ -56,6 +56,36 @@ t.classList.remove("show");
 
 }
 
+/* ================= SAFE SHUFFLE FIX ================= */
+/* When old tests have shuffled options wrongly saved,
+this normalizes correct index from answer text */
+function fixQuestion(q){
+
+let obj={...q};
+
+const opts=obj.options || [];
+
+if(
+obj.answer &&
+typeof obj.answer==="string" &&
+opts.length>0
+){
+
+const found=opts.findIndex(x=>
+String(x).trim().toLowerCase() ===
+String(obj.answer).trim().toLowerCase()
+);
+
+if(found>=0){
+obj.answerIndex=found;
+}
+
+}
+
+return obj;
+
+}
+
 /* ================= LOAD TESTS ================= */
 async function loadTests(){
 
@@ -102,9 +132,26 @@ u.email ||
 
 }catch(err){}
 
+/* fix old shuffled tests */
+let fixedQuestions=
+(data.questions || []).map(fixQuestion);
+
+let fixedSections=[];
+
+if(Array.isArray(data.sections)){
+
+fixedSections=data.sections.map(sec=>({
+...sec,
+questions:(sec.questions || []).map(fixQuestion)
+}));
+
+}
+
 allTests.push({
 id:d.id,
 ...data,
+questions:fixedQuestions,
+sections:fixedSections,
 creatorName
 });
 
@@ -149,7 +196,6 @@ Number(test.endAt || 0);
 const attemptedUsers=
 test.attemptedUsers || [];
 
-/* one attempt only */
 if(
 attemptedUsers.includes(
 currentUser.uid
@@ -158,7 +204,6 @@ currentUser.uid
 return "attempted";
 }
 
-/* scheduled */
 if(start && now < start){
 return "upcoming";
 }
