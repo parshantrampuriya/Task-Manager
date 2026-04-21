@@ -105,14 +105,11 @@ location.href="give-test.html";
 return;
 }
 
-/* ================= IMPORTANT FIX ================= */
-/* deep clone so original firestore data untouched */
-questions = JSON.parse(
+/* keep existing features same */
+questions =
+JSON.parse(
 JSON.stringify(testData.questions || [])
 );
-
-/* fix option shuffle with answer remap */
-prepareQuestions();
 
 answers =
 new Array(questions.length).fill(null);
@@ -134,71 +131,6 @@ Number(testData.duration || 60) * 60;
 startTimer();
 renderPalette();
 renderQuestion();
-
-}
-
-/* ================= SHUFFLE ================= */
-function shuffleArray(arr){
-
-let a=[...arr];
-
-for(let i=a.length-1;i>0;i--){
-
-let j=Math.floor(Math.random()*(i+1));
-
-[a[i],a[j]] = [a[j],a[i]];
-
-}
-
-return a;
-
-}
-
-/* ================= PREPARE QUESTIONS ================= */
-function prepareQuestions(){
-
-/* question shuffle */
-if(testData.shuffleQuestions){
-questions = shuffleArray(questions);
-}
-
-/* option shuffle + correct answer remap */
-questions = questions.map(q=>{
-
-let obj = {...q};
-
-obj.options = [...(q.options || [])];
-
-let rightIndex = getRight(q);
-
-if(
-testData.shuffleOptions &&
-obj.options.length>1
-){
-
-let rightText =
-obj.options[rightIndex];
-
-obj.options =
-shuffleArray(obj.options);
-
-obj.answerIndex =
-obj.options.findIndex(
-x => String(x)===String(rightText)
-);
-
-if(obj.answerIndex<0)
-obj.answerIndex=0;
-
-}else{
-
-obj.answerIndex = rightIndex;
-
-}
-
-return obj;
-
-});
 
 }
 
@@ -255,8 +187,9 @@ let html="";
 
 (q.options || []).forEach((op,i)=>{
 
+/* FIXED ACTIVE STATE */
 const active =
-answers[currentIndex]===i
+answers[currentIndex]===op
 ? "active":"";
 
 html += `
@@ -279,7 +212,12 @@ renderPalette();
 /* ================= SELECT ================= */
 window.selectOption=(i)=>{
 
-answers[currentIndex]=i;
+const q = questions[currentIndex];
+
+/* FIXED STORE REAL OPTION TEXT */
+answers[currentIndex]=
+q.options[i];
+
 renderQuestion();
 
 };
@@ -485,18 +423,26 @@ let skip=0;
 
 questions.forEach((q,i)=>{
 
-const marked =
-idx(answers[i]);
+const markedText =
+answers[i];
 
 const right =
 getRight(q);
 
-if(marked===-1){
+if(markedText===null){
 
 skip++;
 
 }
-else if(marked===right){
+else if(
+String(markedText)
+.trim()
+.toLowerCase()
+===
+String(q.options[right])
+.trim()
+.toLowerCase()
+){
 
 correct++;
 score += perQ;
