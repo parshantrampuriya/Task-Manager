@@ -63,14 +63,14 @@ const attemptedUsers =
 testData.attemptedUsers || [];
 
 if(
-attemptedUsers.includes(
-currentUser.uid
-)
+attemptedUsers.includes(currentUser.uid)
 ){
 showToast("Already Attempted");
+
 setTimeout(()=>{
 location.href="result.html?id="+testId;
 },900);
+
 return;
 }
 
@@ -105,14 +105,14 @@ location.href="give-test.html";
 return;
 }
 
-/* keep existing features same */
 questions =
 JSON.parse(
 JSON.stringify(testData.questions || [])
 );
 
+/* IMPORTANT FIX */
 answers =
-new Array(questions.length).fill(null);
+new Array(questions.length).fill("");
 
 reviewList =
 new Array(questions.length).fill(false);
@@ -139,7 +139,7 @@ function startTimer(){
 
 updateTimer();
 
-timerInt = setInterval(()=>{
+timerInt=setInterval(()=>{
 
 totalSeconds--;
 
@@ -187,9 +187,8 @@ let html="";
 
 (q.options || []).forEach((op,i)=>{
 
-/* FIXED ACTIVE STATE */
 const active =
-answers[currentIndex]===op
+answers[currentIndex]===String(op)
 ? "active":"";
 
 html += `
@@ -212,11 +211,10 @@ renderPalette();
 /* ================= SELECT ================= */
 window.selectOption=(i)=>{
 
-const q = questions[currentIndex];
+const q=questions[currentIndex];
 
-/* FIXED STORE REAL OPTION TEXT */
-answers[currentIndex]=
-q.options[i];
+answers[currentIndex] =
+String(q.options[i]);
 
 renderQuestion();
 
@@ -250,7 +248,7 @@ renderQuestion();
 
 window.clearAnswer=()=>{
 
-answers[currentIndex]=null;
+answers[currentIndex]="";
 renderQuestion();
 
 };
@@ -281,7 +279,7 @@ cls="current";
 else if(reviewList[i])
 cls="review";
 
-else if(answers[i]!==null)
+else if(answers[i]!=="" )
 cls="answered";
 
 html += `
@@ -327,7 +325,7 @@ return v;
 
 }
 
-let s =
+let s=
 String(v).trim().toUpperCase();
 
 if(s==="A") return 0;
@@ -361,7 +359,7 @@ typeof q.answer==="string" &&
 isNaN(q.answer)
 ){
 
-const txt =
+const txt=
 q.answer.trim().toLowerCase();
 
 for(let i=0;i<(q.options||[]).length;i++){
@@ -424,24 +422,23 @@ let skip=0;
 questions.forEach((q,i)=>{
 
 const markedText =
-answers[i];
+String(answers[i] || "").trim();
 
 const right =
 getRight(q);
 
-if(markedText===null){
+const rightText =
+String(q.options[right] || "")
+.trim();
+
+if(markedText===""){
 
 skip++;
 
 }
 else if(
-String(markedText)
-.trim()
-.toLowerCase()
-===
-String(q.options[right])
-.trim()
-.toLowerCase()
+markedText.toLowerCase()===
+rightText.toLowerCase()
 ){
 
 correct++;
@@ -460,7 +457,7 @@ score -= negPerWrong;
 const resultData = {
 
 testId,
-uid: currentUser.uid,
+uid:currentUser.uid,
 
 userName:
 currentUser.displayName ||
