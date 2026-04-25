@@ -17,59 +17,71 @@ content="width=device-width, initial-scale=1.0">
 <!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
-    <h2>⚡ Menu</h2>
+<h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button>
-    <button onclick="goFriends()">👥 Friends</button>
-    <button onclick="goQuestionBank()">📚 Question Bank</button>
-    <button onclick="goTests()">📝 Tests</button>
-    <button onclick="goProfile()">👤 Profile</button>
-    <button id="logoutBtn">🚪 Logout</button>
+<button onclick="goHome()">🏠 Home</button>
+
+<button onclick="goTasks()">📋 Tasks</button>
+
+<button onclick="goGoals()">🎯 Goals</button>
+
+<button onclick="goFriends()">👥 Friends</button>
+
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+
+<button onclick="goTests()">📝 Tests</button>
+
+<button onclick="goMistakes()">❌ Mistakes</button>
+
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-    <!-- NAVBAR -->
-    <div class="navbar">
+<!-- NAVBAR -->
+<div class="navbar">
 
-        <button class="menu-btn"
-        onclick="toggleSidebar()">☰</button>
+<button class="menu-btn"
+onclick="toggleSidebar()">
+☰
+</button>
 
-        <h2>👥 Friends</h2>
+<h2>👥 Friends</h2>
 
-    </div>
+</div>
 
-    <div class="container">
+<div class="container">
 
-        <!-- SEARCH -->
-        <div class="box">
+<!-- SEARCH -->
+<div class="box">
 
-            <input id="searchUser"
-            placeholder="Enter email...">
+<input
+id="searchUser"
+placeholder="Enter email...">
 
-            <button onclick="sendRequest()">
-                ➕ Send
-            </button>
+<button onclick="sendRequest()">
+➕ Send
+</button>
 
-        </div>
+</div>
 
-        <!-- RECEIVED -->
-        <h3>📩 Received Requests</h3>
-        <div id="requestList"></div>
+<!-- RECEIVED -->
+<h3>📩 Received Requests</h3>
+<div id="requestList"></div>
 
-        <!-- SENT -->
-        <h3>📤 Sent Requests</h3>
-        <div id="sentList"></div>
+<!-- SENT -->
+<h3>📤 Sent Requests</h3>
+<div id="sentList"></div>
 
-        <!-- FRIENDS -->
-        <h3>🤝 Your Friends</h3>
-        <div id="friendList"></div>
+<!-- FRIENDS -->
+<h3>🤝 Your Friends</h3>
+<div id="friendList"></div>
 
-    </div>
+</div>
 
 </div>
 
@@ -77,25 +89,25 @@ content="width=device-width, initial-scale=1.0">
 <div id="confirmModal"
 class="confirm-modal">
 
-    <div class="confirm-box">
+<div class="confirm-box">
 
-        <h3 id="confirmTitle"></h3>
+<h3 id="confirmTitle"></h3>
 
-        <p id="confirmText"></p>
+<p id="confirmText"></p>
 
-        <div class="confirm-actions">
+<div class="confirm-actions">
 
-            <button onclick="confirmYes()">
-                ✔ Yes
-            </button>
+<button onclick="confirmYes()">
+✔ Yes
+</button>
 
-            <button onclick="closeConfirm()">
-                Cancel
-            </button>
+<button onclick="closeConfirm()">
+Cancel
+</button>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
 </div>
 
