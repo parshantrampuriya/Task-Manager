@@ -3,19 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>Mistakes</title>
 
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/sidebar.css">
 <link rel="stylesheet" href="css/mistakes.css">
-
 </head>
+
 <body>
 
-<!-- SIDEBAR -->
+<!-- Sidebar -->
 <div id="sidebar" class="sidebar">
-
 <h2>⚡ Menu</h2>
 
 <button onclick="location.href='home.html'">🏠 Home</button>
@@ -24,87 +22,82 @@
 <button onclick="location.href='friends.html'">👥 Friends</button>
 <button onclick="location.href='mistakes.html'">❌ Mistakes</button>
 <button onclick="location.href='profile.html'">👤 Profile</button>
-
 </div>
 
-<!-- MAIN -->
+<!-- Main -->
 <div class="main">
 
-<!-- NAVBAR -->
 <div class="navbar">
-
-<button class="menu-btn"
-onclick="toggleSidebar()">☰</button>
-
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
 <h2 id="pageTitle">❌ My Mistakes</h2>
+<button id="myPageBtn" class="small-btn" onclick="goMyPage()">My Page</button>
+</div>
+
+<!-- Add box -->
+<div id="addSection" class="glass-box">
+
+<h3>➕ Add Mistake</h3>
+
+<input type="text" id="mistakeInput" placeholder="Write mistake...">
+
+<input type="date" id="mistakeDate">
+
+<button class="main-btn" onclick="addMistake()">Save Mistake</button>
 
 </div>
 
-<!-- TOP -->
-<div class="top-row">
-
-<input type="text"
-id="mistakeInput"
-placeholder="Write your mistake...">
-
-<button onclick="addMistake()">
-➕ Add
-</button>
-
-</div>
-
-<!-- FRIENDS -->
-<div class="friend-box">
-
+<!-- Friends -->
+<div class="glass-box">
 <h3>👥 Friends</h3>
+<div id="friendListMini">Loading...</div>
+</div>
 
-<div id="friendListMini">
-Loading...
+<!-- Mistakes -->
+<div class="glass-box">
+<h3>📋 Mistake History</h3>
+<div id="mistakeList">Loading...</div>
 </div>
 
 </div>
 
-<!-- LIST -->
-<div id="mistakeList"
-class="mistake-list">
+<!-- Edit Popup -->
+<div id="editPopup" class="popup-wrap">
 
-Loading...
+<div class="popup-box">
 
+<h3>✏ Edit Mistake</h3>
+
+<input type="text" id="editText">
+
+<input type="date" id="editDate">
+
+<div class="popup-actions">
+<button class="main-btn" onclick="saveEdit()">Save</button>
+<button class="danger-btn" onclick="closeEdit()">Cancel</button>
 </div>
 
 </div>
+</div>
 
-<!-- EDIT MODAL -->
-<div id="editModal" class="modal">
+<!-- Delete Popup -->
+<div id="deletePopup" class="popup-wrap">
 
-<div class="modal-box">
+<div class="popup-box">
 
-<h3>Edit Mistake</h3>
+<h3>🗑 Delete Mistake?</h3>
+<p>This action cannot be undone.</p>
 
-<input type="text"
-id="editInput">
-
-<div class="modal-actions">
-
-<button onclick="saveEdit()">
-Save
-</button>
-
-<button onclick="closeEdit()">
-Cancel
-</button>
-
+<div class="popup-actions">
+<button class="danger-btn" onclick="confirmDelete()">Delete</button>
+<button class="main-btn" onclick="closeDelete()">Cancel</button>
 </div>
 
 </div>
-
 </div>
 
-<!-- TOAST -->
+<!-- Toast -->
 <div id="toast"></div>
 
-<script type="module"
-src="js/mistakes.js"></script>
-
+<script type="module" src="js/mistakes.js"></script>
 </body>
 </html>
