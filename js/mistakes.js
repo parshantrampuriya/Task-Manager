@@ -10,11 +10,10 @@ addDoc,
 getDocs,
 query,
 where,
-orderBy,
 doc,
+getDoc,
 updateDoc,
-deleteDoc,
-getDoc
+deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const getEl=(id)=>document.getElementById(id);
@@ -23,8 +22,9 @@ let currentUser=null;
 let viewUid=null;
 
 let editId=null;
+let deleteId=null;
 
-/* AUTH */
+/* auth */
 onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
@@ -37,74 +37,83 @@ currentUser=user;
 const params=new URLSearchParams(location.search);
 viewUid=params.get("uid") || user.uid;
 
-loadFriendsMini();
-loadMistakes();
+if(viewUid!==user.uid){
+getEl("pageTitle").innerText="👤 Friend Mistakes";
+getEl("addSection").style.display="none";
+}else{
+getEl("pageTitle").innerText="❌ My Mistakes";
+}
+
+setToday();
+await loadFriends();
+await loadMistakes();
 
 });
 
-/* SIDEBAR */
+/* date default */
+function setToday(){
+let d=new Date();
+getEl("mistakeDate").value=d.toISOString().split("T")[0];
+}
+
+/* sidebar */
 window.toggleSidebar=()=>{
-
 getEl("sidebar").classList.toggle("active");
-
 };
 
-/* ADD */
+/* my page */
+window.goMyPage=()=>{
+location.href="mistakes.html";
+};
+
+/* add */
 window.addMistake=async()=>{
 
 let txt=getEl("mistakeInput").value.trim();
+let dt=getEl("mistakeDate").value;
 
-if(!txt) return showToast("Enter mistake");
+if(!txt) return toast("Enter mistake");
+if(!dt) return toast("Select date");
 
 await addDoc(collection(db,"mistakes"),{
-
-uid:viewUid===currentUser.uid
-? currentUser.uid
-: currentUser.uid,
-
+uid:currentUser.uid,
 text:txt,
+date:dt,
 createdAt:Date.now()
-
 });
 
 getEl("mistakeInput").value="";
-showToast("Added ✅");
-
+toast("Saved ✅");
 loadMistakes();
 
 };
 
-/* LOAD FRIENDS */
-async function loadFriendsMini(){
+/* friends */
+async function loadFriends(){
 
 const snap=await getDocs(collection(db,"friends"));
 
 let html="";
 
-for(const f of snap.docs){
+for(const d of snap.docs){
 
-const users=f.data().users || [];
+let users=d.data().users || [];
 
 if(!users.includes(currentUser.uid))
 continue;
 
-const fid=users.find(x=>x!==currentUser.uid);
+let fid=users.find(x=>x!==currentUser.uid);
 
-const u=await getDoc(doc(db,"users",fid));
+let u=await getDoc(doc(db,"users",fid));
 
 let name="Friend";
 
 if(u.exists()){
-
-name=
-u.data().name ||
-u.data().email ||
-"Friend";
-
+name=u.data().name || u.data().email || "Friend";
 }
 
 html+=`
-<div class="friend-mini"
+<div class="friend-card"
 onclick="openFriend('${fid}')">
 👤 ${name}
 </div>
@@ -113,65 +122,71 @@ onclick="openFriend('${fid}')">
 }
 
 getEl("friendListMini").innerHTML=
-html || "No Friends";
+html || "No friends";
 
 }
 
-/* OPEN FRIEND */
+/* open friend */
 window.openFriend=(uid)=>{
-
-location.href=
-"mistakes.html?uid="+uid;
-
+location.href="mistakes.html?uid="+uid+"&t="+Date.now();
 };
 
-/* LOAD MISTAKES */
+/* load mistakes */
 async function loadMistakes(){
 
-let q=query(
+const snap=await getDocs(
+query(
 collection(db,"mistakes"),
-where("uid","==",viewUid),
-orderBy("createdAt","desc")
+where("uid","==",viewUid)
+)
 );
 
-const snap=await getDocs(q);
+let arr=[];
+
+snap.forEach(d=>{
+arr.push({
+id:d.id,
+...d.data()
+});
+});
+
+/* latest date first */
+arr.sort((a,b)=>{
+
+if(a.date>b.date) return -1;
+if(a.date<b.date) return 1;
+
+return b.createdAt-a.createdAt;
+
+});
 
 let html="";
 let lastDate="";
 
-for(const d of snap.docs){
+arr.forEach(x=>{
 
-const x=d.data();
-
-let dt=new Date(x.createdAt);
-
-let dateTxt=
-dt.toLocaleDateString();
-
-if(dateTxt!==lastDate){
+if(x.date!==lastDate){
 
 html+=`
 <div class="date-head">
-${dateTxt}
+${x.date}
 </div>
 `;
 
-lastDate=dateTxt;
+lastDate=x.date;
 }
 
 html+=`
 <div class="mistake-card">
 
-<div class="mistake-top">
+<div class="m-top">
 
-<div class="mistake-text">
-${x.text}
-</div>
+<div>${x.text}</div>
 
 </div>
 
-<div class="mistake-time">
-${dt.toLocaleTimeString()}
+<div class="m-time">
+Saved
 </div>
 
 ${
@@ -179,15 +194,15 @@ viewUid===currentUser.uid
 ?
 `
 <div class="m-actions">
-
-<button onclick="editMistake('${d.id}','${x.text}')">
-✏ Edit
+<button class="main-btn"
+onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}')">
+Edit
 </button>
 
-<button onclick="deleteMistake('${d.id}')">
-🗑 Delete
+<button class="danger-btn"
+onclick="openDelete('${x.id}')">
+Delete
 </button>
-
 </div>
 `
 :""
@@ -196,80 +211,74 @@ viewUid===currentUser.uid
 </div>
 `;
 
-}
+});
 
 getEl("mistakeList").innerHTML=
 html || "No mistakes found.";
 
-if(viewUid===currentUser.uid){
-
-getEl("pageTitle").innerText=
-"❌ My Mistakes";
-
-}else{
-
-getEl("pageTitle").innerText=
-"👤 Friend Mistakes";
-
 }
 
-}
-
-/* EDIT */
-window.editMistake=(id,text)=>{
+/* edit */
+window.openEdit=(id,text,date)=>{
 
 editId=id;
 
-getEl("editInput").value=text;
+getEl("editText").value=decodeURIComponent(text);
+getEl("editDate").value=date;
 
-getEl("editModal")
-.classList.add("active");
+getEl("editPopup")
+.classList.add("show");
 
 };
 
 window.closeEdit=()=>{
-
-getEl("editModal")
-.classList.remove("active");
-
+getEl("editPopup").classList.remove("show");
 };
 
 window.saveEdit=async()=>{
 
-let val=
-getEl("editInput").value.trim();
-
-if(!val) return;
-
 await updateDoc(
 doc(db,"mistakes",editId),
 {
-text:val
+text:getEl("editText").value.trim(),
+date:getEl("editDate").value
 }
 );
 
 closeEdit();
-showToast("Updated ✅");
+toast("Updated ✅");
 loadMistakes();
 
 };
 
-/* DELETE */
-window.deleteMistake=async(id)=>{
+/* delete */
+window.openDelete=(id)=>{
+deleteId=id;
+getEl("deletePopup").classList.add("show");
+};
 
-await deleteDoc(
-doc(db,"mistakes",id)
-);
+window.closeDelete=()=>{
+getEl("deletePopup").classList.remove("show");
+};
 
-showToast("Deleted ❌");
+window.confirmDelete=async()=>{
+
+await deleteDoc(doc(db,"mistakes",deleteId));
+
+closeDelete();
+toast("Deleted ❌");
 loadMistakes();
 
 };
 
-/* TOAST */
-function showToast(msg){
+/* helpers */
+function escapeText(t){
+return encodeURIComponent(t);
+}
 
-let t=getEl("toast");
+function toast(msg){
+
+const t=getEl("toast");
 
 t.innerText=msg;
 t.classList.add("show");
