@@ -150,7 +150,7 @@ id:d.id,
 });
 });
 
-/* latest date first */
+/* latest first */
 arr.sort((a,b)=>{
 
 if(a.date>b.date) return -1;
@@ -179,14 +179,8 @@ lastDate=x.date;
 html+=`
 <div class="mistake-card">
 
-<div class="m-top">
-
-<div>${x.text}</div>
-
-</div>
-
-<div class="m-time">
-Saved
+<div class="m-left">
+<div class="m-text">${x.text}</div>
 </div>
 
 ${
@@ -194,6 +188,7 @@ viewUid===currentUser.uid
 ?
 `
 <div class="m-actions">
+
 <button class="main-btn"
 onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}')">
 Edit
@@ -203,6 +198,7 @@ Edit
 onclick="openDelete('${x.id}')">
 Delete
 </button>
+
 </div>
 `
 :""
