@@ -1,0 +1,109 @@
+.top-row{
+display:flex;
+gap:10px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
+.top-row input{
+flex:1;
+padding:12px;
+border-radius:10px;
+border:1px solid #00cfff;
+background:rgba(255,255,255,.08);
+color:#fff;
+}
+
+.top-row button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
+.friend-box{
+margin-top:20px;
+padding:15px;
+border-radius:12px;
+background:rgba(0,0,0,.55);
+}
+
+.friend-mini{
+padding:10px;
+margin:8px 0;
+border-radius:8px;
+background:rgba(255,255,255,.06);
+cursor:pointer;
+}
+
+.friend-mini:hover{
+background:#00cfff;
+color:#000;
+}
+
+.mistake-list{
+margin-top:20px;
+}
+
+.date-head{
+margin:18px 0 10px;
+font-size:20px;
+color:#00eaff;
+}
+
+.mistake-card{
+padding:14px;
+margin-bottom:12px;
+border-radius:12px;
+background:rgba(0,0,0,.55);
+}
+
+.mistake-top{
+display:flex;
+justify-content:space-between;
+gap:10px;
+}
+
+.mistake-text{
+font-size:16px;
+font-weight:500;
+}
+
+.mistake-time{
+font-size:13px;
+color:#aaa;
+margin-top:8px;
+}
+
+.m-actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.m-actions button{
+padding:8px 10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.m-actions button:nth-child(1){
+background:#ffc107;
+}
+
+.m-actions button:nth-child(2){
+background:#ff4d4d;
+color:#fff;
+}
+
+@media(max-width:768px){
+
+.top-row{
+flex-direction:column;
+}
+
+}
