@@ -15,102 +15,104 @@
 <!-- ================= UNIVERSAL SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
-    <h2>⚡ Menu</h2>
+<h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
+<button onclick="goHome()">🏠 Home</button>
 
-    <button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goTasks()">📋 Tasks</button>
 
-    <button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goGoals()">🎯 Goals</button>
 
-    <button onclick="goFriends()">👥 Friends</button>
+<button onclick="goFriends()">👥 Friends</button>
 
-    <button onclick="goQuestionBank()">📚 Question Bank</button>
+<button onclick="goQuestionBank()">📚 Question Bank</button>
 
-    <button onclick="goTests()">📝 Tests</button>
+<button onclick="goTests()">📝 Tests</button>
 
-    <button onclick="goProfile()">👤 Profile</button>
+<button onclick="goMistakes()">❌ Mistakes</button>
 
-    <button id="logoutBtn">🚪 Logout</button>
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
 <!-- ================= MAIN ================= -->
 <div class="main">
 
-    <!-- NAVBAR -->
-    <div class="navbar">
+<!-- NAVBAR -->
+<div class="navbar">
 
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-        <h2 id="username">📋 Tasks</h2>
+<h2 id="username">📋 Tasks</h2>
 
-    </div>
+</div>
 
-    <div class="container">
+<div class="container">
 
-        <!-- SEARCH -->
-        <input id="searchInput" placeholder="🔍 Search tasks...">
+<!-- SEARCH -->
+<input id="searchInput" placeholder="🔍 Search tasks...">
 
-        <!-- TABS -->
-        <div class="tabs">
+<!-- TABS -->
+<div class="tabs">
 
-            <button onclick="switchTab('pending',event)">
-            📌 Pending
-            </button>
+<button onclick="switchTab('pending',event)">
+📌 Pending
+</button>
 
-            <button onclick="switchTab('due',event)">
-            🔥 Due
-            </button>
+<button onclick="switchTab('due',event)">
+🔥 Due
+</button>
 
-            <button onclick="switchTab('completed',event)">
-            ✅ Completed
-            </button>
+<button onclick="switchTab('completed',event)">
+✅ Completed
+</button>
 
-        </div>
+</div>
 
-        <!-- ADD TASK -->
-        <div class="add-task">
+<!-- ADD TASK -->
+<div class="add-task">
 
-            <input id="taskInput" placeholder="New task...">
+<input id="taskInput" placeholder="New task...">
 
-            <input type="date" id="dateInput">
+<input type="date" id="dateInput">
 
-            <input type="time" id="timeInput">
+<input type="time" id="timeInput">
 
-            <button onclick="addTask()">➕ Add</button>
+<button onclick="addTask()">➕ Add</button>
 
-        </div>
+</div>
 
-        <!-- TASK LIST -->
-        <div id="taskContainer"></div>
+<!-- TASK LIST -->
+<div id="taskContainer"></div>
 
-    </div>
+</div>
 
 </div>
 
 <!-- ================= MODAL ================= -->
 <div id="modal" class="modal">
 
-    <div class="modal-box">
+<div class="modal-box">
 
-        <h3 id="modalTitle">Edit Task</h3>
+<h3 id="modalTitle">Edit Task</h3>
 
-        <input id="modalInput" placeholder="Task name">
+<input id="modalInput" placeholder="Task name">
 
-        <input type="date" id="modalDate">
+<input type="date" id="modalDate">
 
-        <input type="time" id="modalTime">
+<input type="time" id="modalTime">
 
-        <div class="modal-actions">
+<div class="modal-actions">
 
-            <button onclick="confirmAction()">💾 Save</button>
+<button onclick="confirmAction()">💾 Save</button>
 
-            <button onclick="closeModal()">❌ Cancel</button>
+<button onclick="closeModal()">❌ Cancel</button>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
 </div>
 
