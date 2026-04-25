@@ -23,6 +23,7 @@ border:none;
 border-radius:10px;
 background:rgba(255,255,255,.08);
 color:#fff;
+box-sizing:border-box;
 }
 
 .main-btn,
@@ -46,15 +47,11 @@ background:#ff4d4d;
 color:#fff;
 }
 
-.friend-card,
-.mistake-card{
+.friend-card{
 padding:14px;
 border-radius:12px;
 background:rgba(255,255,255,.05);
 margin-bottom:10px;
-}
-
-.friend-card{
 cursor:pointer;
 }
 
@@ -63,31 +60,61 @@ background:#00cfff;
 color:#000;
 }
 
+/* DATE */
 .date-head{
-margin:20px 0 10px;
+margin:18px 0 10px;
 font-size:18px;
-color:#00ffcc;
 font-weight:bold;
+color:#00ffcc;
 }
 
-.m-top{
+/* MISTAKE CARD */
+.mistake-card{
+padding:14px;
+border-radius:12px;
+background:rgba(255,255,255,.05);
+margin-bottom:10px;
 display:flex;
 justify-content:space-between;
-gap:10px;
+align-items:center;
+gap:14px;
+}
+
+/* LEFT TEXT AREA */
+.m-left{
+flex:1;
+min-width:0;
+}
+
+.m-text{
+font-size:16px;
+font-weight:500;
+word-break:break-word;
 }
 
 .m-time{
 font-size:13px;
 color:#aaa;
-margin-top:8px;
+margin-top:6px;
 }
 
+/* RIGHT BUTTON AREA */
 .m-actions{
 display:flex;
 gap:8px;
-margin-top:10px;
+flex-shrink:0;
 }
 
+.m-actions button{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+white-space:nowrap;
+}
+
+/* POPUPS */
 .popup-wrap{
 position:fixed;
 inset:0;
@@ -145,11 +172,24 @@ z-index:99999;
 opacity:1;
 }
 
+/* MOBILE */
 @media(max-width:768px){
-.m-top{
+
+.mistake-card{
 flex-direction:column;
+align-items:stretch;
 }
+
+.m-actions{
+width:100%;
+}
+
+.m-actions button{
+flex:1;
+}
+
 .popup-actions{
 flex-direction:column;
 }
+
 }
