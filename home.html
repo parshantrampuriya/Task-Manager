@@ -15,113 +15,140 @@
 <!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
-    <h2>⚡ Menu</h2>
+<h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button>
-    <button onclick="goFriends()">👥 Friends</button>
-    <button onclick="goQuestionBank()">📚 Question Bank</button>
-    <button onclick="goTests()">📝 Tests</button>
-    <button onclick="goProfile()">👤 Profile</button>
-    <button id="logoutBtn">🚪 Logout</button>
+<button onclick="goHome()">🏠 Home</button>
+
+<button onclick="goTasks()">📋 Tasks</button>
+
+<button onclick="goGoals()">🎯 Goals</button>
+
+<button onclick="goFriends()">👥 Friends</button>
+
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+
+<button onclick="goTests()">📝 Tests</button>
+
+<button onclick="goMistakes()">❌ Mistakes</button>
+
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-    <!-- NAVBAR -->
-    <div class="navbar">
+<!-- NAVBAR -->
+<div class="navbar">
 
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<button class="menu-btn"
+onclick="toggleSidebar()">
+☰
+</button>
 
-        <h2 id="username">👤 Loading...</h2>
+<h2 id="username">👤 Loading...</h2>
 
-    </div>
+</div>
 
-    <!-- DASHBOARD -->
-    <div class="container">
+<!-- DASHBOARD -->
+<div class="container">
 
-        <div class="dashboard">
+<div class="dashboard">
 
-            <!-- LEFT PANEL -->
-            <div class="left-panel">
+<!-- LEFT PANEL -->
+<div class="left-panel">
 
-                <h2>📅 Today's Tasks</h2>
+<h2>📅 Today's Tasks</h2>
 
-                <!-- COUNTDOWN -->
-                <div id="countdownBox">
-                    ⏳ Loading countdown...
-                </div>
+<!-- COUNTDOWN -->
+<div id="countdownBox">
+⏳ Loading countdown...
+</div>
 
-                <!-- QUICK ADD -->
-                <div class="quick-add" id="quickAddBox">
+<!-- QUICK ADD -->
+<div class="quick-add" id="quickAddBox">
 
-                    <input id="quickTaskInput" placeholder="Add new task...">
+<input
+id="quickTaskInput"
+placeholder="Add new task...">
 
-                    <input type="date" id="quickDateInput">
+<input
+type="date"
+id="quickDateInput">
 
-                    <input type="time" id="quickTimeInput">
+<input
+type="time"
+id="quickTimeInput">
 
-                    <button onclick="quickAddTask()">➕ Add</button>
+<button onclick="quickAddTask()">
+➕ Add
+</button>
 
-                </div>
+</div>
 
-                <!-- TASK LIST -->
-                <div id="homeContent"></div>
+<!-- TASK LIST -->
+<div id="homeContent"></div>
 
-            </div>
+</div>
 
-            <!-- RIGHT PANEL -->
-            <div class="right-panel">
+<!-- RIGHT PANEL -->
+<div class="right-panel">
 
-                <h2>🎯 Goals Progress</h2>
+<h2>🎯 Goals Progress</h2>
 
-                <small style="color:#aaa;">
-                    Drag to reorder goals
-                </small>
+<small style="color:#aaa;">
+Drag to reorder goals
+</small>
 
-                <div id="goalsHomeContainer"
-                class="goal-container"></div>
+<div
+id="goalsHomeContainer"
+class="goal-container">
+</div>
 
-            </div>
+</div>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
 </div>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
 
-    <div class="modal-box">
+<div class="modal-box">
 
-        <h3 id="modalTitle">Edit Task</h3>
+<h3 id="modalTitle">
+Edit Task
+</h3>
 
-        <input id="modalText"
-        placeholder="Task name">
+<input
+id="modalText"
+placeholder="Task name">
 
-        <input type="date"
-        id="modalDate">
+<input
+type="date"
+id="modalDate">
 
-        <input type="time"
-        id="modalTime">
+<input
+type="time"
+id="modalTime">
 
-        <div class="modal-actions">
+<div class="modal-actions">
 
-            <button onclick="confirmAction()">
-                💾 Save
-            </button>
+<button onclick="confirmAction()">
+💾 Save
+</button>
 
-            <button onclick="closeModal()">
-                ❌ Cancel
-            </button>
+<button onclick="closeModal()">
+❌ Cancel
+</button>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
 </div>
 
