@@ -18,152 +18,167 @@ content="width=device-width, initial-scale=1.0">
 <!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
-    <h2>⚡ Menu</h2>
+<h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button>
-    <button onclick="goFriends()">👥 Friends</button>
-    <button onclick="goQuestionBank()">📚 Question Bank</button>
-    <button onclick="goTests()">📝 Tests</button>
-    <button onclick="goProfile()">👤 Profile</button>
-    <button onclick="logout()">🚪 Logout</button>
+<button onclick="goHome()">🏠 Home</button>
+
+<button onclick="goTasks()">📋 Tasks</button>
+
+<button onclick="goGoals()">🎯 Goals</button>
+
+<button onclick="goFriends()">👥 Friends</button>
+
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+
+<button onclick="goTests()">📝 Tests</button>
+
+<button onclick="goMistakes()">❌ Mistakes</button>
+
+<button onclick="goProfile()">👤 Profile</button>
+
+<button onclick="logout()">🚪 Logout</button>
 
 </div>
 
 <!-- PAGE -->
 <div class="page">
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
+<!-- TOP BAR -->
+<div class="top-bar">
 
-        <button class="menu-btn"
-        onclick="toggleSidebar()">
-        ☰
-        </button>
+<button class="menu-btn"
+onclick="toggleSidebar()">
+☰
+</button>
 
-        <div class="top-title">
+<div class="top-title">
 
-            <h1>📝 Test Dashboard</h1>
+<h1>📝 Test Dashboard</h1>
 
-            <p>
-            Create • Attempt • Analyze • Improve
-            </p>
+<p>
+Create • Attempt • Analyze • Improve
+</p>
 
-        </div>
+</div>
 
-        <button class="refresh-btn"
-        onclick="refreshPage()">
-        ⟳
-        </button>
+<button class="refresh-btn"
+onclick="refreshPage()">
+⟳
+</button>
 
-    </div>
+</div>
 
-    <!-- HERO -->
-    <div class="hero-card">
+<!-- HERO -->
+<div class="hero-card">
 
-        <h2>Welcome Back</h2>
+<h2>Welcome Back</h2>
 
-        <p>
-        Build smart tests from your question bank,
-        assign users, track scores and grow faster.
-        </p>
+<p>
+Build smart tests from your question bank,
+assign users, track scores and grow faster.
+</p>
 
-    </div>
+</div>
 
-    <!-- MAIN CARDS -->
-    <div class="card-wrap">
+<!-- MAIN CARDS -->
+<div class="card-wrap">
 
-        <div class="big-card create"
-        onclick="location.href='create-test.html'">
+<div class="big-card create"
+onclick="location.href='create-test.html'">
 
-            <div class="icon">➕</div>
-            <h2>Create Test</h2>
+<div class="icon">➕</div>
 
-            <p>
-            Create new test from question bank
-            or manual input
-            </p>
+<h2>Create Test</h2>
 
-        </div>
+<p>
+Create new test from question bank
+or manual input
+</p>
 
-        <div class="big-card mine"
-        onclick="location.href='my-tests.html'">
+</div>
 
-            <div class="icon">📋</div>
-            <h2>My Tests</h2>
+<div class="big-card mine"
+onclick="location.href='my-tests.html'">
 
-            <p>
-            Manage created tests, edit and release results
-            </p>
+<div class="icon">📋</div>
 
-        </div>
+<h2>My Tests</h2>
 
-        <div class="big-card give"
-        onclick="location.href='give-test.html'">
+<p>
+Manage created tests, edit and release results
+</p>
 
-            <div class="icon">📝</div>
-            <h2>Available Tests</h2>
+</div>
 
-            <p>
-            Start assigned tests and upcoming exams
-            </p>
+<div class="big-card give"
+onclick="location.href='give-test.html'">
 
-        </div>
+<div class="icon">📝</div>
 
-        <div class="big-card result"
-        onclick="location.href='result.html'">
+<h2>Available Tests</h2>
 
-            <div class="icon">📊</div>
-            <h2>Results</h2>
+<p>
+Start assigned tests and upcoming exams
+</p>
 
-            <p>
-            See marks, rank and performance reports
-            </p>
+</div>
 
-        </div>
+<div class="big-card result"
+onclick="location.href='result.html'">
 
-    </div>
+<div class="icon">📊</div>
 
-    <!-- UPCOMING -->
-    <div class="section-box">
+<h2>Results</h2>
 
-        <div class="section-head">
+<p>
+See marks, rank and performance reports
+</p>
 
-            <h2>🔥 Upcoming Tests</h2>
+</div>
 
-            <span id="upcomingCount">0</span>
+</div>
 
-        </div>
+<!-- UPCOMING -->
+<div class="section-box">
 
-        <div id="upcomingList"
-        class="mini-list">
+<div class="section-head">
 
-            <div class="empty-row">
-                No upcoming tests
-            </div>
+<h2>🔥 Upcoming Tests</h2>
 
-        </div>
+<span id="upcomingCount">0</span>
 
-    </div>
+</div>
 
-    <!-- RECENT -->
-    <div class="section-box">
+<div id="upcomingList"
+class="mini-list">
 
-        <div class="section-head">
-            <h2>📌 Recent Activity</h2>
-        </div>
+<div class="empty-row">
+No upcoming tests
+</div>
 
-        <div id="recentList"
-        class="mini-list">
+</div>
 
-            <div class="empty-row">
-                No recent activity
-            </div>
+</div>
 
-        </div>
+<!-- RECENT -->
+<div class="section-box">
 
-    </div>
+<div class="section-head">
+
+<h2>📌 Recent Activity</h2>
+
+</div>
+
+<div id="recentList"
+class="mini-list">
+
+<div class="empty-row">
+No recent activity
+</div>
+
+</div>
+
+</div>
 
 </div>
 
