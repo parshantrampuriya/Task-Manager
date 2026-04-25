@@ -2,19 +2,26 @@
 
 /* ================= NAVIGATION ================= */
 
-window.goHome = () => location.href = "home.html";
+window.goHome = () =>
+location.href = "home.html";
 
-window.goTasks = () => location.href = "tasks.html";
+window.goTasks = () =>
+location.href = "tasks.html";
 
-window.goGoals = () => location.href = "goals.html";
+window.goGoals = () =>
+location.href = "goals.html";
 
-window.goFriends = () => location.href = "friends.html";
+window.goFriends = () =>
+location.href = "friends.html";
 
 window.goQuestionBank = () =>
 location.href = "question-bank.html";
 
 window.goTests = () =>
 location.href = "tests.html";
+
+window.goMistakes = () =>
+location.href = "mistakes.html";
 
 window.goProfile = () =>
 location.href = "profile.html";
@@ -74,28 +81,45 @@ btn.innerText.toLowerCase();
 
 let active = false;
 
-if(page.includes("home") &&
-txt.includes("home")) active = true;
+if(
+(page === "" || page.includes("home")) &&
+txt.includes("home")
+) active = true;
 
-if(page.includes("tasks") &&
-txt.includes("tasks")) active = true;
+if(
+page.includes("tasks") &&
+txt.includes("tasks")
+) active = true;
 
-if(page.includes("goals") &&
-txt.includes("goals")) active = true;
+if(
+page.includes("goals") &&
+txt.includes("goals")
+) active = true;
 
-if(page.includes("friends") &&
-txt.includes("friends")) active = true;
+if(
+page.includes("friends") &&
+txt.includes("friends")
+) active = true;
 
 if(
 page.includes("question") &&
 txt.includes("question")
 ) active = true;
 
-if(page.includes("tests") &&
-txt.includes("tests")) active = true;
+if(
+page.includes("tests") &&
+txt.includes("tests")
+) active = true;
 
-if(page.includes("profile") &&
-txt.includes("profile")) active = true;
+if(
+page.includes("mistakes") &&
+txt.includes("mistakes")
+) active = true;
+
+if(
+page.includes("profile") &&
+txt.includes("profile")
+) active = true;
 
 if(active){
 
