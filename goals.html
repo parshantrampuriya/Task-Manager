@@ -18,90 +18,107 @@ content="width=device-width, initial-scale=1.0">
 <!-- UNIVERSAL SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
-    <h2>⚡ Menu</h2>
+<h2>⚡ Menu</h2>
 
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="goTasks()">📋 Tasks</button>
-    <button onclick="goGoals()">🎯 Goals</button>
-    <button onclick="goFriends()">👥 Friends</button>
-    <button onclick="goQuestionBank()">📚 Question Bank</button>
-    <button onclick="goTests()">📝 Tests</button>
-    <button onclick="goProfile()">👤 Profile</button>
-    <button onclick="logout()">🚪 Logout</button>
+<button onclick="goHome()">🏠 Home</button>
+
+<button onclick="goTasks()">📋 Tasks</button>
+
+<button onclick="goGoals()">🎯 Goals</button>
+
+<button onclick="goFriends()">👥 Friends</button>
+
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+
+<button onclick="goTests()">📝 Tests</button>
+
+<button onclick="goMistakes()">❌ Mistakes</button>
+
+<button onclick="goProfile()">👤 Profile</button>
+
+<button onclick="logout()">🚪 Logout</button>
 
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-    <!-- NAVBAR -->
-    <div class="navbar">
+<!-- NAVBAR -->
+<div class="navbar">
 
-        <button class="menu-btn"
-        onclick="toggleSidebar()">☰</button>
+<button class="menu-btn"
+onclick="toggleSidebar()">
+☰
+</button>
 
-        <h2>🎯 Goals</h2>
+<h2>🎯 Goals</h2>
 
-    </div>
+</div>
 
-    <div class="container">
+<div class="container">
 
-        <!-- ADD GOAL -->
-        <div class="add-box">
+<!-- ADD GOAL -->
+<div class="add-box">
 
-            <input id="goalName"
-            placeholder="Goal name (e.g. GATE Study)">
+<input
+id="goalName"
+placeholder="Goal name (e.g. GATE Study)">
 
-            <input id="goalTotal"
-            type="number"
-            placeholder="Total target">
+<input
+id="goalTotal"
+type="number"
+placeholder="Total target">
 
-            <input id="goalDeadline"
-            type="date">
+<input
+id="goalDeadline"
+type="date">
 
-            <button id="addBtn">
-                Add Goal
-            </button>
+<button id="addBtn">
+Add Goal
+</button>
 
-        </div>
+</div>
 
-        <!-- GOALS LIST -->
-        <div id="goalContainer"></div>
+<!-- GOALS LIST -->
+<div id="goalContainer"></div>
 
-    </div>
+</div>
 
 </div>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
 
-    <div class="modal-box">
+<div class="modal-box">
 
-        <h3 id="modalTitle">Edit Goal</h3>
+<h3 id="modalTitle">Edit Goal</h3>
 
-        <input id="modalName"
-        placeholder="Goal name">
+<input
+id="modalName"
+placeholder="Goal name">
 
-        <input id="modalInput"
-        type="number"
-        placeholder="Value">
+<input
+id="modalInput"
+type="number"
+placeholder="Value">
 
-        <input id="modalDate"
-        type="date">
+<input
+id="modalDate"
+type="date">
 
-        <div class="modal-actions">
+<div class="modal-actions">
 
-            <button onclick="saveModal()">
-                Save
-            </button>
+<button onclick="saveModal()">
+Save
+</button>
 
-            <button onclick="closeModal()">
-                Cancel
-            </button>
+<button onclick="closeModal()">
+Cancel
+</button>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
 </div>
 
