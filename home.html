@@ -1,18 +1,19 @@
-<!-- home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Home</title>
+<title>Ultimate Dashboard</title>
 
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/sidebar.css">
 
+<link rel="icon" href="data:,">
 </head>
+
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
@@ -29,7 +30,7 @@
 
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 <div class="main">
 
 <!-- TOPBAR -->
@@ -38,42 +39,135 @@
 <button class="menu-btn"
 onclick="toggleSidebar()">☰</button>
 
+<div class="nav-center">
 <h2 id="username">👤 Loading...</h2>
+<p id="todayDate">Loading...</p>
+</div>
 
-<button class="custom-btn"
-onclick="toggleCustomize()">
-⚙ Customize
+<div class="nav-right">
+
+<button class="nav-btn"
+onclick="openCustomize()">
+⚙ Widgets
+</button>
+
+<button class="nav-btn"
+onclick="refreshDashboard()">
+⟳ Refresh
 </button>
 
 </div>
 
-<!-- CUSTOMIZE PANEL -->
-<div id="customPanel" class="custom-panel">
+</div>
 
-<h3>Dashboard Widgets</h3>
+<!-- HERO -->
+<div class="hero-box">
 
-<label><input type="checkbox" data-id="tasks" checked> Today Tasks</label>
-<label><input type="checkbox" data-id="goals" checked> Goals</label>
-<label><input type="checkbox" data-id="quest" checked> Quest</label>
-<label><input type="checkbox" data-id="mistakes" checked> Mistakes</label>
-<label><input type="checkbox" data-id="insight" checked> Insight</label>
-<label><input type="checkbox" data-id="countdown" checked> Countdown</label>
+<h1>🚀 Personal Command Center</h1>
 
-<button onclick="saveLayout()">💾 Save Layout</button>
+<p>
+Track tasks, goals, mistakes, insights, doubts and progress from one place.
+</p>
 
 </div>
 
-<!-- DASHBOARD -->
+<!-- DASHBOARD GRID -->
 <div id="dashboardGrid" class="dashboard-grid">
 
-<!-- cards inserted by js -->
+<!-- JS inject widgets -->
 
 </div>
 
 </div>
 
-<script type="module" src="js/home.js"></script>
+<!-- ================= CUSTOMIZE POPUP ================= -->
+<div id="customPopup" class="popup-wrap">
+
+<div class="popup-box big-popup">
+
+<div class="popup-head">
+<h3>⚙ Customize Dashboard</h3>
+<button onclick="closeCustomize()">✖</button>
+</div>
+
+<div class="widget-list">
+
+<label><input type="checkbox" data-widget="tasks" checked> 📋 Tasks Widget</label>
+
+<label><input type="checkbox" data-widget="goals" checked> 🎯 Goals Widget</label>
+
+<label><input type="checkbox" data-widget="mistakes" checked> ❌ Mistakes Widget</label>
+
+<label><input type="checkbox" data-widget="insights" checked> 🧠 Insights Widget</label>
+
+<label><input type="checkbox" data-widget="quest" checked> ❓ Quest Widget</label>
+
+<label><input type="checkbox" data-widget="countdown" checked> ⏳ Countdown Widget</label>
+
+</div>
+
+<div class="popup-actions">
+
+<button class="main-btn"
+onclick="saveWidgets()">
+💾 Save Layout
+</button>
+
+<button class="danger-btn"
+onclick="closeCustomize()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= QUICK ADD POPUP ================= -->
+<div id="quickPopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<h3 id="popupTitle">Add Item</h3>
+
+<input id="popupText" placeholder="Enter text">
+
+<input type="date" id="popupDate">
+
+<input type="time" id="popupTime">
+
+<select id="popupType">
+<option value="task">Task</option>
+<option value="mistake">Mistake</option>
+<option value="insight">Insight</option>
+<option value="quest">Quest</option>
+<option value="goal">Goal</option>
+</select>
+
+<div class="popup-actions">
+
+<button class="main-btn"
+onclick="saveQuickItem()">
+Save
+</button>
+
+<button class="danger-btn"
+onclick="closeQuickPopup()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast"></div>
+
 <script type="module" src="js/menu.js"></script>
+<script type="module" src="js/home.js"></script>
 
 </body>
 </html>
