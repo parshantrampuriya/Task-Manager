@@ -1,4 +1,4 @@
-// ================= HOME JS =================
+// ================= HOME JS V2 =================
 
 import { auth, db } from "./firebase.js";
 
@@ -13,54 +13,57 @@ getDoc,
 setDoc,
 collection,
 getDocs,
-addDoc
+addDoc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GLOBAL ================= */
 const $ = (id)=>document.getElementById(id);
 
-let currentUser=null;
+let currentUser = null;
+let addType = "task";
 
-let widgetState={
+let widgets = {
+focus:true,
 tasks:true,
 goals:true,
 mistakes:true,
 insights:true,
 quest:true,
-countdown:true
+countdown:true,
+quote:true
 };
 
-let quickMode="task";
-
 /* ================= AUTH ================= */
-onAuthStateChanged(auth,async(user)=>{
+
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser=user;
+currentUser = user;
 
 await loadUser();
-await loadWidgetState();
+await loadWidgetSettings();
 
-setTodayBar();
+setToday();
 renderDashboard();
 startClock();
 
 });
 
 /* ================= USER ================= */
+
 async function loadUser(){
 
-const snap=await getDoc(
+const snap = await getDoc(
 doc(db,"users",currentUser.uid)
 );
 
 if(snap.exists()){
 
-$("username").innerText=
+$("username").innerText =
 "👤 Welcome " +
 (snap.data().name || "User");
 
@@ -69,30 +72,35 @@ $("username").innerText=
 }
 
 /* ================= DATE ================= */
-function setTodayBar(){
 
-let d=new Date();
+function setToday(){
 
-$("todayDate").innerText=
+const d = new Date();
+
+$("todayDate").innerText =
 d.toDateString();
+
+$("addDate").value =
+d.toISOString().split("T")[0];
 
 }
 
-/* ================= WIDGET SETTINGS ================= */
-async function loadWidgetState(){
+/* ================= SETTINGS ================= */
 
-const ref=doc(
+async function loadWidgetSettings(){
+
+const ref = doc(
 db,
 "dashboardSettings",
 currentUser.uid
 );
 
-const snap=await getDoc(ref);
+const snap = await getDoc(ref);
 
 if(snap.exists()){
 
-widgetState={
-...widgetState,
+widgets = {
+...widgets,
 ...snap.data()
 };
 
@@ -100,107 +108,251 @@ widgetState={
 
 document
 .querySelectorAll("[data-widget]")
-.forEach(chk=>{
+.forEach(x=>{
 
-chk.checked=
-widgetState[
-chk.dataset.widget
-];
+x.checked =
+widgets[x.dataset.widget];
 
 });
 
 }
 
-window.openCustomize=()=>{
+window.openCustomize = ()=>{
 $("customPopup").classList.add("show");
 };
 
-window.closeCustomize=()=>{
+window.closeCustomize = ()=>{
 $("customPopup").classList.remove("show");
 };
 
-window.saveWidgets=async()=>{
+window.saveWidgets = async()=>{
 
 document
 .querySelectorAll("[data-widget]")
-.forEach(chk=>{
+.forEach(x=>{
 
-widgetState[
-chk.dataset.widget
-]=chk.checked;
+widgets[x.dataset.widget] =
+x.checked;
 
 });
 
 await setDoc(
 doc(db,"dashboardSettings",currentUser.uid),
-widgetState
+widgets
 );
 
 closeCustomize();
 toast("Saved ✅");
+
 renderDashboard();
 
 };
 
 /* ================= DASHBOARD ================= */
-window.refreshDashboard=()=>{
-renderDashboard();
-toast("Refreshed 🔄");
-};
 
 async function renderDashboard(){
 
-let html="";
+let html = "";
 
-if(widgetState.tasks)
-html+=await tasksWidget();
+if(widgets.focus)
+html += await focusCard();
 
-if(widgetState.goals)
-html+=await goalsWidget();
+if(widgets.countdown)
+html += countdownCard();
 
-if(widgetState.mistakes)
-html+=await mistakesWidget();
+if(widgets.quote)
+html += quoteCard();
 
-if(widgetState.insights)
-html+=await insightsWidget();
+if(widgets.tasks)
+html += await tasksCard();
 
-if(widgetState.quest)
-html+=await questWidget();
+if(widgets.goals)
+html += await goalsCard();
 
-if(widgetState.countdown)
-html+=countdownWidget();
+if(widgets.mistakes)
+html += await mistakesCard();
 
-$("dashboardGrid").innerHTML=html;
+if(widgets.insights)
+html += await insightsCard();
+
+if(widgets.quest)
+html += await questCard();
+
+$("dashboardGrid").innerHTML = html;
+
+}
+
+/* ================= FOCUS ================= */
+
+async function focusCard(){
+
+const snap = await getDocs(
+collection(db,"tasks")
+);
+
+let total=0;
+let done=0;
+
+snap.forEach(d=>{
+
+let t=d.data();
+
+if(t.user===currentUser.uid){
+
+let today = new Date()
+.toLocaleDateString("en-CA");
+
+if(t.date===today){
+
+total++;
+
+if(t.completed) done++;
+
+}
+
+}
+
+});
+
+let per = total ? Math.round((done/total)*100) : 0;
+
+return `
+<div class="widget-card">
+<div class="card-head">
+<h3>📅 Today Focus</h3>
+</div>
+
+<div class="big-number">${per}%</div>
+
+<div class="progress">
+<div class="progress-fill"
+style="width:${per}%">
+</div>
+</div>
+
+<div class="small-muted">
+${done}/${total} tasks completed
+</div>
+
+</div>
+`;
+
+}
+
+/* ================= COUNTDOWN ================= */
+
+function countdownCard(){
+
+return `
+<div class="widget-card">
+<div class="card-head">
+<h3>⏳ Countdown</h3>
+</div>
+
+<div id="liveClock"
+class="big-number">--</div>
+
+<div class="small-muted">
+Day ends soon
+</div>
+</div>
+`;
+
+}
+
+function startClock(){
+
+setInterval(()=>{
+
+let box = $("liveClock");
+if(!box) return;
+
+let now = new Date();
+let end = new Date();
+
+end.setHours(23,59,59,999);
+
+let diff = end-now;
+
+let h = Math.floor(diff/3600000);
+let m = Math.floor((diff%3600000)/60000);
+let s = Math.floor((diff%60000)/1000);
+
+box.innerText =
+`${h}h ${m}m ${s}s`;
+
+},1000);
+
+}
+
+/* ================= QUOTE ================= */
+
+function quoteCard(){
+
+const arr = [
+"Discipline beats mood.",
+"Small wins daily.",
+"Finish what matters.",
+"Focus creates power.",
+"Consistency wins."
+];
+
+let q =
+arr[new Date().getDate()%arr.length];
+
+return `
+<div class="widget-card">
+<div class="card-head">
+<h3>🧠 Focus Quote</h3>
+</div>
+
+<div class="item-title">
+${q}
+</div>
+
+</div>
+`;
 
 }
 
 /* ================= TASKS ================= */
-async function tasksWidget(){
 
-const snap=await getDocs(
+async function tasksCard(){
+
+const snap = await getDocs(
 collection(db,"tasks")
 );
 
-const today=new Date()
+let rows = "";
+let today = new Date()
 .toLocaleDateString("en-CA");
-
-let rows="";
 
 snap.forEach(d=>{
 
-let x=d.data();
+let t=d.data();
 
 if(
-x.user===currentUser.uid &&
-x.date===today
+t.user===currentUser.uid &&
+t.date===today
 ){
 
-rows+=`
+rows += `
 <div class="item-row">
+
 <div class="item-left">
-<div class="item-title">${x.text}</div>
-<div class="item-sub">${x.time || ""}</div>
+<div class="item-title">
+${t.completed ? "✔ " : ""}${t.text}
 </div>
+<div class="item-sub">
+${t.time || ""}
+</div>
+</div>
+
+<button class="icon-btn"
+onclick="toggleTask('${d.id}',${t.completed})">
+✔
+</button>
+
 </div>
 `;
 
@@ -209,18 +361,13 @@ rows+=`
 });
 
 if(!rows)
-rows=`<div class="small-muted">No tasks today</div>`;
+rows=`<div class="small-muted">No tasks</div>`;
 
 return `
 <div class="widget-card full-card">
 
 <div class="card-head">
 <h3>📋 Today Tasks</h3>
-
-<div class="card-tools">
-<button class="icon-btn"
-onclick="openQuick('task')">＋</button>
-</div>
 </div>
 
 ${rows}
@@ -230,10 +377,24 @@ ${rows}
 
 }
 
-/* ================= GOALS ================= */
-async function goalsWidget(){
+window.toggleTask = async(id,val)=>{
 
-const snap=await getDocs(
+await updateDoc(
+doc(db,"tasks",id),
+{
+completed:!val
+}
+);
+
+renderDashboard();
+
+};
+
+/* ================= GOALS ================= */
+
+async function goalsCard(){
+
+const snap = await getDocs(
 collection(db,"goals")
 );
 
@@ -249,19 +410,24 @@ let p=Math.round(
 (g.done/g.total)*100 || 0
 );
 
-rows+=`
+rows += `
 <div class="item-row">
 <div class="item-left">
-<div class="item-title">${g.name}</div>
+
+<div class="item-title">
+${g.name}
+</div>
 
 <div class="progress">
 <div class="progress-fill"
-style="width:${p}%"></div>
+style="width:${p}%">
+</div>
 </div>
 
 </div>
 
 <div>${p}%</div>
+
 </div>
 `;
 
@@ -283,125 +449,43 @@ ${rows}
 
 }
 
-/* ================= MISTAKES ================= */
-async function mistakesWidget(){
+/* ================= COUNTS ================= */
+
+async function mistakesCard(){
+return countCard("mistakes","uid","❌ Mistakes");
+}
+
+async function insightsCard(){
+return countCard("insights","uid","🧠 Insights");
+}
+
+async function questCard(){
+return countCard("quest","uid","❓ Quest");
+}
+
+async function countCard(col,key,title){
 
 const snap=await getDocs(
-collection(db,"mistakes")
+collection(db,col)
 );
 
-let count=0;
+let c=0;
 
 snap.forEach(d=>{
-if(d.data().uid===currentUser.uid)
-count++;
+if(d.data()[key]===currentUser.uid)
+c++;
 });
 
 return `
 <div class="widget-card">
-
 <div class="card-head">
-
-<h3>❌ Mistakes</h3>
-
-<div class="card-tools">
-<button class="icon-btn"
-onclick="openQuick('mistake')">＋</button>
+<h3>${title}</h3>
 </div>
 
-</div>
-
-<div class="big-number">${count}</div>
-<div class="small-muted">
-Total mistakes recorded
-</div>
-
-</div>
-`;
-
-}
-
-/* ================= INSIGHTS ================= */
-async function insightsWidget(){
-
-const snap=await getDocs(
-collection(db,"insights")
-);
-
-let latest="No insight added";
-
-snap.forEach(d=>{
-
-let x=d.data();
-
-if(x.uid===currentUser.uid)
-latest=x.text;
-
-});
-
-return `
-<div class="widget-card full-card">
-
-<div class="card-head">
-
-<h3>🧠 Insights</h3>
-
-<div class="card-tools">
-<button class="icon-btn"
-onclick="openQuick('insight')">＋</button>
-</div>
-
-</div>
-
-<div class="item-row">
-<div class="item-title">
-${latest}
-</div>
-</div>
-
-</div>
-`;
-
-}
-
-/* ================= QUEST ================= */
-async function questWidget(){
-
-const snap=await getDocs(
-collection(db,"quest")
-);
-
-let pending=0;
-
-snap.forEach(d=>{
-
-let x=d.data();
-
-if(
-x.uid===currentUser.uid &&
-x.status==="Pending"
-) pending++;
-
-});
-
-return `
-<div class="widget-card">
-
-<div class="card-head">
-
-<h3>❓ Quest</h3>
-
-<div class="card-tools">
-<button class="icon-btn"
-onclick="openQuick('quest')">＋</button>
-</div>
-
-</div>
-
-<div class="big-number">${pending}</div>
+<div class="big-number">${c}</div>
 
 <div class="small-muted">
-Pending questions
+Total records
 </div>
 
 </div>
@@ -409,102 +493,86 @@ Pending questions
 
 }
 
-/* ================= COUNTDOWN ================= */
-function countdownWidget(){
+/* ================= ADD POPUP ================= */
 
-return `
-<div class="widget-card">
+window.openAddPopup=()=>{
+$("addPopup").classList.add("show");
+backToTypes();
+};
 
-<div class="card-head">
-<h3>⏳ Countdown</h3>
-</div>
+window.closeAddPopup=()=>{
+$("addPopup").classList.remove("show");
+};
 
-<div id="liveClock"
-class="big-number">--</div>
+window.selectAddType=(type)=>{
 
-<div class="small-muted">
-Today ends in
-</div>
+addType=type;
 
-</div>
-`;
+$("typeSelect").style.display="none";
+$("dynamicForm").style.display="block";
 
-}
-
-/* ================= CLOCK ================= */
-function startClock(){
-
-setInterval(()=>{
-
-let el=$("liveClock");
-if(!el) return;
-
-let now=new Date();
-
-let end=new Date();
-end.setHours(23,59,59,999);
-
-let diff=end-now;
-
-let h=Math.floor(diff/3600000);
-let m=Math.floor((diff%3600000)/60000);
-let s=Math.floor((diff%60000)/1000);
-
-el.innerText=
-`${h}h ${m}m ${s}s`;
-
-},1000);
-
-}
-
-/* ================= QUICK POPUP ================= */
-window.openQuick=(type)=>{
-
-quickMode=type;
-
-$("popupTitle").innerText=
-"Add " +
+$("popupMainTitle").innerText =
+"➕ Add " +
 type.charAt(0).toUpperCase() +
 type.slice(1);
 
-$("popupType").value=type;
+$("addTarget").style.display =
+type==="goal" ? "block":"none";
 
-$("popupDate").value=
-new Date().toISOString()
-.split("T")[0];
+$("addTime").style.display =
+type==="task" ? "block":"none";
 
-$("quickPopup")
-.classList.add("show");
+$("addPriority").style.display =
+type==="task" ? "block":"none";
 
 };
 
-window.closeQuickPopup=()=>{
-$("quickPopup")
-.classList.remove("show");
+window.backToTypes=()=>{
+
+$("typeSelect").style.display="block";
+$("dynamicForm").style.display="none";
+
+$("popupMainTitle").innerText =
+"➕ Add New";
+
 };
 
-window.saveQuickItem=async()=>{
+window.saveGlobalItem=async()=>{
 
-let text=$("popupText").value.trim();
+let text=$("addText").value.trim();
 
 if(!text) return toast("Enter text");
 
-let date=$("popupDate").value;
-let time=$("popupTime").value;
+let date=$("addDate").value;
+let time=$("addTime").value;
+let target=$("addTarget").value;
 
-if(quickMode==="task"){
+if(addType==="task"){
 
 await addDoc(collection(db,"tasks"),{
 text,
 date,
 time:time || "00:00",
+priority:$("addPriority").value,
 completed:false,
 user:currentUser.uid
 });
 
 }
 
-if(quickMode==="mistake"){
+if(addType==="goal"){
+
+await addDoc(collection(db,"goals"),{
+name:text,
+total:Number(target || 1),
+done:0,
+deadline:date,
+user:currentUser.uid
+});
+
+}
+
+if(addType==="mistake"){
 
 await addDoc(collection(db,"mistakes"),{
 text,
@@ -515,7 +583,7 @@ createdAt:Date.now()
 
 }
 
-if(quickMode==="insight"){
+if(addType==="insight"){
 
 await addDoc(collection(db,"insights"),{
 text,
@@ -526,7 +594,7 @@ createdAt:Date.now()
 
 }
 
-if(quickMode==="quest"){
+if(addType==="quest"){
 
 await addDoc(collection(db,"quest"),{
 text,
@@ -538,14 +606,67 @@ createdAt:Date.now()
 
 }
 
-$("popupText").value="";
-closeQuickPopup();
+$("addText").value="";
+
+closeAddPopup();
 toast("Saved ✅");
+
+renderDashboard();
+
+};
+
+/* ================= DAY MODES ================= */
+
+window.morningMode=()=>{
+toast("Win your day 🔥");
+};
+
+window.nightReview=()=>{
+$("reviewPopup").classList.add("show");
+};
+
+window.closeReview=()=>{
+$("reviewPopup").classList.remove("show");
+};
+
+window.submitReview=async()=>{
+
+let m=$("reviewMistake").value.trim();
+let i=$("reviewInsight").value.trim();
+
+let date=new Date()
+.toISOString().split("T")[0];
+
+if(m){
+
+await addDoc(collection(db,"mistakes"),{
+text:m,
+date,
+uid:currentUser.uid,
+createdAt:Date.now()
+});
+
+}
+
+if(i){
+
+await addDoc(collection(db,"insights"),{
+text:i,
+date,
+uid:currentUser.uid,
+createdAt:Date.now()
+});
+
+}
+
+closeReview();
+toast("Review Saved 🌙");
 renderDashboard();
 
 };
 
 /* ================= TOAST ================= */
+
 function toast(msg){
 
 $("toast").innerText=msg;
@@ -558,15 +679,10 @@ $("toast").classList.remove("show");
 }
 
 /* ================= LOGOUT ================= */
-const logoutBtn=$("logoutBtn");
 
-if(logoutBtn){
-
-logoutBtn.onclick=async()=>{
+$("logoutBtn").onclick=async()=>{
 
 await signOut(auth);
 location.href="index.html";
 
 };
-
-}
