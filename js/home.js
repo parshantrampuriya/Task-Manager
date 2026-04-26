@@ -1,92 +1,136 @@
+/* ================= HOME JS FINAL UPGRADED ================= */
+
 import { auth, db } from "./firebase.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+onAuthStateChanged,
+signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  doc,
-  getDoc,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot
+doc,
+getDoc,
+collection,
+getDocs,
+addDoc,
+updateDoc,
+onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GLOBAL ================= */
+/* ================= ELEMENTS ================= */
+
+const dashboard = document.getElementById("dashboard");
+const username = document.getElementById("username");
+const todayCenter = document.getElementById("todayCenter");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const customPopup = document.getElementById("customPopup");
+
+const chkFocus = document.getElementById("chkFocus");
+const chkTasks = document.getElementById("chkTasks");
+const chkGoals = document.getElementById("chkGoals");
+const chkGrowth = document.getElementById("chkGrowth");
+const chkCountdown = document.getElementById("chkCountdown");
+const chkQuote = document.getElementById("chkQuote");
+
+/* ================= DATA ================= */
 
 let currentUser = null;
 let tasks = [];
 let goals = [];
-let quoteList = [];
-let dashboardPrefs = JSON.parse(localStorage.getItem("dashboardPrefs")) || {
-  focus:true,
-  tasks:true,
-  goals:true,
-  growth:true,
-  countdown:true,
-  quote:true
+let quotes = [];
+
+/* ================= STORAGE ================= */
+
+let prefs = JSON.parse(
+localStorage.getItem("dashboardPrefs")
+) || {
+focus:true,
+tasks:true,
+goals:true,
+growth:true,
+countdown:true,
+quote:true
 };
+
+let widgetSize = JSON.parse(
+localStorage.getItem("widgetSize")
+) || {};
+
+let widgetOrder = JSON.parse(
+localStorage.getItem("widgetOrder")
+) || [
+"focus",
+"countdown",
+"quote",
+"tasks",
+"goals",
+"growth"
+];
 
 /* ================= AUTH ================= */
 
 onAuthStateChanged(auth, async(user)=>{
 
-  if(!user){
-    location.href="index.html";
-    return;
-  }
+if(!user){
+location.href="index.html";
+return;
+}
 
-  currentUser = user;
+currentUser = user;
 
-  let snap = await getDoc(doc(db,"users",user.uid));
+let snap = await getDoc(
+doc(db,"users",user.uid)
+);
 
-  if(snap.exists()){
-    username.innerText = "👤 Welcome " + (snap.data().name || "User");
-  }
+if(snap.exists()){
+username.innerText =
+"👤 Welcome " +
+(snap.data().name || "User");
+}
 
-  loadTasks();
-  loadGoals();
-  loadQuotes();
-  startClock();
+loadTasks();
+loadGoals();
+loadQuotes();
+startClock();
 
 });
 
 /* ================= DATE ================= */
 
 function todayDate(){
-  return new Date().toLocaleDateString("en-CA");
+return new Date()
+.toLocaleDateString("en-CA");
 }
 
 function niceDate(){
-  return new Date().toDateString();
+return new Date()
+.toDateString();
 }
 
-/* ================= LIVE CLOCK ================= */
+/* ================= CLOCK ================= */
 
 function startClock(){
 
-  setInterval(()=>{
+setInterval(()=>{
 
-    let now = new Date();
-    let end = new Date();
-    end.setHours(23,59,59,999);
+let now = new Date();
 
-    let diff = end-now;
+let end = new Date();
+end.setHours(23,59,59,999);
 
-    let h = Math.floor(diff/3600000);
-    let m = Math.floor((diff%3600000)/60000);
-    let s = Math.floor((diff%60000)/1000);
+let diff = end-now;
 
-    todayCenter.innerHTML = `
-      <h3>${niceDate()}</h3>
-      <p>⏳ ${h}h ${m}m ${s}s remaining today</p>
-    `;
+let h=Math.floor(diff/3600000);
+let m=Math.floor((diff%3600000)/60000);
+let s=Math.floor((diff%60000)/1000);
 
-  },1000);
+todayCenter.innerHTML=`
+<h3>${niceDate()}</h3>
+<p>⏳ ${h}h ${m}m ${s}s remaining today</p>
+`;
+
+},1000);
 
 }
 
@@ -94,41 +138,51 @@ function startClock(){
 
 function loadTasks(){
 
-  onSnapshot(collection(db,"tasks"), snap=>{
+onSnapshot(collection(db,"tasks"),snap=>{
 
-    tasks=[];
+tasks=[];
 
-    snap.forEach(d=>{
-      let x=d.data();
-      if(x.user===currentUser.uid){
-        tasks.push({id:d.id,...x});
-      }
-    });
+snap.forEach(d=>{
 
-    renderDashboard();
+let x=d.data();
 
-  });
+if(x.user===currentUser.uid){
+tasks.push({
+id:d.id,
+...x
+});
+}
+
+});
+
+renderDashboard();
+
+});
 
 }
 
 window.toggleTask = async(id,done)=>{
-  await updateDoc(doc(db,"tasks",id),{
-    completed:!done
-  });
+
+await updateDoc(doc(db,"tasks",id),{
+completed:!done
+});
+
 };
 
 function todayTasks(){
 
-  return tasks
-  .filter(x=>x.date===todayDate())
-  .sort((a,b)=>{
+return tasks
+.filter(x=>x.date===todayDate())
+.sort((a,b)=>{
 
-    if(a.completed!==b.completed){
-      return a.completed ? 1 : -1;
-    }
+if(a.completed!==b.completed){
+return a.completed ? 1 : -1;
+}
 
-    return (a.time||"").localeCompare(b.time||"");
-  });
+return (a.time||"")
+.localeCompare(b.time||"");
+
+});
 
 }
 
@@ -136,20 +190,26 @@ function todayTasks(){
 
 function loadGoals(){
 
-  onSnapshot(collection(db,"goals"), snap=>{
+onSnapshot(collection(db,"goals"),snap=>{
 
-    goals=[];
+goals=[];
 
-    snap.forEach(d=>{
-      let x=d.data();
-      if(x.user===currentUser.uid){
-        goals.push({id:d.id,...x});
-      }
-    });
+snap.forEach(d=>{
 
-    renderDashboard();
+let x=d.data();
 
-  });
+if(x.user===currentUser.uid){
+goals.push({
+id:d.id,
+...x
+});
+}
+
+});
+
+renderDashboard();
+
+});
 
 }
 
@@ -157,267 +217,463 @@ function loadGoals(){
 
 async function loadQuotes(){
 
-  const snap = await getDocs(collection(db,"quotes"));
+let snap = await getDocs(
+collection(db,"quotes")
+);
 
-  quoteList=[];
+quotes=[];
 
-  snap.forEach(d=>{
-    quoteList.push(d.data().text);
-  });
+snap.forEach(d=>{
+quotes.push(
+d.data().text
+);
+});
 
-  renderDashboard();
+renderDashboard();
 
 }
 
 function randomQuote(){
 
-  if(!quoteList.length){
-    return "Discipline today creates freedom tomorrow.";
-  }
+if(!quotes.length){
+return "Discipline today creates freedom tomorrow.";
+}
 
-  return quoteList[Math.floor(Math.random()*quoteList.length)];
+return quotes[
+Math.floor(
+Math.random()*quotes.length
+)
+];
 
 }
 
 /* ================= COUNTS ================= */
 
-async function getCount(name){
+async function getCount(col){
 
-  const snap = await getDocs(collection(db,name));
-  let c=0;
+let snap = await getDocs(
+collection(db,col)
+);
 
-  snap.forEach(d=>{
-    if(d.data().uid===currentUser.uid) c++;
-  });
+let c=0;
 
-  return c;
+snap.forEach(d=>{
+
+let x=d.data();
+
+if(x.uid===currentUser.uid)
+c++;
+
+});
+
+return c;
+
 }
 
-/* ================= RENDER ================= */
+/* ================= MAIN RENDER ================= */
 
 async function renderDashboard(){
 
-  dashboard.innerHTML="";
+dashboard.innerHTML="";
 
-  if(dashboardPrefs.focus){
+for(let key of widgetOrder){
 
-    let t = todayTasks();
-    let done = t.filter(x=>x.completed).length;
-    let per = t.length ? Math.round(done*100/t.length) : 0;
+if(!prefs[key]) continue;
 
-    addCard(`
-      <div class="card-head"><h3>📅 Today Focus</h3></div>
-      <div class="widget-body">
-        <div class="big-number">${per}%</div>
-        <div class="progress"><div class="progress-fill" style="width:${per}%"></div></div>
-        <div class="small-muted">${done}/${t.length} tasks completed</div>
-      </div>
-    `,"compact");
-  }
+if(key==="focus"){
+renderFocus();
+}
 
-  if(dashboardPrefs.countdown){
+if(key==="countdown"){
+renderCountdown();
+}
 
-    addCard(`
-      <div class="card-head"><h3>⏳ Countdown</h3></div>
-      <div class="widget-body">
-        <div class="small-muted">Live day timer shown above</div>
-      </div>
-    `,"compact");
-  }
+if(key==="quote"){
+renderQuote();
+}
 
-  if(dashboardPrefs.quote){
+if(key==="tasks"){
+renderTasks();
+}
 
-    addCard(`
-      <div class="card-head">
-        <h3>💬 Quote</h3>
-        <button class="icon-btn" onclick="renderDashboard()">↻</button>
-      </div>
-      <div class="widget-body">
-        <div class="quote-box">${randomQuote()}</div>
-      </div>
-    `,"compact");
-  }
+if(key==="goals"){
+renderGoals();
+}
 
-  if(dashboardPrefs.tasks){
-
-    let html="";
-
-    todayTasks().forEach(x=>{
-
-      html+=`
-      <div class="task-row ${x.completed?'task-done':''}">
-        <div class="task-left">
-          <div class="task-title">${x.text}</div>
-          <div class="task-time">${x.time || "00:00"}</div>
-        </div>
-
-        <button class="tick-btn"
-        onclick="toggleTask('${x.id}',${x.completed})">
-        ✔
-        </button>
-      </div>
-      `;
-    });
-
-    addCard(`
-      <div class="card-head"><h3>📝 Today Tasks</h3></div>
-      <div class="widget-body">${html || "No task today"}</div>
-    `,"full-card");
-  }
-
-  if(dashboardPrefs.goals){
-
-    let html="";
-
-    goals.forEach(g=>{
-
-      let p = Math.round((g.done/g.total)*100 || 0);
-
-      html+=`
-      <div class="goal-row">
-        <div class="goal-title">${g.name}</div>
-        <div class="goal-bar">
-          <div class="goal-fill" style="width:${p}%"></div>
-        </div>
-      </div>
-      `;
-    });
-
-    addCard(`
-      <div class="card-head"><h3>🎯 Goals</h3></div>
-      <div class="widget-body">${html || "No goals"}</div>
-    `,"compact");
-  }
-
-  if(dashboardPrefs.growth){
-
-    let mistakes = await getCount("mistakes");
-    let insights = await getCount("insights");
-    let quest = await getCount("quest");
-    let smart = await getCount("smartmoves");
-
-    addCard(`
-      <div class="card-head"><h3>🌱 Growth Summary</h3></div>
-      <div class="widget-body">
-        <div class="summary-row"><span>Mistakes</span><b>${mistakes}</b></div>
-        <div class="summary-row"><span>Insights</span><b>${insights}</b></div>
-        <div class="summary-row"><span>Quest</span><b>${quest}</b></div>
-        <div class="summary-row"><span>Smart Moves</span><b>${smart}</b></div>
-      </div>
-    `,"compact");
-  }
+if(key==="growth"){
+await renderGrowth();
+}
 
 }
 
-/* ================= ADD CARD ================= */
+}
 
-function addCard(inner,cls=""){
-  dashboard.innerHTML += `
-    <div class="widget-card ${cls}">
-      ${inner}
-    </div>
-  `;
+/* ================= WIDGETS ================= */
+
+function renderFocus(){
+
+let t=todayTasks();
+
+let done=t.filter(x=>x.completed).length;
+
+let p=t.length
+? Math.round(done*100/t.length)
+:0;
+
+addCard("focus",`
+<div class="card-head">
+<h3>📊 Today Focus</h3>
+</div>
+
+<div class="widget-body">
+
+<div class="big-number">${p}%</div>
+
+<div class="progress">
+<div class="progress-fill"
+style="width:${p}%"></div>
+</div>
+
+<div class="small-muted">
+${done}/${t.length} completed
+</div>
+
+</div>
+`,"compact");
+
+}
+
+function renderCountdown(){
+
+addCard("countdown",`
+<div class="card-head">
+<h3>⏳ Countdown</h3>
+</div>
+
+<div class="widget-body">
+<div class="small-muted">
+Live timer shown above
+</div>
+</div>
+`,"compact");
+
+}
+
+function renderQuote(){
+
+addCard("quote",`
+<div class="card-head">
+
+<h3>💬 Quote</h3>
+
+<button class="icon-btn"
+onclick="renderDashboard()">
+↻
+</button>
+
+</div>
+
+<div class="widget-body">
+<div class="quote-box">
+${randomQuote()}
+</div>
+</div>
+`,"compact");
+
+}
+
+function renderTasks(){
+
+let html="";
+
+todayTasks().forEach(x=>{
+
+html+=`
+<div class="task-row
+${x.completed?'task-done':''}">
+
+<div class="task-left">
+
+<div class="task-title">
+${x.text}
+</div>
+
+<div class="task-time">
+${x.time || "00:00"}
+</div>
+
+</div>
+
+<button class="tick-btn"
+onclick="toggleTask('${x.id}',${x.completed})">
+✔
+</button>
+
+</div>
+`;
+
+});
+
+addCard("tasks",`
+<div class="card-head">
+<h3>📋 Today Tasks</h3>
+</div>
+
+<div class="widget-body">
+${html || "No task today"}
+</div>
+`,"full-card");
+
+}
+
+function renderGoals(){
+
+let html="";
+
+goals.forEach(g=>{
+
+let done=Number(g.done||0);
+let total=Number(g.total||1);
+
+let p=Math.round(
+(done/total)*100
+);
+
+if(p>100) p=100;
+
+html+=`
+<div class="goal-row">
+
+<div class="goal-title">
+${g.name} - ${p}%
+</div>
+
+<div class="goal-bar">
+<div class="goal-fill"
+style="width:${p}%"></div>
+</div>
+
+</div>
+`;
+
+});
+
+addCard("goals",`
+<div class="card-head">
+<h3>🎯 Goals</h3>
+</div>
+
+<div class="widget-body">
+${html || "No goals"}
+</div>
+`,"compact");
+
+}
+
+async function renderGrowth(){
+
+let mistakes=
+await getCount("mistakes");
+
+let insights=
+await getCount("insights");
+
+let quest=
+await getCount("quest");
+
+let smart=
+await getCount("smartmoves");
+
+addCard("growth",`
+<div class="card-head">
+<h3>🌱 Growth Summary</h3>
+</div>
+
+<div class="widget-body">
+
+<div class="summary-row">
+<span>Mistakes</span>
+<b>${mistakes}</b>
+</div>
+
+<div class="summary-row">
+<span>Insights</span>
+<b>${insights}</b>
+</div>
+
+<div class="summary-row">
+<span>Quest</span>
+<b>${quest}</b>
+</div>
+
+<div class="summary-row">
+<span>Smart Moves</span>
+<b>${smart}</b>
+</div>
+
+</div>
+`,"compact");
+
+}
+
+/* ================= CARD MAKER ================= */
+
+function addCard(key,inner,defaultSize){
+
+let size =
+widgetSize[key] ||
+defaultSize;
+
+dashboard.innerHTML+=`
+
+<div class="widget-card ${size}">
+
+${inner}
+
+<div class="popup-actions"
+style="margin-top:10px;">
+
+<button class="icon-btn"
+onclick="resizeWidget('${key}','compact')">
+S
+</button>
+
+<button class="icon-btn"
+onclick="resizeWidget('${key}','')">
+M
+</button>
+
+<button class="icon-btn"
+onclick="resizeWidget('${key}','full-card')">
+L
+</button>
+
+<button class="icon-btn"
+onclick="moveUp('${key}')">
+↑
+</button>
+
+<button class="icon-btn"
+onclick="moveDown('${key}')">
+↓
+</button>
+
+</div>
+
+</div>
+`;
+
+}
+
+/* ================= SIZE ================= */
+
+window.resizeWidget=(key,size)=>{
+
+widgetSize[key]=size;
+
+localStorage.setItem(
+"widgetSize",
+JSON.stringify(widgetSize)
+);
+
+renderDashboard();
+
+};
+
+/* ================= ORDER ================= */
+
+window.moveUp=(key)=>{
+
+let i=widgetOrder.indexOf(key);
+
+if(i>0){
+
+[widgetOrder[i],widgetOrder[i-1]]
+=
+[widgetOrder[i-1],widgetOrder[i]];
+
+saveOrder();
+
+}
+
+};
+
+window.moveDown=(key)=>{
+
+let i=widgetOrder.indexOf(key);
+
+if(i<widgetOrder.length-1){
+
+[widgetOrder[i],widgetOrder[i+1]]
+=
+[widgetOrder[i+1],widgetOrder[i]];
+
+saveOrder();
+
+}
+
+};
+
+function saveOrder(){
+
+localStorage.setItem(
+"widgetOrder",
+JSON.stringify(widgetOrder)
+);
+
+renderDashboard();
+
 }
 
 /* ================= CUSTOMIZE ================= */
 
-window.openCustomize = ()=>{
+window.openCustomize=()=>{
 
-  customPopup.classList.add("show");
+customPopup.classList.add("show");
 
-  chkFocus.checked = dashboardPrefs.focus;
-  chkTasks.checked = dashboardPrefs.tasks;
-  chkGoals.checked = dashboardPrefs.goals;
-  chkGrowth.checked = dashboardPrefs.growth;
-  chkCountdown.checked = dashboardPrefs.countdown;
-  chkQuote.checked = dashboardPrefs.quote;
-
-};
-
-window.closeCustomize = ()=>{
-  customPopup.classList.remove("show");
-};
-
-window.saveCustomize = ()=>{
-
-  dashboardPrefs = {
-    focus:chkFocus.checked,
-    tasks:chkTasks.checked,
-    goals:chkGoals.checked,
-    growth:chkGrowth.checked,
-    countdown:chkCountdown.checked,
-    quote:chkQuote.checked
-  };
-
-  localStorage.setItem("dashboardPrefs",
-  JSON.stringify(dashboardPrefs));
-
-  closeCustomize();
-  renderDashboard();
+chkFocus.checked=prefs.focus;
+chkTasks.checked=prefs.tasks;
+chkGoals.checked=prefs.goals;
+chkGrowth.checked=prefs.growth;
+chkCountdown.checked=prefs.countdown;
+chkQuote.checked=prefs.quote;
 
 };
 
-/* ================= QUICK ADD ================= */
-
-window.openAdd = ()=>{
-  addPopup.classList.add("show");
+window.closeCustomize=()=>{
+customPopup.classList.remove("show");
 };
 
-window.closeAdd = ()=>{
-  addPopup.classList.remove("show");
-};
+window.saveCustomize=()=>{
 
-window.selectType = (type)=>{
+prefs={
 
-  addFields.innerHTML="";
-
-  if(type==="task"){
-    addFields.innerHTML=`
-      <input id="aText" placeholder="Task name">
-      <input type="date" id="aDate">
-      <input type="time" id="aTime">
-      <button class="main-btn" onclick="saveTask()">Save Task</button>
-    `;
-  }
-
-  if(type==="goal"){
-    addFields.innerHTML=`
-      <input id="aText" placeholder="Goal name">
-      <input id="aTotal" type="number" placeholder="Target">
-      <button class="main-btn" onclick="saveGoal()">Save Goal</button>
-    `;
-  }
+focus:chkFocus.checked,
+tasks:chkTasks.checked,
+goals:chkGoals.checked,
+growth:chkGrowth.checked,
+countdown:chkCountdown.checked,
+quote:chkQuote.checked
 
 };
 
-window.saveTask = async()=>{
+localStorage.setItem(
+"dashboardPrefs",
+JSON.stringify(prefs)
+);
 
-  await addDoc(collection(db,"tasks"),{
-    text:aText.value,
-    date:aDate.value || todayDate(),
-    time:aTime.value || "00:00",
-    completed:false,
-    user:currentUser.uid
-  });
+closeCustomize();
+renderDashboard();
 
-  closeAdd();
-};
-
-window.saveGoal = async()=>{
-
-  await addDoc(collection(db,"goals"),{
-    name:aText.value,
-    total:Number(aTotal.value||1),
-    done:0,
-    user:currentUser.uid
-  });
-
-  closeAdd();
 };
 
 /* ================= LOGOUT ================= */
 
-logoutBtn.addEventListener("click",async()=>{
-  await signOut(auth);
-  location.href="index.html";
+logoutBtn.addEventListener(
+"click",
+async()=>{
+
+await signOut(auth);
+location.href="index.html";
+
 });
