@@ -1,6 +1,10 @@
+/* ================= PAGE ================= */
+
 .main{
 padding:20px;
 }
+
+/* ================= BOX ================= */
 
 .glass-box{
 background:rgba(0,0,0,.55);
@@ -15,6 +19,8 @@ margin:0 0 15px;
 color:#00eaff;
 }
 
+/* ================= INPUTS ================= */
+
 input{
 width:100%;
 padding:12px;
@@ -25,6 +31,8 @@ background:rgba(255,255,255,.08);
 color:#fff;
 box-sizing:border-box;
 }
+
+/* ================= BUTTONS ================= */
 
 .main-btn,
 .small-btn,
@@ -47,20 +55,8 @@ background:#ff4d4d;
 color:#fff;
 }
 
-.friend-card{
-padding:14px;
-border-radius:12px;
-background:rgba(255,255,255,.05);
-margin-bottom:10px;
-cursor:pointer;
-}
+/* ================= DATE ================= */
 
-.friend-card:hover{
-background:#00cfff;
-color:#000;
-}
-
-/* DATE */
 .date-head{
 margin:18px 0 10px;
 font-size:18px;
@@ -68,8 +64,9 @@ font-weight:bold;
 color:#00ffcc;
 }
 
-/* MISTAKE CARD */
-.mistake-card{
+/* ================= CARD ================= */
+
+.insight-card{
 padding:14px;
 border-radius:12px;
 background:rgba(255,255,255,.05);
@@ -80,32 +77,30 @@ align-items:center;
 gap:14px;
 }
 
-/* LEFT TEXT AREA */
-.m-left{
+.i-left{
 flex:1;
 min-width:0;
 }
 
-.m-text{
+.i-text{
 font-size:16px;
 font-weight:500;
 word-break:break-word;
 }
 
-.m-time{
+.i-time{
 font-size:13px;
 color:#aaa;
 margin-top:6px;
 }
 
-/* RIGHT BUTTON AREA */
-.m-actions{
+.i-actions{
 display:flex;
 gap:8px;
 flex-shrink:0;
 }
 
-.m-actions button{
+.i-actions button{
 padding:8px 12px;
 border:none;
 border-radius:8px;
@@ -114,7 +109,8 @@ font-weight:bold;
 white-space:nowrap;
 }
 
-/* POPUPS */
+/* ================= POPUP ================= */
+
 .popup-wrap{
 position:fixed;
 inset:0;
@@ -152,6 +148,8 @@ margin-top:15px;
 flex:1;
 }
 
+/* ================= TOAST ================= */
+
 #toast{
 position:fixed;
 bottom:25px;
@@ -172,19 +170,20 @@ z-index:99999;
 opacity:1;
 }
 
-/* MOBILE */
+/* ================= MOBILE ================= */
+
 @media(max-width:768px){
 
-.mistake-card{
+.insight-card{
 flex-direction:column;
 align-items:stretch;
 }
 
-.m-actions{
+.i-actions{
 width:100%;
 }
 
-.m-actions button{
+.i-actions button{
 flex:1;
 }
 
