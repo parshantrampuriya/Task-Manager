@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
@@ -29,110 +29,219 @@
 
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 <div class="main">
 
 <!-- NAVBAR -->
 <div class="navbar">
-<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<button class="menu-btn"
+onclick="toggleSidebar()">☰</button>
+
 <h2 id="pageTitle">❓ Quest</h2>
-<button class="small-btn" onclick="goMyPage()">My Page</button>
+
+<button class="small-btn"
+onclick="goMyPage()">My Page</button>
+
 </div>
 
-<!-- REVIEW -->
+<!-- ================= DASHBOARD ================= -->
 <div class="glass-box stats-box">
+
 <div class="stat-card">
 <h3 id="totalAdded">0</h3>
-<p>This Week Added</p>
+<p>Total Added</p>
 </div>
 
 <div class="stat-card">
 <h3 id="totalSolved">0</h3>
-<p>Solved</p>
+<p>Total Solved</p>
 </div>
 
 <div class="stat-card">
 <h3 id="totalPending">0</h3>
-<p>Pending</p>
-</div>
+<p>Total Pending</p>
 </div>
 
-<!-- ADD -->
+</div>
+
+<!-- ================= ADD ================= -->
 <div id="addSection" class="glass-box">
 
 <h3>➕ Add Quest</h3>
 
-<input id="questInput" placeholder="Write doubt / topic / thing to learn...">
+<input
+id="questInput"
+placeholder="Write doubt / topic / thing to learn...">
 
-<input type="date" id="questDate">
+<input
+type="date"
+id="questDate">
 
 <select id="questStatus">
-<option value="Pending">Pending</option>
-<option value="Searching">Searching</option>
-<option value="Asked Someone">Asked Someone</option>
-<option value="Learned">Learned</option>
-<option value="Closed">Closed</option>
+
+<option value="Pending">
+Pending
+</option>
+
+<option value="Solved">
+Solved
+</option>
+
 </select>
 
-<button class="main-btn" onclick="addQuest()">Save Quest</button>
+<button
+class="main-btn"
+onclick="addQuest()">
+Save Quest
+</button>
 
 </div>
 
-<!-- FRIENDS -->
+<!-- ================= FRIENDS ================= -->
 <div class="glass-box">
+
 <h3>👥 Friends</h3>
-<div id="friendListMini">Loading...</div>
+
+<div id="friendListMini">
+Loading...
 </div>
 
-<!-- LIST -->
+</div>
+
+<!-- ================= LIST ================= -->
 <div class="glass-box">
+
 <h3>📋 Quest History</h3>
-<div id="questList">Loading...</div>
+
+<div id="questList">
+Loading...
 </div>
 
 </div>
 
-<!-- EDIT -->
+</div>
+
+<!-- ================= EDIT ================= -->
 <div id="editPopup" class="popup-wrap">
+
 <div class="popup-box">
 
 <h3>✏ Edit Quest</h3>
 
 <input id="editText">
-<input type="date" id="editDate">
+
+<input
+type="date"
+id="editDate">
 
 <select id="editStatus">
-<option>Pending</option>
-<option>Searching</option>
-<option>Asked Someone</option>
-<option>Learned</option>
-<option>Closed</option>
+
+<option value="Pending">
+Pending
+</option>
+
+<option value="Solved">
+Solved
+</option>
+
 </select>
 
 <div class="popup-actions">
-<button class="main-btn" onclick="saveEdit()">Save</button>
-<button class="danger-btn" onclick="closeEdit()">Cancel</button>
+
+<button
+class="main-btn"
+onclick="saveEdit()">
+Save
+</button>
+
+<button
+class="danger-btn"
+onclick="closeEdit()">
+Cancel
+</button>
+
 </div>
 
 </div>
+
 </div>
 
-<!-- DELETE -->
+<!-- ================= DELETE ================= -->
 <div id="deletePopup" class="popup-wrap">
+
 <div class="popup-box">
 
 <h3>🗑 Delete Quest?</h3>
 
+<p>
+This action cannot be undone.
+</p>
+
 <div class="popup-actions">
-<button class="danger-btn" onclick="confirmDelete()">Delete</button>
-<button class="main-btn" onclick="closeDelete()">Cancel</button>
+
+<button
+class="danger-btn"
+onclick="confirmDelete()">
+Delete
+</button>
+
+<button
+class="main-btn"
+onclick="closeDelete()">
+Cancel
+</button>
+
 </div>
 
 </div>
+
 </div>
 
+<!-- ================= TASK POPUP ================= -->
+<div id="taskPopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<h3>📋 Convert To Task</h3>
+
+<p id="taskText"
+style="margin-bottom:12px;color:#00eaff;">
+Task
+</p>
+
+<input
+type="date"
+id="taskDate">
+
+<input
+type="time"
+id="taskTime">
+
+<div class="popup-actions">
+
+<button
+class="main-btn"
+onclick="confirmTask()">
+Add Task
+</button>
+
+<button
+class="danger-btn"
+onclick="closeTaskPopup()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
+<!-- ================= SCRIPTS ================= -->
 <script type="module" src="js/menu.js"></script>
 <script type="module" src="js/quest.js"></script>
 
