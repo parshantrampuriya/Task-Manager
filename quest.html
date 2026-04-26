@@ -1,0 +1,171 @@
+<!-- ================= quest.html ================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Quest</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/quest.css">
+<link rel="icon" href="data:,">
+
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar" class="sidebar">
+
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goFriends()">👥 Friends</button>
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+<button onclick="goTests()">📝 Tests</button>
+<button onclick="goGrowth()">📈 Growth</button>
+<button onclick="goQuest()">❓ Quest</button>
+<button onclick="goProfile()">👤 Profile</button>
+<button onclick="logout()">🚪 Logout</button>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="main">
+
+<div class="navbar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">☰</button>
+
+<h2 id="pageTitle">❓ My Quest</h2>
+
+<button class="small-btn"
+onclick="goMyPage()">
+My Page
+</button>
+
+</div>
+
+<!-- ADD -->
+<div id="addSection" class="glass-box">
+
+<h3>➕ Add Question / Topic</h3>
+
+<input
+type="text"
+id="questInput"
+placeholder="Write doubt / topic / thing to learn...">
+
+<input type="date" id="questDate">
+
+<select id="questPriority">
+<option value="Low">Low Priority</option>
+<option value="Medium" selected>Medium Priority</option>
+<option value="High">High Priority</option>
+</select>
+
+<button
+class="main-btn"
+onclick="addQuest()">
+Save Quest
+</button>
+
+</div>
+
+<!-- FRIENDS -->
+<div class="glass-box">
+
+<h3>👥 Friends</h3>
+
+<div id="friendListMini">
+Loading...
+</div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="glass-box">
+
+<h3>📋 Quest History</h3>
+
+<div id="questList">
+Loading...
+</div>
+
+</div>
+
+</div>
+
+<!-- EDIT -->
+<div id="editPopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<h3>✏ Edit Quest</h3>
+
+<input type="text" id="editText">
+<input type="date" id="editDate">
+
+<select id="editPriority">
+<option>Low</option>
+<option>Medium</option>
+<option>High</option>
+</select>
+
+<div class="popup-actions">
+
+<button class="main-btn"
+onclick="saveEdit()">
+Save
+</button>
+
+<button class="danger-btn"
+onclick="closeEdit()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- DELETE -->
+<div id="deletePopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<h3>🗑 Delete Quest?</h3>
+
+<p>This action cannot be undone.</p>
+
+<div class="popup-actions">
+
+<button class="danger-btn"
+onclick="confirmDelete()">
+Delete
+</button>
+
+<button class="main-btn"
+onclick="closeDelete()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="toast"></div>
+
+<script type="module" src="js/menu.js"></script>
+<script type="module" src="js/quest.js"></script>
+
+</body>
+</html>
