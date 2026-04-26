@@ -125,6 +125,7 @@ flex-wrap:wrap;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
 gap:16px;
+align-items:start;
 }
 
 /* ================= CARD ================= */
@@ -135,6 +136,12 @@ border-radius:18px;
 padding:18px;
 box-shadow:0 0 18px rgba(0,255,255,.05);
 transition:.22s;
+
+/* NEW */
+max-height:420px;
+overflow:hidden;
+display:flex;
+flex-direction:column;
 }
 
 .widget-card:hover{
@@ -144,6 +151,11 @@ box-shadow:0 0 22px rgba(0,255,255,.12);
 
 .full-card{
 grid-column:span 2;
+max-height:430px;
+}
+
+.compact{
+max-height:220px;
 }
 
 @media(max-width:900px){
@@ -159,6 +171,7 @@ justify-content:space-between;
 align-items:center;
 gap:10px;
 margin-bottom:14px;
+flex-shrink:0;
 }
 
 .card-head h3{
@@ -182,6 +195,28 @@ font-size:20px;
 font-weight:700;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 color:#000;
+}
+
+/* ================= SCROLL BODY ================= */
+.widget-body{
+flex:1;
+overflow-y:auto;
+padding-right:4px;
+margin-top:4px;
+}
+
+.widget-body::-webkit-scrollbar{
+width:6px;
+}
+
+.widget-body::-webkit-scrollbar-track{
+background:rgba(255,255,255,.03);
+border-radius:10px;
+}
+
+.widget-body::-webkit-scrollbar-thumb{
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+border-radius:10px;
 }
 
 /* ================= ITEM ROW ================= */
@@ -419,6 +454,11 @@ flex-direction:column;
 
 .check-grid{
 grid-template-columns:1fr;
+}
+
+.widget-card,
+.full-card{
+max-height:340px;
 }
 
 }
