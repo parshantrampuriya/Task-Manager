@@ -1,247 +1,149 @@
-/* ================= BODY ================= */
+/* home.css */
+
 body{
 margin:0;
-font-family:'Segoe UI',sans-serif;
+font-family:Segoe UI,sans-serif;
 background:
 linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.94)),
-url("../mahadev.png") center/cover no-repeat fixed;
+url("../mahadev.png") center/cover fixed no-repeat;
 color:#fff;
 }
 
-/* ================= MAIN ================= */
 .main{
 padding:18px;
 min-height:100vh;
 box-sizing:border-box;
 }
 
-/* ================= NAVBAR ================= */
+/* NAVBAR */
 .navbar{
 display:flex;
 justify-content:space-between;
 align-items:center;
 gap:15px;
-padding:16px 18px;
+padding:16px;
 border-radius:18px;
 background:rgba(255,255,255,.05);
-backdrop-filter:blur(12px);
-box-shadow:0 0 20px rgba(0,255,255,.08);
 margin-bottom:18px;
-flex-wrap:wrap;
 }
 
-.nav-left,
-.nav-right{
+.nav-left,.nav-right{
 display:flex;
 align-items:center;
-gap:12px;
-flex-wrap:wrap;
+gap:10px;
 }
 
 .navbar h2{
 margin:0;
-font-size:26px;
-font-weight:700;
+font-size:28px;
 }
 
-/* ================= BUTTONS ================= */
-.menu-btn,
-.top-btn,
-.icon-btn,
-.tick-btn,
-.main-btn,
-.danger-btn{
+/* BUTTONS */
+.menu-btn,.top-btn,.main-btn,.danger-btn,.icon-btn{
 border:none;
 cursor:pointer;
 font-weight:700;
 border-radius:12px;
-transition:.2s;
 }
 
 .menu-btn{
-width:46px;
-height:46px;
+width:48px;
+height:48px;
 font-size:22px;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
-color:#000;
 }
 
-.top-btn,
-.main-btn{
-padding:11px 16px;
+.top-btn,.main-btn,.icon-btn{
+padding:10px 14px;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 color:#000;
 }
 
 .danger-btn{
-padding:11px 16px;
+padding:10px 14px;
 background:#ff4d4d;
 color:#fff;
 }
 
-.icon-btn,
-.tick-btn{
-width:38px;
-height:38px;
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-color:#000;
-font-size:18px;
-}
-
-.menu-btn:hover,
-.top-btn:hover,
-.icon-btn:hover,
-.tick-btn:hover,
-.main-btn:hover,
-.danger-btn:hover{
-transform:translateY(-2px);
-}
-
-/* ================= TODAY CENTER ================= */
-.today-center{
+/* DATE BAR */
+.today-bar{
 text-align:center;
 padding:18px;
-margin-bottom:18px;
 border-radius:18px;
 background:rgba(255,255,255,.04);
+margin-bottom:18px;
 }
 
-.today-center h3{
+.today-bar h3{
 margin:0;
-font-size:34px;
+font-size:30px;
 color:#00eaff;
 }
 
-.today-center p{
+.today-bar p{
 margin:8px 0 0;
-font-size:15px;
-color:#d0dce0;
+color:#cfd8dc;
 }
 
-/* ================= GRID ================= */
+/* GRID */
 .dashboard-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
 gap:16px;
 align-items:start;
 }
 
-/* ================= CARD ================= */
+/* CARD */
 .widget-card{
+position:relative;
 background:rgba(255,255,255,.05);
 border:1px solid rgba(255,255,255,.08);
 border-radius:18px;
 padding:16px;
-display:flex;
-flex-direction:column;
-min-height:220px;
-max-height:420px;
-overflow:hidden;
+min-height:250px;
+resize:both;
+overflow:auto;
 }
 
-.widget-card.compact{
-min-height:220px;
-}
-
-.widget-card.full-card{
+.full-card{
 grid-column:span 2;
-min-height:420px;
 }
 
-@media(max-width:900px){
-.widget-card.full-card{
-grid-column:span 1;
-}
-}
-
-.widget-card:hover{
-box-shadow:0 0 20px rgba(0,255,255,.10);
-}
-
-/* ================= HEAD ================= */
 .card-head{
 display:flex;
 justify-content:space-between;
 align-items:center;
-gap:10px;
 margin-bottom:12px;
-flex-shrink:0;
+cursor:move;
 }
 
 .card-head h3{
 margin:0;
-font-size:24px;
 color:#00eaff;
 }
 
-/* ================= SCROLL BODY ================= */
 .widget-body{
-flex:1;
-overflow-y:auto;
-padding-right:6px;
+max-height:420px;
+overflow:auto;
+padding-right:5px;
 }
 
 .widget-body::-webkit-scrollbar{
-width:7px;
-}
-
-.widget-body::-webkit-scrollbar-track{
-background:rgba(255,255,255,.03);
-border-radius:10px;
+width:6px;
 }
 
 .widget-body::-webkit-scrollbar-thumb{
-background:linear-gradient(45deg,#00cfff,#00ffcc);
+background:#00eaff;
 border-radius:10px;
 }
 
-/* ================= FOCUS ================= */
-.big-number{
-font-size:52px;
-font-weight:800;
-color:#00ffcc;
-line-height:1;
-margin-top:10px;
-}
-
-.progress{
-height:10px;
-background:#111;
-border-radius:20px;
-margin:12px 0 8px;
-overflow:hidden;
-}
-
-.progress-fill{
-height:100%;
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-}
-
-.small-muted{
-font-size:13px;
-color:#b0bec5;
-}
-
-/* ================= QUOTE ================= */
-.quote-box{
-font-size:18px;
-line-height:1.6;
-padding:8px 2px;
-color:#fff;
-}
-
-/* ================= TASKS ================= */
+/* TASKS */
 .task-row{
 display:flex;
 justify-content:space-between;
 gap:12px;
 padding:10px 0;
 border-bottom:1px solid rgba(255,255,255,.05);
-align-items:flex-start;
-}
-
-.task-row:last-child{
-border-bottom:none;
 }
 
 .task-left{
@@ -250,73 +152,86 @@ min-width:0;
 }
 
 .task-title{
-font-size:15px;
 font-weight:600;
-white-space:normal;
 word-break:break-word;
-line-height:1.4;
+white-space:normal;
 }
 
 .task-time{
 font-size:12px;
-color:#aab7c0;
+color:#bbb;
 margin-top:4px;
 }
 
 .task-done .task-title{
 text-decoration:line-through;
-opacity:.55;
+opacity:.6;
 }
 
-.task-done .task-time{
-opacity:.45;
+.tick-btn{
+width:42px;
+height:42px;
+border:none;
+border-radius:12px;
+background:#00ffcc;
+font-weight:700;
+cursor:pointer;
 }
 
-/* ================= GOALS ================= */
+/* GOALS */
 .goal-row{
 margin-bottom:14px;
 }
 
-.goal-title{
-font-size:15px;
-font-weight:600;
-margin-bottom:6px;
-}
-
-.goal-bar{
+.goal-bar,.progress{
 height:10px;
 background:#111;
 border-radius:20px;
 overflow:hidden;
+margin-top:6px;
 }
 
-.goal-fill{
+.goal-fill,.progress-fill{
 height:100%;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
 
-/* ================= SUMMARY ================= */
+/* TEXT */
+.big-number{
+font-size:48px;
+font-weight:800;
+color:#00ffcc;
+}
+
+.small-muted{
+font-size:13px;
+color:#cfd8dc;
+margin-top:8px;
+}
+
+.quote-box{
+font-size:22px;
+line-height:1.5;
+font-weight:600;
+color:#fff;
+}
+
+/* SUMMARY */
 .summary-row{
 display:flex;
 justify-content:space-between;
 padding:10px 0;
 border-bottom:1px solid rgba(255,255,255,.05);
-font-size:15px;
 }
 
-.summary-row:last-child{
-border-bottom:none;
-}
-
-/* ================= POPUP ================= */
+/* POPUP */
 .popup-wrap{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,.78);
+background:rgba(0,0,0,.75);
 display:flex;
 justify-content:center;
 align-items:center;
-padding:16px;
 opacity:0;
 pointer-events:none;
 transition:.25s;
@@ -329,25 +244,18 @@ pointer-events:auto;
 }
 
 .popup-box{
-width:520px;
-max-width:100%;
+width:420px;
+max-width:95%;
 background:#111;
-border-radius:22px;
-padding:24px;
-box-shadow:0 0 30px rgba(0,255,255,.14);
+padding:22px;
+border-radius:18px;
 }
 
 .popup-head{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:12px;
-}
-
-.popup-head h3{
-margin:0;
-font-size:28px;
-color:#00eaff;
+margin-bottom:14px;
 }
 
 .close-x{
@@ -357,259 +265,83 @@ border:none;
 border-radius:12px;
 background:#ff4d4d;
 color:#fff;
-font-size:18px;
 cursor:pointer;
 }
 
-/* ================= CHECK GRID ================= */
+.type-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
+
+.type-card{
+padding:18px;
+border-radius:14px;
+background:rgba(255,255,255,.05);
+text-align:center;
+font-size:28px;
+cursor:pointer;
+}
+
+.type-card span{
+display:block;
+font-size:14px;
+margin-top:6px;
+}
+
 .check-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:12px;
-margin:18px 0;
+gap:10px;
+margin-bottom:16px;
 }
 
 .check-grid label{
-padding:14px;
-border-radius:14px;
+padding:10px;
 background:rgba(255,255,255,.05);
-display:flex;
-gap:10px;
-align-items:center;
-font-size:15px;
-cursor:pointer;
+border-radius:12px;
 }
 
-/* ================= ACTIONS ================= */
 .popup-actions{
 display:flex;
 gap:10px;
-margin-top:12px;
-flex-wrap:wrap;
 }
 
 .popup-actions button{
 flex:1;
 }
 
-/* ================= MOBILE ================= */
-@media(max-width:768px){
-
-.navbar h2{
-font-size:22px;
+/* TOAST */
+#toast{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:#00ffcc;
+color:#000;
+padding:12px 18px;
+border-radius:12px;
+font-weight:700;
+opacity:0;
+transition:.2s;
 }
 
-.today-center h3{
-font-size:26px;
+#toast.show{
+opacity:1;
+}
+
+@media(max-width:768px){
+
+.full-card{
+grid-column:span 1;
+}
+
+.dashboard-grid{
+grid-template-columns:1fr;
 }
 
 .check-grid{
 grid-template-columns:1fr;
-}
-
-.popup-actions{
-flex-direction:column;
-}
-
-.widget-card{
-max-height:360px;
-}
-  /* ================= RESIZE HANDLE ================= */
-.resize-handle{
-position:absolute;
-right:6px;
-bottom:6px;
-width:16px;
-height:16px;
-cursor:nwse-resize;
-border-radius:4px;
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-opacity:.9;
-}
-
-/* required for handle positioning */
-.widget-card{
-position:relative;
-resize:none;
-}
-
-/* ================= DRAGGING ================= */
-.widget-card.dragging{
-opacity:.55;
-transform:scale(.98);
-box-shadow:0 0 25px rgba(0,255,255,.18);
-}
-
-/* ================= TASK WIDGET BETTER ================= */
-.task-widget{
-min-height:430px;
-max-height:520px;
-}
-
-.task-row{
-padding:12px 0;
-gap:14px;
-}
-
-.task-left{
-flex:1;
-min-width:0;
-}
-
-.task-title{
-font-size:16px;
-font-weight:600;
-line-height:1.45;
-white-space:normal;
-word-break:break-word;
-overflow-wrap:anywhere;
-}
-
-.task-time{
-margin-top:5px;
-font-size:12px;
-color:#9fb0ba;
-}
-
-.task-done .task-title{
-text-decoration:line-through;
-opacity:.55;
-}
-
-.tick-btn{
-width:42px;
-height:42px;
-flex-shrink:0;
-font-size:18px;
-}
-
-/* ================= CENTER DATE PREMIUM ================= */
-.today-center{
-text-align:center;
-padding:18px;
-border-radius:18px;
-background:rgba(255,255,255,.04);
-margin-bottom:18px;
-box-shadow:0 0 18px rgba(0,255,255,.05);
-}
-
-.today-center h3{
-margin:0;
-font-size:34px;
-color:#00eaff;
-font-weight:800;
-}
-
-.today-center p{
-margin:8px 0 0;
-font-size:15px;
-color:#d3dde1;
-}
-
-/* ================= CUSTOM POPUP BETTER ================= */
-.check-grid label{
-justify-content:flex-start;
-font-weight:600;
-transition:.2s;
-}
-
-.check-grid label:hover{
-background:rgba(0,255,255,.10);
-transform:translateY(-2px);
-}
-
-/* ================= ADD POPUP TYPE CARDS ================= */
-.type-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
-gap:12px;
-margin-top:15px;
-}
-
-.type-card{
-padding:18px 10px;
-border-radius:16px;
-background:rgba(255,255,255,.05);
-text-align:center;
-cursor:pointer;
-font-size:30px;
-font-weight:700;
-transition:.22s;
-display:flex;
-flex-direction:column;
-gap:8px;
-}
-
-.type-card span{
-font-size:14px;
-}
-
-.type-card:hover{
-background:#00cfff;
-color:#000;
-transform:translateY(-4px);
-}
-
-/* ================= SCROLL BODY ================= */
-.widget-body{
-flex:1;
-overflow-y:auto;
-padding-right:6px;
-}
-
-.widget-body::-webkit-scrollbar{
-width:7px;
-}
-
-.widget-body::-webkit-scrollbar-thumb{
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-border-radius:10px;
-}
-
-.widget-body::-webkit-scrollbar-track{
-background:rgba(255,255,255,.03);
-}
-
-/* ================= GOALS ================= */
-.goal-row{
-margin-bottom:14px;
-}
-
-.goal-title{
-font-size:15px;
-font-weight:700;
-margin-bottom:6px;
-}
-
-.goal-bar{
-height:10px;
-background:#111;
-border-radius:20px;
-overflow:hidden;
-}
-
-.goal-fill{
-height:100%;
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-}
-
-/* ================= MOBILE ================= */
-@media(max-width:768px){
-
-.today-center h3{
-font-size:26px;
-}
-
-.task-widget{
-min-height:360px;
-max-height:430px;
-}
-
-.resize-handle{
-width:14px;
-height:14px;
-}
-
 }
 
 }
