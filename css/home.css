@@ -1,12 +1,10 @@
-/* home.css */
-
 /* ================= BODY ================= */
 body{
 margin:0;
 font-family:'Segoe UI',sans-serif;
 background:
-linear-gradient(rgba(0,0,0,.86),rgba(0,0,0,.95)),
-url("../mahadev.png") no-repeat center center;
+linear-gradient(rgba(0,0,0,.84),rgba(0,0,0,.95)),
+url("../mahadev.png") no-repeat center center fixed;
 background-size:cover;
 color:#fff;
 }
@@ -14,192 +12,335 @@ color:#fff;
 /* ================= MAIN ================= */
 .main{
 padding:20px;
-transition:.3s;
+min-height:100vh;
+box-sizing:border-box;
 }
 
 /* ================= NAVBAR ================= */
 .navbar{
 display:flex;
+justify-content:space-between;
 align-items:center;
 gap:15px;
-justify-content:space-between;
-padding:15px 18px;
-background:rgba(0,0,0,.55);
-border-radius:14px;
+padding:16px 20px;
+border-radius:18px;
+background:rgba(0,0,0,.58);
+backdrop-filter:blur(14px);
 box-shadow:0 0 18px rgba(0,255,255,.08);
+margin-bottom:18px;
 }
 
-.navbar h2{
+.nav-center h2{
 margin:0;
-font-size:24px;
-flex:1;
+font-size:28px;
+}
+
+.nav-center p{
+margin:4px 0 0;
+font-size:13px;
+color:#b9c8d1;
+}
+
+.nav-right{
+display:flex;
+gap:10px;
 }
 
 .menu-btn,
-.custom-btn{
+.nav-btn,
+.main-btn,
+.danger-btn{
 border:none;
-padding:10px 14px;
-border-radius:10px;
+padding:11px 15px;
+border-radius:12px;
 cursor:pointer;
 font-weight:700;
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-color:#000;
 transition:.22s;
 }
 
-.menu-btn:hover,
-.custom-btn:hover{
-transform:translateY(-2px);
-}
-
-/* ================= CUSTOM PANEL ================= */
-.custom-panel{
-margin-top:16px;
-padding:18px;
-border-radius:14px;
-background:rgba(0,0,0,.55);
-display:none;
-box-shadow:0 0 18px rgba(0,255,255,.08);
-}
-
-.custom-panel.show{
-display:block;
-}
-
-.custom-panel h3{
-margin:0 0 14px;
-color:#00eaff;
-}
-
-.custom-panel label{
-display:block;
-padding:8px 0;
-font-size:15px;
-cursor:pointer;
-}
-
-.custom-panel input{
-margin-right:8px;
-}
-
-.custom-panel button{
-margin-top:14px;
-width:100%;
-border:none;
-padding:12px;
-border-radius:10px;
-cursor:pointer;
-font-weight:700;
-background:linear-gradient(45deg,#00ffcc,#00cfff);
+.menu-btn,
+.nav-btn,
+.main-btn{
+background:linear-gradient(45deg,#00cfff,#00ffcc);
 color:#000;
+}
+
+.danger-btn{
+background:#ff4d4d;
+color:#fff;
+}
+
+.menu-btn:hover,
+.nav-btn:hover,
+.main-btn:hover,
+.danger-btn:hover{
+transform:translateY(-2px) scale(1.02);
+}
+
+/* ================= HERO ================= */
+.hero-box{
+padding:28px;
+border-radius:20px;
+background:linear-gradient(135deg,
+rgba(0,255,255,.08),
+rgba(255,255,255,.03));
+border:1px solid rgba(255,255,255,.06);
+box-shadow:0 0 20px rgba(0,255,255,.06);
+margin-bottom:20px;
+}
+
+.hero-box h1{
+margin:0 0 8px;
+font-size:34px;
+}
+
+.hero-box p{
+margin:0;
+color:#cfd8dc;
+font-size:15px;
+line-height:1.6;
 }
 
 /* ================= GRID ================= */
 .dashboard-grid{
-margin-top:20px;
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:18px;
 }
 
 /* ================= CARD ================= */
-.card{
+.widget-card{
 background:rgba(0,0,0,.58);
 padding:18px;
-border-radius:16px;
-box-shadow:0 0 16px rgba(0,255,255,.08);
-border:1px solid rgba(255,255,255,.04);
+border-radius:18px;
+border:1px solid rgba(255,255,255,.05);
+box-shadow:0 0 16px rgba(0,255,255,.06);
 transition:.25s;
-}
-
-.card:hover{
-transform:translateY(-3px);
-}
-
-.card h3{
-margin:0 0 12px;
-color:#00eaff;
-font-size:20px;
-}
-
-.card.full{
-grid-column:1/-1;
-}
-
-/* ================= TASK ITEM ================= */
-.task-row{
-padding:12px;
-margin-bottom:10px;
-border-radius:10px;
-background:rgba(255,255,255,.05);
-display:flex;
-justify-content:space-between;
-gap:10px;
-align-items:center;
-}
-
-.task-row.done{
-opacity:.6;
-text-decoration:line-through;
-}
-
-.task-time{
-font-size:13px;
-color:#00eaff;
-white-space:nowrap;
-}
-
-/* ================= GOAL BAR ================= */
-.goal-box{
-margin-bottom:14px;
-}
-
-.goal-top{
-display:flex;
-justify-content:space-between;
-margin-bottom:7px;
-font-size:14px;
-}
-
-.goal-bar{
-height:10px;
-background:#111;
-border-radius:30px;
 overflow:hidden;
 }
 
-.goal-fill{
+.widget-card:hover{
+transform:translateY(-4px);
+box-shadow:0 0 22px rgba(0,255,255,.12);
+}
+
+.full-card{
+grid-column:1/-1;
+}
+
+.card-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:14px;
+gap:10px;
+}
+
+.card-head h3{
+margin:0;
+font-size:22px;
+color:#00eaff;
+}
+
+.card-tools{
+display:flex;
+gap:8px;
+}
+
+.icon-btn{
+width:36px;
+height:36px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+font-weight:bold;
+background:rgba(255,255,255,.08);
+color:#fff;
+transition:.22s;
+}
+
+.icon-btn:hover{
+background:#00eaff;
+color:#000;
+transform:scale(1.08);
+}
+
+/* ================= CONTENT ================= */
+.item-row{
+padding:12px;
+border-radius:12px;
+background:rgba(255,255,255,.05);
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+
+.item-row:last-child{
+margin-bottom:0;
+}
+
+.item-left{
+flex:1;
+min-width:0;
+}
+
+.item-title{
+font-weight:600;
+font-size:15px;
+word-break:break-word;
+}
+
+.item-sub{
+font-size:12px;
+color:#b6c5cf;
+margin-top:4px;
+}
+
+.big-number{
+font-size:36px;
+font-weight:800;
+color:#00ffcc;
+margin:10px 0 6px;
+}
+
+.small-muted{
+font-size:13px;
+color:#b6c5cf;
+}
+
+/* ================= BAR ================= */
+.progress{
+height:10px;
+border-radius:20px;
+background:#111;
+overflow:hidden;
+margin-top:8px;
+}
+
+.progress-fill{
 height:100%;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
 
-/* ================= STAT CARD ================= */
-.big-number{
-font-size:34px;
-font-weight:800;
-color:#00ffcc;
-margin:8px 0;
+/* ================= TAG ================= */
+.tag{
+display:inline-block;
+padding:4px 10px;
+border-radius:18px;
+font-size:11px;
+font-weight:700;
+margin-top:6px;
 }
 
-.muted{
-color:#bfc9cf;
-font-size:14px;
+.pending{background:#ff4d4d;}
+.done{background:#00ffcc;color:#000;}
+.searching{background:#ffc107;color:#000;}
+
+/* ================= POPUP ================= */
+.popup-wrap{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.78);
+display:flex;
+justify-content:center;
+align-items:center;
+opacity:0;
+pointer-events:none;
+transition:.25s;
+z-index:9999;
 }
 
-/* ================= INSIGHT ================= */
-.quote-box{
-padding:15px;
-border-radius:12px;
-background:rgba(255,255,255,.05);
-line-height:1.7;
+.popup-wrap.show{
+opacity:1;
+pointer-events:auto;
+}
+
+.popup-box{
+width:360px;
+max-width:94%;
+padding:24px;
+border-radius:18px;
+background:#111;
+box-shadow:0 0 25px rgba(0,255,255,.18);
+}
+
+.big-popup{
+width:430px;
+}
+
+.popup-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+.popup-head h3{
+margin:0;
+}
+
+.popup-head button{
+background:none;
+border:none;
+font-size:18px;
+color:#fff;
+cursor:pointer;
+}
+
+.popup-box input,
+.popup-box select{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:none;
+border-radius:10px;
+background:rgba(255,255,255,.08);
+color:#fff;
+box-sizing:border-box;
+}
+
+.popup-box option{
+color:#000;
+}
+
+.widget-list label{
+display:block;
+padding:8px 0;
 font-size:15px;
 }
 
-/* ================= EMPTY ================= */
-.empty{
-padding:10px;
-color:#9fb0b8;
-font-size:14px;
+.popup-actions{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.popup-actions button{
+flex:1;
+}
+
+/* ================= TOAST ================= */
+#toast{
+position:fixed;
+bottom:25px;
+left:50%;
+transform:translateX(-50%);
+padding:12px 18px;
+background:#00ffcc;
+color:#000;
+font-weight:800;
+border-radius:12px;
+opacity:0;
+pointer-events:none;
+transition:.25s;
+z-index:99999;
+}
+
+#toast.show{
+opacity:1;
 }
 
 /* ================= MOBILE ================= */
@@ -209,16 +350,26 @@ font-size:14px;
 grid-template-columns:1fr;
 }
 
-.card.full{
+.full-card{
 grid-column:auto;
 }
 
 .navbar{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.nav-right{
+width:100%;
 flex-wrap:wrap;
 }
 
-.navbar h2{
-width:100%;
+.nav-right button{
+flex:1;
+}
+
+.hero-box h1{
+font-size:28px;
 }
 
 }
