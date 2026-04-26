@@ -1,55 +1,152 @@
+<!-- ================= smart-moves.html ================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Smart Moves</title>
 
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/sidebar.css">
-<link rel="stylesheet" href="css/growth-pages.css">
+<link rel="stylesheet" href="css/smart-moves.css">
+
 </head>
 
 <body>
 
+<!-- ================= UNIVERSAL SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
+
 <h2>⚡ Menu</h2>
 
 <button onclick="goHome()">🏠 Home</button>
 <button onclick="goTasks()">📋 Tasks</button>
 <button onclick="goGoals()">🎯 Goals</button>
 <button onclick="goFriends()">👥 Friends</button>
-<button onclick="goGrowth()">🌱 Growth Hub</button>
 <button onclick="goQuestionBank()">📚 Question Bank</button>
 <button onclick="goTests()">📝 Tests</button>
+<button onclick="goGrowth()">📈 Growth</button>
+<button onclick="goMistakes()">❌ Mistakes</button>
 <button onclick="goProfile()">👤 Profile</button>
-<button id="logoutBtn">🚪 Logout</button>
+<button onclick="logout()">🚪 Logout</button>
+
 </div>
 
+<!-- ================= MAIN PAGE ================= -->
 <div class="main">
 
 <div class="navbar">
+
 <button class="menu-btn"
 onclick="toggleSidebar()">☰</button>
-<h2>🚀 Smart Moves</h2>
-</div>
 
-<div class="page-box">
+<h2 id="pageTitle">🚀 My Smart Moves</h2>
 
-<div class="top-add">
-<input id="entryInput"
-placeholder="Write smart move / good decision...">
-
-<input type="date"
-id="entryDate">
-
-<button onclick="addEntry()">
-➕ Save
+<button id="myPageBtn"
+class="small-btn"
+onclick="goMyPage()">
+My Page
 </button>
+
 </div>
 
-<div id="listBox"></div>
+<!-- ADD -->
+<div id="addSection" class="glass-box">
+
+<h3>➕ Add Smart Move</h3>
+
+<input
+type="text"
+id="moveInput"
+placeholder="Write smart move...">
+
+<input
+type="date"
+id="moveDate">
+
+<button
+class="main-btn"
+onclick="addMove()">
+Save Smart Move
+</button>
+
+</div>
+
+<!-- FRIENDS -->
+<div class="glass-box">
+
+<h3>👥 Friends</h3>
+
+<div id="friendListMini">
+Loading...
+</div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="glass-box">
+
+<h3>📋 Smart Moves History</h3>
+
+<div id="moveList">
+Loading...
+</div>
+
+</div>
+
+</div>
+
+<!-- EDIT -->
+<div id="editPopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<h3>✏ Edit Smart Move</h3>
+
+<input type="text" id="editText">
+<input type="date" id="editDate">
+
+<div class="popup-actions">
+
+<button class="main-btn"
+onclick="saveEdit()">
+Save
+</button>
+
+<button class="danger-btn"
+onclick="closeEdit()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- DELETE -->
+<div id="deletePopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<h3>🗑 Delete Smart Move?</h3>
+
+<p>This action cannot be undone.</p>
+
+<div class="popup-actions">
+
+<button class="danger-btn"
+onclick="confirmDelete()">
+Delete
+</button>
+
+<button class="main-btn"
+onclick="closeDelete()">
+Cancel
+</button>
+
+</div>
 
 </div>
 
@@ -57,11 +154,8 @@ id="entryDate">
 
 <div id="toast"></div>
 
-<script type="module"
-src="js/menu.js"></script>
-
-<script type="module"
-src="js/smart-moves.js"></script>
+<script type="module" src="js/menu.js"></script>
+<script type="module" src="js/smart-moves.js"></script>
 
 </body>
 </html>
