@@ -414,5 +414,202 @@ flex-direction:column;
 .widget-card{
 max-height:360px;
 }
+  /* ================= RESIZE HANDLE ================= */
+.resize-handle{
+position:absolute;
+right:6px;
+bottom:6px;
+width:16px;
+height:16px;
+cursor:nwse-resize;
+border-radius:4px;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+opacity:.9;
+}
+
+/* required for handle positioning */
+.widget-card{
+position:relative;
+resize:none;
+}
+
+/* ================= DRAGGING ================= */
+.widget-card.dragging{
+opacity:.55;
+transform:scale(.98);
+box-shadow:0 0 25px rgba(0,255,255,.18);
+}
+
+/* ================= TASK WIDGET BETTER ================= */
+.task-widget{
+min-height:430px;
+max-height:520px;
+}
+
+.task-row{
+padding:12px 0;
+gap:14px;
+}
+
+.task-left{
+flex:1;
+min-width:0;
+}
+
+.task-title{
+font-size:16px;
+font-weight:600;
+line-height:1.45;
+white-space:normal;
+word-break:break-word;
+overflow-wrap:anywhere;
+}
+
+.task-time{
+margin-top:5px;
+font-size:12px;
+color:#9fb0ba;
+}
+
+.task-done .task-title{
+text-decoration:line-through;
+opacity:.55;
+}
+
+.tick-btn{
+width:42px;
+height:42px;
+flex-shrink:0;
+font-size:18px;
+}
+
+/* ================= CENTER DATE PREMIUM ================= */
+.today-center{
+text-align:center;
+padding:18px;
+border-radius:18px;
+background:rgba(255,255,255,.04);
+margin-bottom:18px;
+box-shadow:0 0 18px rgba(0,255,255,.05);
+}
+
+.today-center h3{
+margin:0;
+font-size:34px;
+color:#00eaff;
+font-weight:800;
+}
+
+.today-center p{
+margin:8px 0 0;
+font-size:15px;
+color:#d3dde1;
+}
+
+/* ================= CUSTOM POPUP BETTER ================= */
+.check-grid label{
+justify-content:flex-start;
+font-weight:600;
+transition:.2s;
+}
+
+.check-grid label:hover{
+background:rgba(0,255,255,.10);
+transform:translateY(-2px);
+}
+
+/* ================= ADD POPUP TYPE CARDS ================= */
+.type-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+gap:12px;
+margin-top:15px;
+}
+
+.type-card{
+padding:18px 10px;
+border-radius:16px;
+background:rgba(255,255,255,.05);
+text-align:center;
+cursor:pointer;
+font-size:30px;
+font-weight:700;
+transition:.22s;
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.type-card span{
+font-size:14px;
+}
+
+.type-card:hover{
+background:#00cfff;
+color:#000;
+transform:translateY(-4px);
+}
+
+/* ================= SCROLL BODY ================= */
+.widget-body{
+flex:1;
+overflow-y:auto;
+padding-right:6px;
+}
+
+.widget-body::-webkit-scrollbar{
+width:7px;
+}
+
+.widget-body::-webkit-scrollbar-thumb{
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+border-radius:10px;
+}
+
+.widget-body::-webkit-scrollbar-track{
+background:rgba(255,255,255,.03);
+}
+
+/* ================= GOALS ================= */
+.goal-row{
+margin-bottom:14px;
+}
+
+.goal-title{
+font-size:15px;
+font-weight:700;
+margin-bottom:6px;
+}
+
+.goal-bar{
+height:10px;
+background:#111;
+border-radius:20px;
+overflow:hidden;
+}
+
+.goal-fill{
+height:100%;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+
+.today-center h3{
+font-size:26px;
+}
+
+.task-widget{
+min-height:360px;
+max-height:430px;
+}
+
+.resize-handle{
+width:14px;
+height:14px;
+}
+
+}
 
 }
