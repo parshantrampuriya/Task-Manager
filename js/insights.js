@@ -1,3 +1,5 @@
+/* ================= INSIGHTS JS ================= */
+
 import { auth, db } from "./firebase.js";
 
 import {
@@ -11,6 +13,7 @@ getDocs,
 query,
 where,
 doc,
+getDoc,
 updateDoc,
 deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -18,8 +21,13 @@ deleteDoc
 const getEl=(id)=>document.getElementById(id);
 
 let currentUser=null;
+let viewUid=null;
 
-onAuthStateChanged(auth,(user)=>{
+let editId=null;
+let deleteId=null;
+
+/* auth */
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 location.href="index.html";
@@ -27,119 +35,245 @@ return;
 }
 
 currentUser=user;
+
+const params=new URLSearchParams(location.search);
+viewUid=params.get("uid") || user.uid;
+
+if(viewUid!==user.uid){
+getEl("pageTitle").innerText="👤 Friend Insights";
+getEl("addSection").style.display="none";
+}else{
+getEl("pageTitle").innerText="🧠 My Insights";
+}
+
 setToday();
-loadData();
+await loadFriends();
+await loadInsights();
 
 });
 
+/* date */
 function setToday(){
-getEl("entryDate").value=
-new Date().toISOString().split("T")[0];
+let d=new Date();
+getEl("insightDate").value=
+d.toISOString().split("T")[0];
 }
 
-window.addEntry=async()=>{
+/* my page */
+window.goMyPage=()=>{
+location.href="insights.html";
+};
 
-const text=
-getEl("entryInput").value.trim();
+/* add */
+window.addInsight=async()=>{
 
-const date=
-getEl("entryDate").value;
+let txt=getEl("insightInput").value.trim();
+let dt=getEl("insightDate").value;
 
-if(!text) return toast("Enter insight");
+if(!txt) return toast("Enter insight");
+if(!dt) return toast("Select date");
 
 await addDoc(collection(db,"insights"),{
 uid:currentUser.uid,
-text,
-date,
+text:txt,
+date:dt,
 createdAt:Date.now()
 });
 
-getEl("entryInput").value="";
+getEl("insightInput").value="";
 toast("Saved ✅");
-loadData();
+loadInsights();
 
 };
 
-async function loadData(){
+/* friends */
+async function loadFriends(){
+
+const snap=await getDocs(collection(db,"friends"));
+
+let html="";
+
+for(const d of snap.docs){
+
+let users=d.data().users || [];
+
+if(!users.includes(currentUser.uid))
+continue;
+
+let fid=users.find(x=>x!==currentUser.uid);
+
+let u=await getDoc(doc(db,"users",fid));
+
+let name="Friend";
+
+if(u.exists()){
+name=u.data().name ||
+u.data().email ||
+"Friend";
+}
+
+html+=`
+<div class="friend-card"
+onclick="openFriend('${fid}')">
+👤 ${name}
+</div>
+`;
+
+}
+
+getEl("friendListMini").innerHTML=
+html || "No friends";
+
+}
+
+window.openFriend=(uid)=>{
+location.href=
+"insights.html?uid="+uid+"&t="+Date.now();
+};
+
+/* load */
+async function loadInsights(){
 
 const snap=await getDocs(
 query(
 collection(db,"insights"),
-where("uid","==",currentUser.uid)
+where("uid","==",viewUid)
 )
 );
 
 let arr=[];
 
 snap.forEach(d=>{
-arr.push({id:d.id,...d.data()});
+arr.push({
+id:d.id,
+...d.data()
+});
 });
 
-arr.sort((a,b)=>b.createdAt-a.createdAt);
+arr.sort((a,b)=>{
+
+if(a.date>b.date) return -1;
+if(a.date<b.date) return 1;
+
+return b.createdAt-a.createdAt;
+
+});
 
 let html="";
+let lastDate="";
 
 arr.forEach(x=>{
 
-html+=`
-<div class="entry-card">
+if(x.date!==lastDate){
 
-<div class="entry-left">
-<div>${x.text}</div>
-<div class="entry-date">${x.date}</div>
+html+=`
+<div class="date-head">${x.date}</div>
+`;
+
+lastDate=x.date;
+}
+
+html+=`
+<div class="insight-card">
+
+<div class="i-left">
+<div class="i-text">${x.text}</div>
 </div>
 
-<div class="entry-actions">
-<button class="edit-btn"
-onclick="editItem('${x.id}','${encodeURIComponent(x.text)}')">
+${
+viewUid===currentUser.uid
+?
+`
+<div class="i-actions">
+
+<button class="main-btn"
+onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}')">
 Edit
 </button>
 
-<button class="del-btn"
-onclick="deleteItem('${x.id}')">
+<button class="danger-btn"
+onclick="openDelete('${x.id}')">
 Delete
 </button>
+
 </div>
+`
+:""
+}
 
 </div>
 `;
 
 });
 
-getEl("listBox").innerHTML=
-html || "No insights yet.";
+getEl("insightList").innerHTML=
+html || "No insights found.";
 
 }
 
-window.editItem=async(id,text)=>{
+/* edit */
+window.openEdit=(id,text,date)=>{
 
-let val=prompt(
-"Edit Insight",
-decodeURIComponent(text)
+editId=id;
+
+getEl("editText").value=
+decodeURIComponent(text);
+
+getEl("editDate").value=date;
+
+getEl("editPopup")
+.classList.add("show");
+
+};
+
+window.closeEdit=()=>{
+getEl("editPopup")
+.classList.remove("show");
+};
+
+window.saveEdit=async()=>{
+
+await updateDoc(
+doc(db,"insights",editId),
+{
+text:getEl("editText").value.trim(),
+date:getEl("editDate").value
+}
 );
 
-if(!val) return;
-
-await updateDoc(doc(db,"insights",id),{
-text:val.trim()
-});
-
-toast("Updated");
-loadData();
+closeEdit();
+toast("Updated ✅");
+loadInsights();
 
 };
 
-window.deleteItem=async(id)=>{
+/* delete */
+window.openDelete=(id)=>{
+deleteId=id;
+getEl("deletePopup")
+.classList.add("show");
+};
 
-if(!confirm("Delete this insight?"))
-return;
+window.closeDelete=()=>{
+getEl("deletePopup")
+.classList.remove("show");
+};
 
-await deleteDoc(doc(db,"insights",id));
+window.confirmDelete=async()=>{
 
-toast("Deleted");
-loadData();
+await deleteDoc(
+doc(db,"insights",deleteId)
+);
+
+closeDelete();
+toast("Deleted ❌");
+loadInsights();
 
 };
+
+function escapeText(t){
+return encodeURIComponent(t);
+}
 
 function toast(msg){
 
@@ -150,6 +284,6 @@ t.classList.add("show");
 
 setTimeout(()=>{
 t.classList.remove("show");
-},1600);
+},1800);
 
 }
