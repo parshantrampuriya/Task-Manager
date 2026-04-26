@@ -123,7 +123,7 @@ flex-wrap:wrap;
 /* ================= GRID ================= */
 .dashboard-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 gap:16px;
 align-items:start;
 }
@@ -136,12 +136,11 @@ border-radius:18px;
 padding:18px;
 box-shadow:0 0 18px rgba(0,255,255,.05);
 transition:.22s;
-
-/* NEW */
-max-height:420px;
-overflow:hidden;
 display:flex;
 flex-direction:column;
+min-height:240px;
+max-height:380px;
+overflow:hidden;
 }
 
 .widget-card:hover{
@@ -155,7 +154,7 @@ max-height:430px;
 }
 
 .compact{
-max-height:220px;
+max-height:260px;
 }
 
 @media(max-width:900px){
@@ -201,12 +200,16 @@ color:#000;
 .widget-body{
 flex:1;
 overflow-y:auto;
-padding-right:4px;
+overflow-x:hidden;
+padding-right:6px;
 margin-top:4px;
+scroll-behavior:smooth;
+scrollbar-width:thin;
+scrollbar-color:#00eaff rgba(255,255,255,.05);
 }
 
 .widget-body::-webkit-scrollbar{
-width:6px;
+width:8px;
 }
 
 .widget-body::-webkit-scrollbar-track{
@@ -223,7 +226,7 @@ border-radius:10px;
 .item-row{
 display:flex;
 justify-content:space-between;
-align-items:center;
+align-items:flex-start;
 gap:12px;
 padding:10px 0;
 border-bottom:1px solid rgba(255,255,255,.05);
@@ -241,13 +244,41 @@ min-width:0;
 .item-title{
 font-size:15px;
 font-weight:600;
+white-space:normal;
 word-break:break-word;
+line-height:1.45;
+padding-right:8px;
 }
 
 .item-sub{
 font-size:12px;
 color:#aab7c0;
 margin-top:4px;
+}
+
+/* completed task stroke */
+.item-title.done,
+.completed,
+.done .item-title,
+.done span{
+text-decoration:line-through !important;
+opacity:.55;
+}
+
+/* actions */
+.item-actions{
+display:flex;
+gap:8px;
+flex-shrink:0;
+}
+
+.item-actions button{
+width:40px;
+height:40px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
 }
 
 /* ================= BIG NUMBERS ================= */
@@ -459,6 +490,11 @@ grid-template-columns:1fr;
 .widget-card,
 .full-card{
 max-height:340px;
+min-height:220px;
+}
+
+.item-title{
+font-size:14px;
 }
 
 }
