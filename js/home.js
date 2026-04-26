@@ -1,4 +1,4 @@
-/* ================= ULTIMATE HOME.JS FINAL ================= */
+/* ================= ULTIMATE HOME.JS UPDATED ================= */
 
 import { auth, db } from "./firebase.js";
 
@@ -14,58 +14,68 @@ getDoc,
 getDocs,
 addDoc,
 updateDoc,
-deleteDoc,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= DOM ================= */
+
+const username = document.getElementById("username");
+const todayDate = document.getElementById("todayDate");
+const countdownText = document.getElementById("countdownText");
+const dashboardGrid = document.getElementById("dashboardGrid");
+
+const addPopup = document.getElementById("addPopup");
+const customPopup = document.getElementById("customPopup");
+const logoutBtn = document.getElementById("logoutBtn");
+
 /* ================= GLOBAL ================= */
 
-let uid=null;
-let tasks=[];
-let goals=[];
-let stats={
+let uid = null;
+let tasks = [];
+let goals = [];
+
+let stats = {
 mistakes:0,
 insights:0,
 quest:0,
 smart:0
 };
 
-let layout=
-JSON.parse(localStorage.getItem("dashLayout")) || [
-"focus","tasks","quote","goals","growth"
-];
+let layout =
+JSON.parse(localStorage.getItem("dashLayout")) ||
+["focus","tasks","quote","goals","growth"];
 
 /* ================= AUTH ================= */
 
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-uid=user.uid;
+uid = user.uid;
 
-const u=await getDoc(doc(db,"users",uid));
+const snap = await getDoc(doc(db,"users",uid));
 
-if(u.exists()){
-username.innerText=
-"Welcome "+(u.data().name || "");
+if(snap.exists()){
+username.innerText =
+"Welcome " + (snap.data().name || "");
 }
 
-loadLive();
 setTopDate();
 startTimer();
+loadLive();
 
 });
 
-/* ================= TOP DATE ================= */
+/* ================= DATE ================= */
 
 function setTopDate(){
 
-const d=new Date();
+const d = new Date();
 
-todayDate.innerText=
+todayDate.innerText =
 d.toDateString();
 
 }
@@ -74,50 +84,52 @@ function startTimer(){
 
 setInterval(()=>{
 
-let now=new Date();
+let now = new Date();
 
-let end=new Date();
+let end = new Date();
 end.setHours(23,59,59,999);
 
-let diff=end-now;
+let diff = end - now;
 
-let h=Math.floor(diff/3600000);
-let m=Math.floor((diff%3600000)/60000);
-let s=Math.floor((diff%60000)/1000);
+let h = Math.floor(diff/3600000);
+let m = Math.floor((diff%3600000)/60000);
+let s = Math.floor((diff%60000)/1000);
 
-countdownText.innerText=
+countdownText.innerText =
 `⏳ ${h}h ${m}m ${s}s remaining today`;
 
 },1000);
 
 }
 
-/* ================= LOAD DATA ================= */
+/* ================= LOAD ================= */
 
 function loadLive(){
 
-onSnapshot(collection(db,"tasks"),snap=>{
+onSnapshot(collection(db,"tasks"), snap=>{
 
 tasks=[];
 
 snap.forEach(d=>{
 let x=d.data();
-if(x.user===uid)
+if(x.user===uid){
 tasks.push({id:d.id,...x});
+}
 });
 
 renderDashboard();
 
 });
 
-onSnapshot(collection(db,"goals"),snap=>{
+onSnapshot(collection(db,"goals"), snap=>{
 
 goals=[];
 
 snap.forEach(d=>{
 let x=d.data();
-if(x.user===uid)
+if(x.user===uid){
 goals.push({id:d.id,...x});
+}
 });
 
 renderDashboard();
@@ -130,17 +142,10 @@ loadCounts();
 
 async function loadCounts(){
 
-stats.mistakes=
-await getCount("mistakes");
-
-stats.insights=
-await getCount("insights");
-
-stats.quest=
-await getCount("quest");
-
-stats.smart=
-await getCount("smartmoves");
+stats.mistakes = await getCount("mistakes");
+stats.insights = await getCount("insights");
+stats.quest = await getCount("quest");
+stats.smart = await getCount("smartmoves");
 
 renderDashboard();
 
@@ -148,7 +153,7 @@ renderDashboard();
 
 async function getCount(name){
 
-const snap=await getDocs(collection(db,name));
+const snap = await getDocs(collection(db,name));
 
 let c=0;
 
@@ -189,21 +194,21 @@ enableDrag();
 
 }
 
-/* ================= CARD BUILDER ================= */
+/* ================= CARD ================= */
 
 function cardBase(title,id,wide=false){
 
 let div=document.createElement("div");
 
-div.className=
-"widget-card "+(wide?"full-card":"compact");
+div.className =
+"widget-card " + (wide?"full-card task-widget":"compact");
 
-div.draggable=true;
 div.dataset.id=id;
+div.draggable=true;
 
 div.innerHTML=`
 
-<div class="card-head drag-handle">
+<div class="card-head">
 <h3>${title}</h3>
 </div>
 
@@ -223,13 +228,10 @@ return div;
 
 function focusCard(){
 
-let done=
-tasks.filter(x=>x.completed).length;
+let done = tasks.filter(x=>x.completed).length;
+let total = tasks.length;
 
-let total=tasks.length;
-
-let p=total?
-Math.round(done*100/total):0;
+let p = total ? Math.round(done*100/total):0;
 
 let c=cardBase("📊 Today Focus","focus");
 
@@ -238,8 +240,7 @@ c.querySelector("#focusBody").innerHTML=`
 <div class="big-number">${p}%</div>
 
 <div class="progress">
-<div class="progress-fill"
-style="width:${p}%"></div>
+<div class="progress-fill" style="width:${p}%"></div>
 </div>
 
 <div class="small-muted">
@@ -252,25 +253,22 @@ return c;
 
 }
 
-/* ================= TASKS ================= */
+/* ================= TASK ================= */
 
 function taskCard(){
 
 let c=cardBase("📋 Today Tasks","tasks",true);
 
-let today=
-new Date().toLocaleDateString("en-CA");
+let today = new Date().toLocaleDateString("en-CA");
 
-let arr=
-tasks.filter(x=>x.date===today);
+let arr = tasks.filter(x=>x.date===today);
 
 arr.sort((a,b)=>{
 
 if(a.completed!==b.completed)
 return a.completed?1:-1;
 
-return (a.time||"")
-.localeCompare(b.time||"");
+return (a.time||"").localeCompare(b.time||"");
 
 });
 
@@ -284,13 +282,9 @@ html+=`
 
 <div class="task-left">
 
-<div class="task-title">
-${x.text}
-</div>
+<div class="task-title">${x.text}</div>
 
-<div class="task-time">
-${x.time || "00:00"}
-</div>
+<div class="task-time">${x.time || "00:00"}</div>
 
 </div>
 
@@ -305,8 +299,8 @@ onclick="toggleTask('${x.id}',${x.completed})">
 
 });
 
-c.querySelector("#tasksBody").innerHTML=
-html || "No task";
+c.querySelector("#tasksBody").innerHTML =
+html || "No tasks";
 
 return c;
 
@@ -316,24 +310,24 @@ return c;
 
 function quoteCard(){
 
-let q=[
+let quotes=[
+
 "Discipline today creates freedom tomorrow.",
-"Small progress daily beats excuses.",
-"Win the morning win the day.",
 "Consistency creates success.",
-"Action cures fear."
+"Small progress daily wins.",
+"Action beats excuses.",
+"Win morning win day."
+
 ];
 
-let random=
-q[Math.floor(Math.random()*q.length)];
+let random =
+quotes[Math.floor(Math.random()*quotes.length)];
 
 let c=cardBase("💬 Quote","quote");
 
 c.querySelector("#quoteBody").innerHTML=`
 
-<div class="quote-box">
-${random}
-</div>
+<div class="quote-box">${random}</div>
 
 `;
 
@@ -374,7 +368,7 @@ style="width:${p}%"></div>
 
 });
 
-c.querySelector("#goalsBody").innerHTML=
+c.querySelector("#goalsBody").innerHTML =
 html || "No goals";
 
 return c;
@@ -415,9 +409,9 @@ return c;
 
 }
 
-/* ================= TASK TOGGLE ================= */
+/* ================= TOGGLE ================= */
 
-window.toggleTask=async(id,v)=>{
+window.toggleTask = async(id,v)=>{
 
 await updateDoc(doc(db,"tasks",id),{
 completed:!v
@@ -425,7 +419,7 @@ completed:!v
 
 };
 
-/* ================= DRAG ORDER ================= */
+/* ================= DRAG ================= */
 
 function enableDrag(){
 
@@ -446,10 +440,7 @@ card.addEventListener("drop",()=>{
 
 if(drag===card) return;
 
-dashboardGrid.insertBefore(
-drag,
-card
-);
+dashboardGrid.insertBefore(drag,card);
 
 saveOrder();
 
@@ -479,23 +470,19 @@ JSON.stringify(layout)
 
 function enableResize(card){
 
-let handle=
-card.querySelector(".resize-handle");
+let handle = card.querySelector(".resize-handle");
 
-let startX,startY,startW,startH;
+let sx,sy,sw,sh;
 
-handle.onmousedown=e=>{
+handle.onmousedown=(e)=>{
 
 e.preventDefault();
 
-startX=e.clientX;
-startY=e.clientY;
+sx=e.clientX;
+sy=e.clientY;
 
-startW=parseInt(
-document.defaultView.getComputedStyle(card).width,10);
-
-startH=parseInt(
-document.defaultView.getComputedStyle(card).height,10);
+sw=card.offsetWidth;
+sh=card.offsetHeight;
 
 document.onmousemove=drag;
 document.onmouseup=stop;
@@ -504,11 +491,11 @@ document.onmouseup=stop;
 
 function drag(e){
 
-card.style.width=
-(startW+e.clientX-startX)+"px";
+card.style.width =
+(sw + e.clientX - sx) + "px";
 
-card.style.height=
-(startH+e.clientY-startY)+"px";
+card.style.height =
+(sh + e.clientY - sy) + "px";
 
 }
 
@@ -521,7 +508,7 @@ document.onmouseup=null;
 
 }
 
-/* ================= ADD POPUP ================= */
+/* ================= POPUPS ================= */
 
 window.openAddPopup=()=>{
 addPopup.classList.add("show");
@@ -531,10 +518,41 @@ window.closeAddPopup=()=>{
 addPopup.classList.remove("show");
 };
 
+window.openCustomizer=()=>{
+customPopup.classList.add("show");
+};
+
+window.closeCustomizer=()=>{
+customPopup.classList.remove("show");
+};
+
+window.saveLayout=()=>{
+
+let arr=[];
+
+document.querySelectorAll(
+"#customPopup input[type=checkbox]"
+).forEach(x=>{
+if(x.checked) arr.push(x.value);
+});
+
+layout=arr;
+
+localStorage.setItem(
+"dashLayout",
+JSON.stringify(layout)
+);
+
+closeCustomizer();
+renderDashboard();
+
+};
+
+/* ================= ADD ================= */
+
 window.selectAddType=async(type)=>{
 
-let txt=
-prompt("Enter "+type);
+let txt=prompt("Enter "+type);
 
 if(!txt) return;
 
@@ -543,8 +561,7 @@ if(type==="task"){
 await addDoc(collection(db,"tasks"),{
 user:uid,
 text:txt,
-date:new Date()
-.toLocaleDateString("en-CA"),
+date:new Date().toLocaleDateString("en-CA"),
 time:"00:00",
 completed:false
 });
@@ -564,50 +581,18 @@ total:10
 
 else{
 
-await addDoc(collection(db,type==="smart"?"smartmoves":type),{
+await addDoc(
+collection(db,type==="smart"?"smartmoves":type),
+{
 uid:uid,
 text:txt,
-date:new Date()
-.toLocaleDateString("en-CA"),
+date:new Date().toLocaleDateString("en-CA"),
 createdAt:Date.now()
 });
 
 }
 
 closeAddPopup();
-
-};
-
-/* ================= CUSTOM ================= */
-
-window.openCustomizer=()=>{
-customPopup.classList.add("show");
-};
-
-window.closeCustomizer=()=>{
-customPopup.classList.remove("show");
-};
-
-window.saveLayout=()=>{
-
-let arr=[];
-
-document.querySelectorAll(
-"#customPopup input[type=checkbox]"
-).forEach(x=>{
-if(x.checked)
-arr.push(x.value);
-});
-
-layout=arr;
-
-localStorage.setItem(
-"dashLayout",
-JSON.stringify(layout)
-);
-
-closeCustomizer();
-renderDashboard();
 
 };
 
