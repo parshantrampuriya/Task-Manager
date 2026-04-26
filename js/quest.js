@@ -1,5 +1,3 @@
-// ================= quest.js =================
-
 import { auth, db } from "./firebase.js";
 
 import {
@@ -18,14 +16,13 @@ updateDoc,
 deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const getEl=(id)=>document.getElementById(id);
+const getEl=id=>document.getElementById(id);
 
 let currentUser=null;
 let viewUid=null;
 let editId=null;
 let deleteId=null;
 
-/* AUTH */
 onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
@@ -51,31 +48,28 @@ await loadQuest();
 
 });
 
-/* DATE */
 function setToday(){
 getEl("questDate").value=
 new Date().toISOString().split("T")[0];
 }
 
-/* PAGE */
 window.goMyPage=()=>{
 location.href="quest.html";
 };
 
-/* ADD */
 window.addQuest=async()=>{
 
 let text=getEl("questInput").value.trim();
 let date=getEl("questDate").value;
-let priority=getEl("questPriority").value;
+let status=getEl("questStatus").value;
 
-if(!text) return toast("Enter quest");
+if(!text) return toast("Enter text");
 
 await addDoc(collection(db,"quest"),{
 uid:currentUser.uid,
 text,
 date,
-priority,
+status,
 createdAt:Date.now()
 });
 
@@ -85,7 +79,6 @@ loadQuest();
 
 };
 
-/* FRIENDS */
 async function loadFriends(){
 
 const snap=await getDocs(collection(db,"friends"));
@@ -94,16 +87,17 @@ let html="";
 for(const d of snap.docs){
 
 let users=d.data().users || [];
-if(!users.includes(currentUser.uid)) continue;
+
+if(!users.includes(currentUser.uid))
+continue;
 
 let fid=users.find(x=>x!==currentUser.uid);
 
 let u=await getDoc(doc(db,"users",fid));
-
 let name="Friend";
 
 if(u.exists()){
-name=u.data().name || u.data().email;
+name=u.data().name || "Friend";
 }
 
 html+=`
@@ -124,7 +118,6 @@ window.openFriend=(uid)=>{
 location.href="quest.html?uid="+uid;
 };
 
-/* LOAD */
 async function loadQuest(){
 
 const snap=await getDocs(
@@ -138,62 +131,55 @@ snap.forEach(d=>{
 arr.push({id:d.id,...d.data()});
 });
 
-arr.sort((a,b)=>a.date>b.date?-1:1);
+arr.sort((a,b)=>b.createdAt-a.createdAt);
 
 let html="";
-let last="";
+let lastDate="";
+
+let added=0,solved=0,pending=0;
 
 arr.forEach(x=>{
 
-if(x.date!==last){
+added++;
 
-html+=`
-<div class="date-head">${x.date}</div>
-`;
+if(x.status==="Learned" || x.status==="Closed")
+solved++;
+else
+pending++;
 
-last=x.date;
+if(lastDate!==x.date){
+html+=`<div class="date-head">${x.date}</div>`;
+lastDate=x.date;
 }
-
-let p=(x.priority || "Medium").toLowerCase();
 
 html+=`
 <div class="quest-card">
 
 <div class="q-left">
-
-<div class="q-text">
-${x.text}
+<div class="q-text">${x.text}</div>
+<div class="tag ${tagClass(x.status)}">${x.status}</div>
 </div>
 
-<div class="q-meta">
-Priority:
-<span class="priority ${p}">
-${x.priority || "Medium"}
-</span>
-</div>
+<div class="q-actions">
 
-</div>
+<button onclick="googleSearch('${escapeText(x.text)}')">🔎</button>
+
+<button onclick="youtubeSearch('${escapeText(x.text)}')">▶</button>
+
+<button onclick="chatAsk('${escapeText(x.text)}')">🤖</button>
 
 ${
 viewUid===currentUser.uid
-?
-`
-<div class="q-actions">
-
-<button class="main-btn"
-onclick="openEdit('${x.id}','${encodeURIComponent(x.text)}','${x.date}','${x.priority}')">
-Edit
-</button>
-
-<button class="danger-btn"
-onclick="openDelete('${x.id}')">
-Delete
-</button>
-
-</div>
+?`
+<button onclick="toInsight('${escapeText(x.text)}')">🧠</button>
+<button onclick="toTask('${escapeText(x.text)}')">📋</button>
+<button onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}','${x.status}')">✏</button>
+<button onclick="openDelete('${x.id}')">❌</button>
 `
 :""
 }
+
+</div>
 
 </div>
 `;
@@ -203,18 +189,49 @@ Delete
 getEl("questList").innerHTML=
 html || "No quest found.";
 
+getEl("totalAdded").innerText=added;
+getEl("totalSolved").innerText=solved;
+getEl("totalPending").innerText=pending;
+
 }
 
-/* EDIT */
-window.openEdit=(id,text,date,p)=>{
+function tagClass(v){
+
+if(v==="Pending") return "pending";
+if(v==="Searching") return "searching";
+if(v==="Asked Someone") return "asked";
+if(v==="Learned") return "learned";
+return "closed";
+
+}
+
+window.googleSearch=t=>{
+window.open("https://www.google.com/search?q="+decodeURIComponent(t));
+};
+
+window.youtubeSearch=t=>{
+window.open("https://www.youtube.com/results?search_query="+decodeURIComponent(t));
+};
+
+window.chatAsk=t=>{
+window.open("https://chat.openai.com/");
+};
+
+window.toInsight=t=>{
+toast("Copy & add to Insights");
+};
+
+window.toTask=t=>{
+toast("Copy & add to Tasks");
+};
+
+window.openEdit=(id,text,date,status)=>{
 
 editId=id;
 
-getEl("editText").value=
-decodeURIComponent(text);
-
+getEl("editText").value=decodeURIComponent(text);
 getEl("editDate").value=date;
-getEl("editPriority").value=p;
+getEl("editStatus").value=status;
 
 getEl("editPopup").classList.add("show");
 
@@ -226,23 +243,19 @@ getEl("editPopup").classList.remove("show");
 
 window.saveEdit=async()=>{
 
-await updateDoc(
-doc(db,"quest",editId),
-{
+await updateDoc(doc(db,"quest",editId),{
 text:getEl("editText").value.trim(),
 date:getEl("editDate").value,
-priority:getEl("editPriority").value
-}
-);
+status:getEl("editStatus").value
+});
 
 closeEdit();
-toast("Updated ✅");
+toast("Updated");
 loadQuest();
 
 };
 
-/* DELETE */
-window.openDelete=(id)=>{
+window.openDelete=id=>{
 deleteId=id;
 getEl("deletePopup").classList.add("show");
 };
@@ -256,16 +269,18 @@ window.confirmDelete=async()=>{
 await deleteDoc(doc(db,"quest",deleteId));
 
 closeDelete();
-toast("Deleted ❌");
+toast("Deleted");
 loadQuest();
 
 };
 
-/* TOAST */
+function escapeText(t){
+return encodeURIComponent(t);
+}
+
 function toast(msg){
 
-const t=getEl("toast");
-
+let t=getEl("toast");
 t.innerText=msg;
 t.classList.add("show");
 
