@@ -20,8 +20,8 @@ location.href = "question-bank.html";
 window.goTests = () =>
 location.href = "tests.html";
 
-window.goMistakes = () =>
-location.href = "mistakes.html";
+window.goGrowth = () =>
+location.href = "growth.html";
 
 window.goProfile = () =>
 location.href = "profile.html";
