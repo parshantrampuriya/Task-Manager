@@ -1,688 +1,423 @@
-// ================= HOME JS V2 =================
-
 import { auth, db } from "./firebase.js";
 
 import {
-onAuthStateChanged,
-signOut
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-doc,
-getDoc,
-setDoc,
-collection,
-getDocs,
-addDoc,
-updateDoc
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const $ = (id)=>document.getElementById(id);
+/* ================= GLOBAL ================= */
 
 let currentUser = null;
-let addType = "task";
-
-let widgets = {
-focus:true,
-tasks:true,
-goals:true,
-mistakes:true,
-insights:true,
-quest:true,
-countdown:true,
-quote:true
+let tasks = [];
+let goals = [];
+let quoteList = [];
+let dashboardPrefs = JSON.parse(localStorage.getItem("dashboardPrefs")) || {
+  focus:true,
+  tasks:true,
+  goals:true,
+  growth:true,
+  countdown:true,
+  quote:true
 };
 
 /* ================= AUTH ================= */
 
 onAuthStateChanged(auth, async(user)=>{
 
-if(!user){
-location.href="index.html";
-return;
-}
+  if(!user){
+    location.href="index.html";
+    return;
+  }
 
-currentUser = user;
+  currentUser = user;
 
-await loadUser();
-await loadWidgetSettings();
+  let snap = await getDoc(doc(db,"users",user.uid));
 
-setToday();
-renderDashboard();
-startClock();
+  if(snap.exists()){
+    username.innerText = "👤 Welcome " + (snap.data().name || "User");
+  }
+
+  loadTasks();
+  loadGoals();
+  loadQuotes();
+  startClock();
 
 });
-
-/* ================= USER ================= */
-
-async function loadUser(){
-
-const snap = await getDoc(
-doc(db,"users",currentUser.uid)
-);
-
-if(snap.exists()){
-
-$("username").innerText =
-"👤 Welcome " +
-(snap.data().name || "User");
-
-}
-
-}
 
 /* ================= DATE ================= */
 
-function setToday(){
-
-const d = new Date();
-
-$("todayDate").innerText =
-d.toDateString();
-
-$("addDate").value =
-d.toISOString().split("T")[0];
-
+function todayDate(){
+  return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= SETTINGS ================= */
-
-async function loadWidgetSettings(){
-
-const ref = doc(
-db,
-"dashboardSettings",
-currentUser.uid
-);
-
-const snap = await getDoc(ref);
-
-if(snap.exists()){
-
-widgets = {
-...widgets,
-...snap.data()
-};
-
+function niceDate(){
+  return new Date().toDateString();
 }
 
-document
-.querySelectorAll("[data-widget]")
-.forEach(x=>{
-
-x.checked =
-widgets[x.dataset.widget];
-
-});
-
-}
-
-window.openCustomize = ()=>{
-$("customPopup").classList.add("show");
-};
-
-window.closeCustomize = ()=>{
-$("customPopup").classList.remove("show");
-};
-
-window.saveWidgets = async()=>{
-
-document
-.querySelectorAll("[data-widget]")
-.forEach(x=>{
-
-widgets[x.dataset.widget] =
-x.checked;
-
-});
-
-await setDoc(
-doc(db,"dashboardSettings",currentUser.uid),
-widgets
-);
-
-closeCustomize();
-toast("Saved ✅");
-
-renderDashboard();
-
-};
-
-/* ================= DASHBOARD ================= */
-
-async function renderDashboard(){
-
-let html = "";
-
-if(widgets.focus)
-html += await focusCard();
-
-if(widgets.countdown)
-html += countdownCard();
-
-if(widgets.quote)
-html += quoteCard();
-
-if(widgets.tasks)
-html += await tasksCard();
-
-if(widgets.goals)
-html += await goalsCard();
-
-if(widgets.mistakes)
-html += await mistakesCard();
-
-if(widgets.insights)
-html += await insightsCard();
-
-if(widgets.quest)
-html += await questCard();
-
-$("dashboardGrid").innerHTML = html;
-
-}
-
-/* ================= FOCUS ================= */
-
-async function focusCard(){
-
-const snap = await getDocs(
-collection(db,"tasks")
-);
-
-let total=0;
-let done=0;
-
-snap.forEach(d=>{
-
-let t=d.data();
-
-if(t.user===currentUser.uid){
-
-let today = new Date()
-.toLocaleDateString("en-CA");
-
-if(t.date===today){
-
-total++;
-
-if(t.completed) done++;
-
-}
-
-}
-
-});
-
-let per = total ? Math.round((done/total)*100) : 0;
-
-return `
-<div class="widget-card">
-<div class="card-head">
-<h3>📅 Today Focus</h3>
-</div>
-
-<div class="big-number">${per}%</div>
-
-<div class="progress">
-<div class="progress-fill"
-style="width:${per}%">
-</div>
-</div>
-
-<div class="small-muted">
-${done}/${total} tasks completed
-</div>
-
-</div>
-`;
-
-}
-
-/* ================= COUNTDOWN ================= */
-
-function countdownCard(){
-
-return `
-<div class="widget-card">
-<div class="card-head">
-<h3>⏳ Countdown</h3>
-</div>
-
-<div id="liveClock"
-class="big-number">--</div>
-
-<div class="small-muted">
-Day ends soon
-</div>
-</div>
-`;
-
-}
+/* ================= LIVE CLOCK ================= */
 
 function startClock(){
 
-setInterval(()=>{
+  setInterval(()=>{
 
-let box = $("liveClock");
-if(!box) return;
+    let now = new Date();
+    let end = new Date();
+    end.setHours(23,59,59,999);
 
-let now = new Date();
-let end = new Date();
+    let diff = end-now;
 
-end.setHours(23,59,59,999);
+    let h = Math.floor(diff/3600000);
+    let m = Math.floor((diff%3600000)/60000);
+    let s = Math.floor((diff%60000)/1000);
 
-let diff = end-now;
+    todayCenter.innerHTML = `
+      <h3>${niceDate()}</h3>
+      <p>⏳ ${h}h ${m}m ${s}s remaining today</p>
+    `;
 
-let h = Math.floor(diff/3600000);
-let m = Math.floor((diff%3600000)/60000);
-let s = Math.floor((diff%60000)/1000);
-
-box.innerText =
-`${h}h ${m}m ${s}s`;
-
-},1000);
-
-}
-
-/* ================= QUOTE ================= */
-
-function quoteCard(){
-
-const arr = [
-"Discipline beats mood.",
-"Small wins daily.",
-"Finish what matters.",
-"Focus creates power.",
-"Consistency wins."
-];
-
-let q =
-arr[new Date().getDate()%arr.length];
-
-return `
-<div class="widget-card">
-<div class="card-head">
-<h3>🧠 Focus Quote</h3>
-</div>
-
-<div class="item-title">
-${q}
-</div>
-
-</div>
-`;
+  },1000);
 
 }
 
 /* ================= TASKS ================= */
 
-async function tasksCard(){
+function loadTasks(){
 
-const snap = await getDocs(
-collection(db,"tasks")
-);
+  onSnapshot(collection(db,"tasks"), snap=>{
 
-let rows = "";
-let today = new Date()
-.toLocaleDateString("en-CA");
+    tasks=[];
 
-snap.forEach(d=>{
+    snap.forEach(d=>{
+      let x=d.data();
+      if(x.user===currentUser.uid){
+        tasks.push({id:d.id,...x});
+      }
+    });
 
-let t=d.data();
+    renderDashboard();
 
-if(
-t.user===currentUser.uid &&
-t.date===today
-){
-
-rows += `
-<div class="item-row">
-
-<div class="item-left">
-<div class="item-title">
-${t.completed ? "✔ " : ""}${t.text}
-</div>
-<div class="item-sub">
-${t.time || ""}
-</div>
-</div>
-
-<button class="icon-btn"
-onclick="toggleTask('${d.id}',${t.completed})">
-✔
-</button>
-
-</div>
-`;
+  });
 
 }
 
-});
-
-if(!rows)
-rows=`<div class="small-muted">No tasks</div>`;
-
-return `
-<div class="widget-card full-card">
-
-<div class="card-head">
-<h3>📋 Today Tasks</h3>
-</div>
-
-${rows}
-
-</div>
-`;
-
-}
-
-window.toggleTask = async(id,val)=>{
-
-await updateDoc(
-doc(db,"tasks",id),
-{
-completed:!val
-}
-);
-
-renderDashboard();
-
+window.toggleTask = async(id,done)=>{
+  await updateDoc(doc(db,"tasks",id),{
+    completed:!done
+  });
 };
+
+function todayTasks(){
+
+  return tasks
+  .filter(x=>x.date===todayDate())
+  .sort((a,b)=>{
+
+    if(a.completed!==b.completed){
+      return a.completed ? 1 : -1;
+    }
+
+    return (a.time||"").localeCompare(b.time||"");
+  });
+
+}
 
 /* ================= GOALS ================= */
 
-async function goalsCard(){
+function loadGoals(){
 
-const snap = await getDocs(
-collection(db,"goals")
-);
+  onSnapshot(collection(db,"goals"), snap=>{
 
-let rows="";
+    goals=[];
 
-snap.forEach(d=>{
+    snap.forEach(d=>{
+      let x=d.data();
+      if(x.user===currentUser.uid){
+        goals.push({id:d.id,...x});
+      }
+    });
 
-let g=d.data();
+    renderDashboard();
 
-if(g.user===currentUser.uid){
-
-let p=Math.round(
-(g.done/g.total)*100 || 0
-);
-
-rows += `
-<div class="item-row">
-<div class="item-left">
-
-<div class="item-title">
-${g.name}
-</div>
-
-<div class="progress">
-<div class="progress-fill"
-style="width:${p}%">
-</div>
-</div>
-
-</div>
-
-<div>${p}%</div>
-
-</div>
-`;
+  });
 
 }
 
-});
+/* ================= QUOTES ================= */
 
-if(!rows)
-rows=`<div class="small-muted">No goals</div>`;
+async function loadQuotes(){
 
-return `
-<div class="widget-card">
-<div class="card-head">
-<h3>🎯 Goals</h3>
-</div>
-${rows}
-</div>
-`;
+  const snap = await getDocs(collection(db,"quotes"));
+
+  quoteList=[];
+
+  snap.forEach(d=>{
+    quoteList.push(d.data().text);
+  });
+
+  renderDashboard();
+
+}
+
+function randomQuote(){
+
+  if(!quoteList.length){
+    return "Discipline today creates freedom tomorrow.";
+  }
+
+  return quoteList[Math.floor(Math.random()*quoteList.length)];
 
 }
 
 /* ================= COUNTS ================= */
 
-async function mistakesCard(){
-return countCard("mistakes","uid","❌ Mistakes");
+async function getCount(name){
+
+  const snap = await getDocs(collection(db,name));
+  let c=0;
+
+  snap.forEach(d=>{
+    if(d.data().uid===currentUser.uid) c++;
+  });
+
+  return c;
 }
 
-async function insightsCard(){
-return countCard("insights","uid","🧠 Insights");
-}
+/* ================= RENDER ================= */
 
-async function questCard(){
-return countCard("quest","uid","❓ Quest");
-}
+async function renderDashboard(){
 
-async function countCard(col,key,title){
+  dashboard.innerHTML="";
 
-const snap=await getDocs(
-collection(db,col)
-);
+  if(dashboardPrefs.focus){
 
-let c=0;
+    let t = todayTasks();
+    let done = t.filter(x=>x.completed).length;
+    let per = t.length ? Math.round(done*100/t.length) : 0;
 
-snap.forEach(d=>{
-if(d.data()[key]===currentUser.uid)
-c++;
-});
+    addCard(`
+      <div class="card-head"><h3>📅 Today Focus</h3></div>
+      <div class="widget-body">
+        <div class="big-number">${per}%</div>
+        <div class="progress"><div class="progress-fill" style="width:${per}%"></div></div>
+        <div class="small-muted">${done}/${t.length} tasks completed</div>
+      </div>
+    `,"compact");
+  }
 
-return `
-<div class="widget-card">
-<div class="card-head">
-<h3>${title}</h3>
-</div>
+  if(dashboardPrefs.countdown){
 
-<div class="big-number">${c}</div>
+    addCard(`
+      <div class="card-head"><h3>⏳ Countdown</h3></div>
+      <div class="widget-body">
+        <div class="small-muted">Live day timer shown above</div>
+      </div>
+    `,"compact");
+  }
 
-<div class="small-muted">
-Total records
-</div>
+  if(dashboardPrefs.quote){
 
-</div>
-`;
+    addCard(`
+      <div class="card-head">
+        <h3>💬 Quote</h3>
+        <button class="icon-btn" onclick="renderDashboard()">↻</button>
+      </div>
+      <div class="widget-body">
+        <div class="quote-box">${randomQuote()}</div>
+      </div>
+    `,"compact");
+  }
 
-}
+  if(dashboardPrefs.tasks){
 
-/* ================= ADD POPUP ================= */
+    let html="";
 
-window.openAddPopup=()=>{
-$("addPopup").classList.add("show");
-backToTypes();
-};
+    todayTasks().forEach(x=>{
 
-window.closeAddPopup=()=>{
-$("addPopup").classList.remove("show");
-};
+      html+=`
+      <div class="task-row ${x.completed?'task-done':''}">
+        <div class="task-left">
+          <div class="task-title">${x.text}</div>
+          <div class="task-time">${x.time || "00:00"}</div>
+        </div>
 
-window.selectAddType=(type)=>{
+        <button class="tick-btn"
+        onclick="toggleTask('${x.id}',${x.completed})">
+        ✔
+        </button>
+      </div>
+      `;
+    });
 
-addType=type;
+    addCard(`
+      <div class="card-head"><h3>📝 Today Tasks</h3></div>
+      <div class="widget-body">${html || "No task today"}</div>
+    `,"full-card");
+  }
 
-$("typeSelect").style.display="none";
-$("dynamicForm").style.display="block";
+  if(dashboardPrefs.goals){
 
-$("popupMainTitle").innerText =
-"➕ Add " +
-type.charAt(0).toUpperCase() +
-type.slice(1);
+    let html="";
 
-$("addTarget").style.display =
-type==="goal" ? "block":"none";
+    goals.forEach(g=>{
 
-$("addTime").style.display =
-type==="task" ? "block":"none";
+      let p = Math.round((g.done/g.total)*100 || 0);
 
-$("addPriority").style.display =
-type==="task" ? "block":"none";
+      html+=`
+      <div class="goal-row">
+        <div class="goal-title">${g.name}</div>
+        <div class="goal-bar">
+          <div class="goal-fill" style="width:${p}%"></div>
+        </div>
+      </div>
+      `;
+    });
 
-};
+    addCard(`
+      <div class="card-head"><h3>🎯 Goals</h3></div>
+      <div class="widget-body">${html || "No goals"}</div>
+    `,"compact");
+  }
 
-window.backToTypes=()=>{
+  if(dashboardPrefs.growth){
 
-$("typeSelect").style.display="block";
-$("dynamicForm").style.display="none";
+    let mistakes = await getCount("mistakes");
+    let insights = await getCount("insights");
+    let quest = await getCount("quest");
+    let smart = await getCount("smartmoves");
 
-$("popupMainTitle").innerText =
-"➕ Add New";
-
-};
-
-window.saveGlobalItem=async()=>{
-
-let text=$("addText").value.trim();
-
-if(!text) return toast("Enter text");
-
-let date=$("addDate").value;
-let time=$("addTime").value;
-let target=$("addTarget").value;
-
-if(addType==="task"){
-
-await addDoc(collection(db,"tasks"),{
-text,
-date,
-time:time || "00:00",
-priority:$("addPriority").value,
-completed:false,
-user:currentUser.uid
-});
-
-}
-
-if(addType==="goal"){
-
-await addDoc(collection(db,"goals"),{
-name:text,
-total:Number(target || 1),
-done:0,
-deadline:date,
-user:currentUser.uid
-});
-
-}
-
-if(addType==="mistake"){
-
-await addDoc(collection(db,"mistakes"),{
-text,
-date,
-uid:currentUser.uid,
-createdAt:Date.now()
-});
+    addCard(`
+      <div class="card-head"><h3>🌱 Growth Summary</h3></div>
+      <div class="widget-body">
+        <div class="summary-row"><span>Mistakes</span><b>${mistakes}</b></div>
+        <div class="summary-row"><span>Insights</span><b>${insights}</b></div>
+        <div class="summary-row"><span>Quest</span><b>${quest}</b></div>
+        <div class="summary-row"><span>Smart Moves</span><b>${smart}</b></div>
+      </div>
+    `,"compact");
+  }
 
 }
 
-if(addType==="insight"){
+/* ================= ADD CARD ================= */
 
-await addDoc(collection(db,"insights"),{
-text,
-date,
-uid:currentUser.uid,
-createdAt:Date.now()
-});
-
+function addCard(inner,cls=""){
+  dashboard.innerHTML += `
+    <div class="widget-card ${cls}">
+      ${inner}
+    </div>
+  `;
 }
 
-if(addType==="quest"){
+/* ================= CUSTOMIZE ================= */
 
-await addDoc(collection(db,"quest"),{
-text,
-date,
-uid:currentUser.uid,
-status:"Pending",
-createdAt:Date.now()
-});
+window.openCustomize = ()=>{
 
-}
+  customPopup.classList.add("show");
 
-$("addText").value="";
-
-closeAddPopup();
-toast("Saved ✅");
-
-renderDashboard();
+  chkFocus.checked = dashboardPrefs.focus;
+  chkTasks.checked = dashboardPrefs.tasks;
+  chkGoals.checked = dashboardPrefs.goals;
+  chkGrowth.checked = dashboardPrefs.growth;
+  chkCountdown.checked = dashboardPrefs.countdown;
+  chkQuote.checked = dashboardPrefs.quote;
 
 };
 
-/* ================= DAY MODES ================= */
-
-window.morningMode=()=>{
-toast("Win your day 🔥");
+window.closeCustomize = ()=>{
+  customPopup.classList.remove("show");
 };
 
-window.nightReview=()=>{
-$("reviewPopup").classList.add("show");
-};
+window.saveCustomize = ()=>{
 
-window.closeReview=()=>{
-$("reviewPopup").classList.remove("show");
-};
+  dashboardPrefs = {
+    focus:chkFocus.checked,
+    tasks:chkTasks.checked,
+    goals:chkGoals.checked,
+    growth:chkGrowth.checked,
+    countdown:chkCountdown.checked,
+    quote:chkQuote.checked
+  };
 
-window.submitReview=async()=>{
+  localStorage.setItem("dashboardPrefs",
+  JSON.stringify(dashboardPrefs));
 
-let m=$("reviewMistake").value.trim();
-let i=$("reviewInsight").value.trim();
-
-let date=new Date()
-.toISOString().split("T")[0];
-
-if(m){
-
-await addDoc(collection(db,"mistakes"),{
-text:m,
-date,
-uid:currentUser.uid,
-createdAt:Date.now()
-});
-
-}
-
-if(i){
-
-await addDoc(collection(db,"insights"),{
-text:i,
-date,
-uid:currentUser.uid,
-createdAt:Date.now()
-});
-
-}
-
-closeReview();
-toast("Review Saved 🌙");
-renderDashboard();
+  closeCustomize();
+  renderDashboard();
 
 };
 
-/* ================= TOAST ================= */
+/* ================= QUICK ADD ================= */
 
-function toast(msg){
+window.openAdd = ()=>{
+  addPopup.classList.add("show");
+};
 
-$("toast").innerText=msg;
-$("toast").classList.add("show");
+window.closeAdd = ()=>{
+  addPopup.classList.remove("show");
+};
 
-setTimeout(()=>{
-$("toast").classList.remove("show");
-},1800);
+window.selectType = (type)=>{
 
-}
+  addFields.innerHTML="";
+
+  if(type==="task"){
+    addFields.innerHTML=`
+      <input id="aText" placeholder="Task name">
+      <input type="date" id="aDate">
+      <input type="time" id="aTime">
+      <button class="main-btn" onclick="saveTask()">Save Task</button>
+    `;
+  }
+
+  if(type==="goal"){
+    addFields.innerHTML=`
+      <input id="aText" placeholder="Goal name">
+      <input id="aTotal" type="number" placeholder="Target">
+      <button class="main-btn" onclick="saveGoal()">Save Goal</button>
+    `;
+  }
+
+};
+
+window.saveTask = async()=>{
+
+  await addDoc(collection(db,"tasks"),{
+    text:aText.value,
+    date:aDate.value || todayDate(),
+    time:aTime.value || "00:00",
+    completed:false,
+    user:currentUser.uid
+  });
+
+  closeAdd();
+};
+
+window.saveGoal = async()=>{
+
+  await addDoc(collection(db,"goals"),{
+    name:aText.value,
+    total:Number(aTotal.value||1),
+    done:0,
+    user:currentUser.uid
+  });
+
+  closeAdd();
+};
 
 /* ================= LOGOUT ================= */
 
-$("logoutBtn").onclick=async()=>{
-
-await signOut(auth);
-location.href="index.html";
-
-};
+logoutBtn.addEventListener("click",async()=>{
+  await signOut(auth);
+  location.href="index.html";
+});
