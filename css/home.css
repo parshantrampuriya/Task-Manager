@@ -3,7 +3,7 @@ body{
 margin:0;
 font-family:'Segoe UI',sans-serif;
 background:
-linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.94)),
+linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
 url("../mahadev.png") center/cover no-repeat fixed;
 color:#fff;
 }
@@ -29,8 +29,7 @@ box-shadow:0 0 20px rgba(0,255,255,.08);
 margin-bottom:18px;
 }
 
-.nav-left,
-.nav-right{
+.nav-left,.nav-right{
 display:flex;
 align-items:center;
 gap:12px;
@@ -46,9 +45,9 @@ font-weight:700;
 /* ================= BUTTONS ================= */
 .menu-btn,
 .top-btn,
-.mini-btn,
 .main-btn,
-.danger-btn{
+.danger-btn,
+.icon-btn{
 border:none;
 cursor:pointer;
 font-weight:700;
@@ -65,15 +64,10 @@ color:#000;
 }
 
 .top-btn,
-.mini-btn,
 .main-btn{
 padding:12px 16px;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 color:#000;
-}
-
-.add-btn{
-font-size:16px;
 }
 
 .danger-btn{
@@ -82,48 +76,50 @@ background:#ff4d4d;
 color:#fff;
 }
 
+.icon-btn{
+width:38px;
+height:38px;
+font-size:20px;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+color:#000;
+}
+
 .menu-btn:hover,
 .top-btn:hover,
-.mini-btn:hover,
 .main-btn:hover,
-.danger-btn:hover{
+.danger-btn:hover,
+.icon-btn:hover{
 transform:translateY(-2px) scale(1.03);
 }
 
-/* ================= TODAY BAR ================= */
+/* ================= DATE CENTER ================= */
 .today-bar{
 display:flex;
-justify-content:space-between;
+justify-content:center;
 align-items:center;
-gap:15px;
-flex-wrap:wrap;
-padding:18px;
+text-align:center;
+padding:20px;
 border-radius:18px;
 background:rgba(255,255,255,.04);
 margin-bottom:18px;
 }
 
-.today-bar h3{
-margin:0 0 6px;
-font-size:22px;
+.center-top h3{
+margin:0;
+font-size:26px;
 color:#00eaff;
 }
 
-.today-bar p{
-margin:0;
+.center-top p{
+margin:8px 0 0;
+font-size:16px;
 color:#cfd8dc;
-}
-
-.today-actions{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
 }
 
 /* ================= GRID ================= */
 .dashboard-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
 gap:16px;
 align-items:start;
 }
@@ -134,36 +130,27 @@ background:rgba(255,255,255,.05);
 border:1px solid rgba(255,255,255,.08);
 border-radius:18px;
 padding:18px;
-box-shadow:0 0 18px rgba(0,255,255,.05);
-transition:.22s;
 display:flex;
 flex-direction:column;
-min-height:240px;
-max-height:380px;
+max-height:420px;
 overflow:hidden;
 }
 
-.widget-card:hover{
-transform:translateY(-4px);
-box-shadow:0 0 22px rgba(0,255,255,.12);
+.compact{
+max-height:240px;
 }
 
 .full-card{
 grid-column:span 2;
-max-height:430px;
+max-height:520px;
 }
 
-.compact{
-max-height:260px;
+.widget-card:hover{
+box-shadow:0 0 20px rgba(0,255,255,.12);
+transform:translateY(-3px);
 }
 
-@media(max-width:900px){
-.full-card{
-grid-column:span 1;
-}
-}
-
-/* ================= CARD HEAD ================= */
+/* ================= HEAD ================= */
 .card-head{
 display:flex;
 justify-content:space-between;
@@ -175,127 +162,94 @@ flex-shrink:0;
 
 .card-head h3{
 margin:0;
-font-size:22px;
+font-size:24px;
 color:#00eaff;
 }
 
-.card-tools{
-display:flex;
-gap:8px;
-}
-
-.icon-btn{
-width:38px;
-height:38px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-font-size:20px;
-font-weight:700;
-background:linear-gradient(45deg,#00cfff,#00ffcc);
-color:#000;
-}
-
-/* ================= SCROLL BODY ================= */
+/* ================= BODY SCROLL ================= */
 .widget-body{
 flex:1;
 overflow-y:auto;
-overflow-x:hidden;
 padding-right:6px;
-margin-top:4px;
-scroll-behavior:smooth;
-scrollbar-width:thin;
-scrollbar-color:#00eaff rgba(255,255,255,.05);
 }
 
 .widget-body::-webkit-scrollbar{
-width:8px;
-}
-
-.widget-body::-webkit-scrollbar-track{
-background:rgba(255,255,255,.03);
-border-radius:10px;
+width:6px;
 }
 
 .widget-body::-webkit-scrollbar-thumb{
-background:linear-gradient(45deg,#00cfff,#00ffcc);
+background:#00eaff;
 border-radius:10px;
 }
 
-/* ================= ITEM ROW ================= */
-.item-row{
+.widget-body::-webkit-scrollbar-track{
+background:rgba(255,255,255,.04);
+}
+
+/* ================= TASKS ================= */
+.task-row{
 display:flex;
 justify-content:space-between;
 align-items:flex-start;
-gap:12px;
-padding:10px 0;
+gap:10px;
+padding:12px 0;
 border-bottom:1px solid rgba(255,255,255,.05);
 }
 
-.item-row:last-child{
+.task-row:last-child{
 border-bottom:none;
 }
 
-.item-left{
+.task-left{
 flex:1;
 min-width:0;
 }
 
-.item-title{
+.task-title{
 font-size:15px;
 font-weight:600;
+line-height:1.4;
 white-space:normal;
 word-break:break-word;
-line-height:1.45;
-padding-right:8px;
 }
 
-.item-sub{
+.task-time{
 font-size:12px;
-color:#aab7c0;
-margin-top:4px;
+color:#9fb7c2;
+margin-top:5px;
 }
 
-/* completed task stroke */
-.item-title.done,
-.completed,
-.done .item-title,
-.done span{
-text-decoration:line-through !important;
+.task-done .task-title{
+text-decoration:line-through;
 opacity:.55;
 }
 
-/* actions */
-.item-actions{
-display:flex;
-gap:8px;
+.tick-btn{
+width:44px;
+height:44px;
+border:none;
+border-radius:14px;
+cursor:pointer;
+font-size:20px;
+font-weight:700;
+background:linear-gradient(45deg,#00ffcc,#00cfff);
+color:#000;
 flex-shrink:0;
 }
 
-.item-actions button{
-width:40px;
-height:40px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-font-weight:700;
-}
-
-/* ================= BIG NUMBERS ================= */
+/* ================= NUMBERS ================= */
 .big-number{
-font-size:42px;
+font-size:52px;
 font-weight:800;
 color:#00ffcc;
-line-height:1.1;
-margin-top:10px;
+line-height:1;
+margin-bottom:10px;
 }
 
-/* ================= PROGRESS ================= */
 .progress{
 height:10px;
 background:#111;
 border-radius:20px;
-margin-top:8px;
 overflow:hidden;
 }
 
@@ -304,14 +258,60 @@ height:100%;
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 }
 
-/* ================= TEXT ================= */
 .small-muted{
 font-size:13px;
 color:#b0bec5;
 margin-top:8px;
 }
 
-/* ================= POPUPS ================= */
+/* ================= GOALS ================= */
+.goal-row{
+padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.goal-row:last-child{
+border-bottom:none;
+}
+
+.goal-title{
+font-weight:700;
+margin-bottom:6px;
+}
+
+.goal-bar{
+height:10px;
+background:#111;
+border-radius:20px;
+overflow:hidden;
+}
+
+.goal-fill{
+height:100%;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+}
+
+/* ================= GROWTH ================= */
+.summary-row{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.summary-row:last-child{
+border-bottom:none;
+}
+
+/* ================= QUOTE ================= */
+.quote-box{
+font-size:18px;
+line-height:1.7;
+color:#eafcff;
+font-style:italic;
+}
+
+/* ================= POPUP ================= */
 .popup-wrap{
 position:fixed;
 inset:0;
@@ -348,7 +348,6 @@ width:520px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-gap:10px;
 margin-bottom:14px;
 }
 
@@ -359,35 +358,17 @@ color:#00eaff;
 }
 
 .close-x{
-width:40px;
-height:40px;
+width:42px;
+height:42px;
 border:none;
 border-radius:12px;
 background:#ff4d4d;
 color:#fff;
-font-size:18px;
 cursor:pointer;
+font-size:18px;
 }
 
-/* ================= INPUTS ================= */
-input,
-select{
-width:100%;
-padding:13px;
-margin-bottom:12px;
-border:none;
-outline:none;
-border-radius:12px;
-background:rgba(255,255,255,.07);
-color:#fff;
-box-sizing:border-box;
-}
-
-option{
-color:#000;
-}
-
-/* ================= TYPE GRID ================= */
+/* ================= GRID ================= */
 .type-grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
@@ -401,11 +382,11 @@ background:rgba(255,255,255,.05);
 text-align:center;
 cursor:pointer;
 font-size:32px;
-transition:.22s;
+font-weight:700;
 display:flex;
 flex-direction:column;
 gap:8px;
-font-weight:700;
+transition:.22s;
 }
 
 .type-card span{
@@ -413,33 +394,31 @@ font-size:14px;
 }
 
 .type-card:hover{
-transform:translateY(-4px);
 background:#00cfff;
 color:#000;
+transform:translateY(-3px);
 }
 
-/* ================= CHECK GRID ================= */
 .check-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:10px;
-margin:15px 0;
+gap:12px;
+margin:16px 0;
 }
 
 .check-grid label{
-padding:10px;
-border-radius:12px;
+padding:12px;
 background:rgba(255,255,255,.05);
+border-radius:12px;
 display:flex;
 gap:10px;
 align-items:center;
 }
 
-/* ================= POPUP ACTIONS ================= */
+/* ================= ACTIONS ================= */
 .popup-actions{
 display:flex;
 gap:10px;
-margin-top:10px;
 }
 
 .popup-actions button{
@@ -458,7 +437,6 @@ background:#00ffcc;
 color:#000;
 font-weight:700;
 opacity:0;
-pointer-events:none;
 transition:.25s;
 z-index:10000;
 }
@@ -468,33 +446,32 @@ opacity:1;
 }
 
 /* ================= MOBILE ================= */
+@media(max-width:900px){
+
+.full-card{
+grid-column:span 1;
+max-height:420px;
+}
+
+}
+
 @media(max-width:768px){
+
+.navbar{
+flex-direction:column;
+align-items:flex-start;
+}
 
 .navbar h2{
 font-size:22px;
-}
-
-.navbar,
-.today-bar{
-padding:14px;
-}
-
-.popup-actions{
-flex-direction:column;
 }
 
 .check-grid{
 grid-template-columns:1fr;
 }
 
-.widget-card,
-.full-card{
-max-height:340px;
-min-height:220px;
-}
-
-.item-title{
-font-size:14px;
+.popup-actions{
+flex-direction:column;
 }
 
 }
