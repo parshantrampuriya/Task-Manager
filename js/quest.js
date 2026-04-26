@@ -161,20 +161,26 @@ html+=`
 </div>
 
 <div class="q-actions">
+<button title="Google Search"
+onclick="googleSearch('${escapeText(x.text)}')">🔍</button>
 
-<button onclick="googleSearch('${escapeText(x.text)}')">🔎</button>
+<button title="YouTube Search"
+onclick="youtubeSearch('${escapeText(x.text)}')">▶️</button>
 
-<button onclick="youtubeSearch('${escapeText(x.text)}')">▶</button>
+<button title="Ask ChatGPT"
+onclick="chatAsk('${escapeText(x.text)}')">🤖</button>
 
-<button onclick="chatAsk('${escapeText(x.text)}')">🤖</button>
+<button title="Convert To Insight"
+onclick="toInsight('${escapeText(x.text)}')">🧠</button>
 
-${
-viewUid===currentUser.uid
-?`
-<button onclick="toInsight('${escapeText(x.text)}')">🧠</button>
-<button onclick="toTask('${escapeText(x.text)}')">📋</button>
-<button onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}','${x.status}')">✏</button>
-<button onclick="openDelete('${x.id}')">❌</button>
+<button title="Convert To Task"
+onclick="toTask('${escapeText(x.text)}')">📋</button>
+
+<button title="Edit"
+onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}','${x.status}')">✏️</button>
+
+<button title="Delete"
+onclick="openDelete('${x.id}')">🗑️</button>
 `
 :""
 }
