@@ -2,6 +2,7 @@
 padding:20px;
 }
 
+/* ================= BOX ================= */
 .glass-box{
 background:rgba(0,0,0,.55);
 padding:18px;
@@ -15,6 +16,7 @@ margin:0 0 15px;
 color:#00eaff;
 }
 
+/* ================= FORM ================= */
 input,select{
 width:100%;
 padding:12px;
@@ -24,21 +26,38 @@ border-radius:10px;
 background:rgba(255,255,255,.08);
 color:#fff;
 box-sizing:border-box;
+outline:none;
+}
+
+input:focus,
+select:focus{
+box-shadow:0 0 0 2px rgba(0,255,255,.25);
 }
 
 option{
 color:#000;
 }
 
-.main-btn,.small-btn,.danger-btn{
+/* ================= BUTTONS ================= */
+.main-btn,
+.small-btn,
+.danger-btn{
 border:none;
 padding:10px 16px;
 border-radius:10px;
 cursor:pointer;
 font-weight:bold;
+transition:.22s;
 }
 
-.main-btn,.small-btn{
+.main-btn:hover,
+.small-btn:hover,
+.danger-btn:hover{
+transform:translateY(-2px);
+}
+
+.main-btn,
+.small-btn{
 background:linear-gradient(45deg,#00cfff,#00ffcc);
 color:#000;
 }
@@ -48,7 +67,9 @@ background:#ff4d4d;
 color:#fff;
 }
 
-.friend-card,.quest-card{
+/* ================= FRIENDS ================= */
+.friend-card,
+.quest-card{
 padding:14px;
 border-radius:12px;
 background:rgba(255,255,255,.05);
@@ -57,13 +78,16 @@ margin-bottom:10px;
 
 .friend-card{
 cursor:pointer;
+transition:.22s;
 }
 
 .friend-card:hover{
 background:#00cfff;
 color:#000;
+transform:translateY(-2px);
 }
 
+/* ================= DATE ================= */
 .date-head{
 margin:18px 0 10px;
 font-size:18px;
@@ -71,46 +95,49 @@ font-weight:bold;
 color:#00ffcc;
 }
 
+/* ================= QUEST CARD ================= */
 .quest-card{
 display:flex;
 justify-content:space-between;
 gap:15px;
 align-items:flex-start;
+border:1px solid rgba(255,255,255,.04);
 }
 
 .q-left{
 flex:1;
+min-width:0;
 }
 
 .q-text{
 font-size:16px;
 font-weight:500;
 word-break:break-word;
+line-height:1.5;
 }
 
+/* ================= TAGS ================= */
 .tag{
 display:inline-block;
-padding:4px 10px;
+padding:6px 12px;
 border-radius:20px;
 font-size:12px;
-margin-top:8px;
-font-weight:bold;
+margin-top:10px;
+font-weight:700;
+letter-spacing:.3px;
 }
 
-.pending{background:#ff4d4d;}
-.searching{background:#ffc107;color:#000;}
-.learned{background:#00ffcc;color:#000;}
-.closed{background:#777;}
-.asked{background:#4da6ff;}
-
-.q-actions{
-display:flex;
-flex-wrap:wrap;
-gap:6px;
-justify-content:flex-end;
+.pending{
+background:#ff4d4d;
+color:#fff;
 }
 
-/* ACTION BUTTON ROW */
+.solved{
+background:#00ffcc;
+color:#000;
+}
+
+/* ================= ACTION BUTTONS ================= */
 .q-actions{
 display:flex;
 flex-wrap:wrap;
@@ -119,7 +146,6 @@ justify-content:flex-end;
 align-items:center;
 }
 
-/* COMMON BUTTON STYLE */
 .q-actions button{
 width:42px;
 height:42px;
@@ -135,53 +161,53 @@ transition:.22s;
 box-shadow:0 4px 10px rgba(0,0,0,.25);
 }
 
-/* HOVER EFFECT */
 .q-actions button:hover{
 transform:translateY(-3px) scale(1.08);
 }
 
-/* GOOGLE */
+/* Google */
 .q-actions button:nth-child(1){
 background:linear-gradient(45deg,#ffffff,#d9f1ff);
 color:#111;
 }
 
-/* YOUTUBE */
+/* YouTube */
 .q-actions button:nth-child(2){
 background:linear-gradient(45deg,#ff2d2d,#ff6b6b);
 color:#fff;
 }
 
-/* CHATGPT */
+/* ChatGPT */
 .q-actions button:nth-child(3){
 background:linear-gradient(45deg,#00ffcc,#00b894);
 color:#000;
 }
 
-/* TO INSIGHT */
+/* To Insight */
 .q-actions button:nth-child(4){
 background:linear-gradient(45deg,#8e44ff,#b388ff);
 color:#fff;
 }
 
-/* TO TASK */
+/* To Task */
 .q-actions button:nth-child(5){
 background:linear-gradient(45deg,#00cfff,#4facfe);
 color:#000;
 }
 
-/* EDIT */
+/* Edit */
 .q-actions button:nth-child(6){
 background:linear-gradient(45deg,#ffc107,#ffdb58);
 color:#000;
 }
 
-/* DELETE */
+/* Delete */
 .q-actions button:nth-child(7){
 background:linear-gradient(45deg,#ff4d4d,#ff7676);
 color:#fff;
 }
 
+/* ================= POPUPS ================= */
 .popup-wrap{
 position:fixed;
 inset:0;
@@ -206,6 +232,12 @@ max-width:95%;
 background:#111;
 padding:22px;
 border-radius:16px;
+box-shadow:0 0 25px rgba(0,255,255,.14);
+}
+
+.popup-box h3{
+margin-top:0;
+color:#00eaff;
 }
 
 .popup-actions{
@@ -218,6 +250,7 @@ margin-top:15px;
 flex:1;
 }
 
+/* ================= TOAST ================= */
 #toast{
 position:fixed;
 bottom:25px;
@@ -231,12 +264,14 @@ border-radius:10px;
 opacity:0;
 transition:.25s;
 z-index:99999;
+pointer-events:none;
 }
 
 #toast.show{
 opacity:1;
 }
 
+/* ================= STATS ================= */
 .stats-box{
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -248,13 +283,22 @@ background:rgba(255,255,255,.05);
 padding:18px;
 border-radius:14px;
 text-align:center;
+border:1px solid rgba(255,255,255,.04);
 }
 
 .stat-card h3{
-font-size:28px;
+font-size:30px;
 margin:0;
+color:#00ffcc;
 }
 
+.stat-card p{
+margin:8px 0 0;
+color:#cfe7ef;
+font-size:14px;
+}
+
+/* ================= MOBILE ================= */
 @media(max-width:768px){
 
 .quest-card{
@@ -268,6 +312,11 @@ justify-content:flex-start;
 
 .stats-box{
 grid-template-columns:1fr;
+}
+
+.q-actions button{
+width:40px;
+height:40px;
 }
 
 }
