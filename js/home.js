@@ -1,4 +1,4 @@
-/* ================= HOME JS FINAL UPGRADED ================= */
+/* ================= ULTIMATE HOME.JS FINAL ================= */
 
 import { auth, db } from "./firebase.js";
 
@@ -8,324 +8,232 @@ signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
+collection,
 doc,
 getDoc,
-collection,
 getDocs,
 addDoc,
 updateDoc,
+deleteDoc,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= ELEMENTS ================= */
+/* ================= GLOBAL ================= */
 
-const dashboard = document.getElementById("dashboard");
-const username = document.getElementById("username");
-const todayCenter = document.getElementById("todayCenter");
-const logoutBtn = document.getElementById("logoutBtn");
-
-const customPopup = document.getElementById("customPopup");
-
-const chkFocus = document.getElementById("chkFocus");
-const chkTasks = document.getElementById("chkTasks");
-const chkGoals = document.getElementById("chkGoals");
-const chkGrowth = document.getElementById("chkGrowth");
-const chkCountdown = document.getElementById("chkCountdown");
-const chkQuote = document.getElementById("chkQuote");
-
-/* ================= DATA ================= */
-
-let currentUser = null;
-let tasks = [];
-let goals = [];
-let quotes = [];
-
-/* ================= STORAGE ================= */
-
-let prefs = JSON.parse(
-localStorage.getItem("dashboardPrefs")
-) || {
-focus:true,
-tasks:true,
-goals:true,
-growth:true,
-countdown:true,
-quote:true
+let uid=null;
+let tasks=[];
+let goals=[];
+let stats={
+mistakes:0,
+insights:0,
+quest:0,
+smart:0
 };
 
-let widgetSize = JSON.parse(
-localStorage.getItem("widgetSize")
-) || {};
-
-let widgetOrder = JSON.parse(
-localStorage.getItem("widgetOrder")
-) || [
-"focus",
-"countdown",
-"quote",
-"tasks",
-"goals",
-"growth"
+let layout=
+JSON.parse(localStorage.getItem("dashLayout")) || [
+"focus","tasks","quote","goals","growth"
 ];
 
 /* ================= AUTH ================= */
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser = user;
+uid=user.uid;
 
-let snap = await getDoc(
-doc(db,"users",user.uid)
-);
+const u=await getDoc(doc(db,"users",uid));
 
-if(snap.exists()){
-username.innerText =
-"👤 Welcome " +
-(snap.data().name || "User");
+if(u.exists()){
+username.innerText=
+"Welcome "+(u.data().name || "");
 }
 
-loadTasks();
-loadGoals();
-loadQuotes();
-startClock();
+loadLive();
+setTopDate();
+startTimer();
 
 });
 
-/* ================= DATE ================= */
+/* ================= TOP DATE ================= */
 
-function todayDate(){
-return new Date()
-.toLocaleDateString("en-CA");
+function setTopDate(){
+
+const d=new Date();
+
+todayDate.innerText=
+d.toDateString();
+
 }
 
-function niceDate(){
-return new Date()
-.toDateString();
-}
-
-/* ================= CLOCK ================= */
-
-function startClock(){
+function startTimer(){
 
 setInterval(()=>{
 
-let now = new Date();
+let now=new Date();
 
-let end = new Date();
+let end=new Date();
 end.setHours(23,59,59,999);
 
-let diff = end-now;
+let diff=end-now;
 
 let h=Math.floor(diff/3600000);
 let m=Math.floor((diff%3600000)/60000);
 let s=Math.floor((diff%60000)/1000);
 
-todayCenter.innerHTML=`
-<h3>${niceDate()}</h3>
-<p>⏳ ${h}h ${m}m ${s}s remaining today</p>
-`;
+countdownText.innerText=
+`⏳ ${h}h ${m}m ${s}s remaining today`;
 
 },1000);
 
 }
 
-/* ================= TASKS ================= */
+/* ================= LOAD DATA ================= */
 
-function loadTasks(){
+function loadLive(){
 
 onSnapshot(collection(db,"tasks"),snap=>{
 
 tasks=[];
 
 snap.forEach(d=>{
-
 let x=d.data();
-
-if(x.user===currentUser.uid){
-tasks.push({
-id:d.id,
-...x
-});
-}
-
+if(x.user===uid)
+tasks.push({id:d.id,...x});
 });
 
 renderDashboard();
 
 });
-
-}
-
-window.toggleTask = async(id,done)=>{
-
-await updateDoc(doc(db,"tasks",id),{
-completed:!done
-});
-
-};
-
-function todayTasks(){
-
-return tasks
-.filter(x=>x.date===todayDate())
-.sort((a,b)=>{
-
-if(a.completed!==b.completed){
-return a.completed ? 1 : -1;
-}
-
-return (a.time||"")
-.localeCompare(b.time||"");
-
-});
-
-}
-
-/* ================= GOALS ================= */
-
-function loadGoals(){
 
 onSnapshot(collection(db,"goals"),snap=>{
 
 goals=[];
 
 snap.forEach(d=>{
-
 let x=d.data();
-
-if(x.user===currentUser.uid){
-goals.push({
-id:d.id,
-...x
-});
-}
-
+if(x.user===uid)
+goals.push({id:d.id,...x});
 });
 
 renderDashboard();
 
 });
 
+loadCounts();
+
 }
 
-/* ================= QUOTES ================= */
+async function loadCounts(){
 
-async function loadQuotes(){
+stats.mistakes=
+await getCount("mistakes");
 
-let snap = await getDocs(
-collection(db,"quotes")
-);
+stats.insights=
+await getCount("insights");
 
-quotes=[];
+stats.quest=
+await getCount("quest");
 
-snap.forEach(d=>{
-quotes.push(
-d.data().text
-);
-});
+stats.smart=
+await getCount("smartmoves");
 
 renderDashboard();
 
 }
 
-function randomQuote(){
+async function getCount(name){
 
-if(!quotes.length){
-return "Discipline today creates freedom tomorrow.";
-}
-
-return quotes[
-Math.floor(
-Math.random()*quotes.length
-)
-];
-
-}
-
-/* ================= COUNTS ================= */
-
-async function getCount(col){
-
-let snap = await getDocs(
-collection(db,col)
-);
+const snap=await getDocs(collection(db,name));
 
 let c=0;
 
 snap.forEach(d=>{
-
-let x=d.data();
-
-if(x.uid===currentUser.uid)
-c++;
-
+if(d.data().uid===uid) c++;
 });
 
 return c;
 
 }
 
-/* ================= MAIN RENDER ================= */
+/* ================= RENDER ================= */
 
-async function renderDashboard(){
+function renderDashboard(){
 
-dashboard.innerHTML="";
+dashboardGrid.innerHTML="";
 
-for(let key of widgetOrder){
+layout.forEach(type=>{
 
-if(!prefs[key]) continue;
+if(type==="focus")
+dashboardGrid.appendChild(focusCard());
 
-if(key==="focus"){
-renderFocus();
-}
+if(type==="tasks")
+dashboardGrid.appendChild(taskCard());
 
-if(key==="countdown"){
-renderCountdown();
-}
+if(type==="quote")
+dashboardGrid.appendChild(quoteCard());
 
-if(key==="quote"){
-renderQuote();
-}
+if(type==="goals")
+dashboardGrid.appendChild(goalCard());
 
-if(key==="tasks"){
-renderTasks();
-}
+if(type==="growth")
+dashboardGrid.appendChild(growthCard());
 
-if(key==="goals"){
-renderGoals();
-}
+});
 
-if(key==="growth"){
-await renderGrowth();
-}
+enableDrag();
 
 }
 
-}
+/* ================= CARD BUILDER ================= */
 
-/* ================= WIDGETS ================= */
+function cardBase(title,id,wide=false){
 
-function renderFocus(){
+let div=document.createElement("div");
 
-let t=todayTasks();
+div.className=
+"widget-card "+(wide?"full-card":"compact");
 
-let done=t.filter(x=>x.completed).length;
+div.draggable=true;
+div.dataset.id=id;
 
-let p=t.length
-? Math.round(done*100/t.length)
-:0;
+div.innerHTML=`
 
-addCard("focus",`
-<div class="card-head">
-<h3>📊 Today Focus</h3>
+<div class="card-head drag-handle">
+<h3>${title}</h3>
 </div>
 
-<div class="widget-body">
+<div class="widget-body" id="${id}Body"></div>
+
+<div class="resize-handle"></div>
+
+`;
+
+enableResize(div);
+
+return div;
+
+}
+
+/* ================= FOCUS ================= */
+
+function focusCard(){
+
+let done=
+tasks.filter(x=>x.completed).length;
+
+let total=tasks.length;
+
+let p=total?
+Math.round(done*100/total):0;
+
+let c=cardBase("📊 Today Focus","focus");
+
+c.querySelector("#focusBody").innerHTML=`
 
 <div class="big-number">${p}%</div>
 
@@ -335,62 +243,44 @@ style="width:${p}%"></div>
 </div>
 
 <div class="small-muted">
-${done}/${t.length} completed
+${done}/${total} completed
 </div>
 
-</div>
-`,"compact");
+`;
+
+return c;
 
 }
 
-function renderCountdown(){
+/* ================= TASKS ================= */
 
-addCard("countdown",`
-<div class="card-head">
-<h3>⏳ Countdown</h3>
-</div>
+function taskCard(){
 
-<div class="widget-body">
-<div class="small-muted">
-Live timer shown above
-</div>
-</div>
-`,"compact");
+let c=cardBase("📋 Today Tasks","tasks",true);
 
-}
+let today=
+new Date().toLocaleDateString("en-CA");
 
-function renderQuote(){
+let arr=
+tasks.filter(x=>x.date===today);
 
-addCard("quote",`
-<div class="card-head">
+arr.sort((a,b)=>{
 
-<h3>💬 Quote</h3>
+if(a.completed!==b.completed)
+return a.completed?1:-1;
 
-<button class="icon-btn"
-onclick="renderDashboard()">
-↻
-</button>
+return (a.time||"")
+.localeCompare(b.time||"");
 
-</div>
-
-<div class="widget-body">
-<div class="quote-box">
-${randomQuote()}
-</div>
-</div>
-`,"compact");
-
-}
-
-function renderTasks(){
+});
 
 let html="";
 
-todayTasks().forEach(x=>{
+arr.forEach(x=>{
 
 html+=`
-<div class="task-row
-${x.completed?'task-done':''}">
+
+<div class="task-row ${x.completed?'task-done':''}">
 
 <div class="task-left">
 
@@ -410,38 +300,63 @@ onclick="toggleTask('${x.id}',${x.completed})">
 </button>
 
 </div>
+
 `;
 
 });
 
-addCard("tasks",`
-<div class="card-head">
-<h3>📋 Today Tasks</h3>
-</div>
+c.querySelector("#tasksBody").innerHTML=
+html || "No task";
 
-<div class="widget-body">
-${html || "No task today"}
-</div>
-`,"full-card");
+return c;
 
 }
 
-function renderGoals(){
+/* ================= QUOTE ================= */
+
+function quoteCard(){
+
+let q=[
+"Discipline today creates freedom tomorrow.",
+"Small progress daily beats excuses.",
+"Win the morning win the day.",
+"Consistency creates success.",
+"Action cures fear."
+];
+
+let random=
+q[Math.floor(Math.random()*q.length)];
+
+let c=cardBase("💬 Quote","quote");
+
+c.querySelector("#quoteBody").innerHTML=`
+
+<div class="quote-box">
+${random}
+</div>
+
+`;
+
+return c;
+
+}
+
+/* ================= GOALS ================= */
+
+function goalCard(){
+
+let c=cardBase("🎯 Goals","goals");
 
 let html="";
 
 goals.forEach(g=>{
 
-let done=Number(g.done||0);
-let total=Number(g.total||1);
-
 let p=Math.round(
-(done/total)*100
+((g.done||0)/(g.total||1))*100
 );
 
-if(p>100) p=100;
-
 html+=`
+
 <div class="goal-row">
 
 <div class="goal-title">
@@ -454,226 +369,254 @@ style="width:${p}%"></div>
 </div>
 
 </div>
+
 `;
 
 });
 
-addCard("goals",`
-<div class="card-head">
-<h3>🎯 Goals</h3>
-</div>
+c.querySelector("#goalsBody").innerHTML=
+html || "No goals";
 
-<div class="widget-body">
-${html || "No goals"}
-</div>
-`,"compact");
+return c;
 
 }
 
-async function renderGrowth(){
+/* ================= GROWTH ================= */
 
-let mistakes=
-await getCount("mistakes");
+function growthCard(){
 
-let insights=
-await getCount("insights");
+let c=cardBase("🌱 Growth Summary","growth");
 
-let quest=
-await getCount("quest");
-
-let smart=
-await getCount("smartmoves");
-
-addCard("growth",`
-<div class="card-head">
-<h3>🌱 Growth Summary</h3>
-</div>
-
-<div class="widget-body">
+c.querySelector("#growthBody").innerHTML=`
 
 <div class="summary-row">
 <span>Mistakes</span>
-<b>${mistakes}</b>
+<b>${stats.mistakes}</b>
 </div>
 
 <div class="summary-row">
 <span>Insights</span>
-<b>${insights}</b>
+<b>${stats.insights}</b>
 </div>
 
 <div class="summary-row">
 <span>Quest</span>
-<b>${quest}</b>
+<b>${stats.quest}</b>
 </div>
 
 <div class="summary-row">
 <span>Smart Moves</span>
-<b>${smart}</b>
+<b>${stats.smart}</b>
 </div>
 
-</div>
-`,"compact");
-
-}
-
-/* ================= CARD MAKER ================= */
-
-function addCard(key,inner,defaultSize){
-
-let size =
-widgetSize[key] ||
-defaultSize;
-
-dashboard.innerHTML+=`
-
-<div class="widget-card ${size}">
-
-${inner}
-
-<div class="popup-actions"
-style="margin-top:10px;">
-
-<button class="icon-btn"
-onclick="resizeWidget('${key}','compact')">
-S
-</button>
-
-<button class="icon-btn"
-onclick="resizeWidget('${key}','')">
-M
-</button>
-
-<button class="icon-btn"
-onclick="resizeWidget('${key}','full-card')">
-L
-</button>
-
-<button class="icon-btn"
-onclick="moveUp('${key}')">
-↑
-</button>
-
-<button class="icon-btn"
-onclick="moveDown('${key}')">
-↓
-</button>
-
-</div>
-
-</div>
 `;
 
+return c;
+
 }
 
-/* ================= SIZE ================= */
+/* ================= TASK TOGGLE ================= */
 
-window.resizeWidget=(key,size)=>{
+window.toggleTask=async(id,v)=>{
 
-widgetSize[key]=size;
+await updateDoc(doc(db,"tasks",id),{
+completed:!v
+});
 
-localStorage.setItem(
-"widgetSize",
-JSON.stringify(widgetSize)
+};
+
+/* ================= DRAG ORDER ================= */
+
+function enableDrag(){
+
+let drag=null;
+
+document.querySelectorAll(".widget-card")
+.forEach(card=>{
+
+card.addEventListener("dragstart",()=>{
+drag=card;
+});
+
+card.addEventListener("dragover",e=>{
+e.preventDefault();
+});
+
+card.addEventListener("drop",()=>{
+
+if(drag===card) return;
+
+dashboardGrid.insertBefore(
+drag,
+card
 );
 
-renderDashboard();
-
-};
-
-/* ================= ORDER ================= */
-
-window.moveUp=(key)=>{
-
-let i=widgetOrder.indexOf(key);
-
-if(i>0){
-
-[widgetOrder[i],widgetOrder[i-1]]
-=
-[widgetOrder[i-1],widgetOrder[i]];
-
 saveOrder();
 
-}
+});
 
-};
-
-window.moveDown=(key)=>{
-
-let i=widgetOrder.indexOf(key);
-
-if(i<widgetOrder.length-1){
-
-[widgetOrder[i],widgetOrder[i+1]]
-=
-[widgetOrder[i+1],widgetOrder[i]];
-
-saveOrder();
+});
 
 }
-
-};
 
 function saveOrder(){
 
-localStorage.setItem(
-"widgetOrder",
-JSON.stringify(widgetOrder)
-);
+layout=[];
 
-renderDashboard();
+document.querySelectorAll(".widget-card")
+.forEach(x=>{
+layout.push(x.dataset.id);
+});
+
+localStorage.setItem(
+"dashLayout",
+JSON.stringify(layout)
+);
 
 }
 
-/* ================= CUSTOMIZE ================= */
+/* ================= RESIZE ================= */
 
-window.openCustomize=()=>{
+function enableResize(card){
 
-customPopup.classList.add("show");
+let handle=
+card.querySelector(".resize-handle");
 
-chkFocus.checked=prefs.focus;
-chkTasks.checked=prefs.tasks;
-chkGoals.checked=prefs.goals;
-chkGrowth.checked=prefs.growth;
-chkCountdown.checked=prefs.countdown;
-chkQuote.checked=prefs.quote;
+let startX,startY,startW,startH;
+
+handle.onmousedown=e=>{
+
+e.preventDefault();
+
+startX=e.clientX;
+startY=e.clientY;
+
+startW=parseInt(
+document.defaultView.getComputedStyle(card).width,10);
+
+startH=parseInt(
+document.defaultView.getComputedStyle(card).height,10);
+
+document.onmousemove=drag;
+document.onmouseup=stop;
 
 };
 
-window.closeCustomize=()=>{
+function drag(e){
+
+card.style.width=
+(startW+e.clientX-startX)+"px";
+
+card.style.height=
+(startH+e.clientY-startY)+"px";
+
+}
+
+function stop(){
+
+document.onmousemove=null;
+document.onmouseup=null;
+
+}
+
+}
+
+/* ================= ADD POPUP ================= */
+
+window.openAddPopup=()=>{
+addPopup.classList.add("show");
+};
+
+window.closeAddPopup=()=>{
+addPopup.classList.remove("show");
+};
+
+window.selectAddType=async(type)=>{
+
+let txt=
+prompt("Enter "+type);
+
+if(!txt) return;
+
+if(type==="task"){
+
+await addDoc(collection(db,"tasks"),{
+user:uid,
+text:txt,
+date:new Date()
+.toLocaleDateString("en-CA"),
+time:"00:00",
+completed:false
+});
+
+}
+
+else if(type==="goal"){
+
+await addDoc(collection(db,"goals"),{
+user:uid,
+name:txt,
+done:0,
+total:10
+});
+
+}
+
+else{
+
+await addDoc(collection(db,type==="smart"?"smartmoves":type),{
+uid:uid,
+text:txt,
+date:new Date()
+.toLocaleDateString("en-CA"),
+createdAt:Date.now()
+});
+
+}
+
+closeAddPopup();
+
+};
+
+/* ================= CUSTOM ================= */
+
+window.openCustomizer=()=>{
+customPopup.classList.add("show");
+};
+
+window.closeCustomizer=()=>{
 customPopup.classList.remove("show");
 };
 
-window.saveCustomize=()=>{
+window.saveLayout=()=>{
 
-prefs={
+let arr=[];
 
-focus:chkFocus.checked,
-tasks:chkTasks.checked,
-goals:chkGoals.checked,
-growth:chkGrowth.checked,
-countdown:chkCountdown.checked,
-quote:chkQuote.checked
+document.querySelectorAll(
+"#customPopup input[type=checkbox]"
+).forEach(x=>{
+if(x.checked)
+arr.push(x.value);
+});
 
-};
+layout=arr;
 
 localStorage.setItem(
-"dashboardPrefs",
-JSON.stringify(prefs)
+"dashLayout",
+JSON.stringify(layout)
 );
 
-closeCustomize();
+closeCustomizer();
 renderDashboard();
 
 };
 
 /* ================= LOGOUT ================= */
 
-logoutBtn.addEventListener(
-"click",
-async()=>{
+logoutBtn.onclick=async()=>{
 
 await signOut(auth);
+
 location.href="index.html";
 
-});
+};
