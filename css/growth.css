@@ -35,9 +35,11 @@ margin:auto;
 .hero-box{
 padding:28px;
 border-radius:18px;
-background:linear-gradient(135deg,
+background:linear-gradient(
+135deg,
 rgba(0,255,255,.10),
-rgba(255,255,255,.04));
+rgba(255,255,255,.04)
+);
 border:1px solid rgba(255,255,255,.08);
 margin-bottom:25px;
 }
@@ -51,13 +53,14 @@ font-size:34px;
 margin:0;
 color:#cfd8dc;
 font-size:16px;
+line-height:1.6;
 }
 
 /* ================= GRID ================= */
 
 .card-grid{
 display:grid;
-grid-template-columns:repeat(3,1fr);
+grid-template-columns:repeat(4,1fr);
 gap:20px;
 }
 
@@ -71,6 +74,7 @@ transition:.25s;
 border:1px solid rgba(255,255,255,.08);
 background:rgba(0,0,0,.45);
 min-height:240px;
+
 display:flex;
 flex-direction:column;
 justify-content:center;
@@ -112,9 +116,21 @@ box-shadow:0 0 20px rgba(0,180,255,.18);
 box-shadow:0 0 20px rgba(0,255,170,.18);
 }
 
+.purple{
+box-shadow:0 0 20px rgba(170,100,255,.22);
+}
+
 /* ================= MOBILE ================= */
 
-@media(max-width:900px){
+@media(max-width:1100px){
+
+.card-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+@media(max-width:700px){
 
 .card-grid{
 grid-template-columns:1fr;
@@ -126,6 +142,10 @@ font-size:28px;
 
 .growth-card{
 min-height:180px;
+}
+
+.navbar h2{
+font-size:22px;
 }
 
 }
