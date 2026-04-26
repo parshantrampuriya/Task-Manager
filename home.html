@@ -183,7 +183,42 @@ Cancel
 
 </div>
 
-<!-- TOAST -->
+<!-- ADD THIS inside home.html just before </body> -->
+
+<!-- ================= ADD FORM POPUP ================= -->
+<div id="addFormPopup" class="popup-wrap">
+
+<div class="popup-box">
+
+<div class="popup-head">
+<h3 id="addFormTitle">➕ Add New</h3>
+<button class="close-x" onclick="closeAddForm()">✕</button>
+</div>
+
+<input id="addText" placeholder="Enter text">
+
+<input type="date" id="addDate">
+
+<input type="time" id="addTime">
+
+<input id="goalTotal" type="number" placeholder="Goal Total (only for goals)" style="display:none;">
+
+<div class="popup-actions">
+
+<button class="main-btn" onclick="saveAddForm()">
+💾 Save
+</button>
+
+<button class="danger-btn" onclick="closeAddForm()">
+Cancel
+</button>
+
+</div>
+
+</div>
+</div>
+
+<!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
 <script type="module" src="js/menu.js"></script>
