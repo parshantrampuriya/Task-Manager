@@ -192,3 +192,18 @@ flex-direction:column;
 }
 
 }
+.friend-card{
+padding:14px;
+border-radius:12px;
+background:rgba(255,255,255,.05);
+margin-bottom:10px;
+cursor:pointer;
+transition:.25s ease;
+}
+
+.friend-card:hover{
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+color:#000;
+transform:translateX(5px);
+box-shadow:0 0 15px rgba(0,255,255,.35);
+}
