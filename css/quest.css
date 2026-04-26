@@ -110,13 +110,76 @@ gap:6px;
 justify-content:flex-end;
 }
 
+/* ACTION BUTTON ROW */
+.q-actions{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:flex-end;
+align-items:center;
+}
+
+/* COMMON BUTTON STYLE */
 .q-actions button{
-padding:7px 10px;
+width:42px;
+height:42px;
 border:none;
-border-radius:8px;
+border-radius:12px;
 cursor:pointer;
-font-size:12px;
+font-size:18px;
 font-weight:bold;
+display:flex;
+align-items:center;
+justify-content:center;
+transition:.22s;
+box-shadow:0 4px 10px rgba(0,0,0,.25);
+}
+
+/* HOVER EFFECT */
+.q-actions button:hover{
+transform:translateY(-3px) scale(1.08);
+}
+
+/* GOOGLE */
+.q-actions button:nth-child(1){
+background:linear-gradient(45deg,#ffffff,#d9f1ff);
+color:#111;
+}
+
+/* YOUTUBE */
+.q-actions button:nth-child(2){
+background:linear-gradient(45deg,#ff2d2d,#ff6b6b);
+color:#fff;
+}
+
+/* CHATGPT */
+.q-actions button:nth-child(3){
+background:linear-gradient(45deg,#00ffcc,#00b894);
+color:#000;
+}
+
+/* TO INSIGHT */
+.q-actions button:nth-child(4){
+background:linear-gradient(45deg,#8e44ff,#b388ff);
+color:#fff;
+}
+
+/* TO TASK */
+.q-actions button:nth-child(5){
+background:linear-gradient(45deg,#00cfff,#4facfe);
+color:#000;
+}
+
+/* EDIT */
+.q-actions button:nth-child(6){
+background:linear-gradient(45deg,#ffc107,#ffdb58);
+color:#000;
+}
+
+/* DELETE */
+.q-actions button:nth-child(7){
+background:linear-gradient(45deg,#ff4d4d,#ff7676);
+color:#fff;
 }
 
 .popup-wrap{
