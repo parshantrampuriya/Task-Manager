@@ -1,4 +1,4 @@
-/* ================= ULTIMATE HOME.JS UPDATED ================= */
+/* home.js FINAL CLEAN WORKING */
 
 import { auth, db } from "./firebase.js";
 
@@ -17,36 +17,25 @@ updateDoc,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= DOM ================= */
+/* ========= DOM ========= */
+const $ = id => document.getElementById(id);
 
-const username = document.getElementById("username");
-const todayDate = document.getElementById("todayDate");
-const countdownText = document.getElementById("countdownText");
-const dashboardGrid = document.getElementById("dashboardGrid");
-
-const addPopup = document.getElementById("addPopup");
-const customPopup = document.getElementById("customPopup");
-const logoutBtn = document.getElementById("logoutBtn");
-
-/* ================= GLOBAL ================= */
-
+/* ========= GLOBAL ========= */
 let uid = null;
 let tasks = [];
 let goals = [];
-
-let stats = {
+let counts = {
 mistakes:0,
 insights:0,
 quest:0,
-smart:0
+smartmoves:0
 };
 
 let layout =
 JSON.parse(localStorage.getItem("dashLayout")) ||
 ["focus","tasks","quote","goals","growth"];
 
-/* ================= AUTH ================= */
-
+/* ========= AUTH ========= */
 onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
@@ -59,97 +48,70 @@ uid = user.uid;
 const snap = await getDoc(doc(db,"users",uid));
 
 if(snap.exists()){
-username.innerText =
+$("username").innerText =
 "Welcome " + (snap.data().name || "");
 }
 
-setTopDate();
+setDate();
 startTimer();
 loadLive();
 
 });
 
-/* ================= DATE ================= */
-
-/* FIX THIS PART ONLY */
-
-function setTopDate(){
-
-const d = new Date();
-
-/* SAFE CHECK */
-const todayDateEl = document.getElementById("todayDate");
-const countdownEl = document.getElementById("countdownText");
-
-if(todayDateEl){
-todayDateEl.innerText = d.toDateString();
+/* ========= DATE ========= */
+function setDate(){
+$("todayDate").innerText =
+new Date().toDateString();
 }
-
-if(countdownEl){
-countdownEl.innerText = "⏳ Loading...";
-}
-
-}
-
-/* ================= TIMER ================= */
 
 function startTimer(){
 
 setInterval(()=>{
 
-const countdownEl =
-document.getElementById("countdownText");
+const now = new Date();
+const end = new Date();
 
-if(!countdownEl) return;
-
-let now = new Date();
-
-let end = new Date();
 end.setHours(23,59,59,999);
 
-let diff = end-now;
+const diff = end-now;
 
-let h = Math.floor(diff/3600000);
-let m = Math.floor((diff%3600000)/60000);
-let s = Math.floor((diff%60000)/1000);
+const h = Math.floor(diff/3600000);
+const m = Math.floor((diff%3600000)/60000);
+const s = Math.floor((diff%60000)/1000);
 
-countdownEl.innerText =
+$("countdownText").innerText =
 `⏳ ${h}h ${m}m ${s}s remaining today`;
 
 },1000);
 
 }
-/* ================= LOAD ================= */
 
+/* ========= LOAD ========= */
 function loadLive(){
 
 onSnapshot(collection(db,"tasks"), snap=>{
 
-tasks=[];
+tasks = [];
 
 snap.forEach(d=>{
 let x=d.data();
-if(x.user===uid){
-tasks.push({id:d.id,...x});
-}
+if(x.user===uid) tasks.push({id:d.id,...x});
 });
 
-renderDashboard();
+render();
 
 });
 
 onSnapshot(collection(db,"goals"), snap=>{
 
-goals=[];
+goals = [];
 
 snap.forEach(d=>{
 let x=d.data();
-if(x.user===uid){
-goals.push({id:d.id,...x});
-}
+if(x.user===uid) goals.push(x);
 });
 
-renderDashboard();
+render();
 
 });
 
@@ -159,20 +121,27 @@ loadCounts();
 
 async function loadCounts(){
 
-stats.mistakes = await getCount("mistakes");
-stats.insights = await getCount("insights");
-stats.quest = await getCount("quest");
-stats.smart = await getCount("smartmoves");
+counts.mistakes =
+await getCollectionCount("mistakes");
 
-renderDashboard();
+counts.insights =
+await getCollectionCount("insights");
+
+counts.quest =
+await getCollectionCount("quest");
+
+counts.smartmoves =
+await getCollectionCount("smartmoves");
+
+render();
 
 }
 
-async function getCount(name){
+async function getCollectionCount(name){
 
 const snap = await getDocs(collection(db,name));
 
-let c=0;
+let c = 0;
 
 snap.forEach(d=>{
 if(d.data().uid===uid) c++;
@@ -182,28 +151,20 @@ return c;
 
 }
 
-/* ================= RENDER ================= */
+/* ========= RENDER ========= */
+function render(){
 
-function renderDashboard(){
+const grid = $("dashboardGrid");
 
-dashboardGrid.innerHTML="";
+grid.innerHTML = "";
 
 layout.forEach(type=>{
 
-if(type==="focus")
-dashboardGrid.appendChild(focusCard());
-
-if(type==="tasks")
-dashboardGrid.appendChild(taskCard());
-
-if(type==="quote")
-dashboardGrid.appendChild(quoteCard());
-
-if(type==="goals")
-dashboardGrid.appendChild(goalCard());
-
-if(type==="growth")
-dashboardGrid.appendChild(growthCard());
+if(type==="focus") grid.appendChild(focusCard());
+if(type==="tasks") grid.appendChild(taskCard());
+if(type==="quote") grid.appendChild(quoteCard());
+if(type==="goals") grid.appendChild(goalCard());
+if(type==="growth") grid.appendChild(growthCard());
 
 });
 
@@ -211,98 +172,84 @@ enableDrag();
 
 }
 
-/* ================= CARD ================= */
+/* ========= BASE ========= */
+function makeCard(title, id, wide=false){
 
-function cardBase(title,id,wide=false){
-
-let div=document.createElement("div");
+const div = document.createElement("div");
 
 div.className =
-"widget-card " + (wide?"full-card task-widget":"compact");
+"widget-card " + (wide ? "full-card":"");
 
-div.dataset.id=id;
-div.draggable=true;
+div.draggable = true;
+div.dataset.id = id;
 
-div.innerHTML=`
-
+div.innerHTML = `
 <div class="card-head">
 <h3>${title}</h3>
 </div>
-
-<div class="widget-body" id="${id}Body"></div>
-
-<div class="resize-handle"></div>
-
+<div class="widget-body"></div>
 `;
 
-enableResize(div);
-
 return div;
-
 }
 
-/* ================= FOCUS ================= */
-
+/* ========= FOCUS ========= */
 function focusCard(){
 
-let done = tasks.filter(x=>x.completed).length;
-let total = tasks.length;
+const card = makeCard("📊 Today Focus","focus");
 
-let p = total ? Math.round(done*100/total):0;
+const today = getTodayTasks();
 
-let c=cardBase("📊 Today Focus","focus");
+const done =
+today.filter(x=>x.completed).length;
 
-c.querySelector("#focusBody").innerHTML=`
+const total = today.length;
 
+const p = total ?
+Math.round(done*100/total):0;
+
+card.querySelector(".widget-body").innerHTML = `
 <div class="big-number">${p}%</div>
 
 <div class="progress">
-<div class="progress-fill" style="width:${p}%"></div>
+<div class="progress-fill"
+style="width:${p}%"></div>
 </div>
 
 <div class="small-muted">
 ${done}/${total} completed
 </div>
-
 `;
 
-return c;
-
+return card;
 }
 
-/* ================= TASK ================= */
-
+/* ========= TASKS ========= */
 function taskCard(){
 
-let c=cardBase("📋 Today Tasks","tasks",true);
+const card = makeCard("📋 Today Tasks","tasks",true);
 
-let today = new Date().toLocaleDateString("en-CA");
-
-let arr = tasks.filter(x=>x.date===today);
+let arr = getTodayTasks();
 
 arr.sort((a,b)=>{
 
 if(a.completed!==b.completed)
-return a.completed?1:-1;
+return a.completed ? 1 : -1;
 
 return (a.time||"").localeCompare(b.time||"");
 
 });
 
-let html="";
+let html = "";
 
 arr.forEach(x=>{
 
-html+=`
-
+html += `
 <div class="task-row ${x.completed?'task-done':''}">
 
 <div class="task-left">
-
 <div class="task-title">${x.text}</div>
-
 <div class="task-time">${x.time || "00:00"}</div>
-
 </div>
 
 <button class="tick-btn"
@@ -311,68 +258,56 @@ onclick="toggleTask('${x.id}',${x.completed})">
 </button>
 
 </div>
-
 `;
 
 });
 
-c.querySelector("#tasksBody").innerHTML =
-html || "No tasks";
+card.querySelector(".widget-body").innerHTML =
+html || "No task";
 
-return c;
-
+return card;
 }
 
-/* ================= QUOTE ================= */
-
+/* ========= QUOTE ========= */
 function quoteCard(){
 
-let quotes=[
-
+const q = [
 "Discipline today creates freedom tomorrow.",
+"Small progress daily beats excuses.",
+"Win the morning win the day.",
 "Consistency creates success.",
-"Small progress daily wins.",
-"Action beats excuses.",
-"Win morning win day."
-
+"Action cures fear."
 ];
 
-let random =
-quotes[Math.floor(Math.random()*quotes.length)];
+const text =
+q[Math.floor(Math.random()*q.length)];
 
-let c=cardBase("💬 Quote","quote");
+const card = makeCard("💬 Quote","quote");
 
-c.querySelector("#quoteBody").innerHTML=`
+card.querySelector(".widget-body").innerHTML =
+`<div class="quote-box">${text}</div>`;
 
-<div class="quote-box">${random}</div>
-
-`;
-
-return c;
-
+return card;
 }
 
-/* ================= GOALS ================= */
-
+/* ========= GOALS ========= */
 function goalCard(){
 
-let c=cardBase("🎯 Goals","goals");
+const card = makeCard("🎯 Goals","goals");
 
-let html="";
+let html = "";
 
 goals.forEach(g=>{
 
-let p=Math.round(
-((g.done||0)/(g.total||1))*100
-);
+const done = Number(g.done || 0);
+const total = Number(g.total || 0);
 
-html+=`
+const p = total>0 ?
+Math.round((done/total)*100) : 0;
 
+html += `
 <div class="goal-row">
-
-<div class="goal-title">
-${g.name} - ${p}%
-</div>
+<div>${g.name} - ${p}%</div>
 
 <div class="goal-bar">
 <div class="goal-fill"
@@ -380,196 +315,63 @@ style="width:${p}%"></div>
 </div>
 
 </div>
-
 `;
 
 });
 
-c.querySelector("#goalsBody").innerHTML =
+card.querySelector(".widget-body").innerHTML =
 html || "No goals";
 
-return c;
-
+return card;
 }
 
-/* ================= GROWTH ================= */
-
+/* ========= GROWTH ========= */
 function growthCard(){
 
-let c=cardBase("🌱 Growth Summary","growth");
+const card =
+makeCard("🌱 Growth Summary","growth");
 
-c.querySelector("#growthBody").innerHTML=`
-
-<div class="summary-row">
-<span>Mistakes</span>
-<b>${stats.mistakes}</b>
-</div>
-
-<div class="summary-row">
-<span>Insights</span>
-<b>${stats.insights}</b>
-</div>
-
-<div class="summary-row">
-<span>Quest</span>
-<b>${stats.quest}</b>
-</div>
-
-<div class="summary-row">
-<span>Smart Moves</span>
-<b>${stats.smart}</b>
-</div>
-
+card.querySelector(".widget-body").innerHTML = `
+<div class="summary-row"><span>Mistakes</span><b>${counts.mistakes}</b></div>
+<div class="summary-row"><span>Insights</span><b>${counts.insights}</b></div>
+<div class="summary-row"><span>Quest</span><b>${counts.quest}</b></div>
+<div class="summary-row"><span>Smart Moves</span><b>${counts.smartmoves}</b></div>
 `;
 
-return c;
+return card;
+}
+
+/* ========= HELPERS ========= */
+function getTodayTasks(){
+
+const today =
+new Date().toLocaleDateString("en-CA");
+
+return tasks.filter(x=>x.date===today);
 
 }
 
-/* ================= TOGGLE ================= */
-
-window.toggleTask = async(id,v)=>{
+/* ========= TASK TOGGLE ========= */
+window.toggleTask = async(id,val)=>{
 
 await updateDoc(doc(db,"tasks",id),{
-completed:!v
+completed:!val
 });
 
 };
 
-/* ================= DRAG ================= */
-
-function enableDrag(){
-
-let drag=null;
-
-document.querySelectorAll(".widget-card")
-.forEach(card=>{
-
-card.addEventListener("dragstart",()=>{
-drag=card;
-});
-
-card.addEventListener("dragover",e=>{
-e.preventDefault();
-});
-
-card.addEventListener("drop",()=>{
-
-if(drag===card) return;
-
-dashboardGrid.insertBefore(drag,card);
-
-saveOrder();
-
-});
-
-});
-
-}
-
-function saveOrder(){
-
-layout=[];
-
-document.querySelectorAll(".widget-card")
-.forEach(x=>{
-layout.push(x.dataset.id);
-});
-
-localStorage.setItem(
-"dashLayout",
-JSON.stringify(layout)
-);
-
-}
-
-/* ================= RESIZE ================= */
-
-function enableResize(card){
-
-let handle = card.querySelector(".resize-handle");
-
-let sx,sy,sw,sh;
-
-handle.onmousedown=(e)=>{
-
-e.preventDefault();
-
-sx=e.clientX;
-sy=e.clientY;
-
-sw=card.offsetWidth;
-sh=card.offsetHeight;
-
-document.onmousemove=drag;
-document.onmouseup=stop;
-
-};
-
-function drag(e){
-
-card.style.width =
-(sw + e.clientX - sx) + "px";
-
-card.style.height =
-(sh + e.clientY - sy) + "px";
-
-}
-
-function stop(){
-
-document.onmousemove=null;
-document.onmouseup=null;
-
-}
-
-}
-
-/* ================= POPUPS ================= */
-
+/* ========= ADD ========= */
 window.openAddPopup=()=>{
-addPopup.classList.add("show");
+$("addPopup").classList.add("show");
 };
 
 window.closeAddPopup=()=>{
-addPopup.classList.remove("show");
+$("addPopup").classList.remove("show");
 };
 
-window.openCustomizer=()=>{
-customPopup.classList.add("show");
-};
+window.selectAddType = async(type)=>{
 
-window.closeCustomizer=()=>{
-customPopup.classList.remove("show");
-};
-
-window.saveLayout=()=>{
-
-let arr=[];
-
-document.querySelectorAll(
-"#customPopup input[type=checkbox]"
-).forEach(x=>{
-if(x.checked) arr.push(x.value);
-});
-
-layout=arr;
-
-localStorage.setItem(
-"dashLayout",
-JSON.stringify(layout)
-);
-
-closeCustomizer();
-renderDashboard();
-
-};
-
-/* ================= ADD ================= */
-
-window.selectAddType=async(type)=>{
-
-let txt=prompt("Enter "+type);
+let txt = prompt("Enter "+type);
 
 if(!txt) return;
 
@@ -598,12 +400,9 @@ total:10
 
 else{
 
-await addDoc(
-collection(db,type==="smart"?"smartmoves":type),
-{
+await addDoc(collection(db,type),{
 uid:uid,
 text:txt,
-date:new Date().toLocaleDateString("en-CA"),
 createdAt:Date.now()
 });
 
@@ -613,12 +412,88 @@ closeAddPopup();
 
 };
 
-/* ================= LOGOUT ================= */
+/* ========= CUSTOM ========= */
+window.openCustomizer=()=>{
+$("customPopup").classList.add("show");
+};
 
-logoutBtn.onclick=async()=>{
+window.closeCustomizer=()=>{
+$("customPopup").classList.remove("show");
+};
+
+window.saveLayout=()=>{
+
+let arr=[];
+
+document.querySelectorAll(
+"#customPopup input[type=checkbox]"
+).forEach(x=>{
+if(x.checked) arr.push(x.value);
+});
+
+layout = arr;
+
+localStorage.setItem(
+"dashLayout",
+JSON.stringify(layout)
+);
+
+closeCustomizer();
+render();
+
+};
+
+/* ========= DRAG ========= */
+function enableDrag(){
+
+let drag = null;
+
+document.querySelectorAll(".widget-card")
+.forEach(card=>{
+
+card.addEventListener("dragstart",()=>{
+drag = card;
+});
+
+card.addEventListener("dragover",e=>{
+e.preventDefault();
+});
+
+card.addEventListener("drop",()=>{
+
+if(drag===card) return;
+
+$("dashboardGrid")
+.insertBefore(drag,card);
+
+saveOrder();
+
+});
+
+});
+
+}
+
+function saveOrder(){
+
+layout=[];
+
+document.querySelectorAll(".widget-card")
+.forEach(x=>{
+layout.push(x.dataset.id);
+});
+
+localStorage.setItem(
+"dashLayout",
+JSON.stringify(layout)
+);
+
+}
+
+/* ========= LOGOUT ========= */
+$("logoutBtn").onclick = async()=>{
 
 await signOut(auth);
-
 location.href="index.html";
 
 };
