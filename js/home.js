@@ -1,352 +1,414 @@
+// home.js
+
 import { auth, db } from "./firebase.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+onAuthStateChanged,
+signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  doc,
-  getDoc,
-  collection,
-  addDoc,
-  onSnapshot,
-  updateDoc,
-  deleteDoc
+doc,
+getDoc,
+setDoc,
+collection,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= VIEW MODE ================= */
+/* ================= GLOBAL ================= */
+let currentUser=null;
 
-const params = new URLSearchParams(location.search);
-const viewUser = params.get("viewUser");
-
-let isViewMode = !!viewUser;
-let uid;
-
-/* GLOBAL */
-let currentTasks = [];
-let currentTaskId = null;
-let currentAction = null;
-
-/* AUTH */
-onAuthStateChanged(auth, async (user) => {
-
-    if (!user) {
-        location.href = "index.html";
-        return;
-    }
-
-    // 🔥 FIXED UID LOGIC
-    uid = isViewMode ? viewUser : user.uid;
-
-    let snap = await getDoc(doc(db, "users", uid));
-
-    if (snap.exists()) {
-        username.innerText = isViewMode
-            ? `👁 Viewing ${snap.data().name}`
-            : "👤 Welcome " + snap.data().name;
-    }
-
-    // 🔥 HIDE ADD BOX IN VIEW MODE
-    if (isViewMode) {
-        let box = document.getElementById("quickAddBox");
-        if (box) box.style.display = "none";
-    }
-
-    loadTasks(uid);
-    loadGoalsHome(uid);
-
-    startCountdown();
-});
-
-/* DATE */
-function getToday() {
-    return new Date().toLocaleDateString("en-CA");
-}
-
-/* ================= COUNTDOWN ================= */
-
-function startCountdown() {
-
-    setInterval(() => {
-
-        let now = new Date();
-        let midnight = new Date();
-        midnight.setHours(23,59,59,999);
-
-        let diff = midnight - now;
-
-        let hrs = Math.floor(diff / 3600000);
-        let mins = Math.floor((diff % 3600000) / 60000);
-        let secs = Math.floor((diff % 60000) / 1000);
-
-        countdownBox.innerText =
-            `⏳ Today ends in ${hrs}h ${mins}m ${secs}s`;
-
-    }, 1000);
-}
-
-/* ================= QUICK ADD ================= */
-
-window.quickAddTask = async () => {
-
-    if (isViewMode) return; // 🔥 disable in view mode
-
-    let text = quickTaskInput.value;
-    let date = quickDateInput.value;
-    let time = quickTimeInput.value;
-
-    if (!text) return;
-
-    await addDoc(collection(db, "tasks"), {
-        text,
-        date: date || getToday(),
-        time: time || "00:00",
-        completed: false,
-        user: auth.currentUser.uid
-    });
-
-    quickTaskInput.value = "";
-    quickDateInput.value = "";
-    quickTimeInput.value = "";
+let layout={
+tasks:true,
+goals:true,
+quest:true,
+mistakes:true,
+insight:true,
+countdown:true
 };
 
-/* ================= TASKS ================= */
+/* ================= AUTH ================= */
+onAuthStateChanged(auth,async(user)=>{
 
-function loadTasks(uid) {
-
-    onSnapshot(collection(db, "tasks"), snap => {
-
-        let tasks = [];
-
-        snap.forEach(d => {
-            let t = d.data();
-            if (t.user === uid) {
-                tasks.push({ id: d.id, ...t });
-            }
-        });
-
-        currentTasks = tasks;
-
-        renderHome(tasks);
-    });
+if(!user){
+location.href="index.html";
+return;
 }
 
-/* STATUS */
-function getStatus(t) {
+currentUser=user;
 
-    if (!t.time || t.time === "00:00") return "normal";
+await loadUser();
+await loadLayout();
+await renderDashboard();
+startCountdown();
 
-    let now = new Date();
-    let taskTime = new Date(`${t.date}T${t.time}`);
-    let diff = taskTime - now;
+});
 
-    if (diff < 0) return "overdue";
-    if (diff < 30 * 60000) return "urgent";
-    if (diff < 60 * 60000) return "soon";
+/* ================= USER ================= */
+async function loadUser(){
 
-    return "normal";
+const snap=await getDoc(
+doc(db,"users",currentUser.uid)
+);
+
+if(snap.exists()){
+
+document.getElementById("username")
+.innerText=
+"👤 Welcome " +
+(snap.data().name || "User");
+
 }
 
-/* ================= RENDER ================= */
+}
 
-function renderHome(tasks) {
+/* ================= LAYOUT ================= */
+async function loadLayout(){
 
-    let today = getToday();
+const snap=await getDoc(
+doc(db,"dashboardSettings",currentUser.uid)
+);
 
-    let todayTasks = tasks.filter(t => t.date === today);
+if(snap.exists()){
 
-    todayTasks.sort((a, b) => {
+layout={
+...layout,
+...snap.data()
+};
 
-        if (a.completed !== b.completed) {
-            return a.completed ? 1 : -1;
-        }
+}
 
-        if ((a.time && a.time !== "00:00") && (!b.time || b.time === "00:00")) return -1;
-        if ((!a.time || a.time === "00:00") && (b.time && b.time !== "00:00")) return 1;
+/* checkbox sync */
+document
+.querySelectorAll("#customPanel input")
+.forEach(chk=>{
 
-        return (a.time || "").localeCompare(b.time || "");
-    });
+chk.checked=layout[chk.dataset.id];
 
-    let html = `<ol class="task-list">`;
+});
 
-    todayTasks.forEach((t) => {
+}
 
-        let status = getStatus(t);
+window.toggleCustomize=()=>{
 
-        html += `
-        <li class="task-item ${t.completed ? 'done' : ''} ${status}">
-            
-            <div style="display:flex; align-items:center; gap:10px; flex:1;">
-                <span class="${t.completed ? "completed" : ""}">
-                    ${t.text}
-                </span>
-                ${t.time && t.time !== "00:00" ? `<small>🕒 ${t.time}</small>` : ""}
-            </div>
+document
+.getElementById("customPanel")
+.classList.toggle("show");
 
-            ${!isViewMode ? `
-            <div class="task-actions">
-                <button onclick="toggle('${t.id}',${t.completed})">✔</button>
-                <button onclick="openModal('edit','${t.id}','${t.text}','${t.date}','${t.time || ''}')">✏️</button>
-                <button onclick="openModal('delete','${t.id}')">❌</button>
-            </div>` : ""}
+};
 
-        </li>`;
-    });
+window.saveLayout=async()=>{
 
-    html += `</ol>`;
-    homeContent.innerHTML = html;
+document
+.querySelectorAll("#customPanel input")
+.forEach(chk=>{
+
+layout[chk.dataset.id]=chk.checked;
+
+});
+
+await setDoc(
+doc(db,"dashboardSettings",currentUser.uid),
+layout
+);
+
+renderDashboard();
+toggleCustomize();
+
+};
+
+/* ================= DASHBOARD ================= */
+async function renderDashboard(){
+
+const box=
+document.getElementById("dashboardGrid");
+
+let html="";
+
+if(layout.countdown){
+
+html+=`
+<div class="card">
+<h3>⏳ Countdown</h3>
+<div id="countdownLive"
+class="big-number">--</div>
+<div class="muted">
+Time remaining today
+</div>
+</div>
+`;
+
+}
+
+if(layout.tasks){
+
+html+=await taskCard();
+
+}
+
+if(layout.goals){
+
+html+=await goalsCard();
+
+}
+
+if(layout.quest){
+
+html+=await questCard();
+
+}
+
+if(layout.mistakes){
+
+html+=await mistakesCard();
+
+}
+
+if(layout.insight){
+
+html+=await insightCard();
+
+}
+
+box.innerHTML=html;
+
+}
+
+/* ================= TASK CARD ================= */
+async function taskCard(){
+
+const snap=await getDocs(
+collection(db,"tasks")
+);
+
+const today=
+new Date().toLocaleDateString("en-CA");
+
+let arr=[];
+
+snap.forEach(d=>{
+
+let x=d.data();
+
+if(
+x.user===currentUser.uid &&
+x.date===today
+){
+arr.push(x);
+}
+
+});
+
+let rows="";
+
+arr.slice(0,5).forEach(t=>{
+
+rows+=`
+<div class="task-row ${t.completed?'done':''}">
+<span>${t.text}</span>
+<span class="task-time">
+${t.time || ""}
+</span>
+</div>
+`;
+
+});
+
+if(!rows) rows=`<div class="empty">No tasks today</div>`;
+
+return `
+<div class="card full">
+<h3>📅 Today Tasks</h3>
+${rows}
+</div>
+`;
+
 }
 
 /* ================= GOALS ================= */
+async function goalsCard(){
 
-function loadGoalsHome(uid) {
+const snap=await getDocs(
+collection(db,"goals")
+);
 
-    onSnapshot(collection(db, "goals"), snap => {
+let rows="";
 
-        let goals = [];
+snap.forEach(d=>{
 
-        snap.forEach(d => {
-            let g = d.data();
-            if (g.user === uid) {
-                goals.push({ id: d.id, ...g });
-            }
-        });
+let g=d.data();
 
-        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
+if(g.user===currentUser.uid){
 
-        renderGoalsHome(goals);
+let p=Math.round(
+(g.done/g.total)*100 || 0
+);
 
-        if (!isViewMode) setTimeout(enableDrag, 0); // 🔥 disable drag in view
-    });
+rows+=`
+<div class="goal-box">
+
+<div class="goal-top">
+<span>${g.name}</span>
+<span>${p}%</span>
+</div>
+
+<div class="goal-bar">
+<div class="goal-fill"
+style="width:${p}%"></div>
+</div>
+
+</div>
+`;
+
 }
 
-function renderGoalsHome(goals) {
-
-    let html = "";
-
-    goals.forEach(g => {
-
-        let percent = Math.round((g.done / g.total) * 100 || 0);
-
-        html += `
-        <div class="goal-home-card" ${!isViewMode ? `draggable="true"` : ""} data-id="${g.id}">
-            <b>${g.name}</b> → ${percent}%
-            <div class="goal-home-bar">
-                <div class="goal-home-fill" style="width:${percent}%"></div>
-            </div>
-        </div>`;
-    });
-
-    goalsHomeContainer.innerHTML = html;
-}
-
-/* DRAG */
-function enableDrag() {
-
-    let items = document.querySelectorAll(".goal-home-card");
-    let dragItem = null;
-
-    items.forEach(item => {
-
-        item.addEventListener("dragstart", () => {
-            dragItem = item;
-            item.style.opacity = "0.5";
-        });
-
-        item.addEventListener("dragend", () => {
-            item.style.opacity = "1";
-        });
-
-        item.addEventListener("dragover", e => e.preventDefault());
-
-        item.addEventListener("drop", async () => {
-
-            let list = item.parentNode;
-
-            if (dragItem !== item) {
-
-                list.insertBefore(dragItem, item);
-
-                let updated = [...list.children];
-
-                for (let i = 0; i < updated.length; i++) {
-
-                    let id = updated[i].dataset.id;
-
-                    await updateDoc(doc(db, "goals", id), {
-                        order: i
-                    });
-                }
-            }
-        });
-    });
-}
-
-/* ================= MODAL ================= */
-
-window.openModal = (type, id, text="", date="", time="") => {
-
-    if (isViewMode) return; // 🔥 block edit
-
-    currentTaskId = id;
-    currentAction = type;
-
-    modal.classList.add("active");
-
-    modalText.style.display = "block";
-    modalDate.style.display = "block";
-    modalTime.style.display = "block";
-
-    if (type === "edit") {
-        modalTitle.innerText = "Edit Task";
-        modalText.value = text;
-        modalDate.value = date;
-        modalTime.value = time;
-    }
-
-    if (type === "delete") {
-        modalTitle.innerText = "Delete this task?";
-        modalText.style.display = "none";
-        modalDate.style.display = "none";
-        modalTime.style.display = "none";
-    }
-};
-
-window.closeModal = () => {
-    modal.classList.remove("active");
-};
-
-/* CONFIRM */
-window.confirmAction = async () => {
-
-    if (isViewMode) return;
-
-    if (currentAction === "edit") {
-        await updateDoc(doc(db, "tasks", currentTaskId), {
-            text: modalText.value,
-            date: modalDate.value,
-            time: modalTime.value || "00:00"
-        });
-    }
-
-    if (currentAction === "delete") {
-        await deleteDoc(doc(db, "tasks", currentTaskId));
-    }
-
-    closeModal();
-};
-
-/* ACTION */
-window.toggle = (id, completed) => {
-
-    if (isViewMode) return;
-
-    updateDoc(doc(db, "tasks", id), { completed: !completed });
-};
-
-/* LOGOUT */
-logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
-    location.href = "index.html";
 });
+
+if(!rows) rows=`<div class="empty">No goals</div>`;
+
+return `
+<div class="card">
+<h3>🎯 Goals</h3>
+${rows}
+</div>
+`;
+
+}
+
+/* ================= QUEST ================= */
+async function questCard(){
+
+const snap=await getDocs(
+collection(db,"quest")
+);
+
+let pending=0;
+
+snap.forEach(d=>{
+
+let q=d.data();
+
+if(
+q.uid===currentUser.uid &&
+q.status==="Pending"
+){
+pending++;
+}
+
+});
+
+return `
+<div class="card">
+<h3>❓ Quest Pending</h3>
+<div class="big-number">${pending}</div>
+<div class="muted">
+Open doubts / topics
+</div>
+</div>
+`;
+
+}
+
+/* ================= MISTAKES ================= */
+async function mistakesCard(){
+
+const snap=await getDocs(
+collection(db,"mistakes")
+);
+
+let count=0;
+
+snap.forEach(d=>{
+
+let m=d.data();
+
+if(m.uid===currentUser.uid){
+count++;
+}
+
+});
+
+return `
+<div class="card">
+<h3>❌ Mistakes</h3>
+<div class="big-number">${count}</div>
+<div class="muted">
+Recorded mistakes
+</div>
+</div>
+`;
+
+}
+
+/* ================= INSIGHT ================= */
+async function insightCard(){
+
+const snap=await getDocs(
+collection(db,"insights")
+);
+
+let latest="No insights yet.";
+
+snap.forEach(d=>{
+
+let x=d.data();
+
+if(x.uid===currentUser.uid){
+latest=x.text;
+}
+
+});
+
+return `
+<div class="card full">
+<h3>🧠 Latest Insight</h3>
+<div class="quote-box">
+${latest}
+</div>
+</div>
+`;
+
+}
+
+/* ================= COUNTDOWN ================= */
+function startCountdown(){
+
+setInterval(()=>{
+
+const el=
+document.getElementById("countdownLive");
+
+if(!el) return;
+
+let now=new Date();
+
+let end=new Date();
+end.setHours(23,59,59,999);
+
+let diff=end-now;
+
+let h=Math.floor(diff/3600000);
+let m=Math.floor((diff%3600000)/60000);
+let s=Math.floor((diff%60000)/1000);
+
+el.innerText=
+`${h}h ${m}m ${s}s`;
+
+},1000);
+
+}
+
+/* ================= LOGOUT ================= */
+const btn=
+document.getElementById("logoutBtn");
+
+if(btn){
+
+btn.onclick=async()=>{
+
+await signOut(auth);
+location.href="index.html";
+
+};
+
+}
