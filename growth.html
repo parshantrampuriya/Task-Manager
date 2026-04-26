@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Growth Hub</title>
+
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/growth.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goFriends()">👥 Friends</button>
+<button onclick="goGrowth()">🌱 Growth Hub</button>
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+<button onclick="goTests()">📝 Tests</button>
+<button onclick="goProfile()">👤 Profile</button>
+<button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- NAVBAR -->
+<div class="navbar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">☰</button>
+
+<h2>🌱 Growth Hub</h2>
+
+</div>
+
+<!-- PAGE -->
+<div class="growth-wrap">
+
+<div class="hero-box">
+<h1>Build Yourself Daily</h1>
+<p>
+Track mistakes, store lessons, and record smart wins.
+</p>
+</div>
+
+<div class="card-grid">
+
+<div class="growth-card red"
+onclick="location.href='mistakes.html'">
+
+<div class="icon">❌</div>
+<h3>Mistakes</h3>
+<p>
+Track errors and improve daily habits.
+</p>
+
+</div>
+
+<div class="growth-card blue"
+onclick="location.href='insights.html'">
+
+<div class="icon">🧠</div>
+<h3>Insights</h3>
+<p>
+Save life lessons and technical learnings.
+</p>
+
+</div>
+
+<div class="growth-card green"
+onclick="location.href='smart-moves.html'">
+
+<div class="icon">🚀</div>
+<h3>Smart Moves</h3>
+<p>
+Record clever actions and successful decisions.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module"
+src="js/menu.js"></script>
+
+<script type="module"
+src="js/growth.js"></script>
+
+</body>
+</html>
