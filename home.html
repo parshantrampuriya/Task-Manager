@@ -2,20 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Ultimate Dashboard</title>
 
-<link rel="stylesheet" href="css/sidebar.css">
 <link rel="stylesheet" href="css/home.css">
-
-<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/sidebar.css">
 
 </head>
 <body>
 
-<!-- ================= SIDEBAR ================= -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
@@ -32,166 +28,165 @@ content="width=device-width, initial-scale=1.0">
 
 </div>
 
-<!-- ================= MAIN ================= -->
+<!-- MAIN -->
 <div class="main">
 
-<!-- TOP NAV -->
+<!-- NAVBAR -->
 <div class="navbar">
 
 <div class="nav-left">
-
-<button class="menu-btn"
-onclick="toggleSidebar()">☰</button>
-
-<h2 id="username">
-👤 Welcome...
-</h2>
-
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<h2 id="username">👤 Welcome</h2>
 </div>
 
 <div class="nav-right">
-
-<button class="top-btn add-btn"
-onclick="openAddPopup()">
-➕ Add
-</button>
-
-<button class="top-btn"
-onclick="openCustomize()">
-⚙ Customize
-</button>
-
+<button class="top-btn" onclick="openCustomizer()">⚙ Customize</button>
+<button class="top-btn add-btn" onclick="openAddPopup()">➕ Add</button>
 </div>
 
 </div>
 
-<!-- TODAY BAR -->
+<!-- CENTER TOP BAR -->
 <div class="today-bar">
 
-<div>
-<h3>📅 Today</h3>
-<p id="todayDate">Loading...</p>
-</div>
-
-<div class="today-actions">
-
-<button class="mini-btn"
-onclick="morningMode()">
-🌅 Start Day
-</button>
-
-<button class="mini-btn"
-onclick="nightReview()">
-🌙 Review
-</button>
-
+<div class="center-top">
+<h3 id="todayDate">📅 Today</h3>
+<p id="countdownText">⏳ Loading...</p>
 </div>
 
 </div>
 
-<!-- DASHBOARD GRID -->
-<div id="dashboardGrid"
-class="dashboard-grid">
+<!-- DASHBOARD -->
+<div id="dashboardGrid" class="dashboard-grid">
 
-<!-- JS render -->
+<!-- TODAY FOCUS -->
+<div class="widget-card compact" data-widget="focus">
+
+<div class="card-head">
+<h3>📊 Today Focus</h3>
+</div>
+
+<div class="widget-body">
+
+<div class="big-number" id="focusPercent">0%</div>
+
+<div class="progress">
+<div class="progress-fill" id="focusBar" style="width:0%"></div>
+</div>
+
+<div class="small-muted" id="focusText">
+0/0 tasks completed
+</div>
+
+</div>
+
+</div>
+
+<!-- QUOTE -->
+<div class="widget-card compact" data-widget="quote">
+
+<div class="card-head">
+<h3>💬 Focus Quote</h3>
+</div>
+
+<div class="widget-body">
+
+<div class="quote-box" id="quoteText">
+Loading quote...
+</div>
+
+</div>
+
+</div>
+
+<!-- TASKS -->
+<div class="widget-card full-card task-widget" data-widget="tasks">
+
+<div class="card-head">
+<h3>📋 Today Tasks</h3>
+
+<div class="card-tools">
+<button class="icon-btn" onclick="openAddPopup()">＋</button>
+</div>
+
+</div>
+
+<div class="widget-body" id="taskWidgetBody">
+Loading...
+</div>
+
+</div>
+
+<!-- GOALS -->
+<div class="widget-card compact" data-widget="goals">
+
+<div class="card-head">
+<h3>🎯 Goals</h3>
+</div>
+
+<div class="widget-body" id="goalsBox">
+Loading...
+</div>
+
+</div>
+
+<!-- GROWTH SUMMARY -->
+<div class="widget-card compact" data-widget="growth">
+
+<div class="card-head">
+<h3>🌱 Growth Summary</h3>
+</div>
+
+<div class="widget-body" id="growthBox">
+Loading...
+</div>
+
+</div>
 
 </div>
 
 </div>
 
-<!-- ================= GLOBAL ADD POPUP ================= -->
-<div id="addPopup"
-class="popup-wrap">
+<!-- ADD POPUP -->
+<div id="addPopup" class="popup-wrap">
 
-<div class="popup-box large-popup">
+<div class="popup-box">
 
 <div class="popup-head">
-
-<h3 id="popupMainTitle">
-➕ Add New
-</h3>
-
-<button class="close-x"
-onclick="closeAddPopup()">
-✕
-</button>
-
+<h3>➕ Add New</h3>
+<button class="close-x" onclick="closeAddPopup()">✕</button>
 </div>
-
-<!-- STEP 1 -->
-<div id="typeSelect">
 
 <div class="type-grid">
 
-<div class="type-card"
-onclick="selectAddType('task')">
+<div class="type-card" onclick="selectAddType('task')">
 📋
 <span>Task</span>
 </div>
 
-<div class="type-card"
-onclick="selectAddType('goal')">
+<div class="type-card" onclick="selectAddType('goal')">
 🎯
 <span>Goal</span>
 </div>
 
-<div class="type-card"
-onclick="selectAddType('mistake')">
+<div class="type-card" onclick="selectAddType('mistake')">
 ❌
 <span>Mistake</span>
 </div>
 
-<div class="type-card"
-onclick="selectAddType('insight')">
+<div class="type-card" onclick="selectAddType('insight')">
 🧠
 <span>Insight</span>
 </div>
 
-<div class="type-card"
-onclick="selectAddType('quest')">
+<div class="type-card" onclick="selectAddType('quest')">
 ❓
 <span>Quest</span>
 </div>
 
-</div>
-
-</div>
-
-<!-- STEP 2 FORM -->
-<div id="dynamicForm"
-style="display:none;">
-
-<input id="addText"
-placeholder="Write here...">
-
-<input type="date"
-id="addDate">
-
-<input type="time"
-id="addTime">
-
-<input type="number"
-id="addTarget"
-placeholder="Target (for goals only)">
-
-<select id="addPriority">
-<option value="Normal">Normal</option>
-<option value="High">High</option>
-<option value="Urgent">Urgent</option>
-</select>
-
-<div class="popup-actions">
-
-<button class="main-btn"
-onclick="saveGlobalItem()">
-💾 Save
-</button>
-
-<button class="danger-btn"
-onclick="backToTypes()">
-⬅ Back
-</button>
-
+<div class="type-card" onclick="selectAddType('smart')">
+🚀
+<span>Smart Move</span>
 </div>
 
 </div>
@@ -200,88 +195,39 @@ onclick="backToTypes()">
 
 </div>
 
-<!-- ================= CUSTOMIZE POPUP ================= -->
-<div id="customPopup"
-class="popup-wrap">
+<!-- CUSTOMIZE -->
+<div id="customPopup" class="popup-wrap">
 
 <div class="popup-box large-popup">
 
 <div class="popup-head">
-
 <h3>⚙ Customize Dashboard</h3>
-
-<button class="close-x"
-onclick="closeCustomize()">
-✕
-</button>
-
+<button class="close-x" onclick="closeCustomizer()">✕</button>
 </div>
 
 <p class="small-muted">
-Select widgets to show on dashboard
+Select widgets to show
 </p>
 
 <div class="check-grid">
 
-<label>
-<input type="checkbox"
-data-widget="focus">
- Today Focus
-</label>
+<label><input type="checkbox" value="focus" checked> Today Focus</label>
+<label><input type="checkbox" value="quote" checked> Quote</label>
 
-<label>
-<input type="checkbox"
-data-widget="tasks">
- Today Tasks
-</label>
+<label><input type="checkbox" value="tasks" checked> Tasks</label>
+<label><input type="checkbox" value="goals" checked> Goals</label>
 
-<label>
-<input type="checkbox"
-data-widget="goals">
- Goals
-</label>
-
-<label>
-<input type="checkbox"
-data-widget="mistakes">
- Mistakes
-</label>
-
-<label>
-<input type="checkbox"
-data-widget="insights">
- Insights
-</label>
-
-<label>
-<input type="checkbox"
-data-widget="quest">
- Quest
-</label>
-
-<label>
-<input type="checkbox"
-data-widget="countdown">
- Countdown
-</label>
-
-<label>
-<input type="checkbox"
-data-widget="quote">
- Quote
-</label>
+<label><input type="checkbox" value="growth" checked> Growth Summary</label>
 
 </div>
 
 <div class="popup-actions">
 
-<button class="main-btn"
-onclick="saveWidgets()">
+<button class="main-btn" onclick="saveLayout()">
 💾 Save Layout
 </button>
 
-<button class="danger-btn"
-onclick="closeCustomize()">
+<button class="danger-btn" onclick="closeCustomizer()">
 Cancel
 </button>
 
@@ -291,50 +237,11 @@ Cancel
 
 </div>
 
-<!-- ================= REVIEW POPUP ================= -->
-<div id="reviewPopup"
-class="popup-wrap">
-
-<div class="popup-box">
-
-<h3>🌙 Night Review</h3>
-
-<input id="reviewDone"
-placeholder="What completed today?">
-
-<input id="reviewMistake"
-placeholder="Any mistake today?">
-
-<input id="reviewInsight"
-placeholder="What learned today?">
-
-<div class="popup-actions">
-
-<button class="main-btn"
-onclick="submitReview()">
-Submit
-</button>
-
-<button class="danger-btn"
-onclick="closeReview()">
-Close
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= TOAST ================= -->
+<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- ================= JS ================= -->
-<script type="module"
-src="js/menu.js"></script>
-
-<script type="module"
-src="js/home.js"></script>
+<script type="module" src="js/menu.js"></script>
+<script type="module" src="js/home.js"></script>
 
 </body>
 </html>
