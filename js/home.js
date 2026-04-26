@@ -71,37 +71,54 @@ loadLive();
 
 /* ================= DATE ================= */
 
+/* FIX THIS PART ONLY */
+
 function setTopDate(){
 
 const d = new Date();
 
-todayDate.innerText =
-d.toDateString();
+/* SAFE CHECK */
+const todayDateEl = document.getElementById("todayDate");
+const countdownEl = document.getElementById("countdownText");
+
+if(todayDateEl){
+todayDateEl.innerText = d.toDateString();
+}
+
+if(countdownEl){
+countdownEl.innerText = "⏳ Loading...";
+}
 
 }
+
+/* ================= TIMER ================= */
 
 function startTimer(){
 
 setInterval(()=>{
+
+const countdownEl =
+document.getElementById("countdownText");
+
+if(!countdownEl) return;
 
 let now = new Date();
 
 let end = new Date();
 end.setHours(23,59,59,999);
 
-let diff = end - now;
+let diff = end-now;
 
 let h = Math.floor(diff/3600000);
 let m = Math.floor((diff%3600000)/60000);
 let s = Math.floor((diff%60000)/1000);
 
-countdownText.innerText =
+countdownEl.innerText =
 `⏳ ${h}h ${m}m ${s}s remaining today`;
 
 },1000);
 
 }
-
 /* ================= LOAD ================= */
 
 function loadLive(){
