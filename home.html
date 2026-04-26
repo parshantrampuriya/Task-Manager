@@ -1,3 +1,4 @@
+<!-- home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +14,6 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
-
 <h2>⚡ Menu</h2>
 
 <button onclick="goHome()">🏠 Home</button>
@@ -25,200 +25,87 @@
 <button onclick="goGrowth()">🌱 Growth Hub</button>
 <button onclick="goProfile()">👤 Profile</button>
 <button id="logoutBtn">🚪 Logout</button>
-
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<!-- NAVBAR -->
+<!-- NAV -->
 <div class="navbar">
 
 <div class="nav-left">
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-<h2 id="username">👤 Welcome</h2>
+<h2 id="username">Welcome</h2>
 </div>
 
 <div class="nav-right">
-<button class="top-btn" onclick="openCustomize()">⚙ Customize</button>
-<button class="top-btn" onclick="openAdd()">➕ Add</button>
+<button class="top-btn" onclick="openCustomizer()">⚙ Customize</button>
+<button class="top-btn" onclick="openAddPopup()">➕ Add</button>
 </div>
 
 </div>
 
-<!-- DATE + COUNTDOWN -->
+<!-- CENTER -->
 <div class="today-bar">
-
-<div class="center-top" id="todayCenter">
-<h3>Loading Date...</h3>
-<p>Loading...</p>
+<h3 id="todayDate">Today</h3>
+<p id="countdownText">Loading...</p>
 </div>
 
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="dashboard-grid">
-<!-- widgets auto load from JS -->
-</div>
+<!-- GRID -->
+<div id="dashboardGrid" class="dashboard-grid"></div>
 
 </div>
 
-<!-- ================= ADD POPUP ================= -->
+<!-- ADD POPUP -->
 <div id="addPopup" class="popup-wrap">
-
-<div class="popup-box large-popup">
+<div class="popup-box">
 
 <div class="popup-head">
-<h3>➕ Add New</h3>
-<button class="close-x" onclick="closeAdd()">✕</button>
+<h3>Add New</h3>
+<button class="close-x" onclick="closeAddPopup()">✕</button>
 </div>
 
 <div class="type-grid">
 
-<div class="type-card" onclick="selectType('task')">
-📋
-<span>Task</span>
-</div>
-
-<div class="type-card" onclick="selectType('goal')">
-🎯
-<span>Goal</span>
-</div>
-
-<div class="type-card" onclick="selectType('mistake')">
-❌
-<span>Mistake</span>
-</div>
-
-<div class="type-card" onclick="selectType('insight')">
-🧠
-<span>Insight</span>
-</div>
-
-<div class="type-card" onclick="selectType('quest')">
-❓
-<span>Quest</span>
-</div>
-
-<div class="type-card" onclick="selectType('smart')">
-🚀
-<span>Smart Move</span>
-</div>
-
-</div>
-
-<hr style="border-color:rgba(255,255,255,.08);margin:18px 0;">
-
-<div id="addFields">
-<div class="small-muted">
-Choose what you want to add
-</div>
-</div>
+<div class="type-card" onclick="selectAddType('task')">📋<span>Task</span></div>
+<div class="type-card" onclick="selectAddType('goal')">🎯<span>Goal</span></div>
+<div class="type-card" onclick="selectAddType('mistakes')">❌<span>Mistake</span></div>
+<div class="type-card" onclick="selectAddType('insights')">🧠<span>Insight</span></div>
+<div class="type-card" onclick="selectAddType('quest')">❓<span>Quest</span></div>
+<div class="type-card" onclick="selectAddType('smartmoves')">🚀<span>Smart Move</span></div>
 
 </div>
 
 </div>
+</div>
 
-<!-- ================= CUSTOMIZE POPUP ================= -->
+<!-- CUSTOM -->
 <div id="customPopup" class="popup-wrap">
-
-<div class="popup-box large-popup">
-
-<div class="popup-head">
-<h3>⚙ Customize Dashboard</h3>
-<button class="close-x" onclick="closeCustomize()">✕</button>
-</div>
-
-<p class="small-muted">
-Choose widgets to show on your dashboard
-</p>
-
-<div class="check-grid">
-
-<label>
-<input type="checkbox" id="chkFocus" checked>
-Today Focus
-</label>
-
-<label>
-<input type="checkbox" id="chkTasks" checked>
-Today Tasks
-</label>
-
-<label>
-<input type="checkbox" id="chkGoals" checked>
-Goals
-</label>
-
-<label>
-<input type="checkbox" id="chkGrowth" checked>
-Growth Summary
-</label>
-
-<label>
-<input type="checkbox" id="chkCountdown" checked>
-Countdown
-</label>
-
-<label>
-<input type="checkbox" id="chkQuote" checked>
-Quote
-</label>
-
-</div>
-
-<div class="popup-actions">
-
-<button class="main-btn" onclick="saveCustomize()">
-💾 Save Layout
-</button>
-
-<button class="danger-btn" onclick="closeCustomize()">
-Cancel
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ADD THIS inside home.html just before </body> -->
-
-<!-- ================= ADD FORM POPUP ================= -->
-<div id="addFormPopup" class="popup-wrap">
-
 <div class="popup-box">
 
 <div class="popup-head">
-<h3 id="addFormTitle">➕ Add New</h3>
-<button class="close-x" onclick="closeAddForm()">✕</button>
+<h3>Customize</h3>
+<button class="close-x" onclick="closeCustomizer()">✕</button>
 </div>
 
-<input id="addText" placeholder="Enter text">
+<div class="check-grid">
 
-<input type="date" id="addDate">
+<label><input type="checkbox" value="focus" checked> Focus</label>
+<label><input type="checkbox" value="tasks" checked> Tasks</label>
+<label><input type="checkbox" value="quote" checked> Quote</label>
+<label><input type="checkbox" value="goals" checked> Goals</label>
+<label><input type="checkbox" value="growth" checked> Growth</label>
 
-<input type="time" id="addTime">
-
-<input id="goalTotal" type="number" placeholder="Goal Total (only for goals)" style="display:none;">
+</div>
 
 <div class="popup-actions">
-
-<button class="main-btn" onclick="saveAddForm()">
-💾 Save
-</button>
-
-<button class="danger-btn" onclick="closeAddForm()">
-Cancel
-</button>
-
+<button class="main-btn" onclick="saveLayout()">Save</button>
+<button class="danger-btn" onclick="closeCustomizer()">Cancel</button>
 </div>
 
 </div>
 </div>
 
-<!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
 <script type="module" src="js/menu.js"></script>
