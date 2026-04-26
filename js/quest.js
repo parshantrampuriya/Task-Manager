@@ -73,26 +73,27 @@ location.href="quest.html";
 };
 
 /* ================= ADD QUEST ================= */
-window.addQuest=async()=>{
+window.confirmTask = async()=>{
 
-let text=getEl("questInput").value.trim();
-let date=getEl("questDate").value;
+let date=getEl("taskDate").value;
+let time=getEl("taskTime").value || "00:00";
 
-if(!text) return toast("Enter text");
+if(!date) return toast("Select date");
 
-await addDoc(collection(db,"quest"),{
-uid:currentUser.uid,
-text:text,
-date:date,
-status:"Pending",
+await addDoc(collection(db,"tasks"),{
+text:taskQuestText,
+date,
+time,
+completed:false,
+user:currentUser.uid,
+
+fromQuest:true,
+questText:taskQuestText,
 createdAt:Date.now()
 });
 
-getEl("questInput").value="";
-
-toast("Saved ✅");
-
-loadQuest();
+closeTaskPopup();
+toast("Added To Tasks ✅");
 
 };
 
