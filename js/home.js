@@ -1,4 +1,4 @@
-// home.js
+// ================= HOME JS =================
 
 import { auth, db } from "./firebase.js";
 
@@ -12,20 +12,25 @@ doc,
 getDoc,
 setDoc,
 collection,
-getDocs
+getDocs,
+addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= GLOBAL ================= */
+const $ = (id)=>document.getElementById(id);
+
 let currentUser=null;
 
-let layout={
+let widgetState={
 tasks:true,
 goals:true,
-quest:true,
 mistakes:true,
-insight:true,
+insights:true,
+quest:true,
 countdown:true
 };
+
+let quickMode="task";
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
@@ -38,9 +43,11 @@ return;
 currentUser=user;
 
 await loadUser();
-await loadLayout();
-await renderDashboard();
-startCountdown();
+await loadWidgetState();
+
+setTodayBar();
+renderDashboard();
+startClock();
 
 });
 
@@ -53,8 +60,7 @@ doc(db,"users",currentUser.uid)
 
 if(snap.exists()){
 
-document.getElementById("username")
-.innerText=
+$("username").innerText=
 "👤 Welcome " +
 (snap.data().name || "User");
 
@@ -62,129 +68,123 @@ document.getElementById("username")
 
 }
 
-/* ================= LAYOUT ================= */
-async function loadLayout(){
+/* ================= DATE ================= */
+function setTodayBar(){
 
-const snap=await getDoc(
-doc(db,"dashboardSettings",currentUser.uid)
+let d=new Date();
+
+$("todayDate").innerText=
+d.toDateString();
+
+}
+
+/* ================= WIDGET SETTINGS ================= */
+async function loadWidgetState(){
+
+const ref=doc(
+db,
+"dashboardSettings",
+currentUser.uid
 );
+
+const snap=await getDoc(ref);
 
 if(snap.exists()){
 
-layout={
-...layout,
+widgetState={
+...widgetState,
 ...snap.data()
 };
 
 }
 
-/* checkbox sync */
 document
-.querySelectorAll("#customPanel input")
+.querySelectorAll("[data-widget]")
 .forEach(chk=>{
 
-chk.checked=layout[chk.dataset.id];
+chk.checked=
+widgetState[
+chk.dataset.widget
+];
 
 });
 
 }
 
-window.toggleCustomize=()=>{
-
-document
-.getElementById("customPanel")
-.classList.toggle("show");
-
+window.openCustomize=()=>{
+$("customPopup").classList.add("show");
 };
 
-window.saveLayout=async()=>{
+window.closeCustomize=()=>{
+$("customPopup").classList.remove("show");
+};
+
+window.saveWidgets=async()=>{
 
 document
-.querySelectorAll("#customPanel input")
+.querySelectorAll("[data-widget]")
 .forEach(chk=>{
 
-layout[chk.dataset.id]=chk.checked;
+widgetState[
+chk.dataset.widget
+]=chk.checked;
 
 });
 
 await setDoc(
 doc(db,"dashboardSettings",currentUser.uid),
-layout
+widgetState
 );
 
+closeCustomize();
+toast("Saved ✅");
 renderDashboard();
-toggleCustomize();
 
 };
 
 /* ================= DASHBOARD ================= */
-async function renderDashboard(){
+window.refreshDashboard=()=>{
+renderDashboard();
+toast("Refreshed 🔄");
+};
 
-const box=
-document.getElementById("dashboardGrid");
+async function renderDashboard(){
 
 let html="";
 
-if(layout.countdown){
+if(widgetState.tasks)
+html+=await tasksWidget();
 
-html+=`
-<div class="card">
-<h3>⏳ Countdown</h3>
-<div id="countdownLive"
-class="big-number">--</div>
-<div class="muted">
-Time remaining today
-</div>
-</div>
-`;
+if(widgetState.goals)
+html+=await goalsWidget();
 
-}
+if(widgetState.mistakes)
+html+=await mistakesWidget();
 
-if(layout.tasks){
+if(widgetState.insights)
+html+=await insightsWidget();
 
-html+=await taskCard();
+if(widgetState.quest)
+html+=await questWidget();
 
-}
+if(widgetState.countdown)
+html+=countdownWidget();
 
-if(layout.goals){
-
-html+=await goalsCard();
+$("dashboardGrid").innerHTML=html;
 
 }
 
-if(layout.quest){
-
-html+=await questCard();
-
-}
-
-if(layout.mistakes){
-
-html+=await mistakesCard();
-
-}
-
-if(layout.insight){
-
-html+=await insightCard();
-
-}
-
-box.innerHTML=html;
-
-}
-
-/* ================= TASK CARD ================= */
-async function taskCard(){
+/* ================= TASKS ================= */
+async function tasksWidget(){
 
 const snap=await getDocs(
 collection(db,"tasks")
 );
 
-const today=
-new Date().toLocaleDateString("en-CA");
+const today=new Date()
+.toLocaleDateString("en-CA");
 
-let arr=[];
+let rows="";
 
 snap.forEach(d=>{
 
@@ -194,39 +194,44 @@ if(
 x.user===currentUser.uid &&
 x.date===today
 ){
-arr.push(x);
+
+rows+=`
+<div class="item-row">
+<div class="item-left">
+<div class="item-title">${x.text}</div>
+<div class="item-sub">${x.time || ""}</div>
+</div>
+</div>
+`;
+
 }
 
 });
 
-let rows="";
-
-arr.slice(0,5).forEach(t=>{
-
-rows+=`
-<div class="task-row ${t.completed?'done':''}">
-<span>${t.text}</span>
-<span class="task-time">
-${t.time || ""}
-</span>
-</div>
-`;
-
-});
-
-if(!rows) rows=`<div class="empty">No tasks today</div>`;
+if(!rows)
+rows=`<div class="small-muted">No tasks today</div>`;
 
 return `
-<div class="card full">
-<h3>📅 Today Tasks</h3>
+<div class="widget-card full-card">
+
+<div class="card-head">
+<h3>📋 Today Tasks</h3>
+
+<div class="card-tools">
+<button class="icon-btn"
+onclick="openQuick('task')">＋</button>
+</div>
+</div>
+
 ${rows}
+
 </div>
 `;
 
 }
 
 /* ================= GOALS ================= */
-async function goalsCard(){
+async function goalsWidget(){
 
 const snap=await getDocs(
 collection(db,"goals")
@@ -245,18 +250,18 @@ let p=Math.round(
 );
 
 rows+=`
-<div class="goal-box">
+<div class="item-row">
+<div class="item-left">
+<div class="item-title">${g.name}</div>
 
-<div class="goal-top">
-<span>${g.name}</span>
-<span>${p}%</span>
-</div>
-
-<div class="goal-bar">
-<div class="goal-fill"
+<div class="progress">
+<div class="progress-fill"
 style="width:${p}%"></div>
 </div>
 
+</div>
+
+<div>${p}%</div>
 </div>
 `;
 
@@ -264,19 +269,103 @@ style="width:${p}%"></div>
 
 });
 
-if(!rows) rows=`<div class="empty">No goals</div>`;
+if(!rows)
+rows=`<div class="small-muted">No goals</div>`;
 
 return `
-<div class="card">
+<div class="widget-card">
+<div class="card-head">
 <h3>🎯 Goals</h3>
+</div>
 ${rows}
 </div>
 `;
 
 }
 
+/* ================= MISTAKES ================= */
+async function mistakesWidget(){
+
+const snap=await getDocs(
+collection(db,"mistakes")
+);
+
+let count=0;
+
+snap.forEach(d=>{
+if(d.data().uid===currentUser.uid)
+count++;
+});
+
+return `
+<div class="widget-card">
+
+<div class="card-head">
+
+<h3>❌ Mistakes</h3>
+
+<div class="card-tools">
+<button class="icon-btn"
+onclick="openQuick('mistake')">＋</button>
+</div>
+
+</div>
+
+<div class="big-number">${count}</div>
+<div class="small-muted">
+Total mistakes recorded
+</div>
+
+</div>
+`;
+
+}
+
+/* ================= INSIGHTS ================= */
+async function insightsWidget(){
+
+const snap=await getDocs(
+collection(db,"insights")
+);
+
+let latest="No insight added";
+
+snap.forEach(d=>{
+
+let x=d.data();
+
+if(x.uid===currentUser.uid)
+latest=x.text;
+
+});
+
+return `
+<div class="widget-card full-card">
+
+<div class="card-head">
+
+<h3>🧠 Insights</h3>
+
+<div class="card-tools">
+<button class="icon-btn"
+onclick="openQuick('insight')">＋</button>
+</div>
+
+</div>
+
+<div class="item-row">
+<div class="item-title">
+${latest}
+</div>
+</div>
+
+</div>
+`;
+
+}
+
 /* ================= QUEST ================= */
-async function questCard(){
+async function questWidget(){
 
 const snap=await getDocs(
 collection(db,"quest")
@@ -286,98 +375,68 @@ let pending=0;
 
 snap.forEach(d=>{
 
-let q=d.data();
-
-if(
-q.uid===currentUser.uid &&
-q.status==="Pending"
-){
-pending++;
-}
-
-});
-
-return `
-<div class="card">
-<h3>❓ Quest Pending</h3>
-<div class="big-number">${pending}</div>
-<div class="muted">
-Open doubts / topics
-</div>
-</div>
-`;
-
-}
-
-/* ================= MISTAKES ================= */
-async function mistakesCard(){
-
-const snap=await getDocs(
-collection(db,"mistakes")
-);
-
-let count=0;
-
-snap.forEach(d=>{
-
-let m=d.data();
-
-if(m.uid===currentUser.uid){
-count++;
-}
-
-});
-
-return `
-<div class="card">
-<h3>❌ Mistakes</h3>
-<div class="big-number">${count}</div>
-<div class="muted">
-Recorded mistakes
-</div>
-</div>
-`;
-
-}
-
-/* ================= INSIGHT ================= */
-async function insightCard(){
-
-const snap=await getDocs(
-collection(db,"insights")
-);
-
-let latest="No insights yet.";
-
-snap.forEach(d=>{
-
 let x=d.data();
 
-if(x.uid===currentUser.uid){
-latest=x.text;
-}
+if(
+x.uid===currentUser.uid &&
+x.status==="Pending"
+) pending++;
 
 });
 
 return `
-<div class="card full">
-<h3>🧠 Latest Insight</h3>
-<div class="quote-box">
-${latest}
+<div class="widget-card">
+
+<div class="card-head">
+
+<h3>❓ Quest</h3>
+
+<div class="card-tools">
+<button class="icon-btn"
+onclick="openQuick('quest')">＋</button>
 </div>
+
+</div>
+
+<div class="big-number">${pending}</div>
+
+<div class="small-muted">
+Pending questions
+</div>
+
 </div>
 `;
 
 }
 
 /* ================= COUNTDOWN ================= */
-function startCountdown(){
+function countdownWidget(){
+
+return `
+<div class="widget-card">
+
+<div class="card-head">
+<h3>⏳ Countdown</h3>
+</div>
+
+<div id="liveClock"
+class="big-number">--</div>
+
+<div class="small-muted">
+Today ends in
+</div>
+
+</div>
+`;
+
+}
+
+/* ================= CLOCK ================= */
+function startClock(){
 
 setInterval(()=>{
 
-const el=
-document.getElementById("countdownLive");
-
+let el=$("liveClock");
 if(!el) return;
 
 let now=new Date();
@@ -398,13 +457,112 @@ el.innerText=
 
 }
 
+/* ================= QUICK POPUP ================= */
+window.openQuick=(type)=>{
+
+quickMode=type;
+
+$("popupTitle").innerText=
+"Add " +
+type.charAt(0).toUpperCase() +
+type.slice(1);
+
+$("popupType").value=type;
+
+$("popupDate").value=
+new Date().toISOString()
+.split("T")[0];
+
+$("quickPopup")
+.classList.add("show");
+
+};
+
+window.closeQuickPopup=()=>{
+$("quickPopup")
+.classList.remove("show");
+};
+
+window.saveQuickItem=async()=>{
+
+let text=$("popupText").value.trim();
+
+if(!text) return toast("Enter text");
+
+let date=$("popupDate").value;
+let time=$("popupTime").value;
+
+if(quickMode==="task"){
+
+await addDoc(collection(db,"tasks"),{
+text,
+date,
+time:time || "00:00",
+completed:false,
+user:currentUser.uid
+});
+
+}
+
+if(quickMode==="mistake"){
+
+await addDoc(collection(db,"mistakes"),{
+text,
+date,
+uid:currentUser.uid,
+createdAt:Date.now()
+});
+
+}
+
+if(quickMode==="insight"){
+
+await addDoc(collection(db,"insights"),{
+text,
+date,
+uid:currentUser.uid,
+createdAt:Date.now()
+});
+
+}
+
+if(quickMode==="quest"){
+
+await addDoc(collection(db,"quest"),{
+text,
+date,
+uid:currentUser.uid,
+status:"Pending",
+createdAt:Date.now()
+});
+
+}
+
+$("popupText").value="";
+closeQuickPopup();
+toast("Saved ✅");
+renderDashboard();
+
+};
+
+/* ================= TOAST ================= */
+function toast(msg){
+
+$("toast").innerText=msg;
+$("toast").classList.add("show");
+
+setTimeout(()=>{
+$("toast").classList.remove("show");
+},1800);
+
+}
+
 /* ================= LOGOUT ================= */
-const btn=
-document.getElementById("logoutBtn");
+const logoutBtn=$("logoutBtn");
 
-if(btn){
+if(logoutBtn){
 
-btn.onclick=async()=>{
+logoutBtn.onclick=async()=>{
 
 await signOut(auth);
 location.href="index.html";
