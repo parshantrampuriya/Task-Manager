@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Ultimate Dashboard</title>
 
-<link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/home.css">
 
 <link rel="icon" href="data:,">
-</head>
 
+</head>
 <body>
 
 <!-- ================= SIDEBAR ================= -->
@@ -33,76 +35,241 @@
 <!-- ================= MAIN ================= -->
 <div class="main">
 
-<!-- TOPBAR -->
+<!-- TOP NAV -->
 <div class="navbar">
+
+<div class="nav-left">
 
 <button class="menu-btn"
 onclick="toggleSidebar()">☰</button>
 
-<div class="nav-center">
-<h2 id="username">👤 Loading...</h2>
-<p id="todayDate">Loading...</p>
+<h2 id="username">
+👤 Welcome...
+</h2>
+
 </div>
 
 <div class="nav-right">
 
-<button class="nav-btn"
+<button class="top-btn add-btn"
+onclick="openAddPopup()">
+➕ Add
+</button>
+
+<button class="top-btn"
 onclick="openCustomize()">
-⚙ Widgets
-</button>
-
-<button class="nav-btn"
-onclick="refreshDashboard()">
-⟳ Refresh
+⚙ Customize
 </button>
 
 </div>
 
 </div>
 
-<!-- HERO -->
-<div class="hero-box">
+<!-- TODAY BAR -->
+<div class="today-bar">
 
-<h1>🚀 Personal Command Center</h1>
+<div>
+<h3>📅 Today</h3>
+<p id="todayDate">Loading...</p>
+</div>
 
-<p>
-Track tasks, goals, mistakes, insights, doubts and progress from one place.
-</p>
+<div class="today-actions">
+
+<button class="mini-btn"
+onclick="morningMode()">
+🌅 Start Day
+</button>
+
+<button class="mini-btn"
+onclick="nightReview()">
+🌙 Review
+</button>
+
+</div>
 
 </div>
 
 <!-- DASHBOARD GRID -->
-<div id="dashboardGrid" class="dashboard-grid">
+<div id="dashboardGrid"
+class="dashboard-grid">
 
-<!-- JS inject widgets -->
+<!-- JS render -->
+
+</div>
+
+</div>
+
+<!-- ================= GLOBAL ADD POPUP ================= -->
+<div id="addPopup"
+class="popup-wrap">
+
+<div class="popup-box large-popup">
+
+<div class="popup-head">
+
+<h3 id="popupMainTitle">
+➕ Add New
+</h3>
+
+<button class="close-x"
+onclick="closeAddPopup()">
+✕
+</button>
+
+</div>
+
+<!-- STEP 1 -->
+<div id="typeSelect">
+
+<div class="type-grid">
+
+<div class="type-card"
+onclick="selectAddType('task')">
+📋
+<span>Task</span>
+</div>
+
+<div class="type-card"
+onclick="selectAddType('goal')">
+🎯
+<span>Goal</span>
+</div>
+
+<div class="type-card"
+onclick="selectAddType('mistake')">
+❌
+<span>Mistake</span>
+</div>
+
+<div class="type-card"
+onclick="selectAddType('insight')">
+🧠
+<span>Insight</span>
+</div>
+
+<div class="type-card"
+onclick="selectAddType('quest')">
+❓
+<span>Quest</span>
+</div>
+
+</div>
+
+</div>
+
+<!-- STEP 2 FORM -->
+<div id="dynamicForm"
+style="display:none;">
+
+<input id="addText"
+placeholder="Write here...">
+
+<input type="date"
+id="addDate">
+
+<input type="time"
+id="addTime">
+
+<input type="number"
+id="addTarget"
+placeholder="Target (for goals only)">
+
+<select id="addPriority">
+<option value="Normal">Normal</option>
+<option value="High">High</option>
+<option value="Urgent">Urgent</option>
+</select>
+
+<div class="popup-actions">
+
+<button class="main-btn"
+onclick="saveGlobalItem()">
+💾 Save
+</button>
+
+<button class="danger-btn"
+onclick="backToTypes()">
+⬅ Back
+</button>
+
+</div>
+
+</div>
 
 </div>
 
 </div>
 
 <!-- ================= CUSTOMIZE POPUP ================= -->
-<div id="customPopup" class="popup-wrap">
+<div id="customPopup"
+class="popup-wrap">
 
-<div class="popup-box big-popup">
+<div class="popup-box large-popup">
 
 <div class="popup-head">
+
 <h3>⚙ Customize Dashboard</h3>
-<button onclick="closeCustomize()">✖</button>
+
+<button class="close-x"
+onclick="closeCustomize()">
+✕
+</button>
+
 </div>
 
-<div class="widget-list">
+<p class="small-muted">
+Select widgets to show on dashboard
+</p>
 
-<label><input type="checkbox" data-widget="tasks" checked> 📋 Tasks Widget</label>
+<div class="check-grid">
 
-<label><input type="checkbox" data-widget="goals" checked> 🎯 Goals Widget</label>
+<label>
+<input type="checkbox"
+data-widget="focus">
+ Today Focus
+</label>
 
-<label><input type="checkbox" data-widget="mistakes" checked> ❌ Mistakes Widget</label>
+<label>
+<input type="checkbox"
+data-widget="tasks">
+ Today Tasks
+</label>
 
-<label><input type="checkbox" data-widget="insights" checked> 🧠 Insights Widget</label>
+<label>
+<input type="checkbox"
+data-widget="goals">
+ Goals
+</label>
 
-<label><input type="checkbox" data-widget="quest" checked> ❓ Quest Widget</label>
+<label>
+<input type="checkbox"
+data-widget="mistakes">
+ Mistakes
+</label>
 
-<label><input type="checkbox" data-widget="countdown" checked> ⏳ Countdown Widget</label>
+<label>
+<input type="checkbox"
+data-widget="insights">
+ Insights
+</label>
+
+<label>
+<input type="checkbox"
+data-widget="quest">
+ Quest
+</label>
+
+<label>
+<input type="checkbox"
+data-widget="countdown">
+ Countdown
+</label>
+
+<label>
+<input type="checkbox"
+data-widget="quote">
+ Quote
+</label>
 
 </div>
 
@@ -124,37 +291,33 @@ Cancel
 
 </div>
 
-<!-- ================= QUICK ADD POPUP ================= -->
-<div id="quickPopup" class="popup-wrap">
+<!-- ================= REVIEW POPUP ================= -->
+<div id="reviewPopup"
+class="popup-wrap">
 
 <div class="popup-box">
 
-<h3 id="popupTitle">Add Item</h3>
+<h3>🌙 Night Review</h3>
 
-<input id="popupText" placeholder="Enter text">
+<input id="reviewDone"
+placeholder="What completed today?">
 
-<input type="date" id="popupDate">
+<input id="reviewMistake"
+placeholder="Any mistake today?">
 
-<input type="time" id="popupTime">
-
-<select id="popupType">
-<option value="task">Task</option>
-<option value="mistake">Mistake</option>
-<option value="insight">Insight</option>
-<option value="quest">Quest</option>
-<option value="goal">Goal</option>
-</select>
+<input id="reviewInsight"
+placeholder="What learned today?">
 
 <div class="popup-actions">
 
 <button class="main-btn"
-onclick="saveQuickItem()">
-Save
+onclick="submitReview()">
+Submit
 </button>
 
 <button class="danger-btn"
-onclick="closeQuickPopup()">
-Cancel
+onclick="closeReview()">
+Close
 </button>
 
 </div>
@@ -166,8 +329,12 @@ Cancel
 <!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
-<script type="module" src="js/menu.js"></script>
-<script type="module" src="js/home.js"></script>
+<!-- ================= JS ================= -->
+<script type="module"
+src="js/menu.js"></script>
+
+<script type="module"
+src="js/home.js"></script>
 
 </body>
 </html>
