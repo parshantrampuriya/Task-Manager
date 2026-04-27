@@ -1,4 +1,4 @@
-/* home.js FINAL CLEAN WORKING */
+/* home.js FINAL UPDATED (sync resize + layout across phone/laptop) */
 
 import { auth, db } from "./firebase.js";
 
@@ -14,6 +14,7 @@ getDoc,
 getDocs,
 addDoc,
 updateDoc,
+setDoc,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -31,9 +32,8 @@ quest:0,
 smartmoves:0
 };
 
-let layout =
-JSON.parse(localStorage.getItem("dashLayout")) ||
-["focus","tasks","quote","goals","growth"];
+let layout = ["focus","tasks","quote","goals","growth"];
+let widgetSizes = {};
 
 /* ========= AUTH ========= */
 onAuthStateChanged(auth, async(user)=>{
@@ -45,18 +45,53 @@ return;
 
 uid = user.uid;
 
+/* user name */
 const snap = await getDoc(doc(db,"users",uid));
-
 if(snap.exists()){
 $("username").innerText =
 "Welcome " + (snap.data().name || "");
 }
+
+/* load dashboard settings from cloud */
+await loadDashboardSettings();
 
 setDate();
 startTimer();
 loadLive();
 
 });
+
+/* ========= CLOUD SETTINGS ========= */
+async function loadDashboardSettings(){
+
+const snap = await getDoc(doc(db,"dashboardSettings",uid));
+
+if(snap.exists()){
+
+const d = snap.data();
+
+if(Array.isArray(d.layout))
+layout = d.layout;
+
+if(d.widgetSizes)
+widgetSizes = d.widgetSizes;
+
+}
+
+}
+
+async function saveDashboardSettings(){
+
+await setDoc(
+doc(db,"dashboardSettings",uid),
+{
+layout:layout,
+widgetSizes:widgetSizes
+},
+{merge:true}
+);
+
+}
 
 /* ========= DATE ========= */
 function setDate(){
@@ -70,7 +105,6 @@ setInterval(()=>{
 
 const now = new Date();
 const end = new Date();
-
 end.setHours(23,59,59,999);
 
 const diff = end-now;
@@ -91,11 +125,12 @@ function loadLive(){
 
 onSnapshot(collection(db,"tasks"), snap=>{
 
-tasks = [];
+tasks=[];
 
 snap.forEach(d=>{
 let x=d.data();
-if(x.user===uid) tasks.push({id:d.id,...x});
+if(x.user===uid)
+tasks.push({id:d.id,...x});
 });
 
 render();
@@ -104,11 +139,12 @@ render();
 
 onSnapshot(collection(db,"goals"), snap=>{
 
-goals = [];
+goals=[];
 
 snap.forEach(d=>{
 let x=d.data();
-if(x.user===uid) goals.push(x);
+if(x.user===uid)
+goals.push(x);
 });
 
 render();
@@ -121,17 +157,10 @@ loadCounts();
 
 async function loadCounts(){
 
-counts.mistakes =
-await getCollectionCount("mistakes");
-
-counts.insights =
-await getCollectionCount("insights");
-
-counts.quest =
-await getCollectionCount("quest");
-
-counts.smartmoves =
-await getCollectionCount("smartmoves");
+counts.mistakes = await getCollectionCount("mistakes");
+counts.insights = await getCollectionCount("insights");
+counts.quest = await getCollectionCount("quest");
+counts.smartmoves = await getCollectionCount("smartmoves");
 
 render();
 
@@ -141,7 +170,7 @@ async function getCollectionCount(name){
 
 const snap = await getDocs(collection(db,name));
 
-let c = 0;
+let c=0;
 
 snap.forEach(d=>{
 if(d.data().uid===uid) c++;
@@ -155,7 +184,6 @@ return c;
 function render(){
 
 const grid = $("dashboardGrid");
-
 grid.innerHTML = "";
 
 layout.forEach(type=>{
@@ -168,63 +196,62 @@ if(type==="growth") grid.appendChild(growthCard());
 
 });
 
-enableDrag();
+enableDragAndResize();
 
 }
 
-/* ========= BASE ========= */
-function makeCard(title, id, wide=false){
+/* ========= BASE CARD ========= */
+function makeCard(title,id,wide=false){
 
 const div = document.createElement("div");
 
 div.className =
 "widget-card " + (wide ? "full-card":"");
 
-div.draggable = true;
-div.dataset.id = id;
+div.dataset.id=id;
+div.draggable=true;
 
-div.innerHTML = `
+div.innerHTML=`
 <div class="card-head">
 <h3>${title}</h3>
 </div>
 <div class="widget-body"></div>
 `;
 
-return div;
+/* apply saved size */
+if(widgetSizes[id]){
+div.style.width = widgetSizes[id].width || "";
+div.style.height = widgetSizes[id].height || "";
 }
 
-/* ========= FOCUS ========= */
+return div;
+
+}
+
+/* ========= WIDGETS ========= */
+
 function focusCard(){
 
 const card = makeCard("📊 Today Focus","focus");
 
 const today = getTodayTasks();
 
-const done =
-today.filter(x=>x.completed).length;
-
+const done = today.filter(x=>x.completed).length;
 const total = today.length;
 
-const p = total ?
-Math.round(done*100/total):0;
+const p = total ? Math.round(done*100/total):0;
 
-card.querySelector(".widget-body").innerHTML = `
+card.querySelector(".widget-body").innerHTML=`
 <div class="big-number">${p}%</div>
-
 <div class="progress">
-<div class="progress-fill"
-style="width:${p}%"></div>
+<div class="progress-fill" style="width:${p}%"></div>
 </div>
-
-<div class="small-muted">
-${done}/${total} completed
-</div>
+<div class="small-muted">${done}/${total} completed</div>
 `;
 
 return card;
 }
 
-/* ========= TASKS ========= */
 function taskCard(){
 
 const card = makeCard("📋 Today Tasks","tasks",true);
@@ -232,19 +259,17 @@ const card = makeCard("📋 Today Tasks","tasks",true);
 let arr = getTodayTasks();
 
 arr.sort((a,b)=>{
-
 if(a.completed!==b.completed)
 return a.completed ? 1 : -1;
 
 return (a.time||"").localeCompare(b.time||"");
-
 });
 
-let html = "";
+let html="";
 
 arr.forEach(x=>{
 
-html += `
+html+=`
 <div class="task-row ${x.completed?'task-done':''}">
 
 <div class="task-left">
@@ -268,19 +293,16 @@ html || "No task";
 return card;
 }
 
-/* ========= QUOTE ========= */
 function quoteCard(){
 
 const q = [
 "Discipline today creates freedom tomorrow.",
 "Small progress daily beats excuses.",
-"Win the morning win the day.",
 "Consistency creates success.",
 "Action cures fear."
 ];
 
-const text =
-q[Math.floor(Math.random()*q.length)];
+const text = q[Math.floor(Math.random()*q.length)];
 
 const card = makeCard("💬 Quote","quote");
 
@@ -290,30 +312,27 @@ card.querySelector(".widget-body").innerHTML =
 return card;
 }
 
-/* ========= GOALS ========= */
 function goalCard(){
 
 const card = makeCard("🎯 Goals","goals");
 
-let html = "";
+let html="";
 
 goals.forEach(g=>{
 
-const done = Number(g.done || 0);
-const total = Number(g.total || 0);
+const done = Number(g.done||0);
+const total = Number(g.total||0);
 
 const p = total>0 ?
-Math.round((done/total)*100) : 0;
+Math.round((done/total)*100):0;
 
-html += `
+html+=`
 <div class="goal-row">
 <div>${g.name} - ${p}%</div>
 
 <div class="goal-bar">
-<div class="goal-fill"
-style="width:${p}%"></div>
+<div class="goal-fill" style="width:${p}%"></div>
 </div>
-
 </div>
 `;
 
@@ -325,13 +344,11 @@ html || "No goals";
 return card;
 }
 
-/* ========= GROWTH ========= */
 function growthCard(){
 
-const card =
-makeCard("🌱 Growth Summary","growth");
+const card = makeCard("🌱 Growth Summary","growth");
 
-card.querySelector(".widget-body").innerHTML = `
+card.querySelector(".widget-body").innerHTML=`
 <div class="summary-row"><span>Mistakes</span><b>${counts.mistakes}</b></div>
 <div class="summary-row"><span>Insights</span><b>${counts.insights}</b></div>
 <div class="summary-row"><span>Quest</span><b>${counts.quest}</b></div>
@@ -351,7 +368,7 @@ return tasks.filter(x=>x.date===today);
 
 }
 
-/* ========= TASK TOGGLE ========= */
+/* ========= TASK ========= */
 window.toggleTask = async(id,val)=>{
 
 await updateDoc(doc(db,"tasks",id),{
@@ -385,9 +402,7 @@ time:"00:00",
 completed:false
 });
 
-}
-
-else if(type==="goal"){
+}else if(type==="goal"){
 
 await addDoc(collection(db,"goals"),{
 user:uid,
@@ -396,9 +411,7 @@ done:0,
 total:10
 });
 
-}
-
-else{
+}else{
 
 await addDoc(collection(db,type),{
 uid:uid,
@@ -421,7 +434,7 @@ window.closeCustomizer=()=>{
 $("customPopup").classList.remove("show");
 };
 
-window.saveLayout=()=>{
+window.saveLayout = async()=>{
 
 let arr=[];
 
@@ -433,48 +446,59 @@ if(x.checked) arr.push(x.value);
 
 layout = arr;
 
-localStorage.setItem(
-"dashLayout",
-JSON.stringify(layout)
-);
+await saveDashboardSettings();
 
 closeCustomizer();
 render();
 
 };
 
-/* ========= DRAG ========= */
-function enableDrag(){
+/* ========= DRAG + RESIZE ========= */
+function enableDragAndResize(){
 
-let drag = null;
+let drag=null;
 
 document.querySelectorAll(".widget-card")
 .forEach(card=>{
 
+/* drag */
 card.addEventListener("dragstart",()=>{
-drag = card;
+drag=card;
 });
 
 card.addEventListener("dragover",e=>{
 e.preventDefault();
 });
 
-card.addEventListener("drop",()=>{
+card.addEventListener("drop",async()=>{
 
 if(drag===card) return;
 
-$("dashboardGrid")
-.insertBefore(drag,card);
+$("dashboardGrid").insertBefore(drag,card);
 
-saveOrder();
+await saveOrder();
 
 });
+
+/* resize observer */
+const ro = new ResizeObserver(async()=>{
+
+widgetSizes[card.dataset.id]={
+width:card.style.width || getComputedStyle(card).width,
+height:card.style.height || getComputedStyle(card).height
+};
+
+await saveDashboardSettings();
+
+});
+
+ro.observe(card);
 
 });
 
 }
 
-function saveOrder(){
+async function saveOrder(){
 
 layout=[];
 
@@ -483,10 +507,7 @@ document.querySelectorAll(".widget-card")
 layout.push(x.dataset.id);
 });
 
-localStorage.setItem(
-"dashLayout",
-JSON.stringify(layout)
-);
+await saveDashboardSettings();
 
 }
 
