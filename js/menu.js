@@ -1,36 +1,56 @@
-/* ================= FINAL js/menu.js ================= */
+/* ================= VIEW MODE CHECK ================= */
+
+function getViewUser(){
+
+const url =
+new URLSearchParams(location.search);
+
+return url.get("viewUser");
+
+}
+
+const viewUser = getViewUser();
+
+/* ================= PAGE OPEN ================= */
+
+function openPage(page){
+
+if(viewUser){
+
+location.href =
+page + "?viewUser=" + viewUser;
+
+}else{
+
+location.href = page;
+
+}
+
+}
 
 /* ================= NAVIGATION ================= */
 
-window.goHome = () =>
-location.href = "home.html";
+window.goHome=()=>openPage("home.html");
 
-window.goTasks = () =>
-location.href = "tasks.html";
+window.goTasks=()=>openPage("tasks.html");
 
-window.goGoals = () =>
-location.href = "goals.html";
+window.goGoals=()=>openPage("goals.html");
 
-window.goFriends = () =>
-location.href = "friends.html";
+window.goFriends=()=>location.href="friends.html";
 
-window.goQuestionBank = () =>
-location.href = "question-bank.html";
+window.goQuestionBank=()=>openPage("question-bank.html");
 
-window.goTests = () =>
-location.href = "tests.html";
+window.goTests=()=>openPage("tests.html");
 
-window.goGrowth = () =>
-location.href = "growth.html";
+window.goGrowth=()=>openPage("growth.html");
 
-window.goProfile = () =>
-location.href = "profile.html";
+window.goProfile=()=>openPage("profile.html");
 
 /* ================= SIDEBAR ================= */
 
-window.toggleSidebar = () => {
+window.toggleSidebar=()=>{
 
-const sidebar =
+const sidebar=
 document.getElementById("sidebar");
 
 if(sidebar){
@@ -39,14 +59,14 @@ sidebar.classList.toggle("active");
 
 };
 
-/* ================= CLICK OUTSIDE CLOSE ================= */
+/* ================= CLICK OUTSIDE ================= */
 
 document.addEventListener("click",(e)=>{
 
-const sidebar =
+const sidebar=
 document.getElementById("sidebar");
 
-const menuBtn =
+const menuBtn=
 document.querySelector(".menu-btn");
 
 if(!sidebar || !menuBtn) return;
@@ -61,96 +81,97 @@ sidebar.classList.remove("active");
 
 });
 
-/* ================= ACTIVE PAGE ================= */
+/* ================= LOAD ================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const page =
-window.location.pathname
+highlightPage();
+buildReturnButton();
+
+});
+
+/* ================= ACTIVE BUTTON ================= */
+
+function highlightPage(){
+
+const page=
+location.pathname
 .split("/")
 .pop()
 .toLowerCase();
 
-const buttons =
-document.querySelectorAll("#sidebar button");
+document
+.querySelectorAll("#sidebar button")
+.forEach(btn=>{
 
-buttons.forEach(btn=>{
-
-const txt =
+let txt=
 btn.innerText.toLowerCase();
 
-let active = false;
+let active=false;
 
-if(
-(page === "" || page.includes("home")) &&
-txt.includes("home")
-) active = true;
-
-if(
-page.includes("tasks") &&
-txt.includes("tasks")
-) active = true;
-
-if(
-page.includes("goals") &&
-txt.includes("goals")
-) active = true;
-
-if(
-page.includes("friends") &&
-txt.includes("friends")
-) active = true;
-
-if(
-page.includes("question") &&
-txt.includes("question")
-) active = true;
-
-if(
-page.includes("tests") &&
-txt.includes("tests")
-) active = true;
-
-if(
-page.includes("mistakes") &&
-txt.includes("mistakes")
-) active = true;
-
-if(
-page.includes("profile") &&
-txt.includes("profile")
-) active = true;
+if(page.includes("home") && txt.includes("home")) active=true;
+if(page.includes("tasks") && txt.includes("tasks")) active=true;
+if(page.includes("goals") && txt.includes("goals")) active=true;
+if(page.includes("friends") && txt.includes("friends")) active=true;
+if(page.includes("question") && txt.includes("question")) active=true;
+if(page.includes("tests") && txt.includes("tests")) active=true;
+if(page.includes("growth") && txt.includes("growth")) active=true;
+if(page.includes("profile") && txt.includes("profile")) active=true;
 
 if(active){
 
-btn.style.background =
+btn.style.background=
 "linear-gradient(45deg,#00cfff,#00ffcc)";
 
-btn.style.color = "#000";
-
-btn.style.fontWeight = "700";
+btn.style.color="#000";
+btn.style.fontWeight="700";
 
 }
 
 });
 
-});
+}
+
+/* ================= RETURN BUTTON ================= */
+
+function buildReturnButton(){
+
+if(!viewUser) return;
+
+const nav=
+document.querySelector(".navbar");
+
+if(!nav) return;
+
+const btn=
+document.createElement("button");
+
+btn.innerText="↩ My Account";
+btn.className="top-btn";
+
+btn.onclick=()=>{
+location.href="friends.html";
+};
+
+nav.appendChild(btn);
+
+}
 
 /* ================= LOGOUT ================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const logout =
+const logout=
 document.getElementById("logoutBtn");
 
 if(logout){
 
-logout.onclick = ()=>{
+logout.onclick=()=>{
 
 localStorage.clear();
 sessionStorage.clear();
 
-location.href = "index.html";
+location.href="index.html";
 
 };
 
