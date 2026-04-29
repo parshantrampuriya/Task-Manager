@@ -15,7 +15,7 @@ getDocs,
 getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= DOM ================= */
+/* ================= SAFE DOM ================= */
 const username = document.getElementById("username");
 const goalContainer = document.getElementById("goalContainer");
 const goalName = document.getElementById("goalName");
@@ -36,7 +36,7 @@ let goals = [];
 let currentIndex = null;
 let currentMode = null;
 
-/* VIEW MODE */
+/* ================= VIEW MODE ================= */
 const params = new URLSearchParams(location.search);
 const viewUser = params.get("viewUser");
 
@@ -49,14 +49,14 @@ let friendPermission = null;
 onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
-window.location.href="index.html";
+location.href = "index.html";
 return;
 }
 
 currentUser = user;
 realUid = user.uid;
 
-/* friend mode */
+/* mode */
 if(viewUser){
 uid = viewUser;
 isViewMode = true;
@@ -64,22 +64,32 @@ isViewMode = true;
 uid = realUid;
 }
 
-/* user name */
+/* username */
 const snap = await getDoc(doc(db,"users",uid));
 
 if(snap.exists()){
 
 const name = snap.data().name || "User";
 
+if(username){
+
+if(isViewMode){
+username.innerText = "👀 Viewing " + name;
+}else{
+username.innerText = "👤 Welcome " + name;
+}
+
+}
+
+}
+
+/* permission */
 if(isViewMode){
 
-username.innerText = "👀 Viewing " + name;
-
-/* permission check */
 const allowed = await checkFriendPermission();
 
 if(!allowed){
-showBlockedPage(name);
+showBlockedPage();
 return;
 }
 
@@ -87,25 +97,21 @@ hideControls();
 
 }else{
 
-username.innerText = "👤 Welcome " + name;
-
-}
-
-}
-
-/* normal add button */
-if(!isViewMode && addBtn){
+if(addBtn){
 addBtn.addEventListener("click", addGoal);
+}
+
 }
 
 loadGoals();
 
 });
 
-/* ================= PERMISSION ================= */
+/* ================= FRIEND CHECK ================= */
 async function checkFriendPermission(){
 
-const snap = await getDocs(collection(db,"friends"));
+const snap =
+await getDocs(collection(db,"friends"));
 
 for(const d of snap.docs){
 
@@ -131,34 +137,34 @@ return false;
 }
 
 /* ================= BLOCK PAGE ================= */
-function showBlockedPage(name){
+function showBlockedPage(){
+
+if(!goalContainer) return;
 
 goalContainer.innerHTML = `
 <div style="
-padding:60px 30px;
+padding:60px;
 text-align:center;
 background:#111827;
 border-radius:18px;
-box-shadow:0 0 25px rgba(0,255,255,.15);
+margin-top:20px;
 ">
 
 <div style="font-size:60px;">🔒</div>
 
-<h2 style="margin-top:15px;">
-${name} blocked this page
-</h2>
+<h2>This page is blocked</h2>
 
-<p style="opacity:.8;margin-top:10px;">
-Your friend has restricted access.
+<p style="opacity:.8;">
+Your friend restricted access.
 </p>
 
 <button onclick="location.href='home.html'"
 style="
-margin-top:25px;
-padding:14px 24px;
+margin-top:20px;
+padding:12px 24px;
 border:none;
-border-radius:14px;
-font-weight:700;
+border-radius:12px;
+font-weight:bold;
 cursor:pointer;
 background:linear-gradient(45deg,#00eaff,#00ff9d);
 ">
@@ -170,13 +176,13 @@ background:linear-gradient(45deg,#00eaff,#00ff9d);
 
 }
 
-/* ================= HIDE CONTROLS ================= */
+/* ================= HIDE ================= */
 function hideControls(){
 
-if(goalName) goalName.style.display = "none";
-if(goalTotal) goalTotal.style.display = "none";
-if(goalDeadline) goalDeadline.style.display = "none";
-if(addBtn) addBtn.style.display = "none";
+if(goalName) goalName.style.display="none";
+if(goalTotal) goalTotal.style.display="none";
+if(goalDeadline) goalDeadline.style.display="none";
+if(addBtn) addBtn.style.display="none";
 
 }
 
@@ -209,7 +215,7 @@ goals.sort((a,b)=>
 render();
 
 if(!isViewMode){
-setTimeout(enableDrag,0);
+setTimeout(enableDrag,100);
 }
 
 });
@@ -221,9 +227,9 @@ async function addGoal(){
 
 if(isViewMode) return;
 
-let name = goalName.value.trim();
-let total = Number(goalTotal.value);
-let deadline = goalDeadline.value;
+let name = goalName?.value.trim();
+let total = Number(goalTotal?.value);
+let deadline = goalDeadline?.value;
 
 if(!name || !total){
 alert("Enter name & total");
@@ -239,23 +245,23 @@ user:realUid,
 order:Date.now()
 });
 
-goalName.value = "";
-goalTotal.value = "";
-goalDeadline.value = "";
+goalName.value="";
+goalTotal.value="";
+goalDeadline.value="";
 
 }
 
 /* ================= RENDER ================= */
 function render(){
 
+if(!goalContainer) return;
+
 let html = "";
 
 goals.forEach((g,i)=>{
 
-let percent = Math.min(
-(g.done / g.total) * 100,
-100
-);
+let percent =
+Math.min((g.done/g.total)*100,100);
 
 html += `
 <div class="goal-card"
@@ -266,8 +272,7 @@ data-id="${g.id}">
 
 <p>${g.done} / ${g.total}</p>
 
-${g.deadline ?
-`<small>⏳ ${g.deadline}</small>` : ""}
+${g.deadline ? `<small>⏳ ${g.deadline}</small>` : ""}
 
 <div class="progress-bar">
 <div class="fill"
@@ -279,21 +284,13 @@ style="width:${percent}%">
 
 ${!isViewMode ? `
 
-<button onclick="openModal('progress',${i})">
-➕ Add
-</button>
+<button onclick="openModal('progress',${i})">➕ Add</button>
 
-<button onclick="openModal('set',${i})">
-✏️ Edit Progress
-</button>
+<button onclick="openModal('set',${i})">✏️ Edit Progress</button>
 
-<button onclick="openModal('edit',${i})">
-Edit Goal
-</button>
+<button onclick="openModal('edit',${i})">Edit Goal</button>
 
-<button onclick="deleteGoal('${g.id}')">
-Delete
-</button>
+<button onclick="deleteGoal('${g.id}')">Delete</button>
 
 ` : ""}
 
@@ -320,32 +317,26 @@ let dragItem = null;
 items.forEach(item=>{
 
 item.addEventListener("dragstart",()=>{
-
-dragItem = item;
-item.style.opacity = "0.5";
-
+dragItem=item;
+item.style.opacity="0.5";
 });
 
 item.addEventListener("dragend",()=>{
-
-item.style.opacity = "1";
-
+item.style.opacity="1";
 });
 
-item.addEventListener(
-"dragover",
+item.addEventListener("dragover",
 e=>e.preventDefault()
 );
 
-item.addEventListener(
-"drop",
+item.addEventListener("drop",
 async e=>{
 
 e.preventDefault();
 
-if(dragItem !== item){
+if(dragItem!==item){
 
-let list = item.parentNode;
+let list=item.parentNode;
 
 if(
 [...list.children].indexOf(dragItem)
@@ -363,17 +354,14 @@ item
 );
 }
 
-let updated = [...list.children];
+let updated =
+[...list.children];
 
 for(let i=0;i<updated.length;i++){
 
-let id = updated[i].dataset.id;
-
 await updateDoc(
-doc(db,"goals",id),
-{
-order:i
-}
+doc(db,"goals",updated[i].dataset.id),
+{ order:i }
 );
 
 }
@@ -387,90 +375,89 @@ order:i
 }
 
 /* ================= MODAL ================= */
-window.openModal = (mode,index)=>{
+window.openModal=(mode,index)=>{
 
 if(isViewMode) return;
+if(!modal) return;
 
-currentIndex = index;
-currentMode = mode;
+currentIndex=index;
+currentMode=mode;
 
-let g = goals[index];
+let g=goals[index];
 
 modal.classList.add("active");
 
-if(mode === "progress"){
+if(mode==="progress"){
 
-modalTitle.innerText = "Add Progress";
+modalTitle.innerText="Add Progress";
 
-modalName.style.display = "none";
-modalDate.style.display = "none";
-modalInput.value = "";
+modalName.style.display="none";
+modalDate.style.display="none";
+modalInput.value="";
 
 }
 
-else if(mode === "set"){
+else if(mode==="set"){
 
-modalTitle.innerText =
+modalTitle.innerText=
 "Set Progress Value";
 
-modalName.style.display = "none";
-modalDate.style.display = "none";
-modalInput.value = g.done;
+modalName.style.display="none";
+modalDate.style.display="none";
+modalInput.value=g.done;
 
 }
 
 else{
 
-modalTitle.innerText = "Edit Goal";
+modalTitle.innerText="Edit Goal";
 
-modalName.style.display = "block";
-modalDate.style.display = "block";
+modalName.style.display="block";
+modalDate.style.display="block";
 
-modalName.value = g.name;
-modalInput.value = g.total;
-modalDate.value = g.deadline || "";
+modalName.value=g.name;
+modalInput.value=g.total;
+modalDate.value=g.deadline || "";
 
 }
 
 };
 
-window.closeModal = ()=>{
+window.closeModal=()=>{
+
+if(modal){
 modal.classList.remove("active");
+}
+
 };
 
 /* ================= SAVE ================= */
-window.saveModal = async()=>{
+window.saveModal=async()=>{
 
 if(isViewMode) return;
 
-let g = goals[currentIndex];
+let g=goals[currentIndex];
 
-if(currentMode === "progress"){
+if(currentMode==="progress"){
 
-let val = Number(modalInput.value);
-
+let val=Number(modalInput.value);
 if(!val) return;
 
 await updateDoc(
 doc(db,"goals",g.id),
-{
-done:g.done + val
-}
+{ done:g.done + val }
 );
 
 }
 
-else if(currentMode === "set"){
+else if(currentMode==="set"){
 
-let val = Number(modalInput.value);
-
-if(val < 0) return;
+let val=Number(modalInput.value);
+if(val<0) return;
 
 await updateDoc(
 doc(db,"goals",g.id),
-{
-done:val
-}
+{ done:val }
 );
 
 }
@@ -493,12 +480,10 @@ closeModal();
 };
 
 /* ================= DELETE ================= */
-window.deleteGoal = async(id)=>{
+window.deleteGoal=async(id)=>{
 
 if(isViewMode) return;
 
-await deleteDoc(
-doc(db,"goals",id)
-);
+await deleteDoc(doc(db,"goals",id));
 
 };
