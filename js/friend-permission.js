@@ -1,4 +1,3 @@
-
 /* js/friend-permission.js */
 
 import { auth, db } from "./firebase.js";
@@ -37,8 +36,10 @@ return;
 uid = user.uid;
 
 if(!friendDocId || !friendUid){
-alert("Invalid request");
+showPopup("Invalid Request","Redirecting...");
+setTimeout(()=>{
 location.href="friends.html";
+},1500);
 return;
 }
 
@@ -54,27 +55,30 @@ await getDoc(doc(db,"friends",friendDocId));
 
 if(!snap.exists()){
 
-alert("Friend record not found");
+showPopup("Record Not Found","Returning...");
+setTimeout(()=>{
 location.href="friends.html";
-return;
+},1500);
 
+return;
 }
 
 friendData = snap.data();
 
-/* friend name */
+/* title */
 $("friendName").innerText =
 "Permission Setup";
 
-/* get current user permission object */
+/* current permission */
 let p =
 friendData.permissions?.[uid] || {};
 
-/* fill checks */
+/* fill checkboxes */
 setCheck("home",p.home);
 setCheck("profile",p.profile);
 setCheck("goals",p.goals);
 setCheck("growth",p.growth);
+
 setCheck("tasks",p.tasks);
 setCheck("insights",p.insights);
 setCheck("mistakes",p.mistakes);
@@ -84,7 +88,11 @@ setCheck("smartmoves",p.smartmoves);
 }
 
 function setCheck(id,val){
+
+if($(id)){
 $(id).checked = !!val;
+}
+
 }
 
 /* SAVE */
@@ -92,16 +100,16 @@ window.savePermission = async()=>{
 
 let newPermission = {
 
-home: $("home").checked,
-profile: $("profile").checked,
-goals: $("goals").checked,
-growth: $("growth").checked,
+home:$("home").checked,
+profile:$("profile").checked,
+goals:$("goals").checked,
+growth:$("growth").checked,
 
-tasks: $("tasks").checked,
-insights: $("insights").checked,
-mistakes: $("mistakes").checked,
-quest: $("quest").checked,
-smartmoves: $("smartmoves").checked
+tasks:$("tasks").checked,
+insights:$("insights").checked,
+mistakes:$("mistakes").checked,
+quest:$("quest").checked,
+smartmoves:$("smartmoves").checked
 
 };
 
@@ -112,58 +120,114 @@ doc(db,"friends",friendDocId),
 }
 );
 
-/* Replace alert("Saved Successfully ✅"); in js/friend-permission.js */
-/* with this modern popup system */
-
-/* ===== SAVE BUTTON ===== */
-window.savePermission = async()=>{
-
-await updateDoc(doc(db,"friends",friendDocId),{
-permissions:getValues()
-});
-
-showSuccessPopup(
-"Permissions Saved",
-"Friend access updated successfully ✅"
+showPopup(
+"Saved Successfully ✅",
+"Friend access updated"
 );
+
+setTimeout(()=>{
+location.href="friends.html";
+},1600);
 
 };
 
-/* ===== MODERN POPUP ===== */
-function showSuccessPopup(title,msg){
+/* ================= MODERN POPUP ================= */
 
-let old=document.getElementById("nicePopup");
+function showPopup(title,msg){
+
+let old = $("nicePopup");
 if(old) old.remove();
 
-const pop=document.createElement("div");
-pop.id="nicePopup";
+const div = document.createElement("div");
 
-pop.innerHTML=`
-<div class="nice-overlay"></div>
+div.id = "nicePopup";
 
-<div class="nice-box">
+div.innerHTML = `
 
-<div class="nice-icon">✅</div>
+<div style="
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.65);
+backdrop-filter:blur(6px);
+z-index:9998;
+"></div>
 
-<h2>${title}</h2>
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:340px;
+max-width:90%;
+background:#111827;
+border:1px solid rgba(0,255,255,.15);
+border-radius:24px;
+padding:28px 22px;
+text-align:center;
+box-shadow:0 0 35px rgba(0,255,255,.18);
+z-index:9999;
+animation:pop .25s ease;
+">
 
-<p>${msg}</p>
+<div style="
+font-size:52px;
+margin-bottom:12px;
+">✅</div>
 
-<button onclick="closeNicePopup()">
+<h2 style="
+margin:0;
+font-size:26px;
+color:#00eaff;
+font-weight:800;
+">${title}</h2>
+
+<p style="
+margin:12px 0 22px;
+font-size:15px;
+color:#d1d5db;
+line-height:1.5;
+">${msg}</p>
+
+<button onclick="closeNicePopup()"
+style="
+border:none;
+padding:12px 28px;
+border-radius:14px;
+font-weight:700;
+font-size:15px;
+cursor:pointer;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+color:#000;
+">
 OK
 </button>
 
 </div>
+
+<style>
+@keyframes pop{
+from{
+opacity:0;
+transform:translate(-50%,-46%) scale(.85);
+}
+to{
+opacity:1;
+transform:translate(-50%,-50%) scale(1);
+}
+}
+</style>
+
 `;
 
-document.body.appendChild(pop);
+document.body.appendChild(div);
 
 }
 
-window.closeNicePopup=()=>{
+/* CLOSE */
+window.closeNicePopup = ()=>{
 
-const pop=document.getElementById("nicePopup");
+let p = $("nicePopup");
 
-if(pop) pop.remove();
+if(p) p.remove();
 
 };
