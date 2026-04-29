@@ -7,34 +7,26 @@ content="width=device-width, initial-scale=1.0">
 
 <title>Friends</title>
 
-<link rel="stylesheet" href="css/friends.css?v=5">
+<link rel="stylesheet" href="css/friends.css?v=6">
 <link rel="stylesheet" href="css/sidebar.css">
 
 </head>
 
 <body>
 
-<!-- UNIVERSAL SIDEBAR -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
 
 <button onclick="goHome()">🏠 Home</button>
-
 <button onclick="goTasks()">📋 Tasks</button>
-
 <button onclick="goGoals()">🎯 Goals</button>
-
 <button onclick="goFriends()">👥 Friends</button>
-
 <button onclick="goQuestionBank()">📚 Question Bank</button>
-
 <button onclick="goTests()">📝 Tests</button>
-
 <button onclick="goGrowth()">🌱 Growth Hub</button>
-
 <button onclick="goProfile()">👤 Profile</button>
-
 <button id="logoutBtn">🚪 Logout</button>
 
 </div>
@@ -46,40 +38,64 @@ content="width=device-width, initial-scale=1.0">
 <div class="navbar">
 
 <button class="menu-btn"
-onclick="toggleSidebar()">
-☰
-</button>
+onclick="toggleSidebar()">☰</button>
 
-<h2>👥 Friends</h2>
+<h2>👥 Friends Control Center</h2>
 
 </div>
 
 <div class="container">
 
 <!-- SEARCH -->
-<div class="box">
+<div class="box search-box">
+
+<h3>➕ Add Friend</h3>
 
 <input
 id="searchUser"
-placeholder="Enter email...">
+placeholder="Enter friend email...">
 
 <button onclick="sendRequest()">
-➕ Send
+Send Request
 </button>
 
 </div>
 
 <!-- RECEIVED -->
+<div class="section-box">
+
 <h3>📩 Received Requests</h3>
-<div id="requestList"></div>
+
+<div id="requestList"
+class="list-box">
+No requests
+</div>
+
+</div>
 
 <!-- SENT -->
+<div class="section-box">
+
 <h3>📤 Sent Requests</h3>
-<div id="sentList"></div>
+
+<div id="sentList"
+class="list-box">
+No sent
+</div>
+
+</div>
 
 <!-- FRIENDS -->
+<div class="section-box">
+
 <h3>🤝 Your Friends</h3>
-<div id="friendList"></div>
+
+<div id="friendList"
+class="list-box">
+No friends
+</div>
+
+</div>
 
 </div>
 
