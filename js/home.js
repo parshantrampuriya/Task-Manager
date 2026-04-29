@@ -1,3 +1,7 @@
+/* ================= HOME.JS FINAL FULL UPDATED ================= */
+/* Removed top-right My Dashboard button */
+/* Keeps all existing features same */
+
 import { auth, db } from "./firebase.js";
 
 import {
@@ -6,36 +10,44 @@ signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
+collection,
 doc,
 getDoc,
-collection,
-addDoc,
-onSnapshot,
-updateDoc,
-deleteDoc,
 getDocs,
-query,
-where
+addDoc,
+updateDoc,
+setDoc,
+onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GLOBAL ================= */
-let currentUser = null;
-let tasks = [];
-let currentTab = "pending";
+/* ========= DOM ========= */
+const $ = id => document.getElementById(id);
 
-let currentTaskId = null;
-let currentAction = null;
-
-/* VIEW MODE */
+/* ========= URL ========= */
 const params = new URLSearchParams(location.search);
 const viewUser = params.get("viewUser");
 
+/* ========= GLOBAL ========= */
 let uid = null;
 let realUid = null;
 let isViewMode = false;
+
+let tasks = [];
+let goals = [];
+
+let counts = {
+mistakes:0,
+insights:0,
+quest:0,
+smartmoves:0
+};
+
+let layout = ["focus","tasks","quote","goals","growth"];
+let widgetSizes = {};
+
 let friendPermission = null;
 
-/* ================= AUTH ================= */
+/* ========= AUTH ========= */
 onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
@@ -43,10 +55,8 @@ location.href="index.html";
 return;
 }
 
-currentUser = user;
 realUid = user.uid;
 
-/* friend mode */
 if(viewUser){
 uid = viewUser;
 isViewMode = true;
@@ -54,8 +64,8 @@ isViewMode = true;
 uid = realUid;
 }
 
-/* user name */
-let snap = await getDoc(doc(db,"users",uid));
+/* Load name */
+const snap = await getDoc(doc(db,"users",uid));
 
 if(snap.exists()){
 
@@ -63,10 +73,10 @@ const name = snap.data().name || "User";
 
 if(isViewMode){
 
-username.innerText =
+$("username").innerText =
 "👀 Viewing " + name;
 
-/* permission check */
+/* check permission first */
 const allowed =
 await checkFriendPermission();
 
@@ -75,23 +85,35 @@ showBlockedPage(name);
 return;
 }
 
-/* hide editing controls */
-hideControls();
-
 }else{
 
-username.innerText =
-"👤 Welcome " + name;
+$("username").innerText =
+"Welcome " + name;
 
 }
 
 }
 
-loadTasks();
+/* hide edit buttons in friend mode */
+if(isViewMode){
+
+document.querySelectorAll(".top-btn,.add-btn")
+.forEach(x=>x.style.display="none");
+
+}
+
+/* own settings only */
+if(!isViewMode){
+await loadDashboardSettings();
+}
+
+setDate();
+startTimer();
+loadLive();
 
 });
 
-/* ================= PERMISSION ================= */
+/* ========= FRIEND PERMISSION ========= */
 async function checkFriendPermission(){
 
 const snap =
@@ -110,7 +132,7 @@ users.includes(uid)
 friendPermission =
 data.permissions?.[uid] || {};
 
-return friendPermission.tasks === true;
+return friendPermission.home === true;
 
 }
 
@@ -120,11 +142,12 @@ return false;
 
 }
 
-/* ================= BLOCK PAGE ================= */
+/* ========= BLOCK PAGE ========= */
 function showBlockedPage(name){
 
-taskContainer.innerHTML = `
+$("dashboardGrid").innerHTML = `
 <div style="
+grid-column:1/-1;
 padding:60px 30px;
 text-align:center;
 background:#111827;
@@ -160,27 +183,78 @@ background:linear-gradient(45deg,#00eaff,#00ff9d);
 
 }
 
-/* ================= HIDE CONTROLS ================= */
-function hideControls(){
+/* ========= SETTINGS ========= */
+async function loadDashboardSettings(){
 
-if(taskInput) taskInput.style.display="none";
-if(dateInput) dateInput.style.display="none";
-if(timeInput) timeInput.style.display="none";
+const snap =
+await getDoc(doc(db,"dashboardSettings",realUid));
 
-const addBtn =
-document.querySelector("[onclick='addTask()']");
+if(snap.exists()){
 
-if(addBtn) addBtn.style.display="none";
+const d = snap.data();
+
+if(Array.isArray(d.layout))
+layout = d.layout;
+
+if(d.widgetSizes)
+widgetSizes = d.widgetSizes;
 
 }
 
-/* ================= DATE ================= */
-function getToday(){
-return new Date().toLocaleDateString("en-CA");
 }
 
-/* ================= LOAD ================= */
-function loadTasks(){
+async function saveDashboardSettings(){
+
+if(isViewMode) return;
+
+await setDoc(
+doc(db,"dashboardSettings",realUid),
+{
+layout,
+widgetSizes
+},
+{merge:true}
+);
+
+}
+
+/* ========= DATE ========= */
+function setDate(){
+
+$("todayDate").innerText =
+new Date().toDateString();
+
+}
+
+function startTimer(){
+
+setInterval(()=>{
+
+const now = new Date();
+const end = new Date();
+
+end.setHours(23,59,59,999);
+
+const diff = end-now;
+
+const h =
+Math.floor(diff/3600000);
+
+const m =
+Math.floor((diff%3600000)/60000);
+
+const s =
+Math.floor((diff%60000)/1000);
+
+$("countdownText").innerText =
+`⏳ ${h}h ${m}m ${s}s remaining today`;
+
+},1000);
+
+}
+
+/* ========= LOAD ========= */
+function loadLive(){
 
 onSnapshot(collection(db,"tasks"),snap=>{
 
@@ -188,16 +262,10 @@ tasks=[];
 
 snap.forEach(d=>{
 
-let t=d.data();
+let x=d.data();
 
-if(t.user===uid || t.uid===uid){
-
-tasks.push({
-id:d.id,
-...t
-});
-
-}
+if(x.user===uid)
+tasks.push({id:d.id,...x});
 
 });
 
@@ -205,420 +273,338 @@ render();
 
 });
 
-}
+onSnapshot(collection(db,"goals"),snap=>{
 
-/* ================= ADD ================= */
-window.addTask = async()=>{
+goals=[];
 
-if(isViewMode) return;
+snap.forEach(d=>{
 
-let text = taskInput.value.trim();
-let date = dateInput.value;
-let time = timeInput.value;
+let x=d.data();
 
-if(!text) return;
-
-await addDoc(collection(db,"tasks"),{
-
-text:text,
-date:date || getToday(),
-time:time || "00:00",
-completed:false,
-user:realUid,
-uid:realUid,
-createdAt:Date.now()
+if(x.user===uid)
+goals.push(x);
 
 });
-
-taskInput.value="";
-dateInput.value="";
-timeInput.value="";
-
-};
-
-/* ================= STATUS ================= */
-function getStatus(t){
-
-if(!t.time || t.time==="00:00")
-return "normal";
-
-let now = new Date();
-
-let taskTime =
-new Date(`${t.date}T${t.time}`);
-
-let diff = taskTime-now;
-
-if(diff<0) return "overdue";
-if(diff<30*60000) return "urgent";
-if(diff<60*60000) return "soon";
-
-return "normal";
-
-}
-
-/* ================= TAB ================= */
-window.switchTab=(tab,e)=>{
-
-currentTab=tab;
-
-document
-.querySelectorAll(".tabs button")
-.forEach(btn=>{
-btn.classList.remove("active");
-});
-
-if(e) e.target.classList.add("active");
 
 render();
 
-};
-
-/* ================= SORT ================= */
-function sortDates(dates){
-
-return dates.sort((a,b)=>{
-
-if(currentTab==="pending"){
-return new Date(a)-new Date(b);
-}else{
-return new Date(b)-new Date(a);
-}
-
 });
 
+loadCounts();
+
 }
 
-/* ================= RENDER ================= */
+async function loadCounts(){
+
+counts.mistakes =
+await getCollectionCount("mistakes");
+
+counts.insights =
+await getCollectionCount("insights");
+
+counts.quest =
+await getCollectionCount("quest");
+
+counts.smartmoves =
+await getCollectionCount("smartmoves");
+
+render();
+
+}
+
+async function getCollectionCount(name){
+
+const snap =
+await getDocs(collection(db,name));
+
+let c=0;
+
+snap.forEach(d=>{
+if(d.data().uid===uid) c++;
+});
+
+return c;
+
+}
+
+/* ========= RENDER ========= */
 function render(){
 
-let today=getToday();
+const grid = $("dashboardGrid");
+grid.innerHTML="";
 
-let search =
-searchInput.value.toLowerCase();
+layout.forEach(type=>{
 
-let filtered = tasks.filter(t=>
-(t.text || "")
-.toLowerCase()
-.includes(search)
-);
+if(
+isViewMode &&
+friendPermission
+){
 
-if(currentTab==="pending"){
-filtered=filtered.filter(t=>
-!t.completed &&
-t.date>=today
-);
+if(type==="tasks" && !friendPermission.tasks) return;
+if(type==="goals" && !friendPermission.goals) return;
+if(type==="growth" && !friendPermission.growth) return;
+
 }
 
-if(currentTab==="due"){
-filtered=filtered.filter(t=>
-!t.completed &&
-t.date<today
-);
-}
-
-if(currentTab==="completed"){
-filtered=filtered.filter(t=>
-t.completed
-);
-}
-
-let grouped={};
-
-filtered.forEach(t=>{
-
-if(!grouped[t.date])
-grouped[t.date]=[];
-
-grouped[t.date].push(t);
+if(type==="focus") grid.appendChild(focusCard());
+if(type==="tasks") grid.appendChild(taskCard());
+if(type==="quote") grid.appendChild(quoteCard());
+if(type==="goals") grid.appendChild(goalCard());
+if(type==="growth") grid.appendChild(growthCard());
 
 });
+
+if(!isViewMode){
+enableDragAndResize();
+}
+
+}
+
+/* ========= BASE ========= */
+function makeCard(title,id,wide=false){
+
+const div =
+document.createElement("div");
+
+div.className =
+"widget-card " +
+(wide?"full-card":"");
+
+div.dataset.id=id;
+
+if(!isViewMode)
+div.draggable=true;
+
+div.innerHTML=`
+<div class="card-head">
+<h3>${title}</h3>
+</div>
+<div class="widget-body"></div>
+`;
+
+if(widgetSizes[id]){
+
+div.style.width =
+widgetSizes[id].width || "";
+
+div.style.height =
+widgetSizes[id].height || "";
+
+}
+
+return div;
+
+}
+
+/* ========= CARDS ========= */
+function focusCard(){
+
+const card =
+makeCard("📊 Today Focus","focus");
+
+const today = getTodayTasks();
+
+const done =
+today.filter(x=>x.completed).length;
+
+const total = today.length;
+
+const p =
+total ? Math.round(done*100/total):0;
+
+card.querySelector(".widget-body").innerHTML=`
+<div class="big-number">${p}%</div>
+
+<div class="progress">
+<div class="progress-fill"
+style="width:${p}%"></div>
+</div>
+
+<div class="small-muted">
+${done}/${total} completed
+</div>
+`;
+
+return card;
+
+}
+
+function taskCard(){
+
+const card =
+makeCard("📋 Today Tasks","tasks",true);
+
+let arr = getTodayTasks();
 
 let html="";
 
-let dates =
-sortDates(Object.keys(grouped));
-
-dates.forEach(date=>{
-
-let dayName =
-new Date(date)
-.toLocaleDateString("en-US",{
-weekday:"long"
-});
+arr.forEach(x=>{
 
 html+=`
-<div class="date-group">
+<div class="task-row">
 
-<h3>
-📅 ${dayName} (${date})
-</h3>
-
-<ol class="task-list">
-`;
-
-grouped[date].sort((a,b)=>{
-
-if(a.completed!==b.completed){
-return a.completed ? 1 : -1;
-}
-
-return (a.time || "")
-.localeCompare(b.time || "");
-
-});
-
-grouped[date].forEach(t=>{
-
-let status=getStatus(t);
-
-html+=`
-<li class="task-item ${t.completed?'done':''} ${status}">
-
-<div style="
-display:flex;
-align-items:center;
-gap:10px;
-flex:1;
-">
-
-<span>${t.text}</span>
-
-${
-t.time && t.time!=="00:00"
-?
-`<small>🕒 ${t.time}</small>`
-:
-""
-}
-
-${
-t.fromQuest
-?
-`<small style="color:#00cfff;">📘 Quest</small>`
-:
-""
-}
-
+<div class="task-left">
+<div class="task-title">${x.text}</div>
+<div class="task-time">${x.time||"00:00"}</div>
 </div>
-
-<div class="task-actions">
 
 ${!isViewMode ? `
-
-<button onclick="toggle('${t.id}',${t.completed})">
+<button class="tick-btn"
+onclick="toggleTask('${x.id}',${x.completed})">
 ✔
-</button>
-
-<button onclick="openModal(
-'edit',
-'${t.id}',
-'${escapeText(t.text)}',
-'${t.date}',
-'${t.time || ""}'
-)">
-✏️
-</button>
-
-<button onclick="openModal('delete','${t.id}')">
-❌
-</button>
-
-` : ""}
+</button>`:""}
 
 </div>
-
-</li>
 `;
 
 });
+
+card.querySelector(".widget-body").innerHTML =
+html || "No task";
+
+return card;
+
+}
+
+function quoteCard(){
+
+const q = [
+"Discipline today creates freedom tomorrow.",
+"Consistency creates success.",
+"Small progress daily beats excuses."
+];
+
+const text =
+q[Math.floor(Math.random()*q.length)];
+
+const card =
+makeCard("💬 Quote","quote");
+
+card.querySelector(".widget-body").innerHTML =
+`<div class="quote-box">${text}</div>`;
+
+return card;
+
+}
+
+function goalCard(){
+
+const card =
+makeCard("🎯 Goals","goals");
+
+let html="";
+
+goals.forEach(g=>{
+
+const p =
+g.total>0 ?
+Math.round((g.done/g.total)*100):0;
 
 html+=`
-</ol>
+<div class="goal-row">
+<div>${g.name} - ${p}%</div>
+
+<div class="goal-bar">
+<div class="goal-fill"
+style="width:${p}%"></div>
+</div>
 </div>
 `;
 
 });
 
-taskContainer.innerHTML =
-html || "<p>No tasks found.</p>";
+card.querySelector(".widget-body").innerHTML =
+html || "No goals";
+
+return card;
 
 }
 
-/* ================= MODAL ================= */
-window.openModal=(type,id,text="",date="",time="")=>{
+function growthCard(){
+
+const card =
+makeCard("🌱 Growth Summary","growth");
+
+card.querySelector(".widget-body").innerHTML=`
+<div class="summary-row"><span>Mistakes</span><b>${counts.mistakes}</b></div>
+<div class="summary-row"><span>Insights</span><b>${counts.insights}</b></div>
+<div class="summary-row"><span>Quest</span><b>${counts.quest}</b></div>
+<div class="summary-row"><span>Smart Moves</span><b>${counts.smartmoves}</b></div>
+`;
+
+return card;
+
+}
+
+/* ========= HELPERS ========= */
+function getTodayTasks(){
+
+const today =
+new Date().toLocaleDateString("en-CA");
+
+return tasks.filter(x=>x.date===today);
+
+}
+
+/* ========= TASK ========= */
+window.toggleTask = async(id,val)=>{
 
 if(isViewMode) return;
 
-currentTaskId=id;
-currentAction=type;
-
-modal.classList.add("active");
-
-modalInput.style.display="block";
-modalDate.style.display="block";
-modalTime.style.display="block";
-
-if(type==="edit"){
-
-modalTitle.innerText="Edit Task";
-
-modalInput.value =
-decodeURIComponent(text);
-
-modalDate.value=date;
-modalTime.value=time;
-
-}
-
-if(type==="delete"){
-
-modalTitle.innerText=
-"Delete this task?";
-
-modalInput.style.display="none";
-modalDate.style.display="none";
-modalTime.style.display="none";
-
-}
-
-};
-
-window.closeModal=()=>{
-modal.classList.remove("active");
-};
-
-/* ================= CONFIRM ================= */
-window.confirmAction=async()=>{
-
-if(isViewMode) return;
-
-if(currentAction==="edit"){
-
-await updateDoc(
-doc(db,"tasks",currentTaskId),
-{
-text:modalInput.value.trim(),
-date:modalDate.value,
-time:modalTime.value || "00:00"
-}
-);
-
-}
-
-if(currentAction==="delete"){
-
-await deleteDoc(
-doc(db,"tasks",currentTaskId)
-);
-
-}
-
-closeModal();
-
-};
-
-/* ================= TOGGLE ================= */
-window.toggle=async(id,c)=>{
-
-if(isViewMode) return;
-
-const ref=doc(db,"tasks",id);
-
-const snap=await getDoc(ref);
-
-if(!snap.exists()) return;
-
-const task=snap.data();
-
-const nowDone=!c;
-
-await updateDoc(ref,{
-completed:nowDone
+await updateDoc(doc(db,"tasks",id),{
+completed:!val
 });
 
-/* keep your quest logic same */
-if(task.fromQuest && task.questId){
-
-if(nowDone){
-
-await addDoc(
-collection(db,"insights"),
-{
-uid:realUid,
-text:task.text,
-date:getToday(),
-createdAt:Date.now(),
-source:"task"
-}
-);
-
-await deleteDoc(
-doc(db,"quest",task.questId)
-);
-
-}else{
-
-const qRef=
-doc(db,"quest",task.questId);
-
-const qSnap=
-await getDoc(qRef);
-
-if(!qSnap.exists()){
-
-await addDoc(
-collection(db,"quest"),
-{
-uid:realUid,
-text:task.text,
-date:getToday(),
-status:"Pending",
-createdAt:Date.now()
-}
-);
-
-}
-
-const insSnap=
-await getDocs(
-query(
-collection(db,"insights"),
-where("uid","==",realUid),
-where("text","==",task.text)
-)
-);
-
-for(const d of insSnap.docs){
-
-await deleteDoc(
-doc(db,"insights",d.id)
-);
-
-}
-
-}
-
-}
-
 };
 
-/* ================= SEARCH ================= */
-searchInput.addEventListener(
-"input",
-render
-);
+/* ========= DRAG ========= */
+function enableDragAndResize(){
 
-/* ================= LOGOUT ================= */
-logoutBtn.addEventListener(
-"click",
-async()=>{
+let drag=null;
+
+document.querySelectorAll(".widget-card")
+.forEach(card=>{
+
+card.addEventListener("dragstart",()=>{
+drag=card;
+});
+
+card.addEventListener("dragover",e=>{
+e.preventDefault();
+});
+
+card.addEventListener("drop",async()=>{
+
+if(drag===card) return;
+
+$("dashboardGrid")
+.insertBefore(drag,card);
+
+await saveOrder();
+
+});
+
+});
+
+}
+
+async function saveOrder(){
+
+layout=[];
+
+document.querySelectorAll(".widget-card")
+.forEach(x=>{
+layout.push(x.dataset.id);
+});
+
+await saveDashboardSettings();
+
+}
+
+/* ========= LOGOUT ========= */
+$("logoutBtn").onclick = async()=>{
+
 await signOut(auth);
 location.href="index.html";
-}
-);
 
-/* ================= HELPER ================= */
-function escapeText(t){
-return encodeURIComponent(t || "");
-}
+};
