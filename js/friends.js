@@ -1,299 +1,212 @@
 import { auth, db } from "./firebase.js";
 
 import {
-  onAuthStateChanged
+onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  onSnapshot,
-  updateDoc,
-  doc,
-  deleteDoc
+collection,
+addDoc,
+query,
+where,
+getDocs,
+onSnapshot,
+updateDoc,
+doc,
+deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let currentUser;
 
-/* ================= SAFE DOM ================= */
-const getEl = (id) => document.getElementById(id);
+const getEl=id=>document.getElementById(id);
 
-/* ================= AUTH ================= */
+/* AUTH */
+onAuthStateChanged(auth,(user)=>{
 
-onAuthStateChanged(auth, (user) => {
-    if (!user) location.href = "index.html";
+if(!user){
+location.href="index.html";
+return;
+}
 
-    currentUser = user;
+currentUser=user;
 
-    loadReceived();
-    loadSent();
-    loadFriends();
+loadReceived();
+loadSent();
+loadFriends();
+
 });
 
-/* ================= SEND REQUEST ================= */
+/* DEFAULT PERMISSION */
+function defaultPermission(){
 
-window.sendRequest = async () => {
+return{
+home:true,
+profile:true,
+goals:true,
+growth:true,
 
-    let email = getEl("searchUser")?.value.trim();
-
-    if (!email) return showToast("Enter email ❗");
-
-    let snap = await getDocs(
-        query(collection(db,"users"), where("email","==",email))
-    );
-
-    if (snap.empty) return showToast("User not found ❌");
-
-    let target = snap.docs[0];
-
-    if (target.id === currentUser.uid)
-        return showToast("You cannot add yourself ❗");
-
-    // 🔥 Prevent duplicate request
-    let existing = await getDocs(
-        query(collection(db,"friendRequests"),
-            where("from","==",currentUser.uid),
-            where("to","==",target.id)
-        )
-    );
-
-    if (!existing.empty) return showToast("Already sent ⚠️");
-
-    // 🔥 Prevent already friends
-    let alreadyFriend = await getDocs(collection(db,"friends"));
-    for (let f of alreadyFriend.docs) {
-        let users = f.data().users || [];
-        if (users.includes(currentUser.uid) && users.includes(target.id)) {
-            return showToast("Already friends 🤝");
-        }
-    }
-
-    await addDoc(collection(db,"friendRequests"), {
-        from: currentUser.uid,
-        to: target.id,
-        status:"pending"
-    });
-
-    showToast("Request sent ✅");
-    getEl("searchUser").value = "";
+tasks:false,
+insights:false,
+mistakes:false,
+quest:false,
+smartmoves:false
 };
 
-/* ================= RECEIVED ================= */
-
-function loadReceived() {
-
-    onSnapshot(
-        query(collection(db,"friendRequests"),
-        where("to","==",currentUser.uid),
-        where("status","==","pending")),
-    async snap => {
-
-        let html = "";
-
-        for (let r of snap.docs) {
-
-            let d = r.data();
-
-            let userSnap = await getDocs(
-                query(collection(db,"users"),
-                where("__name__","==",d.from))
-            );
-
-            let name = userSnap.docs[0]?.data()?.name || "User";
-
-            html += `
-            <div>
-                👤 ${name}
-                <div>
-                    <button class="accept" onclick="accept('${r.id}','${d.from}')">✔</button>
-                    <button class="reject" onclick="reject('${r.id}')">❌</button>
-                </div>
-            </div>`;
-        }
-
-        getEl("requestList").innerHTML = html || "No requests";
-    });
 }
 
-/* ================= SENT ================= */
+/* SEND REQUEST SAME */
+window.sendRequest = async()=>{
 
-function loadSent() {
+let email=getEl("searchUser").value.trim();
 
-    onSnapshot(
-        query(collection(db,"friendRequests"),
-        where("from","==",currentUser.uid),
-        where("status","==","pending")),
-    async snap => {
+if(!email) return showToast("Enter email");
 
-        let html = "";
+let snap=await getDocs(
+query(collection(db,"users"),
+where("email","==",email))
+);
 
-        for (let r of snap.docs) {
+if(snap.empty) return showToast("User not found");
 
-            let d = r.data();
+let target=snap.docs[0];
 
-            let userSnap = await getDocs(
-                query(collection(db,"users"),
-                where("__name__","==",d.to))
-            );
+if(target.id===currentUser.uid)
+return showToast("Cannot add yourself");
 
-            let name = userSnap.docs[0]?.data()?.name || "User";
+await addDoc(collection(db,"friendRequests"),{
+from:currentUser.uid,
+to:target.id,
+status:"pending"
+});
 
-            html += `<div>⏳ ${name}</div>`;
-        }
+showToast("Request sent");
+};
 
-        getEl("sentList").innerHTML = html || "No sent";
-    });
+/* ACCEPT UPDATED */
+window.accept = async(id,fromUser)=>{
+
+await updateDoc(doc(db,"friendRequests",id),{
+status:"accepted"
+});
+
+await addDoc(collection(db,"friends"),{
+
+users:[currentUser.uid,fromUser],
+
+permissions:{
+[currentUser.uid]:defaultPermission(),
+[fromUser]:defaultPermission()
 }
 
-/* ================= ACCEPT ================= */
+});
 
-window.accept = async (id, fromUser) => {
+showToast("Friend Added 🎉");
 
-    await updateDoc(doc(db,"friendRequests",id), {
-        status:"accepted"
-    });
-
-    // 🔥 Avoid duplicate friend entry
-    let existing = await getDocs(collection(db,"friends"));
-
-    for (let f of existing.docs) {
-        let users = f.data().users || [];
-        if (users.includes(currentUser.uid) && users.includes(fromUser)) {
-            showToast("Already friends 🤝");
-            return;
-        }
-    }
-
-    await addDoc(collection(db,"friends"), {
-        users: [currentUser.uid, fromUser]
-    });
-
-    showActionPopup("Friend Added 🎉","success");
 };
 
-/* ================= REJECT ================= */
+/* LOAD FRIENDS UPDATED */
+function loadFriends(){
 
-window.reject = async (id) => {
+onSnapshot(collection(db,"friends"),async snap=>{
 
-    await updateDoc(doc(db,"friendRequests",id), {
-        status:"rejected"
-    });
+let html="";
 
-    showActionPopup("Request Rejected ❌","reject");
-};
+for(let f of snap.docs){
 
-/* ================= FRIENDS ================= */
+let d=f.data();
+let users=d.users||[];
 
-function loadFriends() {
+if(!users.includes(currentUser.uid))
+continue;
 
-    onSnapshot(collection(db,"friends"), async snap => {
+let friendId=
+users.find(x=>x!==currentUser.uid);
 
-        let html = "";
+let userSnap=await getDocs(
+query(collection(db,"users"),
+where("__name__","==",friendId))
+);
 
-        for (let f of snap.docs) {
+let name=
+userSnap.docs[0]?.data()?.name || "User";
 
-            let d = f.data();
-            let users = d.users || [];
+html+=`
 
-            if (!users.includes(currentUser.uid)) continue;
+<div class="friend">
 
-            let friendId = users.find(u => u !== currentUser.uid);
+<span class="friend-name"
+onclick="openFriend('${friendId}')">
+👤 ${name}
+</span>
 
-            let userSnap = await getDocs(
-                query(collection(db,"users"),
-                where("__name__","==",friendId))
-            );
+<div class="friend-actions">
 
-            let name = userSnap.docs[0]?.data()?.name || "User";
+<button onclick="openChat('${friendId}')">
+💬 Chat
+</button>
 
-            html += `
-            <div class="friend">
+<button onclick="openFriend('${friendId}')">
+👁 View
+</button>
 
-                <span class="friend-name" onclick="openFriend('${friendId}')">
-                    👤 ${name}
-                </span>
+<button onclick="openPermission('${f.id}','${friendId}')">
+⚙
+</button>
 
-                <div class="friend-actions">
-                    <button onclick="openChat('${friendId}')">💬 Chat</button>
-                    <button onclick="openFriend('${friendId}')">📊 View</button>
-                    <button class="remove" onclick="removeFriend('${f.id}')">❌</button>
-                </div>
+<button class="remove"
+onclick="removeFriend('${f.id}')">
+❌
+</button>
 
-            </div>`;
-        }
+</div>
 
-        getEl("friendList").innerHTML = html || "No friends yet";
-    });
+</div>
+
+`;
+
 }
 
-/* ================= REMOVE FRIEND ================= */
+getEl("friendList").innerHTML=
+html || "No friends";
 
-window.removeFriend = (docId) => {
+});
 
-    showConfirmModal(
-        "Remove Friend",
-        "Are you sure you want to remove this friend?",
-        async () => {
-            await deleteDoc(doc(db,"friends",docId));
-            showToast("Friend removed ❌");
-        }
-    );
+}
+
+/* OPEN PERMISSION */
+window.openPermission=(docId,friendId)=>{
+
+location.href=
+"friend-permission.html?id="+docId+"&uid="+friendId;
+
 };
 
-/* ================= NAVIGATION ================= */
-
-window.openFriend = (id) => {
-    // 🔥 IMPORTANT CHANGE → HOME VIEW MODE
-    location.href = "home.html?viewUser=" + id;
+/* VIEW */
+window.openFriend=(id)=>{
+location.href="home.html?viewUser="+id;
 };
 
-window.openChat = (id) => {
-    location.href = "chat.html?uid=" + id;
+window.openChat=(id)=>{
+location.href="chat.html?uid="+id;
 };
 
-/* ================= MODAL ================= */
+/* REMOVE */
+window.removeFriend=async(id)=>{
 
-let confirmCallback = null;
+await deleteDoc(doc(db,"friends",id));
+showToast("Removed");
 
-window.showConfirmModal = (title, text, callback) => {
-    getEl("confirmTitle").innerText = title;
-    getEl("confirmText").innerText = text;
-    getEl("confirmModal").classList.add("active");
-    confirmCallback = callback;
 };
 
-window.closeConfirm = () => {
-    getEl("confirmModal").classList.remove("active");
-};
+/* TOAST */
+window.showToast=(msg)=>{
 
-window.confirmYes = () => {
-    if (confirmCallback) confirmCallback();
-    closeConfirm();
-};
+let t=getEl("toast");
+t.innerText=msg;
+t.classList.add("show");
 
-/* ================= TOAST ================= */
+setTimeout(()=>{
+t.classList.remove("show");
+},2000);
 
-window.showToast = (msg) => {
-    let t = getEl("toast");
-    t.innerText = msg;
-    t.classList.add("show");
-
-    setTimeout(() => t.classList.remove("show"), 2000);
-};
-
-/* ================= ACTION POPUP ================= */
-
-window.showActionPopup = (msg,type) => {
-
-    let p = getEl("actionPopup");
-
-    p.innerText = msg;
-    p.className = "action-popup show " + type;
-
-    setTimeout(()=>{
-        p.classList.remove("show");
-    },2000);
 };
