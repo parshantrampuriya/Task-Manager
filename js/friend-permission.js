@@ -112,8 +112,58 @@ doc(db,"friends",friendDocId),
 }
 );
 
-alert("Saved Successfully ✅");
+/* Replace alert("Saved Successfully ✅"); in js/friend-permission.js */
+/* with this modern popup system */
 
-location.href="friends.html";
+/* ===== SAVE BUTTON ===== */
+window.savePermission = async()=>{
+
+await updateDoc(doc(db,"friends",friendDocId),{
+permissions:getValues()
+});
+
+showSuccessPopup(
+"Permissions Saved",
+"Friend access updated successfully ✅"
+);
+
+};
+
+/* ===== MODERN POPUP ===== */
+function showSuccessPopup(title,msg){
+
+let old=document.getElementById("nicePopup");
+if(old) old.remove();
+
+const pop=document.createElement("div");
+pop.id="nicePopup";
+
+pop.innerHTML=`
+<div class="nice-overlay"></div>
+
+<div class="nice-box">
+
+<div class="nice-icon">✅</div>
+
+<h2>${title}</h2>
+
+<p>${msg}</p>
+
+<button onclick="closeNicePopup()">
+OK
+</button>
+
+</div>
+`;
+
+document.body.appendChild(pop);
+
+}
+
+window.closeNicePopup=()=>{
+
+const pop=document.getElementById("nicePopup");
+
+if(pop) pop.remove();
 
 };
