@@ -15,6 +15,20 @@ getDocs,
 getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= DOM ================= */
+const username = document.getElementById("username");
+const goalContainer = document.getElementById("goalContainer");
+const goalName = document.getElementById("goalName");
+const goalTotal = document.getElementById("goalTotal");
+const goalDeadline = document.getElementById("goalDeadline");
+const addBtn = document.getElementById("addBtn");
+
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modalTitle");
+const modalName = document.getElementById("modalName");
+const modalInput = document.getElementById("modalInput");
+const modalDate = document.getElementById("modalDate");
+
 /* ================= GLOBAL ================= */
 let currentUser = null;
 let goals = [];
@@ -51,45 +65,37 @@ uid = realUid;
 }
 
 /* user name */
-const snap =
-await getDoc(doc(db,"users",uid));
+const snap = await getDoc(doc(db,"users",uid));
 
 if(snap.exists()){
 
-const name =
-snap.data().name || "User";
+const name = snap.data().name || "User";
 
 if(isViewMode){
 
-username.innerText =
-"👀 Viewing " + name;
+username.innerText = "👀 Viewing " + name;
 
 /* permission check */
-const allowed =
-await checkFriendPermission();
+const allowed = await checkFriendPermission();
 
 if(!allowed){
 showBlockedPage(name);
 return;
 }
 
-/* hide add area */
 hideControls();
 
 }else{
 
-username.innerText =
-"👤 Welcome " + name;
+username.innerText = "👤 Welcome " + name;
 
 }
 
 }
 
 /* normal add button */
-if(!isViewMode){
-document
-.getElementById("addBtn")
-.addEventListener("click", addGoal);
+if(!isViewMode && addBtn){
+addBtn.addEventListener("click", addGoal);
 }
 
 loadGoals();
@@ -99,13 +105,12 @@ loadGoals();
 /* ================= PERMISSION ================= */
 async function checkFriendPermission(){
 
-const snap =
-await getDocs(collection(db,"friends"));
+const snap = await getDocs(collection(db,"friends"));
 
 for(const d of snap.docs){
 
-const data=d.data();
-const users=data.users || [];
+const data = d.data();
+const users = data.users || [];
 
 if(
 users.includes(realUid) &&
@@ -168,14 +173,10 @@ background:linear-gradient(45deg,#00eaff,#00ff9d);
 /* ================= HIDE CONTROLS ================= */
 function hideControls(){
 
-if(goalName) goalName.style.display="none";
-if(goalTotal) goalTotal.style.display="none";
-if(goalDeadline) goalDeadline.style.display="none";
-
-const addBtn =
-document.getElementById("addBtn");
-
-if(addBtn) addBtn.style.display="none";
+if(goalName) goalName.style.display = "none";
+if(goalTotal) goalTotal.style.display = "none";
+if(goalDeadline) goalDeadline.style.display = "none";
+if(addBtn) addBtn.style.display = "none";
 
 }
 
@@ -184,13 +185,13 @@ function loadGoals(){
 
 onSnapshot(collection(db,"goals"), snap=>{
 
-goals=[];
+goals = [];
 
 snap.forEach(d=>{
 
-let g=d.data();
+let g = d.data();
 
-if(g.user===uid){
+if(g.user === uid){
 
 goals.push({
 id:d.id,
@@ -202,8 +203,7 @@ id:d.id,
 });
 
 goals.sort((a,b)=>
-(a.order || 0) -
-(b.order || 0)
+(a.order || 0) - (b.order || 0)
 );
 
 render();
@@ -221,40 +221,39 @@ async function addGoal(){
 
 if(isViewMode) return;
 
-let name = goalName.value;
+let name = goalName.value.trim();
 let total = Number(goalTotal.value);
 let deadline = goalDeadline.value;
 
-if(!name || !total)
-return alert("Enter name & total");
+if(!name || !total){
+alert("Enter name & total");
+return;
+}
 
 await addDoc(collection(db,"goals"),{
-
 name,
 total,
 done:0,
 deadline:deadline || null,
 user:realUid,
 order:Date.now()
-
 });
 
-goalName.value="";
-goalTotal.value="";
-goalDeadline.value="";
+goalName.value = "";
+goalTotal.value = "";
+goalDeadline.value = "";
 
 }
 
 /* ================= RENDER ================= */
 function render(){
 
-let html="";
+let html = "";
 
 goals.forEach((g,i)=>{
 
-let percent =
-Math.min(
-(g.done/g.total)*100,
+let percent = Math.min(
+(g.done / g.total) * 100,
 100
 );
 
@@ -268,8 +267,7 @@ data-id="${g.id}">
 <p>${g.done} / ${g.total}</p>
 
 ${g.deadline ?
-`<small>⏳ ${g.deadline}</small>`
-: ""}
+`<small>⏳ ${g.deadline}</small>` : ""}
 
 <div class="progress-bar">
 <div class="fill"
@@ -317,20 +315,20 @@ function enableDrag(){
 let items =
 document.querySelectorAll(".goal-card");
 
-let dragItem=null;
+let dragItem = null;
 
 items.forEach(item=>{
 
 item.addEventListener("dragstart",()=>{
 
-dragItem=item;
-item.style.opacity="0.5";
+dragItem = item;
+item.style.opacity = "0.5";
 
 });
 
 item.addEventListener("dragend",()=>{
 
-item.style.opacity="1";
+item.style.opacity = "1";
 
 });
 
@@ -345,16 +343,14 @@ async e=>{
 
 e.preventDefault();
 
-if(dragItem!==item){
+if(dragItem !== item){
 
-let list=item.parentNode;
+let list = item.parentNode;
 
 if(
-[...list.children]
-.indexOf(dragItem)
+[...list.children].indexOf(dragItem)
 <
-[...list.children]
-.indexOf(item)
+[...list.children].indexOf(item)
 ){
 list.insertBefore(
 dragItem,
@@ -367,13 +363,11 @@ item
 );
 }
 
-let updated =
-[...list.children];
+let updated = [...list.children];
 
 for(let i=0;i<updated.length;i++){
 
-let id =
-updated[i].dataset.id;
+let id = updated[i].dataset.id;
 
 await updateDoc(
 doc(db,"goals",id),
@@ -393,71 +387,67 @@ order:i
 }
 
 /* ================= MODAL ================= */
-window.openModal=(mode,index)=>{
+window.openModal = (mode,index)=>{
 
 if(isViewMode) return;
 
-currentIndex=index;
-currentMode=mode;
+currentIndex = index;
+currentMode = mode;
 
-let g=goals[index];
+let g = goals[index];
 
 modal.classList.add("active");
 
-if(mode==="progress"){
+if(mode === "progress"){
 
-modalTitle.innerText=
-"Add Progress";
+modalTitle.innerText = "Add Progress";
 
-modalName.style.display="none";
-modalDate.style.display="none";
-modalInput.value="";
+modalName.style.display = "none";
+modalDate.style.display = "none";
+modalInput.value = "";
 
 }
 
-else if(mode==="set"){
+else if(mode === "set"){
 
-modalTitle.innerText=
+modalTitle.innerText =
 "Set Progress Value";
 
-modalName.style.display="none";
-modalDate.style.display="none";
-modalInput.value=g.done;
+modalName.style.display = "none";
+modalDate.style.display = "none";
+modalInput.value = g.done;
 
 }
 
 else{
 
-modalTitle.innerText=
-"Edit Goal";
+modalTitle.innerText = "Edit Goal";
 
-modalName.style.display="block";
-modalDate.style.display="block";
+modalName.style.display = "block";
+modalDate.style.display = "block";
 
-modalName.value=g.name;
-modalInput.value=g.total;
-modalDate.value=
-g.deadline || "";
+modalName.value = g.name;
+modalInput.value = g.total;
+modalDate.value = g.deadline || "";
 
 }
 
 };
 
-window.closeModal=()=>{
+window.closeModal = ()=>{
 modal.classList.remove("active");
 };
 
 /* ================= SAVE ================= */
-window.saveModal=async()=>{
+window.saveModal = async()=>{
 
 if(isViewMode) return;
 
-let g=goals[currentIndex];
+let g = goals[currentIndex];
 
-if(currentMode==="progress"){
+if(currentMode === "progress"){
 
-let val =
-Number(modalInput.value);
+let val = Number(modalInput.value);
 
 if(!val) return;
 
@@ -470,12 +460,11 @@ done:g.done + val
 
 }
 
-else if(currentMode==="set"){
+else if(currentMode === "set"){
 
-let val =
-Number(modalInput.value);
+let val = Number(modalInput.value);
 
-if(val<0) return;
+if(val < 0) return;
 
 await updateDoc(
 doc(db,"goals",g.id),
@@ -493,8 +482,7 @@ doc(db,"goals",g.id),
 {
 name:modalName.value,
 total:Number(modalInput.value),
-deadline:
-modalDate.value || null
+deadline:modalDate.value || null
 }
 );
 
@@ -505,7 +493,7 @@ closeModal();
 };
 
 /* ================= DELETE ================= */
-window.deleteGoal=async(id)=>{
+window.deleteGoal = async(id)=>{
 
 if(isViewMode) return;
 
