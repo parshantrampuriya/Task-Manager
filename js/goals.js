@@ -1,242 +1,516 @@
 import { auth, db } from "./firebase.js";
 
 import {
-  onAuthStateChanged
+onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  collection,
-  addDoc,
-  onSnapshot,
-  doc,
-  updateDoc,
-  deleteDoc
+collection,
+addDoc,
+onSnapshot,
+doc,
+updateDoc,
+deleteDoc,
+getDocs,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= GLOBAL ================= */
 let currentUser = null;
 let goals = [];
 
 let currentIndex = null;
 let currentMode = null;
 
-/* INIT */
-onAuthStateChanged(auth, (user) => {
+/* VIEW MODE */
+const params = new URLSearchParams(location.search);
+const viewUser = params.get("viewUser");
 
-    if (!user) {
-        window.location.href = "index.html";
-        return;
-    }
+let uid = null;
+let realUid = null;
+let isViewMode = false;
+let friendPermission = null;
 
-    currentUser = user;
+/* ================= INIT ================= */
+onAuthStateChanged(auth, async(user)=>{
 
-    document.getElementById("addBtn").addEventListener("click", addGoal);
+if(!user){
+window.location.href="index.html";
+return;
+}
 
-    loadGoals();
+currentUser = user;
+realUid = user.uid;
+
+/* friend mode */
+if(viewUser){
+uid = viewUser;
+isViewMode = true;
+}else{
+uid = realUid;
+}
+
+/* user name */
+const snap =
+await getDoc(doc(db,"users",uid));
+
+if(snap.exists()){
+
+const name =
+snap.data().name || "User";
+
+if(isViewMode){
+
+username.innerText =
+"👀 Viewing " + name;
+
+/* permission check */
+const allowed =
+await checkFriendPermission();
+
+if(!allowed){
+showBlockedPage(name);
+return;
+}
+
+/* hide add area */
+hideControls();
+
+}else{
+
+username.innerText =
+"👤 Welcome " + name;
+
+}
+
+}
+
+/* normal add button */
+if(!isViewMode){
+document
+.getElementById("addBtn")
+.addEventListener("click", addGoal);
+}
+
+loadGoals();
+
 });
 
-/* LOAD */
-function loadGoals() {
+/* ================= PERMISSION ================= */
+async function checkFriendPermission(){
 
-    onSnapshot(collection(db, "goals"), snap => {
+const snap =
+await getDocs(collection(db,"friends"));
 
-        goals = [];
+for(const d of snap.docs){
 
-        snap.forEach(d => {
-            let g = d.data();
-            if (g.user === currentUser.uid) {
-                goals.push({ id: d.id, ...g });
-            }
-        });
+const data=d.data();
+const users=data.users || [];
 
-        goals.sort((a, b) => (a.order || 0) - (b.order || 0));
+if(
+users.includes(realUid) &&
+users.includes(uid)
+){
 
-        render();
-        setTimeout(enableDrag, 0);
-    });
+friendPermission =
+data.permissions?.[uid] || {};
+
+return friendPermission.goals === true;
+
 }
 
-/* ADD */
-async function addGoal() {
-
-    let name = goalName.value;
-    let total = Number(goalTotal.value);
-    let deadline = goalDeadline.value;
-
-    if (!name || !total) return alert("Enter name & total");
-
-    await addDoc(collection(db, "goals"), {
-        name,
-        total,
-        done: 0,
-        deadline: deadline || null,
-        user: currentUser.uid,
-        order: Date.now()
-    });
-
-    goalName.value = "";
-    goalTotal.value = "";
-    goalDeadline.value = "";
 }
 
-/* RENDER */
-function render() {
+return false;
 
-    let html = "";
-
-    goals.forEach((g, i) => {
-
-        let percent = Math.min((g.done / g.total) * 100, 100);
-
-        html += `
-        <div class="goal-card" draggable="true" data-id="${g.id}">
-
-            <h3>${g.name}</h3>
-
-            <p>${g.done} / ${g.total}</p>
-
-            ${g.deadline ? `<small>⏳ ${g.deadline}</small>` : ""}
-
-            <div class="progress-bar">
-                <div class="fill" style="width:${percent}%"></div>
-            </div>
-
-            <div class="actions">
-                <button onclick="openModal('progress', ${i})">➕ Add</button>
-                <button onclick="openModal('set', ${i})">✏️ Edit Progress</button>
-                <button onclick="openModal('edit', ${i})">Edit Goal</button>
-                <button onclick="deleteGoal('${g.id}')">Delete</button>
-            </div>
-
-        </div>`;
-    });
-
-    goalContainer.innerHTML = html;
 }
 
-/* DRAG */
-function enableDrag() {
+/* ================= BLOCK PAGE ================= */
+function showBlockedPage(name){
 
-    let items = document.querySelectorAll(".goal-card");
-    let dragItem = null;
+goalContainer.innerHTML = `
+<div style="
+padding:60px 30px;
+text-align:center;
+background:#111827;
+border-radius:18px;
+box-shadow:0 0 25px rgba(0,255,255,.15);
+">
 
-    items.forEach(item => {
+<div style="font-size:60px;">🔒</div>
 
-        item.addEventListener("dragstart", () => {
-            dragItem = item;
-            item.style.opacity = "0.5";
-        });
+<h2 style="margin-top:15px;">
+${name} blocked this page
+</h2>
 
-        item.addEventListener("dragend", () => {
-            item.style.opacity = "1";
-        });
+<p style="opacity:.8;margin-top:10px;">
+Your friend has restricted access.
+</p>
 
-        item.addEventListener("dragover", e => e.preventDefault());
+<button onclick="location.href='home.html'"
+style="
+margin-top:25px;
+padding:14px 24px;
+border:none;
+border-radius:14px;
+font-weight:700;
+cursor:pointer;
+background:linear-gradient(45deg,#00eaff,#00ff9d);
+">
+↩ My Dashboard
+</button>
 
-        item.addEventListener("drop", async e => {
+</div>
+`;
 
-            e.preventDefault();
-
-            if (dragItem !== item) {
-
-                let list = item.parentNode;
-
-                if ([...list.children].indexOf(dragItem) <
-                    [...list.children].indexOf(item)) {
-                    list.insertBefore(dragItem, item.nextSibling);
-                } else {
-                    list.insertBefore(dragItem, item);
-                }
-
-                let updated = [...list.children];
-
-                for (let i = 0; i < updated.length; i++) {
-
-                    let id = updated[i].dataset.id;
-
-                    await updateDoc(doc(db, "goals", id), {
-                        order: i
-                    });
-                }
-            }
-        });
-    });
 }
 
-/* MODAL */
-window.openModal = (mode, index) => {
+/* ================= HIDE CONTROLS ================= */
+function hideControls(){
 
-    currentIndex = index;
-    currentMode = mode;
+if(goalName) goalName.style.display="none";
+if(goalTotal) goalTotal.style.display="none";
+if(goalDeadline) goalDeadline.style.display="none";
 
-    let g = goals[index];
+const addBtn =
+document.getElementById("addBtn");
 
-    modal.classList.add("active");
+if(addBtn) addBtn.style.display="none";
 
-    if (mode === "progress") {
-        modalTitle.innerText = "Add Progress";
-        modalName.style.display = "none";
-        modalDate.style.display = "none";
-        modalInput.value = "";
-    }
+}
 
-    else if (mode === "set") {
-        modalTitle.innerText = "Set Progress Value";
-        modalName.style.display = "none";
-        modalDate.style.display = "none";
-        modalInput.value = g.done;
-    }
+/* ================= LOAD ================= */
+function loadGoals(){
 
-    else {
-        modalTitle.innerText = "Edit Goal";
-        modalName.style.display = "block";
-        modalDate.style.display = "block";
+onSnapshot(collection(db,"goals"), snap=>{
 
-        modalName.value = g.name;
-        modalInput.value = g.total;
-        modalDate.value = g.deadline || "";
-    }
+goals=[];
+
+snap.forEach(d=>{
+
+let g=d.data();
+
+if(g.user===uid){
+
+goals.push({
+id:d.id,
+...g
+});
+
+}
+
+});
+
+goals.sort((a,b)=>
+(a.order || 0) -
+(b.order || 0)
+);
+
+render();
+
+if(!isViewMode){
+setTimeout(enableDrag,0);
+}
+
+});
+
+}
+
+/* ================= ADD ================= */
+async function addGoal(){
+
+if(isViewMode) return;
+
+let name = goalName.value;
+let total = Number(goalTotal.value);
+let deadline = goalDeadline.value;
+
+if(!name || !total)
+return alert("Enter name & total");
+
+await addDoc(collection(db,"goals"),{
+
+name,
+total,
+done:0,
+deadline:deadline || null,
+user:realUid,
+order:Date.now()
+
+});
+
+goalName.value="";
+goalTotal.value="";
+goalDeadline.value="";
+
+}
+
+/* ================= RENDER ================= */
+function render(){
+
+let html="";
+
+goals.forEach((g,i)=>{
+
+let percent =
+Math.min(
+(g.done/g.total)*100,
+100
+);
+
+html += `
+<div class="goal-card"
+${!isViewMode ? `draggable="true"` : ""}
+data-id="${g.id}">
+
+<h3>${g.name}</h3>
+
+<p>${g.done} / ${g.total}</p>
+
+${g.deadline ?
+`<small>⏳ ${g.deadline}</small>`
+: ""}
+
+<div class="progress-bar">
+<div class="fill"
+style="width:${percent}%">
+</div>
+</div>
+
+<div class="actions">
+
+${!isViewMode ? `
+
+<button onclick="openModal('progress',${i})">
+➕ Add
+</button>
+
+<button onclick="openModal('set',${i})">
+✏️ Edit Progress
+</button>
+
+<button onclick="openModal('edit',${i})">
+Edit Goal
+</button>
+
+<button onclick="deleteGoal('${g.id}')">
+Delete
+</button>
+
+` : ""}
+
+</div>
+
+</div>
+`;
+
+});
+
+goalContainer.innerHTML =
+html || "<p>No goals found.</p>";
+
+}
+
+/* ================= DRAG ================= */
+function enableDrag(){
+
+let items =
+document.querySelectorAll(".goal-card");
+
+let dragItem=null;
+
+items.forEach(item=>{
+
+item.addEventListener("dragstart",()=>{
+
+dragItem=item;
+item.style.opacity="0.5";
+
+});
+
+item.addEventListener("dragend",()=>{
+
+item.style.opacity="1";
+
+});
+
+item.addEventListener(
+"dragover",
+e=>e.preventDefault()
+);
+
+item.addEventListener(
+"drop",
+async e=>{
+
+e.preventDefault();
+
+if(dragItem!==item){
+
+let list=item.parentNode;
+
+if(
+[...list.children]
+.indexOf(dragItem)
+<
+[...list.children]
+.indexOf(item)
+){
+list.insertBefore(
+dragItem,
+item.nextSibling
+);
+}else{
+list.insertBefore(
+dragItem,
+item
+);
+}
+
+let updated =
+[...list.children];
+
+for(let i=0;i<updated.length;i++){
+
+let id =
+updated[i].dataset.id;
+
+await updateDoc(
+doc(db,"goals",id),
+{
+order:i
+}
+);
+
+}
+
+}
+
+});
+
+});
+
+}
+
+/* ================= MODAL ================= */
+window.openModal=(mode,index)=>{
+
+if(isViewMode) return;
+
+currentIndex=index;
+currentMode=mode;
+
+let g=goals[index];
+
+modal.classList.add("active");
+
+if(mode==="progress"){
+
+modalTitle.innerText=
+"Add Progress";
+
+modalName.style.display="none";
+modalDate.style.display="none";
+modalInput.value="";
+
+}
+
+else if(mode==="set"){
+
+modalTitle.innerText=
+"Set Progress Value";
+
+modalName.style.display="none";
+modalDate.style.display="none";
+modalInput.value=g.done;
+
+}
+
+else{
+
+modalTitle.innerText=
+"Edit Goal";
+
+modalName.style.display="block";
+modalDate.style.display="block";
+
+modalName.value=g.name;
+modalInput.value=g.total;
+modalDate.value=
+g.deadline || "";
+
+}
+
 };
 
-window.closeModal = () => modal.classList.remove("active");
-
-/* SAVE */
-window.saveModal = async () => {
-
-    let g = goals[currentIndex];
-
-    if (currentMode === "progress") {
-
-        let val = Number(modalInput.value);
-        if (!val) return;
-
-        await updateDoc(doc(db, "goals", g.id), {
-            done: g.done + val
-        });
-    }
-
-    else if (currentMode === "set") {
-
-        let val = Number(modalInput.value);
-        if (val < 0) return;
-
-        await updateDoc(doc(db, "goals", g.id), {
-            done: val
-        });
-    }
-
-    else {
-
-        await updateDoc(doc(db, "goals", g.id), {
-            name: modalName.value,
-            total: Number(modalInput.value),
-            deadline: modalDate.value || null
-        });
-    }
-
-    closeModal();
+window.closeModal=()=>{
+modal.classList.remove("active");
 };
 
-/* DELETE */
-window.deleteGoal = async (id) => {
-    await deleteDoc(doc(db, "goals", id));
+/* ================= SAVE ================= */
+window.saveModal=async()=>{
+
+if(isViewMode) return;
+
+let g=goals[currentIndex];
+
+if(currentMode==="progress"){
+
+let val =
+Number(modalInput.value);
+
+if(!val) return;
+
+await updateDoc(
+doc(db,"goals",g.id),
+{
+done:g.done + val
+}
+);
+
+}
+
+else if(currentMode==="set"){
+
+let val =
+Number(modalInput.value);
+
+if(val<0) return;
+
+await updateDoc(
+doc(db,"goals",g.id),
+{
+done:val
+}
+);
+
+}
+
+else{
+
+await updateDoc(
+doc(db,"goals",g.id),
+{
+name:modalName.value,
+total:Number(modalInput.value),
+deadline:
+modalDate.value || null
+}
+);
+
+}
+
+closeModal();
+
+};
+
+/* ================= DELETE ================= */
+window.deleteGoal=async(id)=>{
+
+if(isViewMode) return;
+
+await deleteDoc(
+doc(db,"goals",id)
+);
+
 };
