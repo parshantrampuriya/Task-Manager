@@ -1,5 +1,5 @@
 /* ================= HOME.JS FINAL FULL UPDATED ================= */
-/* Added: Friend permission lock system */
+/* Removed top-right My Dashboard button */
 /* Keeps all existing features same */
 
 import { auth, db } from "./firebase.js";
@@ -72,10 +72,9 @@ if(snap.exists()){
 const name = snap.data().name || "User";
 
 if(isViewMode){
+
 $("username").innerText =
 "👀 Viewing " + name;
-
-createExitViewButton();
 
 /* check permission first */
 const allowed =
@@ -87,13 +86,15 @@ return;
 }
 
 }else{
+
 $("username").innerText =
 "Welcome " + name;
-}
 
 }
 
-/* hide top buttons */
+}
+
+/* hide edit buttons in friend mode */
 if(isViewMode){
 
 document.querySelectorAll(".top-btn,.add-btn")
@@ -115,7 +116,8 @@ loadLive();
 /* ========= FRIEND PERMISSION ========= */
 async function checkFriendPermission(){
 
-const snap = await getDocs(collection(db,"friends"));
+const snap =
+await getDocs(collection(db,"friends"));
 
 for(const d of snap.docs){
 
@@ -178,36 +180,6 @@ background:linear-gradient(45deg,#00eaff,#00ff9d);
 
 </div>
 `;
-
-}
-
-/* ========= EXIT BUTTON ========= */
-function createExitViewButton(){
-
-if($("exitViewBtn")) return;
-
-const btn = document.createElement("button");
-
-btn.id="exitViewBtn";
-btn.innerHTML="↩ My Dashboard";
-
-btn.style.position="fixed";
-btn.style.top="16px";
-btn.style.right="20px";
-btn.style.zIndex="999";
-btn.style.padding="12px 18px";
-btn.style.border="none";
-btn.style.borderRadius="14px";
-btn.style.fontWeight="700";
-btn.style.cursor="pointer";
-btn.style.background=
-"linear-gradient(45deg,#00eaff,#00ff9d)";
-
-btn.onclick=()=>{
-location.href="home.html";
-};
-
-document.body.appendChild(btn);
 
 }
 
@@ -361,7 +333,6 @@ function render(){
 const grid = $("dashboardGrid");
 grid.innerHTML="";
 
-/* widget permission filtering */
 layout.forEach(type=>{
 
 if(
@@ -443,10 +414,12 @@ total ? Math.round(done*100/total):0;
 
 card.querySelector(".widget-body").innerHTML=`
 <div class="big-number">${p}%</div>
+
 <div class="progress">
 <div class="progress-fill"
 style="width:${p}%"></div>
 </div>
+
 <div class="small-muted">
 ${done}/${total} completed
 </div>
