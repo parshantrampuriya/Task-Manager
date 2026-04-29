@@ -1,4 +1,4 @@
-/* home.js FINAL UPDATED (friend view mode added, existing features kept same) */
+/* ================= HOME.JS FINAL FULL UPDATED ================= */
 
 import { auth, db } from "./firebase.js";
 
@@ -21,17 +21,18 @@ onSnapshot
 /* ========= DOM ========= */
 const $ = id => document.getElementById(id);
 
-/* ========= URL VIEW MODE ========= */
+/* ========= URL PARAMS ========= */
 const params = new URLSearchParams(location.search);
 const viewUser = params.get("viewUser");
 
 /* ========= GLOBAL ========= */
-let uid = null;          // current data loading uid
-let realUid = null;      // logged in user
+let uid = null;        // whose data showing
+let realUid = null;   // logged in user
 let isViewMode = false;
 
 let tasks = [];
 let goals = [];
+
 let counts = {
 mistakes:0,
 insights:0,
@@ -52,41 +53,39 @@ return;
 
 realUid = user.uid;
 
-/* friend view mode */
+/* Friend view mode */
 if(viewUser){
 uid = viewUser;
 isViewMode = true;
 }else{
-uid = user.uid;
+uid = realUid;
 }
 
-/* user name */
+/* Load user name */
 const snap = await getDoc(doc(db,"users",uid));
 
 if(snap.exists()){
 
+const name = snap.data().name || "User";
+
 if(isViewMode){
-$("username").innerText =
-"👀 Viewing " + (snap.data().name || "Friend");
+$("username").innerText = "👀 Viewing " + name;
+createExitViewButton();
 }else{
-$("username").innerText =
-"Welcome " + (snap.data().name || "");
+$("username").innerText = "Welcome " + name;
 }
 
 }
 
-/* hide edit/add in view mode */
+/* Hide edit buttons in friend mode */
 if(isViewMode){
 
-document.querySelectorAll(
-".top-btn,.add-btn"
-).forEach(x=>{
-x.style.display="none";
-});
+document.querySelectorAll(".top-btn,.add-btn")
+.forEach(x=>x.style.display="none");
 
 }
 
-/* only load settings for own dashboard */
+/* Own settings only */
 if(!isViewMode){
 await loadDashboardSettings();
 }
@@ -97,10 +96,44 @@ loadLive();
 
 });
 
-/* ========= CLOUD SETTINGS ========= */
+/* ========= EXIT FRIEND VIEW ========= */
+function createExitViewButton(){
+
+if(document.getElementById("exitViewBtn")) return;
+
+const btn = document.createElement("button");
+
+btn.id = "exitViewBtn";
+btn.innerHTML = "↩ My Dashboard";
+
+btn.style.position = "fixed";
+btn.style.top = "16px";
+btn.style.right = "20px";
+btn.style.zIndex = "999";
+btn.style.padding = "12px 18px";
+btn.style.border = "none";
+btn.style.borderRadius = "14px";
+btn.style.cursor = "pointer";
+btn.style.fontWeight = "700";
+btn.style.color = "#000";
+btn.style.background =
+"linear-gradient(45deg,#00eaff,#00ff9d)";
+btn.style.boxShadow =
+"0 0 18px rgba(0,255,255,.4)";
+
+btn.onclick = ()=>{
+location.href="home.html";
+};
+
+document.body.appendChild(btn);
+
+}
+
+/* ========= SETTINGS ========= */
 async function loadDashboardSettings(){
 
-const snap = await getDoc(doc(db,"dashboardSettings",realUid));
+const snap =
+await getDoc(doc(db,"dashboardSettings",realUid));
 
 if(snap.exists()){
 
@@ -133,8 +166,10 @@ widgetSizes:widgetSizes
 
 /* ========= DATE ========= */
 function setDate(){
+
 $("todayDate").innerText =
 new Date().toDateString();
+
 }
 
 function startTimer(){
@@ -148,9 +183,14 @@ end.setHours(23,59,59,999);
 
 const diff = end-now;
 
-const h = Math.floor(diff/3600000);
-const m = Math.floor((diff%3600000)/60000);
-const s = Math.floor((diff%60000)/1000);
+const h =
+Math.floor(diff/3600000);
+
+const m =
+Math.floor((diff%3600000)/60000);
+
+const s =
+Math.floor((diff%60000)/1000);
 
 $("countdownText").innerText =
 `⏳ ${h}h ${m}m ${s}s remaining today`;
@@ -159,31 +199,37 @@ $("countdownText").innerText =
 
 }
 
-/* ========= LOAD ========= */
+/* ========= LOAD LIVE ========= */
 function loadLive(){
 
-onSnapshot(collection(db,"tasks"), snap=>{
+onSnapshot(collection(db,"tasks"),snap=>{
 
 tasks=[];
 
 snap.forEach(d=>{
+
 let x=d.data();
+
 if(x.user===uid)
 tasks.push({id:d.id,...x});
+
 });
 
 render();
 
 });
 
-onSnapshot(collection(db,"goals"), snap=>{
+onSnapshot(collection(db,"goals"),snap=>{
 
 goals=[];
 
 snap.forEach(d=>{
+
 let x=d.data();
+
 if(x.user===uid)
 goals.push(x);
+
 });
 
 render();
@@ -214,12 +260,15 @@ render();
 
 async function getCollectionCount(name){
 
-const snap = await getDocs(collection(db,name));
+const snap =
+await getDocs(collection(db,name));
 
 let c=0;
 
 snap.forEach(d=>{
+
 if(d.data().uid===uid) c++;
+
 });
 
 return c;
@@ -230,15 +279,25 @@ return c;
 function render(){
 
 const grid = $("dashboardGrid");
-grid.innerHTML = "";
+
+grid.innerHTML="";
 
 layout.forEach(type=>{
 
-if(type==="focus") grid.appendChild(focusCard());
-if(type==="tasks") grid.appendChild(taskCard());
-if(type==="quote") grid.appendChild(quoteCard());
-if(type==="goals") grid.appendChild(goalCard());
-if(type==="growth") grid.appendChild(growthCard());
+if(type==="focus")
+grid.appendChild(focusCard());
+
+if(type==="tasks")
+grid.appendChild(taskCard());
+
+if(type==="quote")
+grid.appendChild(quoteCard());
+
+if(type==="goals")
+grid.appendChild(goalCard());
+
+if(type==="growth")
+grid.appendChild(growthCard());
 
 });
 
@@ -251,16 +310,17 @@ enableDragAndResize();
 /* ========= BASE CARD ========= */
 function makeCard(title,id,wide=false){
 
-const div = document.createElement("div");
+const div =
+document.createElement("div");
 
 div.className =
-"widget-card " + (wide ? "full-card":"");
+"widget-card " +
+(wide ? "full-card":"");
 
 div.dataset.id=id;
 
-if(!isViewMode){
+if(!isViewMode)
 div.draggable=true;
-}
 
 div.innerHTML=`
 <div class="card-head">
@@ -270,11 +330,13 @@ div.innerHTML=`
 `;
 
 if(widgetSizes[id]){
+
 div.style.width =
 widgetSizes[id].width || "";
 
 div.style.height =
 widgetSizes[id].height || "";
+
 }
 
 return div;
@@ -285,17 +347,20 @@ return div;
 
 function focusCard(){
 
-const card = makeCard("📊 Today Focus","focus");
+const card =
+makeCard("📊 Today Focus","focus");
 
-const today = getTodayTasks();
+const today =
+getTodayTasks();
 
 const done =
 today.filter(x=>x.completed).length;
 
-const total = today.length;
+const total =
+today.length;
 
-const p = total ?
-Math.round(done*100/total):0;
+const p =
+total ? Math.round(done*100/total):0;
 
 card.querySelector(".widget-body").innerHTML=`
 <div class="big-number">${p}%</div>
@@ -319,12 +384,13 @@ function taskCard(){
 const card =
 makeCard("📋 Today Tasks","tasks",true);
 
-let arr = getTodayTasks();
+let arr =
+getTodayTasks();
 
 arr.sort((a,b)=>{
 
 if(a.completed!==b.completed)
-return a.completed ? 1 : -1;
+return a.completed ? 1:-1;
 
 return (a.time||"")
 .localeCompare(b.time||"");
@@ -347,7 +413,7 @@ ${!isViewMode ? `
 <button class="tick-btn"
 onclick="toggleTask('${x.id}',${x.completed})">
 ✔
-</button>` : ""}
+</button>`:""}
 
 </div>
 `;
@@ -373,7 +439,8 @@ const q = [
 const text =
 q[Math.floor(Math.random()*q.length)];
 
-const card = makeCard("💬 Quote","quote");
+const card =
+makeCard("💬 Quote","quote");
 
 card.querySelector(".widget-body").innerHTML =
 `<div class="quote-box">${text}</div>`;
@@ -384,16 +451,21 @@ return card;
 
 function goalCard(){
 
-const card = makeCard("🎯 Goals","goals");
+const card =
+makeCard("🎯 Goals","goals");
 
 let html="";
 
 goals.forEach(g=>{
 
-const done = Number(g.done||0);
-const total = Number(g.total||0);
+const done =
+Number(g.done||0);
 
-const p = total>0 ?
+const total =
+Number(g.total||0);
+
+const p =
+total>0 ?
 Math.round((done/total)*100):0;
 
 html+=`
@@ -442,7 +514,7 @@ return tasks.filter(x=>x.date===today);
 
 }
 
-/* ========= TASK ========= */
+/* ========= TASK TOGGLE ========= */
 window.toggleTask = async(id,val)=>{
 
 if(isViewMode) return;
@@ -529,10 +601,13 @@ let arr=[];
 document.querySelectorAll(
 "#customPopup input[type=checkbox]"
 ).forEach(x=>{
-if(x.checked) arr.push(x.value);
+
+if(x.checked)
+arr.push(x.value);
+
 });
 
-layout = arr;
+layout=arr;
 
 await saveDashboardSettings();
 
@@ -568,11 +643,16 @@ await saveOrder();
 
 });
 
-const ro = new ResizeObserver(async()=>{
+/* resize save */
+const ro =
+new ResizeObserver(async()=>{
 
 widgetSizes[card.dataset.id]={
-width:card.style.width || getComputedStyle(card).width,
-height:card.style.height || getComputedStyle(card).height
+width:card.style.width ||
+getComputedStyle(card).width,
+
+height:card.style.height ||
+getComputedStyle(card).height
 };
 
 await saveDashboardSettings();
@@ -591,7 +671,9 @@ layout=[];
 
 document.querySelectorAll(".widget-card")
 .forEach(x=>{
+
 layout.push(x.dataset.id);
+
 });
 
 await saveDashboardSettings();
@@ -602,6 +684,7 @@ await saveDashboardSettings();
 $("logoutBtn").onclick = async()=>{
 
 await signOut(auth);
+
 location.href="index.html";
 
 };
