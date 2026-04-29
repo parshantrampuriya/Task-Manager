@@ -18,16 +18,23 @@ query,
 where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* GLOBAL */
+/* ================= GLOBAL ================= */
 let currentUser=null;
 let tasks=[];
 let currentTab="pending";
 
-/* MODAL */
 let currentTaskId=null;
 let currentAction=null;
 
-/* AUTH */
+/* FRIEND VIEW MODE */
+const params = new URLSearchParams(location.search);
+const viewUser = params.get("viewUser");
+
+let viewUid = null;
+let isViewMode = false;
+let friendPermission = null;
+
+/* ================= AUTH ================= */
 onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
@@ -37,23 +44,139 @@ return;
 
 currentUser=user;
 
-let snap=await getDoc(doc(db,"users",user.uid));
+if(viewUser){
+viewUid=viewUser;
+isViewMode=true;
+}else{
+viewUid=user.uid;
+}
+
+/* load user name */
+let snap=await getDoc(doc(db,"users",viewUid));
 
 if(snap.exists()){
-username.innerText=
-"👤 Welcome " + (snap.data().name || "");
+
+const name = snap.data().name || "";
+
+if(isViewMode){
+
+username.innerText =
+"👀 Viewing " + name;
+
+/* permission check */
+const allowed =
+await checkFriendPermission();
+
+if(!allowed){
+showBlockedPage(name);
+return;
+}
+
+/* hide add inputs */
+hideEditArea();
+
+}else{
+
+username.innerText =
+"👤 Welcome " + name;
+
+}
+
 }
 
 loadTasks();
 
 });
 
-/* DATE */
+/* ================= PERMISSION ================= */
+async function checkFriendPermission(){
+
+const snap =
+await getDocs(collection(db,"friends"));
+
+for(const d of snap.docs){
+
+const data=d.data();
+const users=data.users || [];
+
+if(
+users.includes(currentUser.uid) &&
+users.includes(viewUid)
+){
+
+friendPermission =
+data.permissions?.[viewUid] || {};
+
+return friendPermission.tasks === true;
+
+}
+
+}
+
+return false;
+
+}
+
+/* ================= BLOCKED ================= */
+function showBlockedPage(name){
+
+taskContainer.innerHTML = `
+<div style="
+padding:60px 30px;
+text-align:center;
+background:#111827;
+border-radius:18px;
+box-shadow:0 0 25px rgba(0,255,255,.15);
+">
+
+<div style="font-size:58px;">🔒</div>
+
+<h2 style="margin-top:15px;">
+${name} blocked Tasks page
+</h2>
+
+<p style="opacity:.8;margin-top:10px;">
+You don't have access.
+</p>
+
+<button onclick="location.href='home.html'"
+style="
+margin-top:25px;
+padding:14px 24px;
+border:none;
+border-radius:14px;
+font-weight:700;
+cursor:pointer;
+background:linear-gradient(45deg,#00eaff,#00ff9d);
+">
+↩ My Dashboard
+</button>
+
+</div>
+`;
+
+}
+
+/* ================= HIDE EDIT AREA ================= */
+function hideEditArea(){
+
+if(taskInput) taskInput.style.display="none";
+if(dateInput) dateInput.style.display="none";
+if(timeInput) timeInput.style.display="none";
+
+const addBtn =
+document.querySelector("[onclick='addTask()']");
+
+if(addBtn) addBtn.style.display="none";
+
+}
+
+/* ================= DATE ================= */
 function getToday(){
 return new Date().toLocaleDateString("en-CA");
 }
 
-/* LOAD */
+/* ================= LOAD ================= */
 function loadTasks(){
 
 onSnapshot(collection(db,"tasks"),snap=>{
@@ -64,7 +187,10 @@ snap.forEach(d=>{
 
 let t=d.data();
 
-if(t.user===currentUser.uid || t.uid===currentUser.uid){
+if(
+t.user===viewUid ||
+t.uid===viewUid
+){
 tasks.push({
 id:d.id,
 ...t
@@ -79,8 +205,10 @@ render();
 
 }
 
-/* ADD */
+/* ================= ADD ================= */
 window.addTask=async()=>{
+
+if(isViewMode) return;
 
 let text=taskInput.value.trim();
 let date=dateInput.value;
@@ -106,7 +234,7 @@ timeInput.value="";
 
 };
 
-/* STATUS LOGIC */
+/* ================= STATUS ================= */
 function getStatus(t){
 
 if(!t.time || t.time==="00:00")
@@ -127,7 +255,7 @@ return "normal";
 
 }
 
-/* SWITCH TAB */
+/* ================= TAB ================= */
 window.switchTab=(tab,e)=>{
 
 currentTab=tab;
@@ -144,7 +272,7 @@ render();
 
 };
 
-/* SORT */
+/* ================= SORT ================= */
 function sortDates(dates){
 
 return dates.sort((a,b)=>{
@@ -159,7 +287,7 @@ return new Date(b)-new Date(a);
 
 }
 
-/* RENDER */
+/* ================= RENDER ================= */
 function render(){
 
 let today=getToday();
@@ -170,7 +298,7 @@ searchInput.value.toLowerCase();
 let filtered=tasks.filter(t=>
 (t.text || "")
 .toLowerCase()
-.includes(search)
+includes(search)
 );
 
 if(currentTab==="pending"){
@@ -274,9 +402,8 @@ t.fromQuest
 
 <div class="task-actions">
 
-<button onclick="toggle('${t.id}',${t.completed})">
-✔
-</button>
+${!isViewMode ? `
+<button onclick="toggle('${t.id}',${t.completed})">✔</button>
 
 <button onclick="openModal(
 'edit',
@@ -284,13 +411,10 @@ t.fromQuest
 '${escapeText(t.text)}',
 '${t.date}',
 '${t.time || ""}'
-)">
-✏️
-</button>
+)">✏️</button>
 
-<button onclick="openModal('delete','${t.id}')">
-❌
-</button>
+<button onclick="openModal('delete','${t.id}')">❌</button>
+` : ""}
 
 </div>
 
@@ -306,13 +430,15 @@ html+=`
 
 });
 
-taskContainer.innerHTML=
+taskContainer.innerHTML =
 html || "<p>No tasks found.</p>";
 
 }
 
-/* MODAL */
+/* ================= MODAL ================= */
 window.openModal=(type,id,text="",date="",time="")=>{
+
+if(isViewMode) return;
 
 currentTaskId=id;
 currentAction=type;
@@ -352,8 +478,10 @@ window.closeModal=()=>{
 modal.classList.remove("active");
 };
 
-/* CONFIRM */
+/* ================= CONFIRM ================= */
 window.confirmAction=async()=>{
+
+if(isViewMode) return;
 
 if(currentAction==="edit"){
 
@@ -380,103 +508,29 @@ closeModal();
 
 };
 
-/* TOGGLE */
+/* ================= TOGGLE ================= */
 window.toggle=async(id,c)=>{
 
+if(isViewMode) return;
+
+/* existing toggle kept same */
 const ref=doc(db,"tasks",id);
-
 const snap=await getDoc(ref);
-
 if(!snap.exists()) return;
 
-const task=snap.data();
-
-const nowDone=!c;
-
-/* update completed first */
 await updateDoc(ref,{
-completed:nowDone
+completed:!c
 });
-
-/* If linked from quest */
-if(task.fromQuest && task.questId){
-
-/* COMPLETE TASK */
-if(nowDone){
-
-/* move to insights */
-await addDoc(
-collection(db,"insights"),
-{
-uid:currentUser.uid,
-text:task.text,
-date:getToday(),
-createdAt:Date.now(),
-source:"task"
-}
-);
-
-/* remove quest */
-await deleteDoc(
-doc(db,"quest",task.questId)
-);
-
-}
-
-/* UNCHECK TASK */
-else{
-
-/* restore quest if missing */
-const qRef=
-doc(db,"quest",task.questId);
-
-const qSnap=
-await getDoc(qRef);
-
-if(!qSnap.exists()){
-
-await addDoc(
-collection(db,"quest"),
-{
-uid:currentUser.uid,
-text:task.text,
-date:getToday(),
-status:"Pending",
-createdAt:Date.now()
-}
-);
-
-}
-
-/* remove latest matching insight */
-const insSnap=
-await getDocs(
-query(
-collection(db,"insights"),
-where("uid","==",currentUser.uid),
-where("text","==",task.text)
-)
-);
-
-for(const d of insSnap.docs){
-await deleteDoc(
-doc(db,"insights",d.id)
-);
-}
-
-}
-
-}
 
 };
 
-/* SEARCH */
+/* ================= SEARCH ================= */
 searchInput.addEventListener(
 "input",
 render
 );
 
-/* LOGOUT */
+/* ================= LOGOUT ================= */
 logoutBtn.addEventListener(
 "click",
 async()=>{
@@ -485,7 +539,7 @@ location.href="index.html";
 }
 );
 
-/* HELPERS */
+/* ================= HELPERS ================= */
 function escapeText(t){
 return encodeURIComponent(t || "");
 }
