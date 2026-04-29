@@ -1,4 +1,5 @@
-/* ================= VIEW MODE CHECK ================= */
+/* ================= FINAL UPDATED menu.js ================= */
+/* Smart Friend View Navigation + Better Sidebar */
 
 function getViewUser(){
 
@@ -11,7 +12,7 @@ return url.get("viewUser");
 
 const viewUser = getViewUser();
 
-/* ================= PAGE OPEN ================= */
+/* ================= OPEN PAGE ================= */
 
 function openPage(page){
 
@@ -30,27 +31,54 @@ location.href = page;
 
 /* ================= NAVIGATION ================= */
 
-window.goHome=()=>openPage("home.html");
+window.goHome = ()=>openPage("home.html");
 
-window.goTasks=()=>openPage("tasks.html");
+window.goTasks = ()=>{
 
-window.goGoals=()=>openPage("goals.html");
+if(viewUser){
+showToast("🔒 Tasks private in friend mode");
+return;
+}
 
-window.goFriends=()=>location.href="friends.html";
+openPage("tasks.html");
 
-window.goQuestionBank=()=>openPage("question-bank.html");
+};
 
-window.goTests=()=>openPage("tests.html");
+window.goGoals = ()=>openPage("goals.html");
 
-window.goGrowth=()=>openPage("growth.html");
+window.goFriends = ()=>location.href="friends.html";
 
-window.goProfile=()=>openPage("profile.html");
+window.goQuestionBank = ()=>{
+
+if(viewUser){
+showToast("🔒 Not available");
+return;
+}
+
+openPage("question-bank.html");
+
+};
+
+window.goTests = ()=>{
+
+if(viewUser){
+showToast("🔒 Not available");
+return;
+}
+
+openPage("tests.html");
+
+};
+
+window.goGrowth = ()=>openPage("growth.html");
+
+window.goProfile = ()=>openPage("profile.html");
 
 /* ================= SIDEBAR ================= */
 
-window.toggleSidebar=()=>{
+window.toggleSidebar = ()=>{
 
-const sidebar=
+const sidebar =
 document.getElementById("sidebar");
 
 if(sidebar){
@@ -63,10 +91,10 @@ sidebar.classList.toggle("active");
 
 document.addEventListener("click",(e)=>{
 
-const sidebar=
+const sidebar =
 document.getElementById("sidebar");
 
-const menuBtn=
+const menuBtn =
 document.querySelector(".menu-btn");
 
 if(!sidebar || !menuBtn) return;
@@ -87,6 +115,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 highlightPage();
 buildReturnButton();
+setupFriendModeSidebar();
 
 });
 
@@ -94,7 +123,7 @@ buildReturnButton();
 
 function highlightPage(){
 
-const page=
+const page =
 location.pathname
 .split("/")
 .pop()
@@ -104,10 +133,10 @@ document
 .querySelectorAll("#sidebar button")
 .forEach(btn=>{
 
-let txt=
+const txt =
 btn.innerText.toLowerCase();
 
-let active=false;
+let active = false;
 
 if(page.includes("home") && txt.includes("home")) active=true;
 if(page.includes("tasks") && txt.includes("tasks")) active=true;
@@ -120,11 +149,11 @@ if(page.includes("profile") && txt.includes("profile")) active=true;
 
 if(active){
 
-btn.style.background=
+btn.style.background =
 "linear-gradient(45deg,#00cfff,#00ffcc)";
 
-btn.style.color="#000";
-btn.style.fontWeight="700";
+btn.style.color = "#000";
+btn.style.fontWeight = "700";
 
 }
 
@@ -132,28 +161,136 @@ btn.style.fontWeight="700";
 
 }
 
-/* ================= RETURN BUTTON ================= */
+/* ================= FRIEND MODE SIDEBAR ================= */
+
+function setupFriendModeSidebar(){
+
+if(!viewUser) return;
+
+const buttons =
+document.querySelectorAll("#sidebar button");
+
+buttons.forEach(btn=>{
+
+const txt =
+btn.innerText.toLowerCase();
+
+/* hide private pages in friend mode */
+if(
+txt.includes("tasks") ||
+txt.includes("question") ||
+txt.includes("tests") ||
+txt.includes("friends")
+){
+btn.style.display="none";
+}
+
+/* rename pages */
+if(txt.includes("home")){
+btn.innerText="🏠 Friend Home";
+}
+
+if(txt.includes("goals")){
+btn.innerText="🎯 Friend Goals";
+}
+
+if(txt.includes("growth")){
+btn.innerText="🌱 Friend Growth";
+}
+
+if(txt.includes("profile")){
+btn.innerText="👤 Friend Profile";
+}
+
+});
+
+/* add dashboard return button */
+const side =
+document.getElementById("sidebar");
+
+if(side && !document.getElementById("backOwn")){
+
+const btn =
+document.createElement("button");
+
+btn.id="backOwn";
+btn.innerText="↩ My Dashboard";
+
+btn.style.background =
+"linear-gradient(45deg,#00ff99,#00eaff)";
+
+btn.style.color="#000";
+btn.style.fontWeight="700";
+
+btn.onclick=()=>{
+location.href="home.html";
+};
+
+side.appendChild(btn);
+
+}
+
+}
+
+/* ================= NAVBAR RETURN BUTTON ================= */
 
 function buildReturnButton(){
 
 if(!viewUser) return;
 
-const nav=
+const nav =
 document.querySelector(".navbar");
 
 if(!nav) return;
 
-const btn=
+if(document.getElementById("topReturn")) return;
+
+const btn =
 document.createElement("button");
 
+btn.id="topReturn";
 btn.innerText="↩ My Account";
 btn.className="top-btn";
 
 btn.onclick=()=>{
-location.href="friends.html";
+location.href="home.html";
 };
 
 nav.appendChild(btn);
+
+}
+
+/* ================= TOAST ================= */
+
+function showToast(msg){
+
+let old =
+document.getElementById("menuToast");
+
+if(old) old.remove();
+
+const t =
+document.createElement("div");
+
+t.id="menuToast";
+t.innerText=msg;
+
+t.style.position="fixed";
+t.style.bottom="25px";
+t.style.left="50%";
+t.style.transform="translateX(-50%)";
+t.style.padding="12px 18px";
+t.style.borderRadius="14px";
+t.style.background="#111";
+t.style.color="#fff";
+t.style.zIndex="9999";
+t.style.boxShadow="0 0 20px rgba(0,255,255,.25)";
+
+document.body.appendChild(t);
+
+setTimeout(()=>{
+t.remove();
+},1800);
 
 }
 
@@ -161,7 +298,7 @@ nav.appendChild(btn);
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const logout=
+const logout =
 document.getElementById("logoutBtn");
 
 if(logout){
