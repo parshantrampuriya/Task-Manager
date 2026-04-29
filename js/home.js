@@ -1,4 +1,4 @@
-/* home.js FINAL UPDATED (sync resize + layout across phone/laptop) */
+/* home.js FINAL UPDATED (friend view mode added, existing features kept same) */
 
 import { auth, db } from "./firebase.js";
 
@@ -21,8 +21,15 @@ onSnapshot
 /* ========= DOM ========= */
 const $ = id => document.getElementById(id);
 
+/* ========= URL VIEW MODE ========= */
+const params = new URLSearchParams(location.search);
+const viewUser = params.get("viewUser");
+
 /* ========= GLOBAL ========= */
-let uid = null;
+let uid = null;          // current data loading uid
+let realUid = null;      // logged in user
+let isViewMode = false;
+
 let tasks = [];
 let goals = [];
 let counts = {
@@ -43,17 +50,46 @@ location.href="index.html";
 return;
 }
 
+realUid = user.uid;
+
+/* friend view mode */
+if(viewUser){
+uid = viewUser;
+isViewMode = true;
+}else{
 uid = user.uid;
+}
 
 /* user name */
 const snap = await getDoc(doc(db,"users",uid));
+
 if(snap.exists()){
+
+if(isViewMode){
+$("username").innerText =
+"👀 Viewing " + (snap.data().name || "Friend");
+}else{
 $("username").innerText =
 "Welcome " + (snap.data().name || "");
 }
 
-/* load dashboard settings from cloud */
+}
+
+/* hide edit/add in view mode */
+if(isViewMode){
+
+document.querySelectorAll(
+".top-btn,.add-btn"
+).forEach(x=>{
+x.style.display="none";
+});
+
+}
+
+/* only load settings for own dashboard */
+if(!isViewMode){
 await loadDashboardSettings();
+}
 
 setDate();
 startTimer();
@@ -64,7 +100,7 @@ loadLive();
 /* ========= CLOUD SETTINGS ========= */
 async function loadDashboardSettings(){
 
-const snap = await getDoc(doc(db,"dashboardSettings",uid));
+const snap = await getDoc(doc(db,"dashboardSettings",realUid));
 
 if(snap.exists()){
 
@@ -82,8 +118,10 @@ widgetSizes = d.widgetSizes;
 
 async function saveDashboardSettings(){
 
+if(isViewMode) return;
+
 await setDoc(
-doc(db,"dashboardSettings",uid),
+doc(db,"dashboardSettings",realUid),
 {
 layout:layout,
 widgetSizes:widgetSizes
@@ -105,6 +143,7 @@ setInterval(()=>{
 
 const now = new Date();
 const end = new Date();
+
 end.setHours(23,59,59,999);
 
 const diff = end-now;
@@ -157,10 +196,17 @@ loadCounts();
 
 async function loadCounts(){
 
-counts.mistakes = await getCollectionCount("mistakes");
-counts.insights = await getCollectionCount("insights");
-counts.quest = await getCollectionCount("quest");
-counts.smartmoves = await getCollectionCount("smartmoves");
+counts.mistakes =
+await getCollectionCount("mistakes");
+
+counts.insights =
+await getCollectionCount("insights");
+
+counts.quest =
+await getCollectionCount("quest");
+
+counts.smartmoves =
+await getCollectionCount("smartmoves");
 
 render();
 
@@ -196,7 +242,9 @@ if(type==="growth") grid.appendChild(growthCard());
 
 });
 
+if(!isViewMode){
 enableDragAndResize();
+}
 
 }
 
@@ -209,7 +257,10 @@ div.className =
 "widget-card " + (wide ? "full-card":"");
 
 div.dataset.id=id;
+
+if(!isViewMode){
 div.draggable=true;
+}
 
 div.innerHTML=`
 <div class="card-head">
@@ -218,10 +269,12 @@ div.innerHTML=`
 <div class="widget-body"></div>
 `;
 
-/* apply saved size */
 if(widgetSizes[id]){
-div.style.width = widgetSizes[id].width || "";
-div.style.height = widgetSizes[id].height || "";
+div.style.width =
+widgetSizes[id].width || "";
+
+div.style.height =
+widgetSizes[id].height || "";
 }
 
 return div;
@@ -236,33 +289,46 @@ const card = makeCard("📊 Today Focus","focus");
 
 const today = getTodayTasks();
 
-const done = today.filter(x=>x.completed).length;
+const done =
+today.filter(x=>x.completed).length;
+
 const total = today.length;
 
-const p = total ? Math.round(done*100/total):0;
+const p = total ?
+Math.round(done*100/total):0;
 
 card.querySelector(".widget-body").innerHTML=`
 <div class="big-number">${p}%</div>
+
 <div class="progress">
-<div class="progress-fill" style="width:${p}%"></div>
+<div class="progress-fill"
+style="width:${p}%"></div>
 </div>
-<div class="small-muted">${done}/${total} completed</div>
+
+<div class="small-muted">
+${done}/${total} completed
+</div>
 `;
 
 return card;
+
 }
 
 function taskCard(){
 
-const card = makeCard("📋 Today Tasks","tasks",true);
+const card =
+makeCard("📋 Today Tasks","tasks",true);
 
 let arr = getTodayTasks();
 
 arr.sort((a,b)=>{
+
 if(a.completed!==b.completed)
 return a.completed ? 1 : -1;
 
-return (a.time||"").localeCompare(b.time||"");
+return (a.time||"")
+.localeCompare(b.time||"");
+
 });
 
 let html="";
@@ -277,10 +343,11 @@ html+=`
 <div class="task-time">${x.time || "00:00"}</div>
 </div>
 
+${!isViewMode ? `
 <button class="tick-btn"
 onclick="toggleTask('${x.id}',${x.completed})">
 ✔
-</button>
+</button>` : ""}
 
 </div>
 `;
@@ -291,6 +358,7 @@ card.querySelector(".widget-body").innerHTML =
 html || "No task";
 
 return card;
+
 }
 
 function quoteCard(){
@@ -302,7 +370,8 @@ const q = [
 "Action cures fear."
 ];
 
-const text = q[Math.floor(Math.random()*q.length)];
+const text =
+q[Math.floor(Math.random()*q.length)];
 
 const card = makeCard("💬 Quote","quote");
 
@@ -310,6 +379,7 @@ card.querySelector(".widget-body").innerHTML =
 `<div class="quote-box">${text}</div>`;
 
 return card;
+
 }
 
 function goalCard(){
@@ -331,7 +401,8 @@ html+=`
 <div>${g.name} - ${p}%</div>
 
 <div class="goal-bar">
-<div class="goal-fill" style="width:${p}%"></div>
+<div class="goal-fill"
+style="width:${p}%"></div>
 </div>
 </div>
 `;
@@ -342,11 +413,13 @@ card.querySelector(".widget-body").innerHTML =
 html || "No goals";
 
 return card;
+
 }
 
 function growthCard(){
 
-const card = makeCard("🌱 Growth Summary","growth");
+const card =
+makeCard("🌱 Growth Summary","growth");
 
 card.querySelector(".widget-body").innerHTML=`
 <div class="summary-row"><span>Mistakes</span><b>${counts.mistakes}</b></div>
@@ -356,6 +429,7 @@ card.querySelector(".widget-body").innerHTML=`
 `;
 
 return card;
+
 }
 
 /* ========= HELPERS ========= */
@@ -371,6 +445,8 @@ return tasks.filter(x=>x.date===today);
 /* ========= TASK ========= */
 window.toggleTask = async(id,val)=>{
 
+if(isViewMode) return;
+
 await updateDoc(doc(db,"tasks",id),{
 completed:!val
 });
@@ -379,7 +455,11 @@ completed:!val
 
 /* ========= ADD ========= */
 window.openAddPopup=()=>{
+
+if(isViewMode) return;
+
 $("addPopup").classList.add("show");
+
 };
 
 window.closeAddPopup=()=>{
@@ -388,6 +468,8 @@ $("addPopup").classList.remove("show");
 
 window.selectAddType = async(type)=>{
 
+if(isViewMode) return;
+
 let txt = prompt("Enter "+type);
 
 if(!txt) return;
@@ -395,7 +477,7 @@ if(!txt) return;
 if(type==="task"){
 
 await addDoc(collection(db,"tasks"),{
-user:uid,
+user:realUid,
 text:txt,
 date:new Date().toLocaleDateString("en-CA"),
 time:"00:00",
@@ -405,7 +487,7 @@ completed:false
 }else if(type==="goal"){
 
 await addDoc(collection(db,"goals"),{
-user:uid,
+user:realUid,
 name:txt,
 done:0,
 total:10
@@ -414,7 +496,7 @@ total:10
 }else{
 
 await addDoc(collection(db,type),{
-uid:uid,
+uid:realUid,
 text:txt,
 createdAt:Date.now()
 });
@@ -427,7 +509,11 @@ closeAddPopup();
 
 /* ========= CUSTOM ========= */
 window.openCustomizer=()=>{
+
+if(isViewMode) return;
+
 $("customPopup").classList.add("show");
+
 };
 
 window.closeCustomizer=()=>{
@@ -435,6 +521,8 @@ $("customPopup").classList.remove("show");
 };
 
 window.saveLayout = async()=>{
+
+if(isViewMode) return;
 
 let arr=[];
 
@@ -461,7 +549,6 @@ let drag=null;
 document.querySelectorAll(".widget-card")
 .forEach(card=>{
 
-/* drag */
 card.addEventListener("dragstart",()=>{
 drag=card;
 });
@@ -474,13 +561,13 @@ card.addEventListener("drop",async()=>{
 
 if(drag===card) return;
 
-$("dashboardGrid").insertBefore(drag,card);
+$("dashboardGrid")
+.insertBefore(drag,card);
 
 await saveOrder();
 
 });
 
-/* resize observer */
 const ro = new ResizeObserver(async()=>{
 
 widgetSizes[card.dataset.id]={
