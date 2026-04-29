@@ -19,44 +19,47 @@ where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= GLOBAL ================= */
-let currentUser=null;
-let tasks=[];
-let currentTab="pending";
+let currentUser = null;
+let tasks = [];
+let currentTab = "pending";
 
-let currentTaskId=null;
-let currentAction=null;
+let currentTaskId = null;
+let currentAction = null;
 
-/* FRIEND VIEW MODE */
+/* VIEW MODE */
 const params = new URLSearchParams(location.search);
 const viewUser = params.get("viewUser");
 
-let viewUid = null;
+let uid = null;
+let realUid = null;
 let isViewMode = false;
 let friendPermission = null;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser=user;
+currentUser = user;
+realUid = user.uid;
 
+/* friend mode */
 if(viewUser){
-viewUid=viewUser;
-isViewMode=true;
+uid = viewUser;
+isViewMode = true;
 }else{
-viewUid=user.uid;
+uid = realUid;
 }
 
-/* load user name */
-let snap=await getDoc(doc(db,"users",viewUid));
+/* user name */
+let snap = await getDoc(doc(db,"users",uid));
 
 if(snap.exists()){
 
-const name = snap.data().name || "";
+const name = snap.data().name || "User";
 
 if(isViewMode){
 
@@ -72,8 +75,8 @@ showBlockedPage(name);
 return;
 }
 
-/* hide add inputs */
-hideEditArea();
+/* hide editing controls */
+hideControls();
 
 }else{
 
@@ -96,16 +99,16 @@ await getDocs(collection(db,"friends"));
 
 for(const d of snap.docs){
 
-const data=d.data();
-const users=data.users || [];
+const data = d.data();
+const users = data.users || [];
 
 if(
-users.includes(currentUser.uid) &&
-users.includes(viewUid)
+users.includes(realUid) &&
+users.includes(uid)
 ){
 
 friendPermission =
-data.permissions?.[viewUid] || {};
+data.permissions?.[uid] || {};
 
 return friendPermission.tasks === true;
 
@@ -117,7 +120,7 @@ return false;
 
 }
 
-/* ================= BLOCKED ================= */
+/* ================= BLOCK PAGE ================= */
 function showBlockedPage(name){
 
 taskContainer.innerHTML = `
@@ -129,14 +132,14 @@ border-radius:18px;
 box-shadow:0 0 25px rgba(0,255,255,.15);
 ">
 
-<div style="font-size:58px;">🔒</div>
+<div style="font-size:60px;">🔒</div>
 
 <h2 style="margin-top:15px;">
-${name} blocked Tasks page
+${name} blocked this page
 </h2>
 
 <p style="opacity:.8;margin-top:10px;">
-You don't have access.
+Your friend has restricted access.
 </p>
 
 <button onclick="location.href='home.html'"
@@ -157,8 +160,8 @@ background:linear-gradient(45deg,#00eaff,#00ff9d);
 
 }
 
-/* ================= HIDE EDIT AREA ================= */
-function hideEditArea(){
+/* ================= HIDE CONTROLS ================= */
+function hideControls(){
 
 if(taskInput) taskInput.style.display="none";
 if(dateInput) dateInput.style.display="none";
@@ -187,14 +190,13 @@ snap.forEach(d=>{
 
 let t=d.data();
 
-if(
-t.user===viewUid ||
-t.uid===viewUid
-){
+if(t.user===uid || t.uid===uid){
+
 tasks.push({
 id:d.id,
 ...t
 });
+
 }
 
 });
@@ -206,13 +208,13 @@ render();
 }
 
 /* ================= ADD ================= */
-window.addTask=async()=>{
+window.addTask = async()=>{
 
 if(isViewMode) return;
 
-let text=taskInput.value.trim();
-let date=dateInput.value;
-let time=timeInput.value;
+let text = taskInput.value.trim();
+let date = dateInput.value;
+let time = timeInput.value;
 
 if(!text) return;
 
@@ -222,8 +224,8 @@ text:text,
 date:date || getToday(),
 time:time || "00:00",
 completed:false,
-user:currentUser.uid,
-uid:currentUser.uid,
+user:realUid,
+uid:realUid,
 createdAt:Date.now()
 
 });
@@ -240,12 +242,12 @@ function getStatus(t){
 if(!t.time || t.time==="00:00")
 return "normal";
 
-let now=new Date();
+let now = new Date();
 
-let taskTime=
+let taskTime =
 new Date(`${t.date}T${t.time}`);
 
-let diff=taskTime-now;
+let diff = taskTime-now;
 
 if(diff<0) return "overdue";
 if(diff<30*60000) return "urgent";
@@ -292,13 +294,13 @@ function render(){
 
 let today=getToday();
 
-let search=
+let search =
 searchInput.value.toLowerCase();
 
-let filtered=tasks.filter(t=>
+let filtered = tasks.filter(t=>
 (t.text || "")
 .toLowerCase()
-includes(search)
+.includes(search)
 );
 
 if(currentTab==="pending"){
@@ -334,12 +336,12 @@ grouped[t.date].push(t);
 
 let html="";
 
-let dates=
+let dates =
 sortDates(Object.keys(grouped));
 
 dates.forEach(date=>{
 
-let dayName=
+let dayName =
 new Date(date)
 .toLocaleDateString("en-US",{
 weekday:"long"
@@ -403,7 +405,10 @@ t.fromQuest
 <div class="task-actions">
 
 ${!isViewMode ? `
-<button onclick="toggle('${t.id}',${t.completed})">✔</button>
+
+<button onclick="toggle('${t.id}',${t.completed})">
+✔
+</button>
 
 <button onclick="openModal(
 'edit',
@@ -411,9 +416,14 @@ ${!isViewMode ? `
 '${escapeText(t.text)}',
 '${t.date}',
 '${t.time || ""}'
-)">✏️</button>
+)">
+✏️
+</button>
 
-<button onclick="openModal('delete','${t.id}')">❌</button>
+<button onclick="openModal('delete','${t.id}')">
+❌
+</button>
+
 ` : ""}
 
 </div>
@@ -453,7 +463,7 @@ if(type==="edit"){
 
 modalTitle.innerText="Edit Task";
 
-modalInput.value=
+modalInput.value =
 decodeURIComponent(text);
 
 modalDate.value=date;
@@ -513,14 +523,83 @@ window.toggle=async(id,c)=>{
 
 if(isViewMode) return;
 
-/* existing toggle kept same */
 const ref=doc(db,"tasks",id);
+
 const snap=await getDoc(ref);
+
 if(!snap.exists()) return;
 
+const task=snap.data();
+
+const nowDone=!c;
+
 await updateDoc(ref,{
-completed:!c
+completed:nowDone
 });
+
+/* keep your quest logic same */
+if(task.fromQuest && task.questId){
+
+if(nowDone){
+
+await addDoc(
+collection(db,"insights"),
+{
+uid:realUid,
+text:task.text,
+date:getToday(),
+createdAt:Date.now(),
+source:"task"
+}
+);
+
+await deleteDoc(
+doc(db,"quest",task.questId)
+);
+
+}else{
+
+const qRef=
+doc(db,"quest",task.questId);
+
+const qSnap=
+await getDoc(qRef);
+
+if(!qSnap.exists()){
+
+await addDoc(
+collection(db,"quest"),
+{
+uid:realUid,
+text:task.text,
+date:getToday(),
+status:"Pending",
+createdAt:Date.now()
+}
+);
+
+}
+
+const insSnap=
+await getDocs(
+query(
+collection(db,"insights"),
+where("uid","==",realUid),
+where("text","==",task.text)
+)
+);
+
+for(const d of insSnap.docs){
+
+await deleteDoc(
+doc(db,"insights",d.id)
+);
+
+}
+
+}
+
+}
 
 };
 
@@ -539,7 +618,7 @@ location.href="index.html";
 }
 );
 
-/* ================= HELPERS ================= */
+/* ================= HELPER ================= */
 function escapeText(t){
 return encodeURIComponent(t || "");
 }
