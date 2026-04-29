@@ -1,1 +1,91 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Friend Permission</title>
+
+<link rel="stylesheet"
+href="css/friend-permission.css">
+
+<link rel="stylesheet"
+href="css/sidebar.css">
+
+</head>
+<body>
+
+<div id="sidebar" class="sidebar">
+
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goFriends()">👥 Friends</button>
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<div class="main">
+
+<div class="navbar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">☰</button>
+
+<h2>⚙ Friend Permissions</h2>
+
+</div>
+
+<div class="box">
+
+<h3 id="friendName">
+Loading...
+</h3>
+
+<p>
+Choose what this friend can view
+</p>
+
+<div class="grid">
+
+<label><input type="checkbox" id="home"> Home</label>
+
+<label><input type="checkbox" id="profile"> Profile</label>
+
+<label><input type="checkbox" id="goals"> Goals</label>
+
+<label><input type="checkbox" id="growth"> Growth</label>
+
+<label><input type="checkbox" id="tasks"> Tasks</label>
+
+<label><input type="checkbox" id="insights"> Insights</label>
+
+<label><input type="checkbox" id="mistakes"> Mistakes</label>
+
+<label><input type="checkbox" id="quest"> Quest</label>
+
+<label><input type="checkbox" id="smartmoves"> Smart Moves</label>
+
+</div>
+
+<button class="save-btn"
+onclick="savePermission()">
+💾 Save Permission
+</button>
+
+</div>
+
+</div>
+
+<script type="module"
+src="js/friend-permission.js"></script>
+
+<script type="module"
+src="js/menu.js"></script>
+
+</body>
+</html>
