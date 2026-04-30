@@ -1,3 +1,5 @@
+/* ================= TEST DASHBOARD ================= */
+
 import { auth, db } from "./firebase.js";
 
 import {
@@ -6,182 +8,329 @@ onAuthStateChanged
 
 import {
 collection,
-onSnapshot,
-doc,
-getDoc,
 getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= SAFE DOM ================= */
-const getEl = id => document.getElementById(id);
+/* ================= HELPERS ================= */
+const getEl=(id)=>document.getElementById(id);
 
-const username = getEl("username");
-const testContainer = getEl("testContainer");
-
-/* ================= VIEW MODE ================= */
-const params = new URLSearchParams(location.search);
-const viewUser = params.get("viewUser");
-
-let currentUser = null;
-let uid = null;
-let realUid = null;
-let isViewMode = false;
+let currentUser=null;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser = user;
-realUid = user.uid;
+currentUser=user;
 
-/* view mode logic */
-if(viewUser){
-uid = viewUser;
-isViewMode = true;
-}else{
-uid = realUid;
-}
+animateCards();
 
-/* username */
-try{
-const snap = await getDoc(doc(db,"users",uid));
-
-if(snap.exists() && username){
-
-const name = snap.data().name || "User";
-
-if(isViewMode){
-username.innerText = "👀 Viewing " + name;
-
-/* permission check */
-const allowed = await checkPermission();
-
-if(!allowed){
-showBlockedPage(name);
-return;
-}
-
-}else{
-username.innerText = "🧪 Welcome " + name;
-}
-
-}
-}catch(e){}
-
-/* load tests */
-loadTests();
+await loadUpcoming();
+await loadRecent();
 
 });
 
-/* ================= PERMISSION ================= */
-async function checkPermission(){
+/* ================= MENU ================= */
+window.toggleSidebar=()=>{
 
-const snap = await getDocs(collection(db,"friends"));
+const sidebar=getEl("sidebar");
 
-for(const d of snap.docs){
+if(sidebar){
+sidebar.classList.toggle("active");
+}
 
-const data = d.data();
-const users = data.users || [];
+};
 
-if(
-users.includes(realUid) &&
-users.includes(uid)
-){
+/* ================= REFRESH ================= */
+window.refreshPage=async()=>{
 
-const perm =
-data.permissions?.[uid] || {};
+showToast("Refreshing...");
 
-/* using insights or create "tests" permission */
-return perm.tests === true || perm.insights === true;
+await loadUpcoming();
+await loadRecent();
+
+showToast("Updated ✅");
+
+};
+
+/* ================= CARD ANIMATION ================= */
+function animateCards(){
+
+const cards=
+document.querySelectorAll(".big-card");
+
+cards.forEach((card,index)=>{
+
+card.style.opacity="0";
+card.style.transform="translateY(25px)";
+
+setTimeout(()=>{
+
+card.style.transition="0.45s ease";
+card.style.opacity="1";
+card.style.transform="translateY(0)";
+
+},150+(index*110));
+
+});
 
 }
 
+/* ================= STATUS ================= */
+function getStatus(test){
+
+const now=Date.now();
+
+const assigned=
+test.assignedTo || [];
+
+const attempted=
+test.attemptedUsers || [];
+
+if(!assigned.includes(currentUser.uid))
+return "hidden";
+
+if(attempted.includes(currentUser.uid))
+return "attempted";
+
+const start=
+Number(test.startAt || 0);
+
+const end=
+Number(test.endAt || 0);
+
+if(start && now<start)
+return "upcoming";
+
+if(end && now>end)
+return "expired";
+
+return "available";
+
 }
 
-return false;
+/* ================= DATE ================= */
+function fDate(ms){
+
+if(!ms) return "Anytime";
+
+return new Date(ms)
+.toLocaleString();
 
 }
 
-/* ================= BLOCK PAGE ================= */
-function showBlockedPage(name){
+/* ================= UPCOMING ================= */
+async function loadUpcoming(){
 
-if(!testContainer) return;
+const box=getEl("upcomingList");
+const count=getEl("upcomingCount");
 
-testContainer.innerHTML = `
-<div style="
-padding:60px 30px;
-text-align:center;
-background:#111827;
-border-radius:18px;
-box-shadow:0 0 25px rgba(0,255,255,.15);
-">
+if(!box || !count) return;
 
-<div style="font-size:60px;">🔒</div>
+try{
 
-<h2 style="margin-top:15px;">
-${name} blocked this page
-</h2>
+const snap=
+await getDocs(collection(db,"tests"));
 
-<p style="opacity:.8;margin-top:10px;">
-Your friend has restricted access.
-</p>
+let arr=[];
 
-<button onclick="location.href='home.html'"
-style="
-margin-top:25px;
-padding:14px 24px;
-border:none;
-border-radius:14px;
-font-weight:700;
-cursor:pointer;
-background:linear-gradient(45deg,#00eaff,#00ff9d);
-">
-↩ My Dashboard
+snap.forEach(doc=>{
+
+arr.push({
+id:doc.id,
+...doc.data()
+});
+
+});
+
+arr=arr.filter(x=>{
+
+const s=getStatus(x);
+
+return (
+s==="upcoming" ||
+s==="available"
+);
+
+});
+
+/* nearest first */
+arr.sort((a,b)=>{
+
+const a1=
+Number(a.startAt || 0);
+
+const b1=
+Number(b.startAt || 0);
+
+return a1-b1;
+
+});
+
+let html="";
+let total=0;
+
+arr.slice(0,5).forEach(test=>{
+
+const status=
+getStatus(test);
+
+html += `
+<div class="list-row">
+
+<div>
+
+<strong>
+${test.testName || "Untitled Test"}
+</strong>
+
+<small>
+${test.duration || 0} min •
+${status==="upcoming"
+? fDate(test.startAt)
+: "Live Now"}
+</small>
+
+</div>
+
+<button class="mini-btn"
+onclick="location.href='give-test.html'">
+
+${status==="upcoming"
+? "View"
+: "Start"}
+
 </button>
 
 </div>
 `;
 
+total++;
+
+});
+
+count.innerText=total;
+
+box.innerHTML=
+html || `
+<div class="empty-row">
+No upcoming tests
+</div>
+`;
+
+}catch(error){
+
+count.innerText="0";
+
+box.innerHTML=`
+<div class="empty-row">
+No upcoming tests
+</div>
+`;
+
 }
 
-/* ================= LOAD TESTS ================= */
-function loadTests(){
+}
 
-onSnapshot(collection(db,"tests"), snap=>{
+/* ================= RECENT ================= */
+async function loadRecent(){
 
-let html = "";
+const box=getEl("recentList");
 
-snap.forEach(d=>{
+if(!box) return;
 
-const t = d.data();
+try{
 
-/* filter by user */
-if(t.user !== uid) return;
+const snap=
+await getDocs(collection(db,"results"));
+
+let arr=[];
+
+snap.forEach(doc=>{
+
+const d=doc.data();
+
+if(d.uid===currentUser.uid){
+
+arr.push({
+id:doc.id,
+...d
+});
+
+}
+
+});
+
+/* latest first */
+arr.sort((a,b)=>
+Number(b.submittedAt||0)-
+Number(a.submittedAt||0)
+);
+
+let html="";
+
+arr.slice(0,5).forEach(r=>{
 
 html += `
-<div class="test-card">
+<div class="list-row">
 
-<h3>${t.title || "Test"}</h3>
+<div>
 
-<p>${t.description || ""}</p>
+<strong>
+${r.testName || "Test"}
+</strong>
 
-${t.score !== undefined ?
-`<small>Score: ${t.score}</small>` : ""}
+<small>
+Score:
+${r.score ?? 0}
+</small>
+
+</div>
+
+<button class="mini-btn"
+onclick="location.href='result.html?id=${r.testId}'">
+View
+</button>
 
 </div>
 `;
 
 });
 
-if(testContainer){
-testContainer.innerHTML =
-html || "<p>No tests available.</p>";
+box.innerHTML=
+html || `
+<div class="empty-row">
+No recent activity
+</div>
+`;
+
+}catch(error){
+
+box.innerHTML=`
+<div class="empty-row">
+No recent activity
+</div>
+`;
+
 }
 
-});
+}
+
+/* ================= TOAST ================= */
+function showToast(msg){
+
+const toast=getEl("toast");
+
+if(!toast) return;
+
+toast.innerText=msg;
+toast.className="show";
+
+setTimeout(()=>{
+toast.className="";
+},2000);
 
 }
