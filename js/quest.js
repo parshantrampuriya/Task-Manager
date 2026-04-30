@@ -73,6 +73,71 @@ location.href="quest.html";
 };
 
 /* ================= ADD QUEST ================= */
+/* ================= ADD QUEST ================= */
+window.addQuest = async ()=>{
+
+try{
+
+const input = getEl("questText");
+const dateInput = getEl("questDate");
+
+if(!input){
+console.error("questText element not found");
+return;
+}
+
+if(!dateInput){
+console.error("questDate element not found");
+return;
+}
+
+const text = input.value.trim();
+const date = dateInput.value;
+
+/* validation */
+if(!text){
+toast("Enter quest");
+return;
+}
+
+if(!date){
+toast("Select date");
+return;
+}
+
+/* disable button (prevent double click) */
+const btn = document.querySelector("[onclick='addQuest()']");
+if(btn) btn.disabled = true;
+
+/* save */
+await addDoc(collection(db,"quest"),{
+uid: currentUser.uid,
+text: text,
+date: date,
+status: "Pending",
+createdAt: Date.now()
+});
+
+/* clear input */
+input.value = "";
+
+/* reload */
+await loadQuest();
+
+toast("Quest Added ✅");
+
+}catch(err){
+
+console.error(err);
+toast("Error adding quest");
+
+}
+
+/* re-enable button */
+const btn = document.querySelector("[onclick='addQuest()']");
+if(btn) btn.disabled = false;
+
+};
 window.confirmTask = async()=>{
 
 let date=getEl("taskDate").value;
