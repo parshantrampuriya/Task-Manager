@@ -52,49 +52,19 @@ await loadQuest();
 
 });
 
-/* ================= DEFAULT DATE ================= */
-function setToday(){
-
-const today=new Date().toISOString().split("T")[0];
-
-if(getEl("questDate")){
-getEl("questDate").value=today;
-}
-
-if(getEl("taskDate")){
-getEl("taskDate").value=today;
-}
-
-}
-
-/* ================= NAVIGATION ================= */
-window.goMyPage=()=>{
-location.href="quest.html";
-};
-
 /* ================= ADD QUEST ================= */
-/* ================= ADD QUEST ================= */
-window.addQuest = async ()=>{
+window.addQuest = async()=>{
 
 try{
 
 const input = getEl("questText");
 const dateInput = getEl("questDate");
 
-if(!input){
-console.error("questText element not found");
-return;
-}
-
-if(!dateInput){
-console.error("questDate element not found");
-return;
-}
+if(!input || !dateInput) return;
 
 const text = input.value.trim();
 const date = dateInput.value;
 
-/* validation */
 if(!text){
 toast("Enter quest");
 return;
@@ -105,62 +75,36 @@ toast("Select date");
 return;
 }
 
-/* disable button (prevent double click) */
-const btn = document.querySelector("[onclick='addQuest()']");
-if(btn) btn.disabled = true;
-
-/* save */
 await addDoc(collection(db,"quest"),{
 uid: currentUser.uid,
-text: text,
-date: date,
-status: "Pending",
+text,
+date,
+status:"Pending",
 createdAt: Date.now()
 });
 
-/* clear input */
-input.value = "";
-
-/* reload */
-await loadQuest();
+input.value="";
 
 toast("Quest Added ✅");
 
-}catch(err){
+await loadQuest();
 
+}catch(err){
 console.error(err);
 toast("Error adding quest");
-
 }
 
-/* re-enable button */
-const btn = document.querySelector("[onclick='addQuest()']");
-if(btn) btn.disabled = false;
-
 };
-window.confirmTask = async()=>{
 
-let date=getEl("taskDate").value;
-let time=getEl("taskTime").value || "00:00";
+/* ================= DEFAULT DATE ================= */
+function setToday(){
 
-if(!date) return toast("Select date");
+const today=new Date().toISOString().split("T")[0];
 
-await addDoc(collection(db,"tasks"),{
-text:taskQuestText,
-date,
-time,
-completed:false,
-user:currentUser.uid,
+if(getEl("questDate")) getEl("questDate").value=today;
+if(getEl("taskDate")) getEl("taskDate").value=today;
 
-fromQuest:true,
-questText:taskQuestText,
-createdAt:Date.now()
-});
-
-closeTaskPopup();
-toast("Added To Tasks ✅");
-
-};
+}
 
 /* ================= FRIENDS ================= */
 async function loadFriends(){
@@ -194,8 +138,7 @@ onclick="openFriend('${fid}')">
 
 }
 
-getEl("friendListMini").innerHTML=
-html || "No friends";
+getEl("friendListMini").innerHTML=html || "No friends";
 
 }
 
@@ -207,49 +150,31 @@ location.href="quest.html?uid="+uid+"&t="+Date.now();
 async function loadQuest(){
 
 const snap=await getDocs(
-query(
-collection(db,"quest"),
-where("uid","==",viewUid)
-)
+query(collection(db,"quest"),where("uid","==",viewUid))
 );
 
 let arr=[];
 
 snap.forEach(d=>{
-arr.push({
-id:d.id,
-...d.data()
-});
+arr.push({id:d.id,...d.data()});
 });
 
-/* latest first */
 arr.sort((a,b)=>b.createdAt-a.createdAt);
 
 let html="";
 let lastDate="";
 
-let added=0;
-let solved=0;
-let pending=0;
+let added=0, solved=0, pending=0;
 
 arr.forEach(x=>{
 
 added++;
 
-if(x.status==="Solved"){
-solved++;
-}else{
-pending++;
-}
+if(x.status==="Solved") solved++;
+else pending++;
 
 if(lastDate!==x.date){
-
-html+=`
-<div class="date-head">
-${x.date}
-</div>
-`;
-
+html+=`<div class="date-head">${x.date}</div>`;
 lastDate=x.date;
 }
 
@@ -258,38 +183,21 @@ html+=`
 
 <div class="q-left">
 
-<div class="q-text">
-${x.text}
-</div>
+<div class="q-text">${x.text}</div>
 
-<div class="tag ${tagClass(x.status)}">
-${x.status}
-</div>
+<div class="tag ${tagClass(x.status)}">${x.status}</div>
 
 </div>
 
 <div class="q-actions">
 
-<button title="Google Search"
-onclick="googleSearch('${escapeText(x.text)}')">🔍</button>
-
-<button title="YouTube Search"
-onclick="youtubeSearch('${escapeText(x.text)}')">▶️</button>
-
-<button title="Ask ChatGPT"
-onclick="chatAsk('${escapeText(x.text)}')">🤖</button>
-
-<button title="Move To Insight"
-onclick="toInsight('${x.id}','${escapeText(x.text)}')">🧠</button>
-
-<button title="Convert To Task"
-onclick="openTaskPopup('${x.id}','${escapeText(x.text)}')">📋</button>
-
-<button title="Edit"
-onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}','${x.status}')">✏️</button>
-
-<button title="Delete"
-onclick="openDelete('${x.id}')">🗑️</button>
+<button onclick="googleSearch('${escapeText(x.text)}')">🔍</button>
+<button onclick="youtubeSearch('${escapeText(x.text)}')">▶️</button>
+<button onclick="chatAsk('${escapeText(x.text)}')">🤖</button>
+<button onclick="toInsight('${x.id}','${escapeText(x.text)}')">🧠</button>
+<button onclick="openTaskPopup('${x.id}','${escapeText(x.text)}')">📋</button>
+<button onclick="openEdit('${x.id}','${escapeText(x.text)}','${x.date}','${x.status}')">✏️</button>
+<button onclick="openDelete('${x.id}')">🗑️</button>
 
 </div>
 
@@ -298,79 +206,11 @@ onclick="openDelete('${x.id}')">🗑️</button>
 
 });
 
-getEl("questList").innerHTML=
-html || "No quest found.";
+getEl("questList").innerHTML=html || "No quest found.";
 
-if(getEl("totalAdded"))
-getEl("totalAdded").innerText=added;
-
-if(getEl("totalSolved"))
-getEl("totalSolved").innerText=solved;
-
-if(getEl("totalPending"))
-getEl("totalPending").innerText=pending;
-
-}
-
-/* ================= TAG ================= */
-function tagClass(v){
-
-if(v==="Solved") return "learned";
-
-return "pending";
-
-}
-
-/* ================= SEARCH ================= */
-window.googleSearch=t=>{
-window.open(
-"https://www.google.com/search?q="+decodeURIComponent(t),
-"_blank"
-);
-};
-
-window.youtubeSearch=t=>{
-window.open(
-"https://www.youtube.com/results?search_query="+decodeURIComponent(t),
-"_blank"
-);
-};
-
-window.chatAsk=t=>{
-window.open(
-"https://chat.openai.com/",
-"_blank"
-);
-};
-
-/* ================= TO INSIGHT ================= */
-window.toInsight=(id,t)=>{
-
-let ok=confirm("Send to Insights?");
-
-if(!ok) return;
-
-moveQuestToInsight(id,decodeURIComponent(t));
-
-};
-
-async function moveQuestToInsight(id,text){
-
-const today=new Date().toISOString().split("T")[0];
-
-await addDoc(collection(db,"insights"),{
-uid:currentUser.uid,
-text:text,
-date:today,
-createdAt:Date.now(),
-source:"quest"
-});
-
-await deleteDoc(doc(db,"quest",id));
-
-toast("Moved To Insights 🧠");
-
-loadQuest();
+if(getEl("totalAdded")) getEl("totalAdded").innerText=added;
+if(getEl("totalSolved")) getEl("totalSolved").innerText=solved;
+if(getEl("totalPending")) getEl("totalPending").innerText=pending;
 
 }
 
@@ -379,21 +219,16 @@ window.openTaskPopup=(id,text)=>{
 
 taskQuestId=id;
 
-getEl("taskText").innerText=
-decodeURIComponent(text);
-
-getEl("taskPopup")
-.classList.add("show");
+getEl("taskText").innerText=decodeURIComponent(text);
+getEl("taskPopup").classList.add("show");
 
 };
 
 window.closeTaskPopup=()=>{
-
-getEl("taskPopup")
-.classList.remove("show");
-
+getEl("taskPopup").classList.remove("show");
 };
 
+/* ================= CONFIRM TASK ================= */
 window.confirmTask=async()=>{
 
 const date=getEl("taskDate").value;
@@ -404,10 +239,7 @@ toast("Select date");
 return;
 }
 
-const qSnap=await getDoc(
-doc(db,"quest",taskQuestId)
-);
-
+const qSnap=await getDoc(doc(db,"quest",taskQuestId));
 if(!qSnap.exists()) return;
 
 const qData=qSnap.data();
@@ -415,8 +247,8 @@ const qData=qSnap.data();
 await addDoc(collection(db,"tasks"),{
 uid:currentUser.uid,
 text:qData.text,
-date:date,
-time:time,
+date,
+time,
 done:false,
 fromQuest:true,
 questId:taskQuestId,
@@ -424,7 +256,6 @@ createdAt:Date.now()
 });
 
 closeTaskPopup();
-
 toast("Added To Tasks 📋");
 
 };
@@ -434,15 +265,11 @@ window.openEdit=(id,text,date,status)=>{
 
 editId=id;
 
-getEl("editText").value=
-decodeURIComponent(text);
-
+getEl("editText").value=decodeURIComponent(text);
 getEl("editDate").value=date;
-
 getEl("editStatus").value=status;
 
-getEl("editPopup")
-.classList.add("show");
+getEl("editPopup").classList.add("show");
 
 };
 
@@ -460,7 +287,7 @@ if(status==="Solved"){
 
 await addDoc(collection(db,"insights"),{
 uid:currentUser.uid,
-text:text,
+text,
 date:new Date().toISOString().split("T")[0],
 createdAt:Date.now(),
 source:"quest-direct"
@@ -475,9 +302,7 @@ return;
 }
 
 await updateDoc(doc(db,"quest",editId),{
-text:text,
-date:date,
-status:status
+text,date,status
 });
 
 closeEdit();
@@ -488,12 +313,8 @@ loadQuest();
 
 /* ================= DELETE ================= */
 window.openDelete=id=>{
-
 deleteId=id;
-
-getEl("deletePopup")
-.classList.add("show");
-
+getEl("deletePopup").classList.add("show");
 };
 
 window.closeDelete=()=>{
@@ -505,14 +326,16 @@ window.confirmDelete=async()=>{
 await deleteDoc(doc(db,"quest",deleteId));
 
 closeDelete();
-
 toast("Deleted");
-
 loadQuest();
 
 };
 
 /* ================= HELPERS ================= */
+function tagClass(v){
+return v==="Solved" ? "learned" : "pending";
+}
+
 function escapeText(t){
 return encodeURIComponent(t);
 }
@@ -520,14 +343,11 @@ return encodeURIComponent(t);
 function toast(msg){
 
 let t=getEl("toast");
-
 if(!t) return;
 
 t.innerText=msg;
 t.classList.add("show");
 
-setTimeout(()=>{
-t.classList.remove("show");
-},1800);
+setTimeout(()=>t.classList.remove("show"),1800);
 
 }
