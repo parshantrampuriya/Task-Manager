@@ -29,31 +29,13 @@ await loadSubjects();
 
 });
 
-/* ================= SIDEBAR ================= */
+/* ================= MENU ================= */
 window.toggleSidebar=()=>{
 
 const bar=getEl("sidebar");
 if(bar) bar.classList.toggle("active");
 
 };
-
-/* 🔥 CLOSE SIDEBAR ON OUTSIDE CLICK */
-document.addEventListener("click",(e)=>{
-
-const sidebar=getEl("sidebar");
-const btn=document.querySelector(".menu-btn");
-
-if(!sidebar || !btn) return;
-
-if(
-sidebar.classList.contains("active") &&
-!sidebar.contains(e.target) &&
-!btn.contains(e.target)
-){
-sidebar.classList.remove("active");
-}
-
-});
 
 /* ================= TOAST ================= */
 function showToast(msg,type="success"){
@@ -71,21 +53,23 @@ t.classList.remove("show");
 }
 
 /* ================= MODE ================= */
-const modeSelect = getEl("modeSelect");
+getEl("modeSelect").addEventListener("change",()=>{
 
-if(modeSelect){
-modeSelect.addEventListener("change",()=>{
+const mode=getEl("modeSelect").value;
 
-const mode=modeSelect.value;
+if(mode==="new"){
 
-getEl("newArea").style.display =
-mode==="new" ? "block" : "none";
+getEl("newArea").style.display="block";
+getEl("existingArea").style.display="none";
 
-getEl("existingArea").style.display =
-mode==="existing" ? "block" : "none";
+}else{
+
+getEl("newArea").style.display="none";
+getEl("existingArea").style.display="block";
+
+}
 
 });
-}
 
 /* ================= UNIVERSAL INDEX ================= */
 function idx(v){
@@ -115,7 +99,7 @@ return -1;
 
 }
 
-/* ================= NORMALIZE ================= */
+/* ================= NORMALIZE QUESTION ================= */
 function normalizeQuestion(q){
 
 const options=q.options || [];
@@ -149,9 +133,14 @@ ansIndex=idx(raw);
 if(ansText!==""){
 
 options.forEach((op,i)=>{
-if(String(op).trim().toLowerCase() === ansText.toLowerCase()){
+
+if(
+String(op).trim().toLowerCase() ===
+ansText.toLowerCase()
+){
 ansIndex=i;
 }
+
 });
 
 }
@@ -185,10 +174,13 @@ where("uid","==",currentUser.uid)
 let arr=[];
 
 snap.forEach(doc=>{
+
 const d=doc.data();
+
 if(d.subject && !arr.includes(d.subject)){
 arr.push(d.subject);
 }
+
 });
 
 arr.sort();
@@ -199,8 +191,8 @@ fillSelect("topicList",["➕ Create New Topic"]);
 
 }
 
-/* ================= DROPDOWNS ================= */
-getEl("subjectList")?.addEventListener("change",async()=>{
+/* ================= SUBJECT CHANGE ================= */
+getEl("subjectList").addEventListener("change",async()=>{
 
 const subject=getEl("subjectList").value;
 
@@ -215,10 +207,13 @@ where("subject","==",subject)
 let arr=[];
 
 snap.forEach(doc=>{
+
 const d=doc.data();
+
 if(d.chapter && !arr.includes(d.chapter)){
 arr.push(d.chapter);
 }
+
 });
 
 arr.sort();
@@ -232,7 +227,8 @@ toggleTopicInput();
 
 });
 
-getEl("chapterList")?.addEventListener("change",async()=>{
+/* ================= CHAPTER CHANGE ================= */
+getEl("chapterList").addEventListener("change",async()=>{
 
 toggleChapterInput();
 
@@ -257,21 +253,30 @@ where("chapter","==",chapter)
 let arr=[];
 
 snap.forEach(doc=>{
+
 const d=doc.data();
+
 if(d.topic && !arr.includes(d.topic)){
 arr.push(d.topic);
 }
+
 });
 
 arr.sort();
 arr.unshift("➕ Create New Topic");
 
 fillSelect("topicList",arr);
+
 toggleTopicInput();
 
 });
 
-getEl("topicList")?.addEventListener("change",toggleTopicInput);
+/* ================= TOPIC CHANGE ================= */
+getEl("topicList").addEventListener("change",()=>{
+
+toggleTopicInput();
+
+});
 
 /* ================= INPUT TOGGLE ================= */
 function toggleChapterInput(){
@@ -279,7 +284,9 @@ function toggleChapterInput(){
 const val=getEl("chapterList").value;
 
 getEl("newChapterWrap").style.display =
-val==="➕ Create New Chapter" ? "block" : "none";
+val==="➕ Create New Chapter"
+? "block"
+: "none";
 
 }
 
@@ -288,7 +295,9 @@ function toggleTopicInput(){
 const val=getEl("topicList").value;
 
 getEl("newTopicWrap").style.display =
-val==="➕ Create New Topic" ? "block" : "none";
+val==="➕ Create New Topic"
+? "block"
+: "none";
 
 }
 
@@ -309,11 +318,9 @@ getEl(id).innerHTML=html;
 window.previewQuestions=()=>{
 
 const box=getEl("previewBox");
-const card=getEl("previewCard");
 
 if(previewOpen){
 box.innerHTML="No Preview Yet";
-card?.classList.remove("active");
 previewOpen=false;
 return;
 }
@@ -349,7 +356,8 @@ html += `
 
 html += `
 <div class="opt ${i===q.answerIndex ? 'correct':''}">
-${String.fromCharCode(65+i)}. ${op}
+${String.fromCharCode(65+i)}.
+${op}
 ${i===q.answerIndex ? ' ✅ Correct':''}
 </div>
 `;
@@ -361,8 +369,6 @@ html += `</div>`;
 });
 
 box.innerHTML=html;
-card?.classList.add("active");   /* 🔥 FIX */
-
 previewOpen=true;
 
 };
@@ -391,12 +397,15 @@ let subject="",chapter="",topic="";
 const mode=getEl("modeSelect").value;
 
 if(mode==="new"){
+
 subject=getEl("subject").value.trim();
 chapter=getEl("chapter").value.trim();
 topic=getEl("topic").value.trim();
+
 }else{
 
 subject=getEl("subjectList").value.trim();
+
 chapter=getEl("chapterList").value.trim();
 topic=getEl("topicList").value.trim();
 
@@ -415,13 +424,54 @@ showToast("Subject Required","error");
 return;
 }
 
+/* existing */
+const oldSnap=await getDocs(
+query(
+collection(db,"questionBank"),
+where("uid","==",currentUser.uid),
+where("subject","==",subject),
+where("chapter","==",chapter),
+where("topic","==",topic)
+)
+);
+
+let existing=[];
+
+oldSnap.forEach(doc=>{
+
+const d=doc.data();
+
+existing.push(
+JSON.stringify({
+question:(d.question||"").trim(),
+options:d.options||[],
+answer:d.answer || (d.options||[])[d.answerIndex||0]
+})
+);
+
+});
+
 let saved=0;
+let skipped=0;
 
 for(let item of data){
 
 const q=normalizeQuestion(item);
 
-await addDoc(collection(db,"questionBank"),{
+const sign=JSON.stringify({
+question:q.question.trim(),
+options:q.options,
+answer:q.answer
+});
+
+if(existing.includes(sign)){
+skipped++;
+continue;
+}
+
+await addDoc(
+collection(db,"questionBank"),
+{
 uid:currentUser.uid,
 subject,
 chapter,
@@ -431,21 +481,29 @@ options:q.options,
 answer:q.answer,
 answerIndex:q.answerIndex,
 createdAt:Date.now()
-});
+}
+);
 
+existing.push(sign);
 saved++;
 
 }
 
-/* RESET */
+/* clear */
 getEl("jsonBox").value="";
 getEl("previewBox").innerHTML="No Preview Yet";
-getEl("previewCard")?.classList.remove("active");
+
+getEl("subject").value="";
+getEl("chapter").value="";
+getEl("topic").value="";
+
+getEl("newChapterInput").value="";
+getEl("newTopicInput").value="";
 
 previewOpen=false;
 
 await loadSubjects();
 
-showToast(`${saved} Questions Saved ✅`);
+showToast(`${saved} Saved ✅ | ${skipped} Duplicate Skipped`);
 
 };
