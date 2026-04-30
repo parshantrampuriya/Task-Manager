@@ -57,13 +57,15 @@ window.addQuest = async()=>{
 
 try{
 
-const input = getEl("questText");
+const input = getEl("questInput");   // ✅ FIXED
 const dateInput = getEl("questDate");
+const statusInput = getEl("questStatus");
 
 if(!input || !dateInput) return;
 
 const text = input.value.trim();
 const date = dateInput.value;
+const status = statusInput?.value || "Pending";
 
 if(!text){
 toast("Enter quest");
@@ -79,10 +81,11 @@ await addDoc(collection(db,"quest"),{
 uid: currentUser.uid,
 text,
 date,
-status:"Pending",
+status,
 createdAt: Date.now()
 });
 
+/* clear */
 input.value="";
 
 toast("Quest Added ✅");
@@ -95,7 +98,6 @@ toast("Error adding quest");
 }
 
 };
-
 /* ================= DEFAULT DATE ================= */
 function setToday(){
 
