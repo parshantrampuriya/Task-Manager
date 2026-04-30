@@ -10,23 +10,17 @@ body{
 
 /* ================= PAGE ================= */
 .page{
-    display:flex;                  /* 🔥 FIX */
-    flex-direction:column;         /* 🔥 stack vertically */
-    align-items:center;            /* 🔥 center everything */
-    gap:20px;
-    padding:18px;
-    max-width:1100px;
+    max-width:1050px;
     margin:auto;
+    padding:18px;
 }
 
 /* ================= TOP BAR ================= */
 .top-bar{
-    width:100%;                    /* 🔥 FIX */
-    max-width:900px;               /* 🔥 center width */
     display:flex;
     align-items:center;
     gap:16px;
-    margin-bottom:10px;
+    margin-bottom:20px;
     padding:18px 22px;
     border-radius:22px;
     background:rgba(15,15,15,.88);
@@ -104,23 +98,12 @@ body{
 /* ================= CARD ================= */
 .main-card,
 .preview-card{
-    width:100%;                   /* 🔥 FIX */
-    max-width:700px;              /* 🔥 centered width */
     background:rgba(16,16,16,.90);
     border:1px solid rgba(0,255,255,.12);
     border-radius:24px;
     padding:24px;
+    margin-bottom:22px;
     box-shadow:0 0 22px rgba(0,255,255,.06);
-}
-
-/* 🔥 PREVIEW HIDDEN BY DEFAULT */
-.preview-card{
-    display:none;
-}
-
-/* 🔥 SHOW WHEN ACTIVE */
-.preview-card.active{
-    display:block;
 }
 
 /* ================= TITLE ================= */
