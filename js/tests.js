@@ -1,5 +1,3 @@
-/* ================= TEST DASHBOARD ================= */
-
 import { auth, db } from "./firebase.js";
 
 import {
@@ -8,329 +6,182 @@ onAuthStateChanged
 
 import {
 collection,
+onSnapshot,
+doc,
+getDoc,
 getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= HELPERS ================= */
-const getEl=(id)=>document.getElementById(id);
+/* ================= SAFE DOM ================= */
+const getEl = id => document.getElementById(id);
 
-let currentUser=null;
+const username = getEl("username");
+const testContainer = getEl("testContainer");
+
+/* ================= VIEW MODE ================= */
+const params = new URLSearchParams(location.search);
+const viewUser = params.get("viewUser");
+
+let currentUser = null;
+let uid = null;
+let realUid = null;
+let isViewMode = false;
 
 /* ================= AUTH ================= */
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 location.href="index.html";
 return;
 }
 
-currentUser=user;
+currentUser = user;
+realUid = user.uid;
 
-animateCards();
-
-await loadUpcoming();
-await loadRecent();
-
-});
-
-/* ================= MENU ================= */
-window.toggleSidebar=()=>{
-
-const sidebar=getEl("sidebar");
-
-if(sidebar){
-sidebar.classList.toggle("active");
+/* view mode logic */
+if(viewUser){
+uid = viewUser;
+isViewMode = true;
+}else{
+uid = realUid;
 }
 
-};
-
-/* ================= REFRESH ================= */
-window.refreshPage=async()=>{
-
-showToast("Refreshing...");
-
-await loadUpcoming();
-await loadRecent();
-
-showToast("Updated ✅");
-
-};
-
-/* ================= CARD ANIMATION ================= */
-function animateCards(){
-
-const cards=
-document.querySelectorAll(".big-card");
-
-cards.forEach((card,index)=>{
-
-card.style.opacity="0";
-card.style.transform="translateY(25px)";
-
-setTimeout(()=>{
-
-card.style.transition="0.45s ease";
-card.style.opacity="1";
-card.style.transform="translateY(0)";
-
-},150+(index*110));
-
-});
-
-}
-
-/* ================= STATUS ================= */
-function getStatus(test){
-
-const now=Date.now();
-
-const assigned=
-test.assignedTo || [];
-
-const attempted=
-test.attemptedUsers || [];
-
-if(!assigned.includes(currentUser.uid))
-return "hidden";
-
-if(attempted.includes(currentUser.uid))
-return "attempted";
-
-const start=
-Number(test.startAt || 0);
-
-const end=
-Number(test.endAt || 0);
-
-if(start && now<start)
-return "upcoming";
-
-if(end && now>end)
-return "expired";
-
-return "available";
-
-}
-
-/* ================= DATE ================= */
-function fDate(ms){
-
-if(!ms) return "Anytime";
-
-return new Date(ms)
-.toLocaleString();
-
-}
-
-/* ================= UPCOMING ================= */
-async function loadUpcoming(){
-
-const box=getEl("upcomingList");
-const count=getEl("upcomingCount");
-
-if(!box || !count) return;
-
+/* username */
 try{
+const snap = await getDoc(doc(db,"users",uid));
 
-const snap=
-await getDocs(collection(db,"tests"));
+if(snap.exists() && username){
 
-let arr=[];
+const name = snap.data().name || "User";
 
-snap.forEach(doc=>{
+if(isViewMode){
+username.innerText = "👀 Viewing " + name;
 
-arr.push({
-id:doc.id,
-...doc.data()
-});
+/* permission check */
+const allowed = await checkPermission();
 
-});
+if(!allowed){
+showBlockedPage(name);
+return;
+}
 
-arr=arr.filter(x=>{
+}else{
+username.innerText = "🧪 Welcome " + name;
+}
 
-const s=getStatus(x);
+}
+}catch(e){}
 
-return (
-s==="upcoming" ||
-s==="available"
-);
-
-});
-
-/* nearest first */
-arr.sort((a,b)=>{
-
-const a1=
-Number(a.startAt || 0);
-
-const b1=
-Number(b.startAt || 0);
-
-return a1-b1;
+/* load tests */
+loadTests();
 
 });
 
-let html="";
-let total=0;
+/* ================= PERMISSION ================= */
+async function checkPermission(){
 
-arr.slice(0,5).forEach(test=>{
+const snap = await getDocs(collection(db,"friends"));
 
-const status=
-getStatus(test);
+for(const d of snap.docs){
 
-html += `
-<div class="list-row">
+const data = d.data();
+const users = data.users || [];
 
-<div>
+if(
+users.includes(realUid) &&
+users.includes(uid)
+){
 
-<strong>
-${test.testName || "Untitled Test"}
-</strong>
+const perm =
+data.permissions?.[uid] || {};
 
-<small>
-${test.duration || 0} min •
-${status==="upcoming"
-? fDate(test.startAt)
-: "Live Now"}
-</small>
+/* using insights or create "tests" permission */
+return perm.tests === true || perm.insights === true;
 
-</div>
+}
 
-<button class="mini-btn"
-onclick="location.href='give-test.html'">
+}
 
-${status==="upcoming"
-? "View"
-: "Start"}
+return false;
 
+}
+
+/* ================= BLOCK PAGE ================= */
+function showBlockedPage(name){
+
+if(!testContainer) return;
+
+testContainer.innerHTML = `
+<div style="
+padding:60px 30px;
+text-align:center;
+background:#111827;
+border-radius:18px;
+box-shadow:0 0 25px rgba(0,255,255,.15);
+">
+
+<div style="font-size:60px;">🔒</div>
+
+<h2 style="margin-top:15px;">
+${name} blocked this page
+</h2>
+
+<p style="opacity:.8;margin-top:10px;">
+Your friend has restricted access.
+</p>
+
+<button onclick="location.href='home.html'"
+style="
+margin-top:25px;
+padding:14px 24px;
+border:none;
+border-radius:14px;
+font-weight:700;
+cursor:pointer;
+background:linear-gradient(45deg,#00eaff,#00ff9d);
+">
+↩ My Dashboard
 </button>
 
 </div>
 `;
 
-total++;
-
-});
-
-count.innerText=total;
-
-box.innerHTML=
-html || `
-<div class="empty-row">
-No upcoming tests
-</div>
-`;
-
-}catch(error){
-
-count.innerText="0";
-
-box.innerHTML=`
-<div class="empty-row">
-No upcoming tests
-</div>
-`;
-
 }
 
-}
+/* ================= LOAD TESTS ================= */
+function loadTests(){
 
-/* ================= RECENT ================= */
-async function loadRecent(){
+onSnapshot(collection(db,"tests"), snap=>{
 
-const box=getEl("recentList");
+let html = "";
 
-if(!box) return;
+snap.forEach(d=>{
 
-try{
+const t = d.data();
 
-const snap=
-await getDocs(collection(db,"results"));
-
-let arr=[];
-
-snap.forEach(doc=>{
-
-const d=doc.data();
-
-if(d.uid===currentUser.uid){
-
-arr.push({
-id:doc.id,
-...d
-});
-
-}
-
-});
-
-/* latest first */
-arr.sort((a,b)=>
-Number(b.submittedAt||0)-
-Number(a.submittedAt||0)
-);
-
-let html="";
-
-arr.slice(0,5).forEach(r=>{
+/* filter by user */
+if(t.user !== uid) return;
 
 html += `
-<div class="list-row">
+<div class="test-card">
 
-<div>
+<h3>${t.title || "Test"}</h3>
 
-<strong>
-${r.testName || "Test"}
-</strong>
+<p>${t.description || ""}</p>
 
-<small>
-Score:
-${r.score ?? 0}
-</small>
-
-</div>
-
-<button class="mini-btn"
-onclick="location.href='result.html?id=${r.testId}'">
-View
-</button>
+${t.score !== undefined ?
+`<small>Score: ${t.score}</small>` : ""}
 
 </div>
 `;
 
 });
 
-box.innerHTML=
-html || `
-<div class="empty-row">
-No recent activity
-</div>
-`;
-
-}catch(error){
-
-box.innerHTML=`
-<div class="empty-row">
-No recent activity
-</div>
-`;
-
+if(testContainer){
+testContainer.innerHTML =
+html || "<p>No tests available.</p>";
 }
 
-}
-
-/* ================= TOAST ================= */
-function showToast(msg){
-
-const toast=getEl("toast");
-
-if(!toast) return;
-
-toast.innerText=msg;
-toast.className="show";
-
-setTimeout(()=>{
-toast.className="";
-},2000);
+});
 
 }
