@@ -9,109 +9,107 @@
 <link rel="stylesheet" href="css/add-question.css?v=4">
 
 </head>
+
 <body>
 
 <!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
+
     <h2>⚡ Menu</h2>
 
     <button onclick="goHome()">🏠 Home</button>
+    <button onclick="goTasks()">📋 Tasks</button>
+    <button onclick="goGoals()">🎯 Goals</button>
+    <button onclick="goFriends()">👥 Friends</button>
+    <button onclick="goQuestionBank()">📚 Question Bank</button>
+    <button onclick="goTests()">📝 Tests</button>
+    <button onclick="goGrowth()">🌱 Growth Hub</button>
+    <button onclick="goProfile()">👤 Profile</button>
 
-<button onclick="goTasks()">📋 Tasks</button>
-
-<button onclick="goGoals()">🎯 Goals</button>
-
-<button onclick="goFriends()">👥 Friends</button>
-
-<button onclick="goQuestionBank()">📚 Question Bank</button>
-
-<button onclick="goTests()">📝 Tests</button>
-
-<button onclick="goGrowth()">🌱 Growth Hub</button>
-
-<button onclick="goProfile()">👤 Profile</button>
-
-<button id="logoutBtn">🚪 Logout</button>
-</div>
-
-<!-- ================= PAGE ================= -->
-<div class="page">
-
-<!-- TOP BAR -->
-<div class="top-bar">
-
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-
-    <div class="top-title">
-        <h1>➕ Add Questions</h1>
-        <p>Store Questions Professionally In Your Question Bank</p>
-    </div>
-
-    <button class="back-btn"
-        onclick="location.href='question-bank.html'"
-        title="Back">
-        ⬅
-    </button>
+    <button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
-<!-- MAIN CARD -->
-<div class="main-card">
+<!-- ================= MAIN WRAPPER (IMPORTANT FIX) ================= -->
+<div class="main">
 
-    <!-- MODE -->
-    <div class="section-title">📁 Save Location</div>
+    <!-- ================= PAGE ================= -->
+    <div class="page">
 
-    <label>Mode</label>
-    <select id="modeSelect">
-        <option value="new">Create New Folder</option>
-        <option value="existing">Use Existing Folder</option>
-    </select>
+        <!-- TOP BAR -->
+        <div class="top-bar">
 
-    <!-- NEW -->
-    <div id="newArea">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-        <label>Subject *</label>
-        <input id="subject" placeholder="Mechanical">
+            <div class="top-title">
+                <h1>➕ Add Questions</h1>
+                <p>Store Questions Professionally In Your Question Bank</p>
+            </div>
 
-        <label>Chapter</label>
-        <input id="chapter" placeholder="Thermodynamics">
+            <!-- 🔥 FIXED BACK BUTTON -->
+            <button class="back-btn"
+                onclick="history.back()"
+                title="Back">
+                ⬅
+            </button>
 
-        <label>Topic</label>
-        <input id="topic" placeholder="Entropy">
-
-    </div>
-
-    <!-- EXISTING -->
-    <div id="existingArea" style="display:none;">
-
-        <label>Select Subject *</label>
-        <select id="subjectList"></select>
-
-        <label>Select Chapter</label>
-        <select id="chapterList"></select>
-
-        <!-- NEW CHAPTER INPUT -->
-        <div id="newChapterWrap" style="display:none;">
-            <label>New Chapter Name</label>
-            <input id="newChapterInput" placeholder="Enter new chapter">
         </div>
 
-        <label>Select Topic</label>
-        <select id="topicList"></select>
+        <!-- ================= MAIN CARD ================= -->
+        <div class="main-card">
 
-        <!-- NEW TOPIC INPUT -->
-        <div id="newTopicWrap" style="display:none;">
-            <label>New Topic Name</label>
-            <input id="newTopicInput" placeholder="Enter new topic">
-        </div>
+            <!-- MODE -->
+            <div class="section-title">📁 Save Location</div>
 
-    </div>
+            <label>Mode</label>
+            <select id="modeSelect">
+                <option value="new">Create New Folder</option>
+                <option value="existing">Use Existing Folder</option>
+            </select>
 
-    <!-- JSON -->
-    <div class="section-title">🧠 Questions JSON</div>
+            <!-- NEW -->
+            <div id="newArea">
 
-    <label>Paste JSON</label>
-    <textarea id="jsonBox" placeholder='[
+                <label>Subject *</label>
+                <input id="subject" placeholder="Mechanical">
+
+                <label>Chapter</label>
+                <input id="chapter" placeholder="Thermodynamics">
+
+                <label>Topic</label>
+                <input id="topic" placeholder="Entropy">
+
+            </div>
+
+            <!-- EXISTING -->
+            <div id="existingArea" style="display:none;">
+
+                <label>Select Subject *</label>
+                <select id="subjectList"></select>
+
+                <label>Select Chapter</label>
+                <select id="chapterList"></select>
+
+                <div id="newChapterWrap" style="display:none;">
+                    <label>New Chapter Name</label>
+                    <input id="newChapterInput" placeholder="Enter new chapter">
+                </div>
+
+                <label>Select Topic</label>
+                <select id="topicList"></select>
+
+                <div id="newTopicWrap" style="display:none;">
+                    <label>New Topic Name</label>
+                    <input id="newTopicInput" placeholder="Enter new topic">
+                </div>
+
+            </div>
+
+            <!-- JSON -->
+            <div class="section-title">🧠 Questions JSON</div>
+
+            <label>Paste JSON</label>
+            <textarea id="jsonBox" placeholder='[
  {
   "question":"Unit of Force?",
   "options":["Joule","Newton","Watt","Pascal"],
@@ -119,28 +117,34 @@
  }
 ]'></textarea>
 
-    <!-- BUTTON -->
-    <div class="btn-row">
-        <button class="preview-btn" onclick="previewQuestions()">👁 Preview</button>
-        <button class="save-btn" onclick="saveQuestions()">💾 Save Questions</button>
+            <!-- BUTTON -->
+            <div class="btn-row">
+                <button class="preview-btn" onclick="previewQuestions()">👁 Preview</button>
+                <button class="save-btn" onclick="saveQuestions()">💾 Save Questions</button>
+            </div>
+
+        </div>
+
+        <!-- ================= PREVIEW ================= -->
+        <div class="preview-card" id="previewCard">
+
+            <div class="section-title">👁 Live Preview</div>
+
+            <div id="previewBox">No Preview Yet</div>
+
+        </div>
+
     </div>
 
 </div>
 
-<!-- PREVIEW -->
-<div class="preview-card">
-
-    <div class="section-title">👁 Live Preview</div>
-
-    <div id="previewBox">No Preview Yet</div>
-
-</div>
-
-</div>
-
-<!-- TOAST -->
+<!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
+<!-- 🔥 IMPORTANT: MENU JS -->
+<script src="js/menu.js"></script>
+
+<!-- MAIN LOGIC -->
 <script type="module" src="js/add-question.js?v=4"></script>
 
 </body>
