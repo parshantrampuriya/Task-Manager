@@ -1,336 +1,137 @@
-/* ================= TEST DASHBOARD ================= */
-
-import { auth, db } from "./firebase.js";
-
-import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-collection,
-getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* ================= HELPERS ================= */
-const getEl=(id)=>document.getElementById(id);
-
-let currentUser=null;
-
-/* ================= AUTH ================= */
-onAuthStateChanged(auth,async(user)=>{
-
-if(!user){
-location.href="index.html";
-return;
-}
-
-currentUser=user;
-
-animateCards();
-
-await loadUpcoming();
-await loadRecent();
-
-});
-
-/* ================= MENU ================= */
-window.toggleSidebar=()=>{
-
-const sidebar=getEl("sidebar");
-
-if(sidebar){
-sidebar.classList.toggle("active");
-}
-
-};
-
-/* ================= REFRESH ================= */
-window.refreshPage=async()=>{
-
-showToast("Refreshing...");
-
-await loadUpcoming();
-await loadRecent();
-
-showToast("Updated ✅");
-
-};
-
-/* ================= CARD ANIMATION ================= */
-function animateCards(){
-
-const cards=
-document.querySelectorAll(".big-card");
-
-cards.forEach((card,index)=>{
-
-card.style.opacity="0";
-card.style.transform="translateY(25px)";
-
-setTimeout(()=>{
-
-card.style.transition="0.45s ease";
-card.style.opacity="1";
-card.style.transform="translateY(0)";
-
-},150+(index*110));
-
-});
-
-}
-
-/* ================= STATUS ================= */
-function getStatus(test){
-
-const now=Date.now();
-
-const assigned=
-test.assignedTo || [];
-
-const attempted=
-test.attemptedUsers || [];
-
-if(!assigned.includes(currentUser.uid))
-return "hidden";
-
-if(attempted.includes(currentUser.uid))
-return "attempted";
-
-const start=
-Number(test.startAt || 0);
-
-const end=
-Number(test.endAt || 0);
-
-if(start && now<start)
-return "upcoming";
-
-if(end && now>end)
-return "expired";
-
-return "available";
-
-}
-
-/* ================= DATE ================= */
-function fDate(ms){
-
-if(!ms) return "Anytime";
-
-return new Date(ms)
-.toLocaleString();
-
-}
-
-/* ================= UPCOMING ================= */
-async function loadUpcoming(){
-
-const box=getEl("upcomingList");
-const count=getEl("upcomingCount");
-
-if(!box || !count) return;
-
-try{
-
-const snap=
-await getDocs(collection(db,"tests"));
-
-let arr=[];
-
-snap.forEach(doc=>{
-
-arr.push({
-id:doc.id,
-...doc.data()
-});
-
-});
-
-arr=arr.filter(x=>{
-
-const s=getStatus(x);
-
-return (
-s==="upcoming" ||
-s==="available"
-);
-
-});
-
-/* nearest first */
-arr.sort((a,b)=>{
-
-const a1=
-Number(a.startAt || 0);
-
-const b1=
-Number(b.startAt || 0);
-
-return a1-b1;
-
-});
-
-let html="";
-let total=0;
-
-arr.slice(0,5).forEach(test=>{
-
-const status=
-getStatus(test);
-
-html += `
-<div class="list-row">
-
-<div>
-
-<strong>
-${test.testName || "Untitled Test"}
-</strong>
-
-<small>
-${test.duration || 0} min •
-${status==="upcoming"
-? fDate(test.startAt)
-: "Live Now"}
-</small>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>View Questions</title>
+
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/view-question.css?v=4">
+
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar" class="sidebar">
+
+    <h2>⚡ Menu</h2>
+
+    <button onclick="location.href='home.html'">🏠 Home</button>
+    <button onclick="location.href='tasks.html'">📋 Tasks</button>
+    <button onclick="location.href='goals.html'">🎯 Goals</button>
+    <button onclick="location.href='friends.html'">👥 Friends</button>
+    <button onclick="location.href='question-bank.html'">📚 Question Bank</button>
+    <button onclick="location.href='create-test.html'">📝 Create Test</button>
+    <button onclick="location.href='give-test.html'">🎯 Give Test</button>
+    <button onclick="location.href='profile.html'">👤 Profile</button>
 
 </div>
 
-<button class="mini-btn"
-onclick="location.href='give-test.html'">
+<!-- ================= PAGE ================= -->
+<div class="page">
 
-${status==="upcoming"
-? "View"
-: "Start"}
+    <!-- TOP BAR -->
+    <div class="top-bar">
 
-</button>
+        <button class="menu-btn"
+        onclick="toggleSidebar()">☰</button>
 
-</div>
-`;
+        <div class="top-title">
+            <h1 id="pageTitle">📚 View Questions</h1>
+            <p id="pageSubTitle">
+                Browse Question Bank Like File Manager
+            </p>
+        </div>
 
-total++;
+        <button class="page-back-btn"
+        onclick="location.href='question-bank.html'">
+        ⬅
+        </button>
 
-});
+    </div>
 
-count.innerText=total;
+    <!-- PATH BAR -->
+    <div class="path-bar">
 
-box.innerHTML=
-html || `
-<div class="empty-row">
-No upcoming tests
-</div>
-`;
+        <button class="folder-back-btn"
+        onclick="goFolderBack()">
+        ↩ Folder Back
+        </button>
 
-}catch(error){
+        <div id="pathText" class="path-text">
+            Home
+        </div>
 
-count.innerText="0";
+        <button
+        id="viewAllBtn"
+        class="view-all-btn"
+        onclick="viewAllQuestions()"
+        style="display:none;">
+        👁 Preview All
+        </button>
 
-box.innerHTML=`
-<div class="empty-row">
-No upcoming tests
-</div>
-`;
+    </div>
 
-}
-
-}
-
-/* ================= RECENT ================= */
-async function loadRecent(){
-
-const box=getEl("recentList");
-
-if(!box) return;
-
-try{
-
-const snap=
-await getDocs(collection(db,"results"));
-
-let arr=[];
-
-snap.forEach(doc=>{
-
-const d=doc.data();
-
-if(d.uid===currentUser.uid){
-
-arr.push({
-id:doc.id,
-...d
-});
-
-}
-
-});
-
-/* latest first */
-arr.sort((a,b)=>
-Number(b.submittedAt||0)-
-Number(a.submittedAt||0)
-);
-
-let html="";
-
-arr.slice(0,5).forEach(r=>{
-
-html += `
-<div class="list-row">
-
-<div>
-
-<strong>
-${r.testName || "Test"}
-</strong>
-
-<small>
-Score:
-${r.score ?? 0}
-</small>
+    <!-- FILE AREA -->
+    <div class="main-card">
+        <div id="fileArea"></div>
+    </div>
 
 </div>
 
-<button class="mini-btn"
-onclick="location.href='result.html?id=${r.testId}'">
-View
-</button>
+<!-- ================= MAIN POPUP ================= -->
+<div id="popup" class="popup">
+
+    <div class="popup-box">
+
+        <button class="close-btn"
+        onclick="closePopup()">✕</button>
+
+        <h2 id="popupQuestion">Title</h2>
+
+        <div id="popupContent"></div>
+
+    </div>
 
 </div>
-`;
 
-});
+<!-- ================= CONFIRM POPUP ================= -->
+<div id="confirmPopup" class="popup">
 
-box.innerHTML=
-html || `
-<div class="empty-row">
-No recent activity
+    <div class="popup-box">
+
+        <button class="close-btn"
+        onclick="closeConfirmPopup()">✕</button>
+
+        <h2 id="confirmTitle">Confirm</h2>
+
+        <div id="confirmText">
+            Are you sure?
+        </div>
+
+        <div class="popup-btn-row">
+
+            <button class="preview-btn"
+            onclick="closeConfirmPopup()">
+            Cancel
+            </button>
+
+            <button id="confirmYesBtn"
+            class="delete-btn">
+            Yes Delete
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
-`;
 
-}catch(error){
+<!-- TOAST -->
+<div id="toast"></div>
 
-box.innerHTML=`
-<div class="empty-row">
-No recent activity
-</div>
-`;
+<script type="module"
+src="js/view-question.js?v=100"></script>
 
-}
-
-}
-
-/* ================= TOAST ================= */
-function showToast(msg){
-
-const toast=getEl("toast");
-
-if(!toast) return;
-
-toast.innerText=msg;
-toast.className="show";
-
-setTimeout(()=>{
-toast.className="";
-},2000);
-
-}
+</body>
+</html>
