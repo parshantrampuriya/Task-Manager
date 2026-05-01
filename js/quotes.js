@@ -21,7 +21,9 @@ let currentUser = null;
 let viewUid = null;
 let editId = null;
 
-/* AUTH */
+/* ================= INIT ================= */
+document.addEventListener("DOMContentLoaded", () => {
+
 onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
@@ -31,37 +33,74 @@ return;
 
 currentUser = user;
 
+/* view mode */
 const params = new URLSearchParams(location.search);
 viewUid = params.get("viewUser") || user.uid;
 
-/* friend mode */
-if(viewUid !== user.uid){
-getEl("addSection").style.display = "none";
-getEl("pageTitle").innerText = "👤 Friend Thoughts";
-}else{
-getEl("pageTitle").innerText = "✨ My Thoughts";
-}
+/* UI setup */
+setupUI();
 
-setupButton();
+/* attach button AFTER DOM READY */
+attachEvents();
+
+/* load data */
 loadQuotes();
 
 });
 
-/* FIX BUTTON (IMPORTANT) */
-function setupButton(){
+});
+
+/* ================= UI ================= */
+function setupUI(){
+
+const addSection = getEl("addSection");
+const title = getEl("pageTitle");
+
+/* friend mode */
+if(viewUid !== currentUser.uid){
+
+if(addSection) addSection.style.display = "none";
+if(title) title.innerText = "👤 Friend Thoughts";
+
+}else{
+
+if(title) title.innerText = "✨ My Thoughts";
+
+}
+
+}
+
+/* ================= BUTTON FIX ================= */
+function attachEvents(){
 
 const btn = getEl("addQuoteBtn");
 
-if(btn){
+if(!btn){
+console.log("❌ Button not found");
+return;
+}
+
+/* remove old (safe rebind) */
+btn.onclick = null;
+
+/* bind */
 btn.addEventListener("click", addQuote);
-}
+
+console.log("✅ Button connected");
 
 }
 
-/* ADD */
+/* ================= ADD ================= */
 async function addQuote(){
 
+console.log("🔥 Click detected");
+
 const input = getEl("quoteInput");
+
+if(!input){
+console.log("❌ Input not found");
+return;
+}
 
 const text = input.value.trim();
 
@@ -69,6 +108,8 @@ if(!text){
 toast("Write something");
 return;
 }
+
+try{
 
 await addDoc(collection(db,"quotes"),{
 uid: currentUser.uid,
@@ -83,9 +124,14 @@ toast("Saved ✨");
 
 loadQuotes();
 
+}catch(err){
+console.error(err);
+toast("Error saving");
 }
 
-/* LOAD */
+}
+
+/* ================= LOAD ================= */
 async function loadQuotes(){
 
 const snap = await getDocs(
@@ -99,6 +145,7 @@ snap.forEach(d=>{
 arr.push({id:d.id, ...d.data()});
 });
 
+/* latest first */
 arr.sort((a,b)=>b.createdAt-a.createdAt);
 
 let html = "";
@@ -109,7 +156,7 @@ html += `
 <div class="quote-card">
 
 <div class="quote-text">
-${q.text.replace(/\n/g,"<br>")}
+${(q.text || "").replace(/\n/g,"<br>")}
 </div>
 
 <div class="quote-time">
@@ -132,11 +179,15 @@ viewUid === currentUser.uid
 
 });
 
-getEl("quoteList").innerHTML = html || "No thoughts yet";
+const list = getEl("quoteList");
+
+if(list){
+list.innerHTML = html || "No thoughts yet";
+}
 
 }
 
-/* EDIT */
+/* ================= EDIT ================= */
 window.openEdit = (id,text)=>{
 
 editId = id;
@@ -163,7 +214,7 @@ loadQuotes();
 
 }
 
-/* DELETE */
+/* ================= DELETE ================= */
 window.deleteQuote = async(id)=>{
 
 let ok = confirm("Delete this thought?");
@@ -176,10 +227,12 @@ loadQuotes();
 
 };
 
-/* TOAST */
+/* ================= TOAST ================= */
 function toast(msg){
 
 let t = getEl("toast");
+
+if(!t) return;
 
 t.innerText = msg;
 t.classList.add("show");
