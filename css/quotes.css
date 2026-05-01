@@ -1,25 +1,147 @@
-.quote-card{
-background:#161616;
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:#0b0b0b;
+color:#fff;
+}
+
+/* TOP BAR */
+.top-bar{
+display:flex;
+align-items:center;
+gap:12px;
+padding:16px;
+background:#111;
+border-bottom:1px solid #222;
+}
+
+.menu-btn{
+width:45px;
+height:45px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+font-size:20px;
+cursor:pointer;
+}
+
+/* PAGE */
+.page{
+max-width:700px;
+margin:auto;
+padding:16px;
+}
+
+/* ADD CARD */
+.quote-add-card{
+background:#111;
 padding:18px;
-border-radius:18px;
-margin-bottom:14px;
+border-radius:16px;
+margin-bottom:20px;
+box-shadow:0 0 12px rgba(0,255,255,.08);
+}
+
+/* TEXTAREA */
+#quoteInput{
+width:100%;
+height:120px;
+padding:12px;
+border-radius:12px;
+border:1px solid #333;
+background:#0a0a0a;
+color:#fff;
+font-size:14px;
+resize:none;
+margin-top:10px;
+}
+
+/* BUTTON */
+.save-btn{
+margin-top:12px;
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+color:#000;
+font-weight:700;
+cursor:pointer;
+}
+
+/* LIST CARD */
+.quote-list-card{
+background:#111;
+padding:18px;
+border-radius:16px;
+box-shadow:0 0 12px rgba(0,255,255,.08);
+}
+
+/* QUOTE CARD */
+.quote-card{
+background:#181818;
+padding:16px;
+border-radius:14px;
+margin-bottom:12px;
 border-left:4px solid #00eaff;
 }
 
+/* TEXT */
 .quote-text{
-font-size:16px;
+font-size:14px;
 line-height:1.6;
 white-space:pre-line;
 }
 
+/* TIME */
 .quote-time{
 font-size:12px;
 opacity:0.6;
-margin-top:10px;
+margin-top:8px;
 }
 
+/* ACTIONS */
 .actions{
 margin-top:10px;
 display:flex;
 gap:10px;
+}
+
+.actions button{
+border:none;
+padding:6px 10px;
+border-radius:8px;
+cursor:pointer;
+background:#222;
+color:#fff;
+}
+
+/* TOAST */
+#toast{
+position:fixed;
+top:20px;
+right:20px;
+background:#111;
+padding:10px 14px;
+border-radius:10px;
+opacity:0;
+transform:translateY(-50px);
+transition:.3s;
+}
+
+#toast.show{
+opacity:1;
+transform:translateY(0);
+}
+
+/* MOBILE */
+@media(max-width:600px){
+
+.page{
+padding:12px;
+}
+
+#quoteInput{
+height:100px;
+}
+
 }
