@@ -21,7 +21,7 @@ let currentUser = null;
 let viewUid = null;
 let editId = null;
 
-/* ================= AUTH ================= */
+/* AUTH */
 onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
@@ -34,18 +34,36 @@ currentUser = user;
 const params = new URLSearchParams(location.search);
 viewUid = params.get("viewUser") || user.uid;
 
+/* friend mode */
 if(viewUid !== user.uid){
 getEl("addSection").style.display = "none";
+getEl("pageTitle").innerText = "👤 Friend Thoughts";
+}else{
+getEl("pageTitle").innerText = "✨ My Thoughts";
 }
 
+setupButton();
 loadQuotes();
 
 });
 
-/* ================= ADD ================= */
-window.addQuote = async()=>{
+/* FIX BUTTON (IMPORTANT) */
+function setupButton(){
 
-const text = getEl("quoteInput").value.trim();
+const btn = getEl("addQuoteBtn");
+
+if(btn){
+btn.addEventListener("click", addQuote);
+}
+
+}
+
+/* ADD */
+async function addQuote(){
+
+const input = getEl("quoteInput");
+
+const text = input.value.trim();
 
 if(!text){
 toast("Write something");
@@ -59,15 +77,15 @@ createdAt: Date.now(),
 updatedAt: Date.now()
 });
 
-getEl("quoteInput").value = "";
+input.value = "";
 
 toast("Saved ✨");
 
 loadQuotes();
 
-};
+}
 
-/* ================= LOAD ================= */
+/* LOAD */
 async function loadQuotes(){
 
 const snap = await getDocs(
@@ -102,15 +120,8 @@ ${
 viewUid === currentUser.uid
 ? `
 <div class="actions">
-
-<button onclick="openEdit('${q.id}','${encodeURIComponent(q.text)}')">
-✏️
-</button>
-
-<button onclick="deleteQuote('${q.id}')">
-🗑️
-</button>
-
+<button onclick="openEdit('${q.id}','${encodeURIComponent(q.text)}')">✏️</button>
+<button onclick="deleteQuote('${q.id}')">🗑️</button>
 </div>
 `
 : ""
@@ -125,7 +136,7 @@ getEl("quoteList").innerHTML = html || "No thoughts yet";
 
 }
 
-/* ================= EDIT ================= */
+/* EDIT */
 window.openEdit = (id,text)=>{
 
 editId = id;
@@ -152,7 +163,7 @@ loadQuotes();
 
 }
 
-/* ================= DELETE ================= */
+/* DELETE */
 window.deleteQuote = async(id)=>{
 
 let ok = confirm("Delete this thought?");
@@ -165,7 +176,7 @@ loadQuotes();
 
 };
 
-/* ================= TOAST ================= */
+/* TOAST */
 function toast(msg){
 
 let t = getEl("toast");
