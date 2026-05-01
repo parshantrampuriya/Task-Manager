@@ -1,4 +1,48 @@
-<div class="glass-box">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Quotes</title>
+
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/quotes.css">
+
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goFriends()">👥 Friends</button>
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+<button onclick="goTests()">📝 Tests</button>
+<button onclick="goGrowth()">🌱 Growth Hub</button>
+<button onclick="goProfile()">👤 Profile</button>
+<button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="top-bar">
+
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<h2 id="pageTitle">✨ Thoughts</h2>
+
+</div>
+
+<div class="page">
+
+<!-- ADD -->
+<div id="addSection" class="quote-add-card">
 
 <h3>✨ Add Thought</h3>
 
@@ -6,16 +50,31 @@
 placeholder="Write your thought...
 Use Enter for new lines"></textarea>
 
-<button class="main-btn" onclick="addQuote()">
-Save Quote
+<button class="save-btn" id="addQuoteBtn">
+Save Thought
 </button>
 
 </div>
 
-<div class="glass-box">
+<!-- LIST -->
+<div class="quote-list-card">
 
 <h3>📜 Thoughts</h3>
 
 <div id="quoteList">Loading...</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="toast"></div>
+
+<script src="js/menu.js"></script>
+<script type="module" src="js/quotes.js"></script>
+
+</body>
+</html>
 
 </div>
