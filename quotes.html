@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
@@ -28,9 +28,10 @@
 
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 <div class="main">
 
+<!-- ================= TOP BAR ================= -->
 <div class="top-bar">
 
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
@@ -39,9 +40,10 @@
 
 </div>
 
+<!-- ================= PAGE ================= -->
 <div class="page">
 
-<!-- ADD -->
+<!-- ================= ADD ================= -->
 <div id="addSection" class="quote-add-card">
 
 <h3>✨ Add Thought</h3>
@@ -56,22 +58,36 @@ Save Thought
 
 </div>
 
-<!-- LIST -->
+<!-- ================= FRIEND THOUGHTS ================= -->
+<div class="quote-list-card">
+
+<h3>👥 Friends Thoughts</h3>
+
+<div id="friendThoughts">
+Loading...
+</div>
+
+</div>
+
+<!-- ================= MY / FRIEND LIST ================= -->
 <div class="quote-list-card">
 
 <h3>📜 Thoughts</h3>
 
-<div id="quoteList">Loading...</div>
-
+<div id="quoteList">
+Loading...
 </div>
 
 </div>
 
 </div>
 
+</div>
+
+<!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
-<!-- 🔥 IMPORTANT ORDER -->
+<!-- ================= SCRIPTS ================= -->
 <script src="js/menu.js"></script>
 <script type="module" src="js/quotes.js"></script>
 
