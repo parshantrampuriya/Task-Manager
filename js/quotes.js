@@ -11,6 +11,7 @@ getDocs,
 query,
 where,
 doc,
+getDoc,        // 🔥 IMPORTANT (added)
 updateDoc,
 deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -37,15 +38,15 @@ currentUser = user;
 const params = new URLSearchParams(location.search);
 viewUid = params.get("viewUser") || user.uid;
 
-/* UI setup */
+/* UI */
 setupUI();
 
-/* attach button */
+/* button */
 attachEvents();
 
-/* load data */
+/* load */
 loadQuotes();
-loadFriends();   // 🔥 NEW
+loadFriends();
 
 });
 
@@ -75,7 +76,10 @@ function attachEvents(){
 
 const btn = getEl("addQuoteBtn");
 
-if(!btn) return;
+if(!btn){
+console.log("❌ Button not found");
+return;
+}
 
 btn.onclick = null;
 btn.addEventListener("click", addQuote);
@@ -86,12 +90,17 @@ btn.addEventListener("click", addQuote);
 async function addQuote(){
 
 const input = getEl("quoteInput");
+
+if(!input) return;
+
 const text = input.value.trim();
 
 if(!text){
 toast("Write something");
 return;
 }
+
+try{
 
 await addDoc(collection(db,"quotes"),{
 uid: currentUser.uid,
@@ -105,6 +114,11 @@ input.value = "";
 toast("Saved ✨");
 
 loadQuotes();
+
+}catch(err){
+console.error(err);
+toast("Error saving");
+}
 
 }
 
@@ -155,11 +169,14 @@ viewUid === currentUser.uid
 
 });
 
-getEl("quoteList").innerHTML = html || "No thoughts yet";
+const list = getEl("quoteList");
+if(list){
+list.innerHTML = html || "No thoughts yet";
+}
 
 }
 
-/* ================= FRIENDS LIST ================= */
+/* ================= FRIENDS LIST (FIXED) ================= */
 async function loadFriends(){
 
 const wrap = getEl("friendThoughts");
@@ -172,16 +189,35 @@ let html = "";
 
 for(const d of snap.docs){
 
-let users = d.data().users || [];
+const users = d.data().users || [];
 
 if(!users.includes(currentUser.uid)) continue;
 
-let fid = users.find(x=>x!==currentUser.uid);
+const fid = users.find(x => x !== currentUser.uid);
 
+if(!fid) continue;
+
+/* 🔥 GET REAL NAME */
+let name = "Friend";
+
+try{
+
+const userSnap = await getDoc(doc(db,"users",fid));
+
+if(userSnap.exists()){
+const u = userSnap.data();
+name = u.name || u.username || u.email || "Friend";
+}
+
+}catch(e){
+console.log("User fetch error", e);
+}
+
+/* 🔥 USE NAME */
 html += `
 <div class="friend-card"
 onclick="openFriendThought('${fid}')">
-👤 Friend
+👤 ${name}
 </div>
 `;
 
@@ -203,7 +239,6 @@ editId = id;
 
 const val = decodeURIComponent(text);
 
-/* custom popup instead of prompt */
 const newText = prompt("Edit your thought:", val);
 
 if(newText !== null){
