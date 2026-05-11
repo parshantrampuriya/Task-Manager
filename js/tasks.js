@@ -1,23 +1,3 @@
-import { auth, db } from "./firebase.js";
-
-import {
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-doc,
-getDoc,
-collection,
-addDoc,
-onSnapshot,
-updateDoc,
-deleteDoc,
-getDocs,
-query,
-where
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 /* ================= GLOBAL ================= */
 let currentUser = null;
 let tasks = [];
@@ -26,188 +6,7 @@ let currentTab = "pending";
 let currentTaskId = null;
 let currentAction = null;
 
-/* VIEW MODE */
-const params = new URLSearchParams(location.search);
-const viewUser = params.get("viewUser");
-
-let uid = null;
-let realUid = null;
-let isViewMode = false;
-let friendPermission = null;
-
-/* ================= AUTH ================= */
-onAuthStateChanged(auth, async(user)=>{
-
-if(!user){
-location.href="index.html";
-return;
-}
-
-currentUser = user;
-realUid = user.uid;
-
-/* friend mode */
-if(viewUser){
-uid = viewUser;
-isViewMode = true;
-}else{
-uid = realUid;
-}
-
-/* user name */
-let snap = await getDoc(doc(db,"users",uid));
-
-if(snap.exists()){
-
-const name = snap.data().name || "User";
-
-if(isViewMode){
-
-username.innerText =
-"👀 Viewing " + name;
-
-/* permission check */
-const allowed =
-await checkFriendPermission();
-
-if(!allowed){
-showBlockedPage(name);
-return;
-}
-
-/* hide editing controls */
-hideControls();
-
-}else{
-
-username.innerText =
-"👤 Welcome " + name;
-
-}
-
-}
-
-loadTasks();
-
-});
-
-/* ================= PERMISSION ================= */
-async function checkFriendPermission(){
-
-const snap =
-await getDocs(collection(db,"friends"));
-
-for(const d of snap.docs){
-
-const data = d.data();
-const users = data.users || [];
-
-if(
-users.includes(realUid) &&
-users.includes(uid)
-){
-
-friendPermission =
-data.permissions?.[uid] || {};
-
-return friendPermission.tasks === true;
-
-}
-
-}
-
-return false;
-
-}
-
-/* ================= BLOCK PAGE ================= */
-function showBlockedPage(name){
-
-taskContainer.innerHTML = `
-<div style="
-padding:60px 30px;
-text-align:center;
-background:#111827;
-border-radius:18px;
-box-shadow:0 0 25px rgba(0,255,255,.15);
-">
-
-<div style="font-size:60px;">🔒</div>
-
-<h2 style="margin-top:15px;">
-${name} blocked this page
-</h2>
-
-<p style="opacity:.8;margin-top:10px;">
-Your friend has restricted access.
-</p>
-
-<button onclick="location.href='home.html'"
-style="
-margin-top:25px;
-padding:14px 24px;
-border:none;
-border-radius:14px;
-font-weight:700;
-cursor:pointer;
-background:linear-gradient(45deg,#00eaff,#00ff9d);
-">
-↩ My Dashboard
-</button>
-
-</div>
-`;
-
-}
-
-/* ================= HIDE CONTROLS ================= */
-function hideControls(){
-
-if(taskInput) taskInput.style.display="none";
-if(dateInput) dateInput.style.display="none";
-if(timeInput) timeInput.style.display="none";
-
-const addBtn =
-document.querySelector("[onclick='addTask()']");
-
-if(addBtn) addBtn.style.display="none";
-
-}
-
-/* ================= DATE ================= */
-function getToday(){
-return new Date().toLocaleDateString("en-CA");
-}
-
-/* ================= LOAD ================= */
-function loadTasks(){
-
-onSnapshot(collection(db,"tasks"),snap=>{
-
-tasks=[];
-
-snap.forEach(d=>{
-
-let t=d.data();
-
-if(t.user===uid || t.uid===uid){
-
-tasks.push({
-id:d.id,
-...t
-});
-
-}
-
-});
-
-render();
-
-});
-
-}
-
-/* ================= ADD ================= */
+/* ================= ADD TASK ================= */
 window.addTask = async()=>{
 
 if(isViewMode) return;
@@ -216,6 +15,12 @@ let text = taskInput.value.trim();
 let date = dateInput.value;
 let time = timeInput.value;
 
+const important =
+document.getElementById("importantInput")?.checked || false;
+
+const urgent =
+document.getElementById("urgentInput")?.checked || false;
+
 if(!text) return;
 
 await addDoc(collection(db,"tasks"),{
@@ -223,6 +28,10 @@ await addDoc(collection(db,"tasks"),{
 text:text,
 date:date || getToday(),
 time:time || "00:00",
+
+important,
+urgent,
+
 completed:false,
 user:realUid,
 uid:realUid,
@@ -234,60 +43,143 @@ taskInput.value="";
 dateInput.value="";
 timeInput.value="";
 
+document.getElementById("importantInput").checked=false;
+document.getElementById("urgentInput").checked=false;
+
 };
 
-/* ================= STATUS ================= */
-function getStatus(t){
+/* ================= PRIORITY ================= */
+function getPriorityScore(t){
 
-if(!t.time || t.time==="00:00")
-return "normal";
+if(t.important && t.urgent) return 1;
 
-let now = new Date();
+if(t.important && !t.urgent) return 2;
 
-let taskTime =
-new Date(`${t.date}T${t.time}`);
+if(!t.important && t.urgent) return 3;
 
-let diff = taskTime-now;
-
-if(diff<0) return "overdue";
-if(diff<30*60000) return "urgent";
-if(diff<60*60000) return "soon";
-
-return "normal";
+return 4;
 
 }
 
-/* ================= TAB ================= */
-window.switchTab=(tab,e)=>{
+/* ================= PRIORITY BADGE ================= */
+function getPriorityBadge(t){
 
-currentTab=tab;
+if(t.important && t.urgent){
+return `
+<span class="priority critical">
+🔥 Critical
+</span>
+`;
+}
 
-document
-.querySelectorAll(".tabs button")
-.forEach(btn=>{
-btn.classList.remove("active");
-});
+if(t.important){
+return `
+<span class="priority important">
+⭐ Important
+</span>
+`;
+}
 
-if(e) e.target.classList.add("active");
+if(t.urgent){
+return `
+<span class="priority urgent-badge">
+⚡ Urgent
+</span>
+`;
+}
 
-render();
+return `
+<span class="priority normal-badge">
+🧩 Normal
+</span>
+`;
 
-};
+}
 
-/* ================= SORT ================= */
-function sortDates(dates){
+/* ================= UPDATE STATS ================= */
+function updateStats(filtered){
 
-return dates.sort((a,b)=>{
+let critical=0;
+let important=0;
+let completed=0;
+let pending=0;
 
-if(currentTab==="pending"){
-return new Date(a)-new Date(b);
+filtered.forEach(t=>{
+
+if(t.completed){
+completed++;
 }else{
-return new Date(b)-new Date(a);
+pending++;
+}
+
+if(t.important && t.urgent){
+critical++;
+}
+
+if(t.important){
+important++;
 }
 
 });
 
+if(document.getElementById("criticalCount"))
+document.getElementById("criticalCount").innerText=critical;
+
+if(document.getElementById("importantCount"))
+document.getElementById("importantCount").innerText=important;
+
+if(document.getElementById("completedCount"))
+document.getElementById("completedCount").innerText=completed;
+
+if(document.getElementById("pendingCount"))
+document.getElementById("pendingCount").innerText=pending;
+
+/* productivity */
+let total = completed + pending;
+
+let percent = total
+? Math.round((completed/total)*100)
+: 0;
+
+if(document.getElementById("progressFill")){
+document.getElementById("progressFill").style.width =
+percent + "%";
 }
+
+if(document.getElementById("progressText")){
+document.getElementById("progressText").innerText =
+percent + "%";
+}
+
+}
+
+/* ================= CLEAR COMPLETED ================= */
+window.clearCompletedTasks = async()=>{
+
+if(isViewMode) return;
+
+let doneTasks =
+tasks.filter(t=>t.completed);
+
+if(doneTasks.length===0){
+alert("No completed tasks");
+return;
+}
+
+let ok =
+confirm(
+`Delete ${doneTasks.length} completed tasks?`
+);
+
+if(!ok) return;
+
+for(const t of doneTasks){
+
+await deleteDoc(doc(db,"tasks",t.id));
+
+}
+
+};
 
 /* ================= RENDER ================= */
 function render(){
@@ -323,6 +215,9 @@ t.completed
 );
 }
 
+/* 🔥 UPDATE STATS */
+updateStats(filtered);
+
 let grouped={};
 
 filtered.forEach(t=>{
@@ -357,10 +252,14 @@ html+=`
 <ol class="task-list">
 `;
 
+/* 🔥 QUADRANT SORT */
 grouped[date].sort((a,b)=>{
 
-if(a.completed!==b.completed){
-return a.completed ? 1 : -1;
+let pa = getPriorityScore(a);
+let pb = getPriorityScore(b);
+
+if(pa!==pb){
+return pa-pb;
 }
 
 return (a.time || "")
@@ -377,12 +276,21 @@ html+=`
 
 <div style="
 display:flex;
-align-items:center;
-gap:10px;
+flex-direction:column;
+gap:6px;
 flex:1;
 ">
 
+<div style="
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+">
+
 <span>${t.text}</span>
+
+${getPriorityBadge(t)}
 
 ${
 t.time && t.time!=="00:00"
@@ -399,6 +307,8 @@ t.fromQuest
 :
 ""
 }
+
+</div>
 
 </div>
 
@@ -469,6 +379,20 @@ decodeURIComponent(text);
 modalDate.value=date;
 modalTime.value=time;
 
+/* load task */
+let task =
+tasks.find(x=>x.id===id);
+
+if(task){
+
+document.getElementById("modalImportant").checked =
+task.important || false;
+
+document.getElementById("modalUrgent").checked =
+task.urgent || false;
+
+}
+
 }
 
 if(type==="delete"){
@@ -484,10 +408,6 @@ modalTime.style.display="none";
 
 };
 
-window.closeModal=()=>{
-modal.classList.remove("active");
-};
-
 /* ================= CONFIRM ================= */
 window.confirmAction=async()=>{
 
@@ -500,7 +420,13 @@ doc(db,"tasks",currentTaskId),
 {
 text:modalInput.value.trim(),
 date:modalDate.value,
-time:modalTime.value || "00:00"
+time:modalTime.value || "00:00",
+
+important:
+document.getElementById("modalImportant").checked,
+
+urgent:
+document.getElementById("modalUrgent").checked
 }
 );
 
@@ -517,108 +443,3 @@ doc(db,"tasks",currentTaskId)
 closeModal();
 
 };
-
-/* ================= TOGGLE ================= */
-window.toggle=async(id,c)=>{
-
-if(isViewMode) return;
-
-const ref=doc(db,"tasks",id);
-
-const snap=await getDoc(ref);
-
-if(!snap.exists()) return;
-
-const task=snap.data();
-
-const nowDone=!c;
-
-await updateDoc(ref,{
-completed:nowDone
-});
-
-/* keep your quest logic same */
-if(task.fromQuest && task.questId){
-
-if(nowDone){
-
-await addDoc(
-collection(db,"insights"),
-{
-uid:realUid,
-text:task.text,
-date:getToday(),
-createdAt:Date.now(),
-source:"task"
-}
-);
-
-await deleteDoc(
-doc(db,"quest",task.questId)
-);
-
-}else{
-
-const qRef=
-doc(db,"quest",task.questId);
-
-const qSnap=
-await getDoc(qRef);
-
-if(!qSnap.exists()){
-
-await addDoc(
-collection(db,"quest"),
-{
-uid:realUid,
-text:task.text,
-date:getToday(),
-status:"Pending",
-createdAt:Date.now()
-}
-);
-
-}
-
-const insSnap=
-await getDocs(
-query(
-collection(db,"insights"),
-where("uid","==",realUid),
-where("text","==",task.text)
-)
-);
-
-for(const d of insSnap.docs){
-
-await deleteDoc(
-doc(db,"insights",d.id)
-);
-
-}
-
-}
-
-}
-
-};
-
-/* ================= SEARCH ================= */
-searchInput.addEventListener(
-"input",
-render
-);
-
-/* ================= LOGOUT ================= */
-logoutBtn.addEventListener(
-"click",
-async()=>{
-await signOut(auth);
-location.href="index.html";
-}
-);
-
-/* ================= HELPER ================= */
-function escapeText(t){
-return encodeURIComponent(t || "");
-}
