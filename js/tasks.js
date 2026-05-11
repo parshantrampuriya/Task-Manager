@@ -17,12 +17,14 @@ onSnapshot
 /* ================= GLOBAL ================= */
 let currentUser = null;
 let tasks = [];
+
 let currentTab = "pending";
 
 let currentTaskId = null;
 let currentAction = null;
 
 let isViewMode = false;
+
 let uid = null;
 let realUid = null;
 
@@ -32,8 +34,10 @@ let quadrantFilter = "all";
 onAuthStateChanged(auth,(user)=>{
 
 if(!user){
+
 location.href="index.html";
 return;
+
 }
 
 currentUser = user;
@@ -82,15 +86,19 @@ return new Date()
 
 }
 
-/* ================= SORT ================= */
+/* ================= SORT DATES ================= */
 function sortDates(dates){
 
 return dates.sort((a,b)=>{
 
 if(currentTab==="pending"){
-return new Date(a)-new Date(b);
+
+return new Date(a) - new Date(b);
+
 }else{
-return new Date(b)-new Date(a);
+
+return new Date(b) - new Date(a);
+
 }
 
 });
@@ -107,23 +115,28 @@ return encodeURIComponent(t || "");
 /* ================= STATUS ================= */
 function getStatus(t){
 
-if(!t.time || t.time==="00:00")
+if(!t.time || t.time==="00:00"){
 return "";
+}
 
 let now = new Date();
 
 let taskTime =
 new Date(`${t.date}T${t.time}`);
 
-let diff = taskTime-now;
+let diff = taskTime - now;
 
-if(diff < 0) return "overdue";
+if(diff < 0){
+return "overdue";
+}
 
-if(diff < 30*60000)
+if(diff < 30*60000){
 return "urgent-status";
+}
 
-if(diff < 60*60000)
+if(diff < 60*60000){
 return "soon";
+}
 
 return "";
 
@@ -137,11 +150,15 @@ currentTab = tab;
 document
 .querySelectorAll(".tabs button")
 .forEach(btn=>{
+
 btn.classList.remove("active");
+
 });
 
 if(e){
+
 e.target.classList.add("active");
+
 }
 
 render();
@@ -156,11 +173,15 @@ quadrantFilter = type;
 document
 .querySelectorAll(".quad-btn")
 .forEach(btn=>{
+
 btn.classList.remove("active");
+
 });
 
 if(e){
+
 e.target.classList.add("active");
+
 }
 
 render();
@@ -189,8 +210,15 @@ document.getElementById("importantCheck");
 const urgentEl =
 document.getElementById("urgentCheck");
 
+if(!taskEl){
+
+alert("taskInput not found");
+return;
+
+}
+
 let text =
-taskEl?.value.trim() || "";
+taskEl.value.trim();
 
 let date =
 dateEl?.value || "";
@@ -216,24 +244,35 @@ try{
 await addDoc(collection(db,"tasks"),{
 
 text:text,
+
 date:date || getToday(),
+
 time:time || "00:00",
 
-important:important,
-urgent:urgent,
+important:Boolean(important),
+
+urgent:Boolean(urgent),
 
 completed:false,
-user:realUid,
+
 uid:realUid,
+user:realUid,
+
 createdAt:Date.now()
 
 });
 
 /* CLEAR */
 
-if(taskEl) taskEl.value="";
-if(dateEl) dateEl.value="";
-if(timeEl) timeEl.value="";
+taskEl.value="";
+
+if(dateEl){
+dateEl.value="";
+}
+
+if(timeEl){
+timeEl.value="";
+}
 
 if(importantEl){
 importantEl.checked=false;
@@ -259,11 +298,23 @@ err.message
 /* ================= PRIORITY SCORE ================= */
 function getPriorityScore(t){
 
-if(t.important && t.urgent) return 1;
+const important =
+t.important === true;
 
-if(t.important && !t.urgent) return 2;
+const urgent =
+t.urgent === true;
 
-if(!t.important && t.urgent) return 3;
+if(important && urgent){
+return 1;
+}
+
+if(important && !urgent){
+return 2;
+}
+
+if(!important && urgent){
+return 3;
+}
 
 return 4;
 
@@ -272,15 +323,21 @@ return 4;
 /* ================= QUADRANT CLASS ================= */
 function getQuadrantClass(t){
 
-if(t.important && t.urgent){
+const important =
+t.important === true;
+
+const urgent =
+t.urgent === true;
+
+if(important && urgent){
 return "q1";
 }
 
-if(t.important && !t.urgent){
+if(important && !urgent){
 return "q2";
 }
 
-if(!t.important && t.urgent){
+if(!important && urgent){
 return "q3";
 }
 
@@ -291,7 +348,13 @@ return "q4";
 /* ================= PRIORITY BADGE ================= */
 function getPriorityBadge(t){
 
-if(t.important && t.urgent){
+const important =
+t.important === true;
+
+const urgent =
+t.urgent === true;
+
+if(important && urgent){
 
 return `
 <span class="badge urgent">
@@ -301,7 +364,7 @@ return `
 
 }
 
-if(t.important){
+if(important){
 
 return `
 <span class="badge important">
@@ -311,7 +374,7 @@ return `
 
 }
 
-if(t.urgent){
+if(urgent){
 
 return `
 <span class="badge quest">
@@ -332,43 +395,59 @@ return `
 /* ================= UPDATE STATS ================= */
 function updateStats(todayTasks){
 
-let critical=0;
-let important=0;
-let completed=0;
-let pending=0;
+let critical = 0;
+let important = 0;
+let completed = 0;
+let pending = 0;
 
 let earnedPoints = 0;
 let totalPoints = 0;
 
 todayTasks.forEach(t=>{
 
+const isImportant =
+t.important === true;
+
+const isUrgent =
+t.urgent === true;
+
 if(t.completed){
+
 completed++;
+
 }else{
+
 pending++;
+
 }
 
-if(t.important && t.urgent){
+/* COUNTS */
+
+if(isImportant && isUrgent){
+
 critical++;
+
 }
 
-if(t.important && !t.urgent){
+if(isImportant && !isUrgent){
+
 important++;
+
 }
 
-/* PRODUCTIVITY WEIGHT */
+/* PRODUCTIVITY */
 
 let points = 1;
 
-if(t.important && t.urgent){
+if(isImportant && isUrgent){
 
 points = 4;
 
-}else if(t.important){
+}else if(isImportant){
 
 points = 3;
 
-}else if(t.urgent){
+}else if(isUrgent){
 
 points = 2;
 
@@ -384,7 +463,7 @@ earnedPoints += points;
 
 });
 
-/* UPDATE CARDS */
+/* UPDATE UI */
 
 const criticalEl =
 document.getElementById("criticalCount");
@@ -416,11 +495,15 @@ pendingEl.innerText = pending;
 
 /* PRODUCTIVITY */
 
-let percent = totalPoints
-? Math.round(
+let percent = 0;
+
+if(totalPoints > 0){
+
+percent = Math.round(
 (earnedPoints / totalPoints) * 100
-)
-: 0;
+);
+
+}
 
 /* BAR */
 
@@ -494,7 +577,7 @@ const todayTasks = tasks.filter(t=>
 t.date === today
 );
 
-/* FILTERED */
+/* SEARCH */
 
 let filtered = tasks.filter(t=>
 (t.text || "")
@@ -507,7 +590,8 @@ let filtered = tasks.filter(t=>
 if(quadrantFilter==="critical"){
 
 filtered = filtered.filter(t=>
-t.important && t.urgent
+t.important === true &&
+t.urgent === true
 );
 
 }
@@ -515,7 +599,8 @@ t.important && t.urgent
 if(quadrantFilter==="important"){
 
 filtered = filtered.filter(t=>
-t.important && !t.urgent
+t.important === true &&
+t.urgent !== true
 );
 
 }
@@ -523,7 +608,8 @@ t.important && !t.urgent
 if(quadrantFilter==="urgent"){
 
 filtered = filtered.filter(t=>
-!t.important && t.urgent
+t.important !== true &&
+t.urgent === true
 );
 
 }
@@ -531,7 +617,8 @@ filtered = filtered.filter(t=>
 if(quadrantFilter==="normal"){
 
 filtered = filtered.filter(t=>
-!t.important && !t.urgent
+t.important !== true &&
+t.urgent !== true
 );
 
 }
@@ -575,7 +662,9 @@ let grouped = {};
 filtered.forEach(t=>{
 
 if(!grouped[t.date]){
-grouped[t.date]=[];
+
+grouped[t.date] = [];
+
 }
 
 grouped[t.date].push(t);
@@ -609,11 +698,16 @@ html += `
 
 grouped[date].sort((a,b)=>{
 
-let pa = getPriorityScore(a);
-let pb = getPriorityScore(b);
+let pa =
+getPriorityScore(a);
 
-if(pa!==pb){
-return pa-pb;
+let pb =
+getPriorityScore(b);
+
+if(pa !== pb){
+
+return pa - pb;
+
 }
 
 return (a.time || "")
@@ -713,8 +807,8 @@ completed:!c
 /* ================= MODAL ================= */
 window.openModal=(type,id,text="",date="",time="")=>{
 
-currentTaskId=id;
-currentAction=type;
+currentTaskId = id;
+currentAction = type;
 
 modal.classList.add("active");
 
@@ -724,24 +818,36 @@ modalTime.style.display="block";
 
 if(type==="edit"){
 
-modalTitle.innerText="Edit Task";
+modalTitle.innerText =
+"Edit Task";
 
 modalInput.value =
 decodeURIComponent(text);
 
-modalDate.value=date;
-modalTime.value=time;
+modalDate.value = date;
+
+modalTime.value = time;
 
 let task =
 tasks.find(x=>x.id===id);
 
 if(task){
 
-document.getElementById("modalImportant").checked =
-task.important || false;
+const mi =
+document.getElementById("modalImportant");
 
-document.getElementById("modalUrgent").checked =
+const mu =
+document.getElementById("modalUrgent");
+
+if(mi){
+mi.checked =
+task.important || false;
+}
+
+if(mu){
+mu.checked =
 task.urgent || false;
+}
 
 }
 
@@ -775,15 +881,22 @@ if(currentAction==="edit"){
 await updateDoc(
 doc(db,"tasks",currentTaskId),
 {
-text:modalInput.value.trim(),
-date:modalDate.value,
-time:modalTime.value || "00:00",
+
+text:
+modalInput.value.trim(),
+
+date:
+modalDate.value,
+
+time:
+modalTime.value || "00:00",
 
 important:
 document.getElementById("modalImportant")?.checked || false,
 
 urgent:
 document.getElementById("modalUrgent")?.checked || false
+
 }
 );
 
