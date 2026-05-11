@@ -11,10 +11,6 @@ addDoc,
 deleteDoc,
 updateDoc,
 doc,
-getDoc,
-getDocs,
-query,
-where,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -26,10 +22,12 @@ let currentTab = "pending";
 let currentTaskId = null;
 let currentAction = null;
 
-/* 🔥 VIEW MODE FIX */
 let isViewMode = false;
 let uid = null;
 let realUid = null;
+
+/* 🔥 QUADRANT FILTER */
+let quadrantFilter = "all";
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth,(user)=>{
@@ -76,7 +74,7 @@ render();
 
 }
 
-/* ================= TODAY FIX ================= */
+/* ================= TODAY ================= */
 function getToday(){
 
 return new Date()
@@ -85,7 +83,7 @@ return new Date()
 
 }
 
-/* ================= SORT DATES ================= */
+/* ================= SORT ================= */
 function sortDates(dates){
 
 return dates.sort((a,b)=>{
@@ -128,13 +126,32 @@ return "normal";
 
 }
 
-/* ================= TAB FIX ================= */
+/* ================= TAB ================= */
 window.switchTab = (tab,e)=>{
 
 currentTab = tab;
 
 document
 .querySelectorAll(".tabs button")
+.forEach(btn=>{
+btn.classList.remove("active");
+});
+
+if(e){
+e.target.classList.add("active");
+}
+
+render();
+
+};
+
+/* ================= QUADRANT FILTER ================= */
+window.setQuadrantFilter = (type,e)=>{
+
+quadrantFilter = type;
+
+document
+.querySelectorAll(".quad-btn")
 .forEach(btn=>{
 btn.classList.remove("active");
 });
@@ -308,8 +325,6 @@ document.getElementById("pendingCount").innerText=pending;
 /* ================= CLEAR COMPLETED ================= */
 window.clearCompletedTasks = async()=>{
 
-if(isViewMode) return;
-
 let doneTasks =
 tasks.filter(t=>t.completed);
 
@@ -347,6 +362,40 @@ let filtered = tasks.filter(t=>
 .includes(search)
 );
 
+/* ================= QUADRANT FILTER ================= */
+
+if(quadrantFilter==="critical"){
+
+filtered = filtered.filter(t=>
+t.important && t.urgent
+);
+
+}
+
+if(quadrantFilter==="important"){
+
+filtered = filtered.filter(t=>
+t.important && !t.urgent
+);
+
+}
+
+if(quadrantFilter==="urgent"){
+
+filtered = filtered.filter(t=>
+!t.important && t.urgent
+);
+
+}
+
+if(quadrantFilter==="normal"){
+
+filtered = filtered.filter(t=>
+!t.important && !t.urgent
+);
+
+}
+
 /* pending */
 if(currentTab==="pending"){
 
@@ -376,7 +425,6 @@ t.completed
 
 }
 
-/* update stats */
 updateStats(filtered);
 
 let grouped={};
@@ -414,7 +462,7 @@ html+=`
 <ol class="task-list">
 `;
 
-/* 🔥 SORT BY QUADRANT */
+/* SORT */
 grouped[date].sort((a,b)=>{
 
 let pa = getPriorityScore(a);
@@ -539,7 +587,6 @@ decodeURIComponent(text);
 modalDate.value=date;
 modalTime.value=time;
 
-/* load existing */
 let task =
 tasks.find(x=>x.id===id);
 
@@ -559,7 +606,6 @@ task.urgent || false;
 
 }
 
-/* delete */
 if(type==="delete"){
 
 modalTitle.innerText=
@@ -583,7 +629,6 @@ modal.classList.remove("active");
 /* ================= CONFIRM ================= */
 window.confirmAction=async()=>{
 
-/* edit */
 if(currentAction==="edit"){
 
 await updateDoc(
@@ -603,7 +648,6 @@ document.getElementById("modalUrgent")?.checked || false
 
 }
 
-/* delete */
 if(currentAction==="delete"){
 
 await deleteDoc(
