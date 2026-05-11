@@ -1,3 +1,23 @@
+/* ================= FIREBASE IMPORTS ================= */
+import { auth, db } from "./firebase.js";
+
+import {
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+collection,
+addDoc,
+deleteDoc,
+updateDoc,
+doc,
+getDoc,
+getDocs,
+query,
+where,
+onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 /* ================= GLOBAL ================= */
 let currentUser = null;
 let tasks = [];
@@ -10,6 +30,51 @@ let currentAction = null;
 let isViewMode = false;
 let uid = null;
 let realUid = null;
+
+/* ================= AUTH ================= */
+onAuthStateChanged(auth,(user)=>{
+
+if(!user){
+location.href="index.html";
+return;
+}
+
+currentUser = user;
+
+realUid = user.uid;
+uid = user.uid;
+
+loadTasks();
+
+});
+
+/* ================= LOAD TASKS ================= */
+function loadTasks(){
+
+onSnapshot(collection(db,"tasks"),(snap)=>{
+
+tasks = [];
+
+snap.forEach(d=>{
+
+const t = d.data();
+
+if(t.uid === uid || t.user === uid){
+
+tasks.push({
+id:d.id,
+...t
+});
+
+}
+
+});
+
+render();
+
+});
+
+}
 
 /* ================= TODAY FIX ================= */
 function getToday(){
@@ -238,27 +303,6 @@ if(document.getElementById("pendingCount")){
 document.getElementById("pendingCount").innerText=pending;
 }
 
-/* productivity */
-let total = completed + pending;
-
-let percent = total
-? Math.round((completed/total)*100)
-: 0;
-
-if(document.getElementById("progressFill")){
-
-document.getElementById("progressFill").style.width =
-percent + "%";
-
-}
-
-if(document.getElementById("progressText")){
-
-document.getElementById("progressText").innerText =
-percent + "%";
-
-}
-
 }
 
 /* ================= CLEAR COMPLETED ================= */
@@ -418,21 +462,11 @@ t.time && t.time!=="00:00"
 ""
 }
 
-${
-t.fromQuest
-?
-`<small style="color:#00cfff;">📘 Quest</small>`
-:
-""
-}
-
 </div>
 
 </div>
 
 <div class="task-actions">
-
-${!isViewMode ? `
 
 <button onclick="toggle('${t.id}',${t.completed})">
 ✔
@@ -451,8 +485,6 @@ ${!isViewMode ? `
 <button onclick="openModal('delete','${t.id}')">
 ❌
 </button>
-
-` : ""}
 
 </div>
 
@@ -473,10 +505,20 @@ html || "<p>No tasks found.</p>";
 
 }
 
+/* ================= TOGGLE ================= */
+window.toggle = async(id,c)=>{
+
+await updateDoc(
+doc(db,"tasks",id),
+{
+completed:!c
+}
+);
+
+};
+
 /* ================= MODAL ================= */
 window.openModal=(type,id,text="",date="",time="")=>{
-
-if(isViewMode) return;
 
 currentTaskId=id;
 currentAction=type;
@@ -541,8 +583,6 @@ modal.classList.remove("active");
 /* ================= CONFIRM ================= */
 window.confirmAction=async()=>{
 
-if(isViewMode) return;
-
 /* edit */
 if(currentAction==="edit"){
 
@@ -575,3 +615,9 @@ doc(db,"tasks",currentTaskId)
 closeModal();
 
 };
+
+/* ================= SEARCH ================= */
+searchInput.addEventListener(
+"input",
+render
+);
