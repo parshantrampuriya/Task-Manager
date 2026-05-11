@@ -11,6 +11,58 @@ let isViewMode = false;
 let uid = null;
 let realUid = null;
 
+/* ================= TODAY FIX ================= */
+function getToday(){
+
+return new Date()
+.toISOString()
+.split("T")[0];
+
+}
+
+/* ================= SORT DATES ================= */
+function sortDates(dates){
+
+return dates.sort((a,b)=>{
+
+if(currentTab==="pending"){
+return new Date(a)-new Date(b);
+}else{
+return new Date(b)-new Date(a);
+}
+
+});
+
+}
+
+/* ================= ESCAPE ================= */
+function escapeText(t){
+
+return encodeURIComponent(t || "");
+
+}
+
+/* ================= STATUS ================= */
+function getStatus(t){
+
+if(!t.time || t.time==="00:00")
+return "normal";
+
+let now = new Date();
+
+let taskTime =
+new Date(`${t.date}T${t.time}`);
+
+let diff = taskTime-now;
+
+if(diff<0) return "overdue";
+if(diff<30*60000) return "urgent";
+if(diff<60*60000) return "soon";
+
+return "normal";
+
+}
+
 /* ================= TAB FIX ================= */
 window.switchTab = (tab,e)=>{
 
@@ -476,6 +528,13 @@ modalDate.style.display="none";
 modalTime.style.display="none";
 
 }
+
+};
+
+/* ================= CLOSE MODAL ================= */
+window.closeModal=()=>{
+
+modal.classList.remove("active");
 
 };
 
