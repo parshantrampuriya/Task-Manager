@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Tasks</title>
 
 <link rel="stylesheet" href="css/tasks.css">
@@ -12,7 +14,7 @@
 
 <body>
 
-<!-- ================= UNIVERSAL SIDEBAR ================= -->
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
@@ -40,24 +42,69 @@
 <!-- ================= MAIN ================= -->
 <div class="main">
 
-<!-- NAVBAR -->
+<!-- ================= NAVBAR ================= -->
 <div class="navbar">
 
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-<h2 id="username">📋 Tasks</h2>
+<h2 id="username">📋 Tasks Dashboard</h2>
 
 </div>
 
+<!-- ================= CONTAINER ================= -->
 <div class="container">
 
-<!-- SEARCH -->
-<input id="searchInput" placeholder="🔍 Search tasks...">
+<!-- ================= PRODUCTIVITY STATS ================= -->
+<div class="stats-grid">
 
-<!-- TABS -->
+<div class="stat-card critical">
+<h3 id="criticalCount">0</h3>
+<p>🔥 Critical</p>
+</div>
+
+<div class="stat-card important">
+<h3 id="importantCount">0</h3>
+<p>⭐ Important</p>
+</div>
+
+<div class="stat-card completed">
+<h3 id="completedCount">0</h3>
+<p>✅ Completed</p>
+</div>
+
+<div class="stat-card pending">
+<h3 id="pendingCount">0</h3>
+<p>📌 Pending</p>
+</div>
+
+</div>
+
+<!-- ================= PRODUCTIVITY BAR ================= -->
+<div class="productivity-box">
+
+<div class="productivity-head">
+
+<span>📈 Productivity Score</span>
+
+<span id="productivityText">0%</span>
+
+</div>
+
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+
+</div>
+
+<!-- ================= SEARCH ================= -->
+<input id="searchInput"
+placeholder="🔍 Search tasks...">
+
+<!-- ================= TABS ================= -->
 <div class="tabs">
 
-<button onclick="switchTab('pending',event)">
+<button class="active"
+onclick="switchTab('pending',event)">
 📌 Pending
 </button>
 
@@ -71,20 +118,78 @@
 
 </div>
 
-<!-- ADD TASK -->
+<!-- ================= CLEAR COMPLETED ================= -->
+<div class="top-actions">
+
+<button id="clearCompletedBtn"
+class="clear-btn"
+onclick="clearCompleted()">
+
+🗑 Clear Completed
+
+</button>
+
+</div>
+
+<!-- ================= ADD TASK ================= -->
 <div class="add-task">
 
-<input id="taskInput" placeholder="New task...">
+<input id="taskInput"
+placeholder="New task...">
 
 <input type="date" id="dateInput">
 
 <input type="time" id="timeInput">
 
-<button onclick="addTask()">➕ Add</button>
+<!-- PRIORITY -->
+<div class="priority-box">
+
+<label class="priority-option">
+
+<input type="checkbox" id="importantCheck">
+
+<span>⭐ Important</span>
+
+</label>
+
+<label class="priority-option">
+
+<input type="checkbox" id="urgentCheck">
+
+<span>🔥 Urgent</span>
+
+</label>
 
 </div>
 
-<!-- TASK LIST -->
+<button onclick="addTask()">
+➕ Add
+</button>
+
+</div>
+
+<!-- ================= QUADRANT LEGEND ================= -->
+<div class="quadrant-info">
+
+<div class="quad q1">
+🔥 Important + Urgent
+</div>
+
+<div class="quad q2">
+⭐ Important
+</div>
+
+<div class="quad q3">
+⚡ Urgent
+</div>
+
+<div class="quad q4">
+📦 Low Priority
+</div>
+
+</div>
+
+<!-- ================= TASK LIST ================= -->
 <div id="taskContainer"></div>
 
 </div>
@@ -98,17 +203,37 @@
 
 <h3 id="modalTitle">Edit Task</h3>
 
-<input id="modalInput" placeholder="Task name">
+<input id="modalInput"
+placeholder="Task name">
 
 <input type="date" id="modalDate">
 
 <input type="time" id="modalTime">
 
+<!-- PRIORITY EDIT -->
+<div class="modal-priority">
+
+<label>
+<input type="checkbox" id="modalImportant">
+⭐ Important
+</label>
+
+<label>
+<input type="checkbox" id="modalUrgent">
+🔥 Urgent
+</label>
+
+</div>
+
 <div class="modal-actions">
 
-<button onclick="confirmAction()">💾 Save</button>
+<button onclick="confirmAction()">
+💾 Save
+</button>
 
-<button onclick="closeModal()">❌ Cancel</button>
+<button onclick="closeModal()">
+❌ Cancel
+</button>
 
 </div>
 
@@ -116,6 +241,7 @@
 
 </div>
 
+<!-- ================= SCRIPTS ================= -->
 <script type="module" src="js/tasks.js"></script>
 <script type="module" src="js/menu.js"></script>
 
