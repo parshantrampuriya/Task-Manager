@@ -6,6 +6,11 @@ let currentTab = "pending";
 let currentTaskId = null;
 let currentAction = null;
 
+/* 🔥 IMPORTANT FIX */
+let isViewMode = false;
+let uid = null;
+let realUid = null;
+
 /* ================= ADD TASK ================= */
 window.addTask = async()=>{
 
@@ -21,7 +26,10 @@ document.getElementById("importantInput")?.checked || false;
 const urgent =
 document.getElementById("urgentInput")?.checked || false;
 
-if(!text) return;
+if(!text){
+alert("Enter task");
+return;
+}
 
 await addDoc(collection(db,"tasks"),{
 
@@ -29,8 +37,8 @@ text:text,
 date:date || getToday(),
 time:time || "00:00",
 
-important,
-urgent,
+important:important,
+urgent:urgent,
 
 completed:false,
 user:realUid,
@@ -39,16 +47,22 @@ createdAt:Date.now()
 
 });
 
+/* clear */
 taskInput.value="";
 dateInput.value="";
 timeInput.value="";
 
+if(document.getElementById("importantInput")){
 document.getElementById("importantInput").checked=false;
+}
+
+if(document.getElementById("urgentInput")){
 document.getElementById("urgentInput").checked=false;
+}
 
 };
 
-/* ================= PRIORITY ================= */
+/* ================= PRIORITY SCORE ================= */
 function getPriorityScore(t){
 
 if(t.important && t.urgent) return 1;
@@ -65,27 +79,33 @@ return 4;
 function getPriorityBadge(t){
 
 if(t.important && t.urgent){
+
 return `
 <span class="priority critical">
 🔥 Critical
 </span>
 `;
+
 }
 
 if(t.important){
+
 return `
 <span class="priority important">
 ⭐ Important
 </span>
 `;
+
 }
 
 if(t.urgent){
+
 return `
 <span class="priority urgent-badge">
 ⚡ Urgent
 </span>
 `;
+
 }
 
 return `
@@ -122,17 +142,21 @@ important++;
 
 });
 
-if(document.getElementById("criticalCount"))
+if(document.getElementById("criticalCount")){
 document.getElementById("criticalCount").innerText=critical;
+}
 
-if(document.getElementById("importantCount"))
+if(document.getElementById("importantCount")){
 document.getElementById("importantCount").innerText=important;
+}
 
-if(document.getElementById("completedCount"))
+if(document.getElementById("completedCount")){
 document.getElementById("completedCount").innerText=completed;
+}
 
-if(document.getElementById("pendingCount"))
+if(document.getElementById("pendingCount")){
 document.getElementById("pendingCount").innerText=pending;
+}
 
 /* productivity */
 let total = completed + pending;
@@ -142,13 +166,17 @@ let percent = total
 : 0;
 
 if(document.getElementById("progressFill")){
+
 document.getElementById("progressFill").style.width =
 percent + "%";
+
 }
 
 if(document.getElementById("progressText")){
+
 document.getElementById("progressText").innerText =
 percent + "%";
+
 }
 
 }
@@ -195,35 +223,45 @@ let filtered = tasks.filter(t=>
 .includes(search)
 );
 
+/* pending */
 if(currentTab==="pending"){
+
 filtered=filtered.filter(t=>
 !t.completed &&
 t.date>=today
 );
+
 }
 
+/* due */
 if(currentTab==="due"){
+
 filtered=filtered.filter(t=>
 !t.completed &&
 t.date<today
 );
+
 }
 
+/* completed */
 if(currentTab==="completed"){
+
 filtered=filtered.filter(t=>
 t.completed
 );
+
 }
 
-/* 🔥 UPDATE STATS */
+/* update stats */
 updateStats(filtered);
 
 let grouped={};
 
 filtered.forEach(t=>{
 
-if(!grouped[t.date])
+if(!grouped[t.date]){
 grouped[t.date]=[];
+}
 
 grouped[t.date].push(t);
 
@@ -252,7 +290,7 @@ html+=`
 <ol class="task-list">
 `;
 
-/* 🔥 QUADRANT SORT */
+/* 🔥 SORT BY QUADRANT */
 grouped[date].sort((a,b)=>{
 
 let pa = getPriorityScore(a);
@@ -379,22 +417,27 @@ decodeURIComponent(text);
 modalDate.value=date;
 modalTime.value=time;
 
-/* load task */
+/* load existing */
 let task =
 tasks.find(x=>x.id===id);
 
 if(task){
 
+if(document.getElementById("modalImportant")){
 document.getElementById("modalImportant").checked =
 task.important || false;
+}
 
+if(document.getElementById("modalUrgent")){
 document.getElementById("modalUrgent").checked =
 task.urgent || false;
-
 }
 
 }
 
+}
+
+/* delete */
 if(type==="delete"){
 
 modalTitle.innerText=
@@ -413,6 +456,7 @@ window.confirmAction=async()=>{
 
 if(isViewMode) return;
 
+/* edit */
 if(currentAction==="edit"){
 
 await updateDoc(
@@ -423,15 +467,16 @@ date:modalDate.value,
 time:modalTime.value || "00:00",
 
 important:
-document.getElementById("modalImportant").checked,
+document.getElementById("modalImportant")?.checked || false,
 
 urgent:
-document.getElementById("modalUrgent").checked
+document.getElementById("modalUrgent")?.checked || false
 }
 );
 
 }
 
+/* delete */
 if(currentAction==="delete"){
 
 await deleteDoc(
