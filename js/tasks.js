@@ -109,7 +109,7 @@ return encodeURIComponent(t || "");
 function getStatus(t){
 
 if(!t.time || t.time==="00:00")
-return "normal";
+return "";
 
 let now = new Date();
 
@@ -119,10 +119,10 @@ new Date(`${t.date}T${t.time}`);
 let diff = taskTime-now;
 
 if(diff<0) return "overdue";
-if(diff<30*60000) return "urgent";
+if(diff<30*60000) return "urgent-status";
 if(diff<60*60000) return "soon";
 
-return "normal";
+return "";
 
 }
 
@@ -174,10 +174,10 @@ let date = dateInput.value;
 let time = timeInput.value;
 
 const important =
-document.getElementById("importantInput")?.checked || false;
+document.getElementById("importantCheck")?.checked || false;
 
 const urgent =
-document.getElementById("urgentInput")?.checked || false;
+document.getElementById("urgentCheck")?.checked || false;
 
 if(!text){
 alert("Enter task");
@@ -207,13 +207,8 @@ taskInput.value="";
 dateInput.value="";
 timeInput.value="";
 
-if(document.getElementById("importantInput")){
-document.getElementById("importantInput").checked=false;
-}
-
-if(document.getElementById("urgentInput")){
-document.getElementById("urgentInput").checked=false;
-}
+document.getElementById("importantCheck").checked=false;
+document.getElementById("urgentCheck").checked=false;
 
 }catch(err){
 
@@ -237,13 +232,32 @@ return 4;
 
 }
 
+/* ================= QUADRANT CLASS ================= */
+function getQuadrantClass(t){
+
+if(t.important && t.urgent){
+return "q1";
+}
+
+if(t.important && !t.urgent){
+return "q2";
+}
+
+if(!t.important && t.urgent){
+return "q3";
+}
+
+return "q4";
+
+}
+
 /* ================= PRIORITY BADGE ================= */
 function getPriorityBadge(t){
 
 if(t.important && t.urgent){
 
 return `
-<span class="priority critical">
+<span class="badge urgent">
 🔥 Critical
 </span>
 `;
@@ -253,7 +267,7 @@ return `
 if(t.important){
 
 return `
-<span class="priority important">
+<span class="badge important">
 ⭐ Important
 </span>
 `;
@@ -263,7 +277,7 @@ return `
 if(t.urgent){
 
 return `
-<span class="priority urgent-badge">
+<span class="badge quest">
 ⚡ Urgent
 </span>
 `;
@@ -271,7 +285,7 @@ return `
 }
 
 return `
-<span class="priority normal-badge">
+<span class="badge">
 🧩 Normal
 </span>
 `;
@@ -285,6 +299,10 @@ let critical=0;
 let important=0;
 let completed=0;
 let pending=0;
+
+/* 🔥 PRODUCTIVITY */
+let earnedPoints = 0;
+let totalPoints = 0;
 
 filtered.forEach(t=>{
 
@@ -300,6 +318,32 @@ critical++;
 
 if(t.important){
 important++;
+}
+
+/* points */
+
+let points = 1;
+
+if(t.important && t.urgent){
+
+points = 4;
+
+}else if(t.important){
+
+points = 3;
+
+}else if(t.urgent){
+
+points = 2;
+
+}
+
+totalPoints += points;
+
+if(t.completed){
+
+earnedPoints += points;
+
 }
 
 });
@@ -320,10 +364,32 @@ if(document.getElementById("pendingCount")){
 document.getElementById("pendingCount").innerText=pending;
 }
 
+/* productivity percent */
+
+let percent = totalPoints
+? Math.round((earnedPoints / totalPoints) * 100)
+: 0;
+
+/* update ui */
+
+if(document.getElementById("progressFill")){
+
+document.getElementById("progressFill").style.width =
+percent + "%";
+
+}
+
+if(document.getElementById("productivityText")){
+
+document.getElementById("productivityText").innerText =
+percent + "%";
+
+}
+
 }
 
 /* ================= CLEAR COMPLETED ================= */
-window.clearCompletedTasks = async()=>{
+window.clearCompleted = async()=>{
 
 let doneTasks =
 tasks.filter(t=>t.completed);
@@ -481,36 +547,27 @@ grouped[date].forEach(t=>{
 
 let status=getStatus(t);
 
+let quadClass =
+getQuadrantClass(t);
+
 html+=`
-<li class="task-item ${t.completed?'done':''} ${status}">
+<li class="task-item ${quadClass} ${t.completed?'done':''} ${status}">
 
-<div style="
-display:flex;
-flex-direction:column;
-gap:6px;
-flex:1;
-">
+<div class="task-left">
 
-<div style="
-display:flex;
-align-items:center;
-gap:10px;
-flex-wrap:wrap;
-">
-
-<span>${t.text}</span>
+<div class="task-title">
+${t.text}
+</div>
 
 ${getPriorityBadge(t)}
 
 ${
 t.time && t.time!=="00:00"
 ?
-`<small>🕒 ${t.time}</small>`
+`<div class="task-time">🕒 ${t.time}</div>`
 :
 ""
 }
-
-</div>
 
 </div>
 
@@ -592,15 +649,11 @@ tasks.find(x=>x.id===id);
 
 if(task){
 
-if(document.getElementById("modalImportant")){
 document.getElementById("modalImportant").checked =
 task.important || false;
-}
 
-if(document.getElementById("modalUrgent")){
 document.getElementById("modalUrgent").checked =
 task.urgent || false;
-}
 
 }
 
