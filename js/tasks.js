@@ -6,10 +6,29 @@ let currentTab = "pending";
 let currentTaskId = null;
 let currentAction = null;
 
-/* 🔥 IMPORTANT FIX */
+/* 🔥 VIEW MODE FIX */
 let isViewMode = false;
 let uid = null;
 let realUid = null;
+
+/* ================= TAB FIX ================= */
+window.switchTab = (tab,e)=>{
+
+currentTab = tab;
+
+document
+.querySelectorAll(".tabs button")
+.forEach(btn=>{
+btn.classList.remove("active");
+});
+
+if(e){
+e.target.classList.add("active");
+}
+
+render();
+
+};
 
 /* ================= ADD TASK ================= */
 window.addTask = async()=>{
@@ -30,6 +49,8 @@ if(!text){
 alert("Enter task");
 return;
 }
+
+try{
 
 await addDoc(collection(db,"tasks"),{
 
@@ -58,6 +79,13 @@ document.getElementById("importantInput").checked=false;
 
 if(document.getElementById("urgentInput")){
 document.getElementById("urgentInput").checked=false;
+}
+
+}catch(err){
+
+console.log(err);
+alert("Error adding task");
+
 }
 
 };
