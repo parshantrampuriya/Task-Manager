@@ -26,7 +26,6 @@ let isViewMode = false;
 let uid = null;
 let realUid = null;
 
-/* 🔥 QUADRANT FILTER */
 let quadrantFilter = "all";
 
 /* ================= AUTH ================= */
@@ -118,9 +117,13 @@ new Date(`${t.date}T${t.time}`);
 
 let diff = taskTime-now;
 
-if(diff<0) return "overdue";
-if(diff<30*60000) return "urgent-status";
-if(diff<60*60000) return "soon";
+if(diff < 0) return "overdue";
+
+if(diff < 30*60000)
+return "urgent-status";
+
+if(diff < 60*60000)
+return "soon";
 
 return "";
 
@@ -169,19 +172,43 @@ window.addTask = async()=>{
 
 if(isViewMode) return;
 
-let text = taskInput.value.trim();
-let date = dateInput.value;
-let time = timeInput.value;
+/* SAFE INPUTS */
+
+const taskEl =
+document.getElementById("taskInput");
+
+const dateEl =
+document.getElementById("dateInput");
+
+const timeEl =
+document.getElementById("timeInput");
+
+const importantEl =
+document.getElementById("importantCheck");
+
+const urgentEl =
+document.getElementById("urgentCheck");
+
+let text =
+taskEl?.value.trim() || "";
+
+let date =
+dateEl?.value || "";
+
+let time =
+timeEl?.value || "";
 
 const important =
-document.getElementById("importantCheck")?.checked || false;
+importantEl?.checked || false;
 
 const urgent =
-document.getElementById("urgentCheck")?.checked || false;
+urgentEl?.checked || false;
 
 if(!text){
+
 alert("Enter task");
 return;
+
 }
 
 try{
@@ -202,18 +229,28 @@ createdAt:Date.now()
 
 });
 
-/* clear */
-taskInput.value="";
-dateInput.value="";
-timeInput.value="";
+/* CLEAR */
 
-document.getElementById("importantCheck").checked=false;
-document.getElementById("urgentCheck").checked=false;
+if(taskEl) taskEl.value="";
+if(dateEl) dateEl.value="";
+if(timeEl) timeEl.value="";
+
+if(importantEl){
+importantEl.checked=false;
+}
+
+if(urgentEl){
+urgentEl.checked=false;
+}
 
 }catch(err){
 
 console.log(err);
-alert("Error adding task");
+
+alert(
+"Task add failed:\n" +
+err.message
+);
 
 }
 
@@ -293,26 +330,23 @@ return `
 }
 
 /* ================= UPDATE STATS ================= */
-function updateStats(filtered){
+function updateStats(todayTasks){
 
 let critical=0;
 let important=0;
 let completed=0;
 let pending=0;
 
-/* 🔥 PRODUCTIVITY */
 let earnedPoints = 0;
 let totalPoints = 0;
 
-filtered.forEach(t=>{
+todayTasks.forEach(t=>{
 
 if(t.completed){
 completed++;
 }else{
 pending++;
 }
-
-/* stats */
 
 if(t.important && t.urgent){
 critical++;
@@ -322,7 +356,7 @@ if(t.important && !t.urgent){
 important++;
 }
 
-/* productivity points */
+/* PRODUCTIVITY WEIGHT */
 
 let points = 1;
 
@@ -350,42 +384,64 @@ earnedPoints += points;
 
 });
 
-/* update cards */
+/* UPDATE CARDS */
 
-if(document.getElementById("criticalCount")){
-document.getElementById("criticalCount").innerText=critical;
+const criticalEl =
+document.getElementById("criticalCount");
+
+const importantEl =
+document.getElementById("importantCount");
+
+const completedEl =
+document.getElementById("completedCount");
+
+const pendingEl =
+document.getElementById("pendingCount");
+
+if(criticalEl){
+criticalEl.innerText = critical;
 }
 
-if(document.getElementById("importantCount")){
-document.getElementById("importantCount").innerText=important;
+if(importantEl){
+importantEl.innerText = important;
 }
 
-if(document.getElementById("completedCount")){
-document.getElementById("completedCount").innerText=completed;
+if(completedEl){
+completedEl.innerText = completed;
 }
 
-if(document.getElementById("pendingCount")){
-document.getElementById("pendingCount").innerText=pending;
+if(pendingEl){
+pendingEl.innerText = pending;
 }
 
-/* 🔥 TODAY PRODUCTIVITY */
+/* PRODUCTIVITY */
 
 let percent = totalPoints
-? Math.round((earnedPoints / totalPoints) * 100)
+? Math.round(
+(earnedPoints / totalPoints) * 100
+)
 : 0;
 
-/* update ui */
+/* BAR */
 
-if(document.getElementById("progressFill")){
+const fill =
+document.getElementById("progressFill");
 
-document.getElementById("progressFill").style.width =
+if(fill){
+
+fill.style.width =
 percent + "%";
 
 }
 
-if(document.getElementById("productivityText")){
+/* TEXT */
 
-document.getElementById("productivityText").innerText =
+const productivityText =
+document.getElementById("productivityText");
+
+if(productivityText){
+
+productivityText.innerText =
 percent + "%";
 
 }
@@ -399,12 +455,13 @@ let doneTasks =
 tasks.filter(t=>t.completed);
 
 if(doneTasks.length===0){
+
 alert("No completed tasks");
 return;
+
 }
 
-let ok =
-confirm(
+let ok = confirm(
 `Delete ${doneTasks.length} completed tasks?`
 );
 
@@ -412,7 +469,9 @@ if(!ok) return;
 
 for(const t of doneTasks){
 
-await deleteDoc(doc(db,"tasks",t.id));
+await deleteDoc(
+doc(db,"tasks",t.id)
+);
 
 }
 
@@ -421,18 +480,21 @@ await deleteDoc(doc(db,"tasks",t.id));
 /* ================= RENDER ================= */
 function render(){
 
-let today=getToday();
+let today = getToday();
+
+const searchEl =
+document.getElementById("searchInput");
 
 let search =
-searchInput.value.toLowerCase();
+searchEl?.value.toLowerCase() || "";
 
-/* 🔥 TODAY TASKS FOR PRODUCTIVITY */
+/* TODAY TASKS */
 
 const todayTasks = tasks.filter(t=>
 t.date === today
 );
 
-/* search filter */
+/* FILTERED */
 
 let filtered = tasks.filter(t=>
 (t.text || "")
@@ -440,7 +502,7 @@ let filtered = tasks.filter(t=>
 .includes(search)
 );
 
-/* ================= QUADRANT FILTER ================= */
+/* QUADRANT FILTER */
 
 if(quadrantFilter==="critical"){
 
@@ -474,47 +536,41 @@ filtered = filtered.filter(t=>
 
 }
 
-/* ================= TABS ================= */
-
-/* pending */
+/* TABS */
 
 if(currentTab==="pending"){
 
-filtered=filtered.filter(t=>
+filtered = filtered.filter(t=>
 !t.completed &&
-t.date>=today
+t.date >= today
 );
 
 }
-
-/* due */
 
 if(currentTab==="due"){
 
-filtered=filtered.filter(t=>
+filtered = filtered.filter(t=>
 !t.completed &&
-t.date<today
+t.date < today
 );
 
 }
 
-/* completed */
-
 if(currentTab==="completed"){
 
-filtered=filtered.filter(t=>
+filtered = filtered.filter(t=>
 t.completed
 );
 
 }
 
-/* 🔥 PRODUCTIVITY USES ONLY TODAY TASKS */
+/* UPDATE STATS */
 
 updateStats(todayTasks);
 
-/* ================= GROUP ================= */
+/* GROUP */
 
-let grouped={};
+let grouped = {};
 
 filtered.forEach(t=>{
 
@@ -526,7 +582,9 @@ grouped[t.date].push(t);
 
 });
 
-let html="";
+/* HTML */
+
+let html = "";
 
 let dates =
 sortDates(Object.keys(grouped));
@@ -539,7 +597,7 @@ new Date(date)
 weekday:"long"
 });
 
-html+=`
+html += `
 <div class="date-group">
 
 <h3>
@@ -548,8 +606,6 @@ html+=`
 
 <ol class="task-list">
 `;
-
-/* SORT */
 
 grouped[date].sort((a,b)=>{
 
@@ -567,12 +623,13 @@ return (a.time || "")
 
 grouped[date].forEach(t=>{
 
-let status=getStatus(t);
+let status =
+getStatus(t);
 
 let quadClass =
 getQuadrantClass(t);
 
-html+=`
+html += `
 <li class="task-item ${quadClass} ${t.completed?'done':''} ${status}">
 
 <div class="task-left">
@@ -620,15 +677,24 @@ t.time && t.time!=="00:00"
 
 });
 
-html+=`
+html += `
 </ol>
 </div>
 `;
 
 });
 
-taskContainer.innerHTML =
+/* SHOW */
+
+const container =
+document.getElementById("taskContainer");
+
+if(container){
+
+container.innerHTML =
 html || "<p>No tasks found.</p>";
+
+}
 
 }
 
@@ -683,7 +749,7 @@ task.urgent || false;
 
 if(type==="delete"){
 
-modalTitle.innerText=
+modalTitle.innerText =
 "Delete this task?";
 
 modalInput.style.display="none";
@@ -736,7 +802,15 @@ closeModal();
 };
 
 /* ================= SEARCH ================= */
-searchInput.addEventListener(
+
+const searchInputEl =
+document.getElementById("searchInput");
+
+if(searchInputEl){
+
+searchInputEl.addEventListener(
 "input",
 render
 );
+
+}
