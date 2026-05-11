@@ -3,7 +3,8 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>Tasks</title>
 
@@ -45,75 +46,115 @@
 <!-- ================= NAVBAR ================= -->
 <div class="navbar">
 
-<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<button class="menu-btn"
+onclick="toggleSidebar()">
 
-<h2 id="username">📋 Tasks Dashboard</h2>
+☰
+
+</button>
+
+<h2 id="username">
+📋 Tasks Dashboard
+</h2>
 
 </div>
 
 <!-- ================= CONTAINER ================= -->
 <div class="container">
 
-<!-- ================= PRODUCTIVITY STATS ================= -->
+<!-- ================= STATS ================= -->
 <div class="stats-grid">
 
 <div class="stat-card critical">
+
 <h3 id="criticalCount">0</h3>
+
 <p>🔥 Critical</p>
+
 </div>
 
 <div class="stat-card important">
+
 <h3 id="importantCount">0</h3>
+
 <p>⭐ Important</p>
+
 </div>
 
 <div class="stat-card completed">
+
 <h3 id="completedCount">0</h3>
+
 <p>✅ Completed</p>
+
 </div>
 
 <div class="stat-card pending">
+
 <h3 id="pendingCount">0</h3>
+
 <p>📌 Pending</p>
-</div>
 
 </div>
 
-<!-- ================= PRODUCTIVITY BAR ================= -->
+</div>
+
+<!-- ================= PRODUCTIVITY ================= -->
 <div class="productivity-box">
 
 <div class="productivity-head">
 
-<span>📈 Productivity Score</span>
+<span>
+📈 Productivity Score
+</span>
 
-<span id="progressText">0%</span>
+<!-- 🔥 FIXED ID -->
+<span id="productivityText">
+0%
+</span>
 
 </div>
 
 <div class="progress-bar">
-<div class="progress-fill" id="progressFill"></div>
+
+<div
+class="progress-fill"
+id="progressFill">
+
+</div>
+
 </div>
 
 </div>
 
 <!-- ================= SEARCH ================= -->
-<input id="searchInput"
+<input
+id="searchInput"
 placeholder="🔍 Search tasks...">
 
 <!-- ================= TABS ================= -->
 <div class="tabs">
 
-<button class="active"
+<button
+class="active"
 onclick="switchTab('pending',event)">
+
 📌 Pending
+
 </button>
 
-<button onclick="switchTab('due',event)">
+<button
+onclick="switchTab('due',event)">
+
 🔥 Due
+
 </button>
 
-<button onclick="switchTab('completed',event)">
+<button
+onclick="switchTab('completed',event)">
+
 ✅ Completed
+
 </button>
 
 </div>
@@ -123,7 +164,7 @@ onclick="switchTab('pending',event)">
 
 <button
 class="clear-btn"
-onclick="clearCompletedTasks()">
+onclick="clearCompleted()">
 
 🗑 Clear Completed
 
@@ -134,38 +175,52 @@ onclick="clearCompletedTasks()">
 <!-- ================= ADD TASK ================= -->
 <div class="add-task">
 
-<input id="taskInput"
+<input
+id="taskInput"
 placeholder="New task...">
 
-<input type="date" id="dateInput">
+<input
+type="date"
+id="dateInput">
 
-<input type="time" id="timeInput">
+<input
+type="time"
+id="timeInput">
 
 <!-- ================= PRIORITY ================= -->
 <div class="priority-box">
 
 <label class="priority-option">
 
-<input type="checkbox"
-id="importantInput">
+<!-- 🔥 FIXED IDS -->
+<input
+type="checkbox"
+id="importantCheck">
 
-<span>⭐ Important</span>
+<span>
+⭐ Important
+</span>
 
 </label>
 
 <label class="priority-option">
 
-<input type="checkbox"
-id="urgentInput">
+<input
+type="checkbox"
+id="urgentCheck">
 
-<span>🔥 Urgent</span>
+<span>
+🔥 Urgent
+</span>
 
 </label>
 
 </div>
 
 <button onclick="addTask()">
+
 ➕ Add
+
 </button>
 
 </div>
@@ -215,8 +270,10 @@ onclick="setQuadrantFilter('normal',event)">
 
 </div>
 
-<!-- ================= TASK LIST ================= -->
-<div id="taskContainer"></div>
+<!-- ================= TASKS ================= -->
+<div id="taskContainer">
+
+</div>
 
 </div>
 
@@ -227,21 +284,31 @@ onclick="setQuadrantFilter('normal',event)">
 
 <div class="modal-box">
 
-<h3 id="modalTitle">Edit Task</h3>
+<h3 id="modalTitle">
 
-<input id="modalInput"
+Edit Task
+
+</h3>
+
+<input
+id="modalInput"
 placeholder="Task name">
 
-<input type="date" id="modalDate">
+<input
+type="date"
+id="modalDate">
 
-<input type="time" id="modalTime">
+<input
+type="time"
+id="modalTime">
 
-<!-- ================= EDIT PRIORITY ================= -->
+<!-- ================= MODAL PRIORITY ================= -->
 <div class="modal-priority">
 
 <label>
 
-<input type="checkbox"
+<input
+type="checkbox"
 id="modalImportant">
 
 ⭐ Important
@@ -250,7 +317,8 @@ id="modalImportant">
 
 <label>
 
-<input type="checkbox"
+<input
+type="checkbox"
 id="modalUrgent">
 
 🔥 Urgent
@@ -262,11 +330,15 @@ id="modalUrgent">
 <div class="modal-actions">
 
 <button onclick="confirmAction()">
+
 💾 Save
+
 </button>
 
 <button onclick="closeModal()">
+
 ❌ Cancel
+
 </button>
 
 </div>
@@ -276,8 +348,17 @@ id="modalUrgent">
 </div>
 
 <!-- ================= SCRIPTS ================= -->
-<script type="module" src="js/menu.js"></script>
-<script type="module" src="js/tasks.js"></script>
+<script
+type="module"
+src="js/menu.js">
+
+</script>
+
+<script
+type="module"
+src="js/tasks.js">
+
+</script>
 
 </body>
 </html>
