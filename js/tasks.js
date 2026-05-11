@@ -193,6 +193,8 @@ window.addTask = async()=>{
 
 if(isViewMode) return;
 
+/* INPUTS */
+
 const taskEl =
 document.getElementById("taskInput");
 
@@ -202,7 +204,7 @@ document.getElementById("dateInput");
 const timeEl =
 document.getElementById("timeInput");
 
-/* 🔥 FIXED IDS */
+/* 🔥 CORRECT IDS */
 const importantEl =
 document.getElementById("importantCheck");
 
@@ -211,7 +213,7 @@ document.getElementById("urgentCheck");
 
 if(!taskEl){
 
-alert("taskInput not found");
+alert("Task input not found");
 return;
 
 }
@@ -225,32 +227,12 @@ dateEl?.value || getToday();
 let time =
 timeEl?.value || "00:00";
 
-/* 🔥 FIX */
-let important = false;
-let urgent = false;
+/* 🔥 IMPORTANT FIX */
+const important =
+importantEl ? importantEl.checked : false;
 
-if(importantEl){
-
-important = importantEl.checked;
-
-}
-
-if(urgentEl){
-
-urgent = urgentEl.checked;
-
-}
-
-/* DEBUG */
-console.log(
-"IMPORTANT:",
-important
-);
-
-console.log(
-"URGENT:",
-urgent
-);
+const urgent =
+urgentEl ? urgentEl.checked : false;
 
 if(!text){
 
@@ -284,57 +266,22 @@ createdAt:Date.now()
 
 /* CLEAR */
 
-taskEl.value="";
+taskEl.value = "";
 
 if(dateEl){
-dateEl.value="";
+dateEl.value = "";
 }
 
 if(timeEl){
-timeEl.value="";
+timeEl.value = "";
 }
 
 if(importantEl){
-importantEl.checked=false;
+importantEl.checked = false;
 }
 
 if(urgentEl){
-urgentEl.checked=false;
-}
-
-/* 🔥 FORCE RENDER */
-render();
-
-}catch(err){
-
-console.log(err);
-
-alert(
-"Task add failed:\n" +
-err.message
-);
-
-}
-
-};
-/* CLEAR */
-
-taskEl.value="";
-
-if(dateEl){
-dateEl.value="";
-}
-
-if(timeEl){
-timeEl.value="";
-}
-
-if(importantEl){
-importantEl.checked=false;
-}
-
-if(urgentEl){
-urgentEl.checked=false;
+urgentEl.checked = false;
 }
 
 }catch(err){
@@ -466,6 +413,8 @@ t.important === true;
 const isUrgent =
 t.urgent === true;
 
+/* COUNTS */
+
 if(t.completed){
 
 completed++;
@@ -475,8 +424,6 @@ completed++;
 pending++;
 
 }
-
-/* COUNTS */
 
 if(isImportant && isUrgent){
 
@@ -518,7 +465,7 @@ earnedPoints += points;
 
 });
 
-/* UPDATE UI */
+/* UPDATE CARDS */
 
 const criticalEl =
 document.getElementById("criticalCount");
@@ -548,7 +495,7 @@ if(pendingEl){
 pendingEl.innerText = pending;
 }
 
-/* PRODUCTIVITY */
+/* 🔥 PRODUCTIVITY FIX */
 
 let percent = 0;
 
@@ -572,7 +519,7 @@ percent + "%";
 
 }
 
-/* TEXT */
+/* 🔥 FIXED ID */
 
 const productivityText =
 document.getElementById("productivityText");
@@ -626,7 +573,7 @@ document.getElementById("searchInput");
 let search =
 searchEl?.value.toLowerCase() || "";
 
-/* TODAY TASKS */
+/* 🔥 TODAY TASKS */
 
 const todayTasks = tasks.filter(t=>
 t.date === today
@@ -706,7 +653,7 @@ t.completed
 
 }
 
-/* UPDATE STATS */
+/* 🔥 UPDATE STATS */
 
 updateStats(todayTasks);
 
@@ -792,7 +739,9 @@ ${getPriorityBadge(t)}
 ${
 t.time && t.time!=="00:00"
 ?
-`<div class="task-time">🕒 ${t.time}</div>`
+`<div class="task-time">
+🕒 ${t.time}
+</div>`
 :
 ""
 }
@@ -895,13 +844,17 @@ const mu =
 document.getElementById("modalUrgent");
 
 if(mi){
+
 mi.checked =
 task.important || false;
+
 }
 
 if(mu){
+
 mu.checked =
 task.urgent || false;
+
 }
 
 }
