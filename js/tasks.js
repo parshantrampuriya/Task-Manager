@@ -193,8 +193,6 @@ window.addTask = async()=>{
 
 if(isViewMode) return;
 
-/* SAFE INPUTS */
-
 const taskEl =
 document.getElementById("taskInput");
 
@@ -204,6 +202,7 @@ document.getElementById("dateInput");
 const timeEl =
 document.getElementById("timeInput");
 
+/* 🔥 FIXED IDS */
 const importantEl =
 document.getElementById("importantCheck");
 
@@ -221,16 +220,37 @@ let text =
 taskEl.value.trim();
 
 let date =
-dateEl?.value || "";
+dateEl?.value || getToday();
 
 let time =
-timeEl?.value || "";
+timeEl?.value || "00:00";
 
-const important =
-importantEl?.checked || false;
+/* 🔥 FIX */
+let important = false;
+let urgent = false;
 
-const urgent =
-urgentEl?.checked || false;
+if(importantEl){
+
+important = importantEl.checked;
+
+}
+
+if(urgentEl){
+
+urgent = urgentEl.checked;
+
+}
+
+/* DEBUG */
+console.log(
+"IMPORTANT:",
+important
+);
+
+console.log(
+"URGENT:",
+urgent
+);
 
 if(!text){
 
@@ -245,13 +265,13 @@ await addDoc(collection(db,"tasks"),{
 
 text:text,
 
-date:date || getToday(),
+date:date,
 
-time:time || "00:00",
+time:time,
 
-important:Boolean(important),
+important:important,
 
-urgent:Boolean(urgent),
+urgent:urgent,
 
 completed:false,
 
@@ -262,6 +282,41 @@ createdAt:Date.now()
 
 });
 
+/* CLEAR */
+
+taskEl.value="";
+
+if(dateEl){
+dateEl.value="";
+}
+
+if(timeEl){
+timeEl.value="";
+}
+
+if(importantEl){
+importantEl.checked=false;
+}
+
+if(urgentEl){
+urgentEl.checked=false;
+}
+
+/* 🔥 FORCE RENDER */
+render();
+
+}catch(err){
+
+console.log(err);
+
+alert(
+"Task add failed:\n" +
+err.message
+);
+
+}
+
+};
 /* CLEAR */
 
 taskEl.value="";
