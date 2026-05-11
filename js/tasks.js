@@ -312,15 +312,17 @@ completed++;
 pending++;
 }
 
+/* stats */
+
 if(t.important && t.urgent){
 critical++;
 }
 
-if(t.important){
+if(t.important && !t.urgent){
 important++;
 }
 
-/* points */
+/* productivity points */
 
 let points = 1;
 
@@ -348,6 +350,8 @@ earnedPoints += points;
 
 });
 
+/* update cards */
+
 if(document.getElementById("criticalCount")){
 document.getElementById("criticalCount").innerText=critical;
 }
@@ -364,7 +368,7 @@ if(document.getElementById("pendingCount")){
 document.getElementById("pendingCount").innerText=pending;
 }
 
-/* productivity percent */
+/* 🔥 TODAY PRODUCTIVITY */
 
 let percent = totalPoints
 ? Math.round((earnedPoints / totalPoints) * 100)
@@ -422,6 +426,14 @@ let today=getToday();
 let search =
 searchInput.value.toLowerCase();
 
+/* 🔥 TODAY TASKS FOR PRODUCTIVITY */
+
+const todayTasks = tasks.filter(t=>
+t.date === today
+);
+
+/* search filter */
+
 let filtered = tasks.filter(t=>
 (t.text || "")
 .toLowerCase()
@@ -462,7 +474,10 @@ filtered = filtered.filter(t=>
 
 }
 
+/* ================= TABS ================= */
+
 /* pending */
+
 if(currentTab==="pending"){
 
 filtered=filtered.filter(t=>
@@ -473,6 +488,7 @@ t.date>=today
 }
 
 /* due */
+
 if(currentTab==="due"){
 
 filtered=filtered.filter(t=>
@@ -483,6 +499,7 @@ t.date<today
 }
 
 /* completed */
+
 if(currentTab==="completed"){
 
 filtered=filtered.filter(t=>
@@ -491,7 +508,11 @@ t.completed
 
 }
 
-updateStats(filtered);
+/* 🔥 PRODUCTIVITY USES ONLY TODAY TASKS */
+
+updateStats(todayTasks);
+
+/* ================= GROUP ================= */
 
 let grouped={};
 
@@ -529,6 +550,7 @@ html+=`
 `;
 
 /* SORT */
+
 grouped[date].sort((a,b)=>{
 
 let pa = getPriorityScore(a);
