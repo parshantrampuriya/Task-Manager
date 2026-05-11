@@ -86,7 +86,7 @@
 
 <span>📈 Productivity Score</span>
 
-<span id="productivityText">0%</span>
+<span id="progressText">0%</span>
 
 </div>
 
@@ -118,12 +118,12 @@ onclick="switchTab('pending',event)">
 
 </div>
 
-<!-- ================= CLEAR COMPLETED ================= -->
+<!-- ================= CLEAR BUTTON ================= -->
 <div class="top-actions">
 
-<button id="clearCompletedBtn"
+<button
 class="clear-btn"
-onclick="clearCompleted()">
+onclick="clearCompletedTasks()">
 
 🗑 Clear Completed
 
@@ -141,12 +141,13 @@ placeholder="New task...">
 
 <input type="time" id="timeInput">
 
-<!-- PRIORITY -->
+<!-- ================= PRIORITY ================= -->
 <div class="priority-box">
 
 <label class="priority-option">
 
-<input type="checkbox" id="importantCheck">
+<input type="checkbox"
+id="importantInput">
 
 <span>⭐ Important</span>
 
@@ -154,7 +155,8 @@ placeholder="New task...">
 
 <label class="priority-option">
 
-<input type="checkbox" id="urgentCheck">
+<input type="checkbox"
+id="urgentInput">
 
 <span>🔥 Urgent</span>
 
@@ -168,24 +170,48 @@ placeholder="New task...">
 
 </div>
 
-<!-- ================= QUADRANT LEGEND ================= -->
+<!-- ================= QUADRANT FILTERS ================= -->
 <div class="quadrant-info">
 
-<div class="quad q1">
+<button
+class="quad-btn active q1"
+onclick="setQuadrantFilter('all',event)">
+
+📋 All
+
+</button>
+
+<button
+class="quad-btn q1"
+onclick="setQuadrantFilter('critical',event)">
+
 🔥 Important + Urgent
-</div>
 
-<div class="quad q2">
+</button>
+
+<button
+class="quad-btn q2"
+onclick="setQuadrantFilter('important',event)">
+
 ⭐ Important
-</div>
 
-<div class="quad q3">
+</button>
+
+<button
+class="quad-btn q3"
+onclick="setQuadrantFilter('urgent',event)">
+
 ⚡ Urgent
-</div>
 
-<div class="quad q4">
+</button>
+
+<button
+class="quad-btn q4"
+onclick="setQuadrantFilter('normal',event)">
+
 📦 Low Priority
-</div>
+
+</button>
 
 </div>
 
@@ -210,17 +236,25 @@ placeholder="Task name">
 
 <input type="time" id="modalTime">
 
-<!-- PRIORITY EDIT -->
+<!-- ================= EDIT PRIORITY ================= -->
 <div class="modal-priority">
 
 <label>
-<input type="checkbox" id="modalImportant">
+
+<input type="checkbox"
+id="modalImportant">
+
 ⭐ Important
+
 </label>
 
 <label>
-<input type="checkbox" id="modalUrgent">
+
+<input type="checkbox"
+id="modalUrgent">
+
 🔥 Urgent
+
 </label>
 
 </div>
@@ -242,8 +276,8 @@ placeholder="Task name">
 </div>
 
 <!-- ================= SCRIPTS ================= -->
-<script type="module" src="js/tasks.js"></script>
 <script type="module" src="js/menu.js"></script>
+<script type="module" src="js/tasks.js"></script>
 
 </body>
 </html>
