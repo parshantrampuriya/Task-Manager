@@ -1,0 +1,143 @@
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:
+linear-gradient(rgba(0,0,0,.88),rgba(0,0,0,.95)),
+url('../mahadev.png') center/cover fixed;
+color:#fff;
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+padding:20px;
+}
+
+.topbar{
+display:flex;
+align-items:center;
+gap:20px;
+margin-bottom:25px;
+}
+
+.topbar h1{
+margin:0;
+font-size:38px;
+}
+
+.back-btn{
+padding:12px 18px;
+border:none;
+border-radius:14px;
+font-weight:700;
+cursor:pointer;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+color:#000;
+}
+
+.game-panel{
+background:rgba(0,0,0,.55);
+padding:25px;
+border-radius:24px;
+backdrop-filter:blur(10px);
+box-shadow:0 0 25px rgba(0,255,255,.12);
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+background:rgba(255,255,255,.06);
+padding:18px;
+border-radius:18px;
+text-align:center;
+}
+
+.card h3{
+margin:0;
+font-size:15px;
+opacity:.8;
+}
+
+.card p{
+margin-top:10px;
+font-size:22px;
+font-weight:700;
+}
+
+.controls{
+display:flex;
+gap:15px;
+margin-bottom:25px;
+}
+
+.controls button{
+padding:14px 20px;
+border:none;
+border-radius:14px;
+font-weight:700;
+font-size:15px;
+background:linear-gradient(45deg,#00cfff,#00ffcc);
+color:#000;
+cursor:pointer;
+}
+
+.board{
+width:100%;
+max-width:720px;
+margin:auto;
+display:grid;
+grid-template-columns:repeat(8,1fr);
+border:6px solid #00eaff;
+border-radius:14px;
+overflow:hidden;
+}
+
+.cell{
+aspect-ratio:1;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:48px;
+cursor:pointer;
+transition:.2s;
+user-select:none;
+}
+
+.white{
+background:#f0d9b5;
+color:#000;
+}
+
+.black{
+background:#b58863;
+color:#000;
+}
+
+.cell.selected{
+box-shadow:inset 0 0 0 5px #00eaff;
+}
+
+.cell.move{
+background:#4caf50 !important;
+}
+
+.cell.capture{
+background:#ff4d4d !important;
+}
+
+@media(max-width:700px){
+
+.stats{
+grid-template-columns:1fr;
+}
+
+.cell{
+font-size:28px;
+}
+
+}
