@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Brain Arena</title>
+
+<link rel="stylesheet" href="css/games.css">
+<link rel="stylesheet" href="css/sidebar.css">
+
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+<h2>🧠 Brain Arena</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goFriends()">👥 Friends</button>
+<button onclick="goGames()">🎮 Games</button>
+<button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- NAVBAR -->
+<div class="navbar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">
+☰
+</button>
+
+<h2>
+🧠 Brain Arena
+</h2>
+
+</div>
+
+<!-- HERO -->
+<div class="hero">
+
+<h1>
+🎮 Brain Games & Multiplayer Arena
+</h1>
+
+<p>
+Challenge friends, improve memory, train logic,
+and compete in multiplayer brain battles.
+</p>
+
+</div>
+
+<!-- GAME GRID -->
+<div class="games-grid">
+
+<!-- SUDOKU -->
+<div class="game-card">
+
+<div class="game-icon">🧩</div>
+
+<h3>Sudoku Arena</h3>
+
+<p>
+Single player + multiplayer sudoku battles.
+Easy to nightmare difficulty.
+</p>
+
+<div class="tags">
+<span>Single Player</span>
+<span>Multiplayer</span>
+<span>Levels</span>
+</div>
+
+<button onclick="openGame('sudoku.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- CHESS -->
+<div class="game-card">
+
+<div class="game-icon">♟️</div>
+
+<h3>Chess Master</h3>
+
+<p>
+Play against AI or challenge friends online.
+Realtime multiplayer chess.
+</p>
+
+<div class="tags">
+<span>AI</span>
+<span>Realtime</span>
+<span>Ranked</span>
+</div>
+
+<button onclick="openGame('chess.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- TIC TAC TOE -->
+<div class="game-card">
+
+<div class="game-icon">❌⭕</div>
+
+<h3>Tic Tac Toe</h3>
+
+<p>
+Classic multiplayer strategy game.
+Fast competitive gameplay.
+</p>
+
+<div class="tags">
+<span>Quick Match</span>
+<span>Friends</span>
+<span>AI</span>
+</div>
+
+<button onclick="openGame('tictactoe.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- MEMORY -->
+<div class="game-card">
+
+<div class="game-icon">🧠</div>
+
+<h3>Memory Match</h3>
+
+<p>
+Train concentration and memory speed.
+Beat your best score.
+</p>
+
+<div class="tags">
+<span>Focus</span>
+<span>Memory</span>
+<span>Timer</span>
+</div>
+
+<button onclick="openGame('memory.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- PATTERN -->
+<div class="game-card">
+
+<div class="game-icon">🎨</div>
+
+<h3>Pattern Recall</h3>
+
+<p>
+Remember and repeat increasingly difficult patterns.
+</p>
+
+<div class="tags">
+<span>Memory</span>
+<span>Reflex</span>
+<span>Levels</span>
+</div>
+
+<button onclick="openGame('pattern.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- REFLEX -->
+<div class="game-card">
+
+<div class="game-icon">⚡</div>
+
+<h3>Reflex Battle</h3>
+
+<p>
+Measure reaction speed and compete with friends.
+</p>
+
+<div class="tags">
+<span>Reaction</span>
+<span>Competition</span>
+<span>Fast</span>
+</div>
+
+<button onclick="openGame('reflex.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- MATH -->
+<div class="game-card">
+
+<div class="game-icon">🔢</div>
+
+<h3>Mental Math Arena</h3>
+
+<p>
+Solve math problems quickly and dominate leaderboards.
+</p>
+
+<div class="tags">
+<span>Math</span>
+<span>Brain</span>
+<span>Challenge</span>
+</div>
+
+<button onclick="openGame('mathbattle.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- IQ -->
+<div class="game-card">
+
+<div class="game-icon">🧠</div>
+
+<h3>IQ Puzzle Arena</h3>
+
+<p>
+Logic puzzles, sequences, and reasoning battles.
+</p>
+
+<div class="tags">
+<span>Logic</span>
+<span>Puzzle</span>
+<span>IQ</span>
+</div>
+
+<button onclick="openGame('iqarena.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- MAZE -->
+<div class="game-card">
+
+<div class="game-icon">🗺️</div>
+
+<h3>Maze Escape</h3>
+
+<p>
+Escape difficult mazes before your friends do.
+</p>
+
+<div class="tags">
+<span>Maze</span>
+<span>Adventure</span>
+<span>Race</span>
+</div>
+
+<button onclick="openGame('maze.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- 2048 -->
+<div class="game-card">
+
+<div class="game-icon">🧱</div>
+
+<h3>2048 Challenge</h3>
+
+<p>
+Combine blocks and reach 2048 before anyone else.
+</p>
+
+<div class="tags">
+<span>Puzzle</span>
+<span>Numbers</span>
+<span>Strategy</span>
+</div>
+
+<button onclick="openGame('2048.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- MINESWEEPER -->
+<div class="game-card">
+
+<div class="game-icon">💣</div>
+
+<h3>Minesweeper</h3>
+
+<p>
+Classic strategic puzzle game with multiplayer races.
+</p>
+
+<div class="tags">
+<span>Classic</span>
+<span>Brain</span>
+<span>Logic</span>
+</div>
+
+<button onclick="openGame('minesweeper.html')">
+▶ Play Now
+</button>
+
+</div>
+
+<!-- WORD -->
+<div class="game-card">
+
+<div class="game-icon">🔤</div>
+
+<h3>Word Battle</h3>
+
+<p>
+Find words quickly and improve vocabulary skills.
+</p>
+
+<div class="tags">
+<span>Words</span>
+<span>English</span>
+<span>Speed</span>
+</div>
+
+<button onclick="openGame('wordbattle.html')">
+▶ Play Now
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module" src="js/games.js"></script>
+<script type="module" src="js/menu.js"></script>
+
+</body>
+</html>
