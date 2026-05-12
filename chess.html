@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chess Arena</title>
+
+<link rel="stylesheet" href="css/chess.css">
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="topbar">
+
+<button class="back-btn"
+onclick="goBack()">
+⬅ Back
+</button>
+
+<h1>♟️ Chess Arena</h1>
+
+</div>
+
+<div class="game-panel">
+
+<div class="stats">
+
+<div class="card">
+<h3>Turn</h3>
+<p id="turnText">White</p>
+</div>
+
+<div class="card">
+<h3>Mode</h3>
+<p>Single Player</p>
+</div>
+
+<div class="card">
+<h3>Status</h3>
+<p id="statusText">Playing</p>
+</div>
+
+</div>
+
+<div class="controls">
+
+<button onclick="resetGame()">
+🔄 New Game
+</button>
+
+<button onclick="undoMove()">
+↩ Undo
+</button>
+
+</div>
+
+<div id="board" class="board"></div>
+
+</div>
+
+</div>
+
+<script src="js/chess.js"></script>
+
+</body>
+</html>
