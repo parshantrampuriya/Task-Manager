@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Planner</title>
+
+    <link rel="stylesheet" href="goal-planner.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h1>GoalFlow</h1>
+        </div>
+
+        <nav class="menu">
+
+            <button class="menu-btn active">
+                Dashboard
+            </button>
+
+            <button class="menu-btn">
+                Projects
+            </button>
+
+            <button class="menu-btn">
+                Timeline
+            </button>
+
+            <button class="menu-btn">
+                Analytics
+            </button>
+
+            <button class="menu-btn">
+                AI Planner
+            </button>
+
+            <button class="menu-btn">
+                Settings
+            </button>
+
+        </nav>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div>
+                <h2>Goal Planning Workspace</h2>
+                <p>Create visual reverse planning systems</p>
+            </div>
+
+            <button id="newProjectBtn">
+                + New Project
+            </button>
+
+        </header>
+
+        <!-- PROJECT SECTION -->
+
+        <section class="projects-section">
+
+            <div class="project-card">
+                <h3>GATE 2027</h3>
+                <p>Mechanical Engineering Preparation</p>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 35%;"></div>
+                </div>
+
+                <span>35% Complete</span>
+            </div>
+
+            <div class="project-card">
+                <h3>Production Engineering</h3>
+                <p>Industrial Learning Roadmap</p>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 50%;"></div>
+                </div>
+
+                <span>50% Complete</span>
+            </div>
+
+            <div class="project-card">
+                <h3>Fitness Transformation</h3>
+                <p>Strength + Health Goals</p>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 20%;"></div>
+                </div>
+
+                <span>20% Complete</span>
+            </div>
+
+        </section>
+
+        <!-- WORKSPACE -->
+
+        <section class="workspace">
+
+            <div class="workspace-header">
+
+                <h2>Visual Planning Canvas</h2>
+
+                <div class="workspace-actions">
+
+                    <button id="addNodeBtn">
+                        + Add Node
+                    </button>
+
+                    <button>
+                        Timeline
+                    </button>
+
+                    <button>
+                        Map View
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- CANVAS -->
+
+            <div class="canvas" id="canvas">
+
+                <!-- MAIN GOAL -->
+
+                <div class="node main-goal" style="top: 100px; left: 500px;">
+                    <h3>GATE 2027 AIR &lt; 100</h3>
+                    <p>Main Goal</p>
+                </div>
+
+                <!-- SUBJECTS -->
+
+                <div class="node subject-node" style="top: 300px; left: 250px;">
+                    <h3>Thermodynamics</h3>
+                    <p>Subject</p>
+                </div>
+
+                <div class="node subject-node" style="top: 300px; left: 550px;">
+                    <h3>Fluid Mechanics</h3>
+                    <p>Subject</p>
+                </div>
+
+                <div class="node subject-node" style="top: 300px; left: 850px;">
+                    <h3>SOM</h3>
+                    <p>Subject</p>
+                </div>
+
+                <!-- TOPICS -->
+
+                <div class="node topic-node" style="top: 520px; left: 200px;">
+                    <h3>Entropy</h3>
+                    <p>Topic</p>
+                </div>
+
+                <div class="node topic-node" style="top: 520px; left: 420px;">
+                    <h3>Cycles</h3>
+                    <p>Topic</p>
+                </div>
+
+                <div class="node topic-node" style="top: 520px; left: 620px;">
+                    <h3>Bernoulli</h3>
+                    <p>Topic</p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="goal-planner.js"></script>
+
+</body>
+</html>
