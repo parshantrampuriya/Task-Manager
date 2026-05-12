@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Sudoku Arena</title>
+
+<link rel="stylesheet" href="css/sudoku.css">
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="topbar">
+
+<button class="back-btn"
+onclick="goBack()">
+⬅ Back
+</button>
+
+<h1>🧩 Sudoku Arena</h1>
+
+</div>
+
+<div class="game-panel">
+
+<div class="stats">
+
+<div class="card">
+<h3>Difficulty</h3>
+<p id="difficultyText">Easy</p>
+</div>
+
+<div class="card">
+<h3>Timer</h3>
+<p id="timer">00:00</p>
+</div>
+
+<div class="card">
+<h3>Mistakes</h3>
+<p id="mistakes">0 / 3</p>
+</div>
+
+</div>
+
+<div class="controls">
+
+<select id="difficultySelect">
+<option value="easy">Easy</option>
+<option value="medium">Medium</option>
+<option value="hard">Hard</option>
+<option value="expert">Expert</option>
+</select>
+
+<button onclick="startGame()">
+🎮 New Game
+</button>
+
+<button onclick="checkBoard()">
+✅ Check
+</button>
+
+<button onclick="solveGame()">
+🧠 Solve
+</button>
+
+</div>
+
+<div id="board" class="board"></div>
+
+<div class="numbers">
+<button onclick="selectNumber(1)">1</button>
+<button onclick="selectNumber(2)">2</button>
+<button onclick="selectNumber(3)">3</button>
+<button onclick="selectNumber(4)">4</button>
+<button onclick="selectNumber(5)">5</button>
+<button onclick="selectNumber(6)">6</button>
+<button onclick="selectNumber(7)">7</button>
+<button onclick="selectNumber(8)">8</button>
+<button onclick="selectNumber(9)">9</button>
+<button class="erase"
+onclick="selectNumber(0)">
+❌
+</button>
+</div>
+
+</div>
+
+</div>
+
+<script src="js/sudoku.js"></script>
+
+</body>
+</html>
