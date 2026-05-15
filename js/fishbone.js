@@ -1,28 +1,15 @@
-// File: fishbone.js
+// FILE NAME: fishbone.js
 
 const updateBtn = document.getElementById("updateBtn");
-const clearBtn = document.getElementById("clearBtn");
-const mainProblem = document.getElementById("mainProblem");
-const effectText = document.getElementById("effectText");
+const problemInput = document.getElementById("problemInput");
+const problemBox = document.getElementById("problemBox");
 
 updateBtn.addEventListener("click", () => {
 
-    if(mainProblem.value.trim() === ""){
-        alert("Please enter the main problem.");
+    if(problemInput.value.trim() === ""){
+        alert("Please enter a problem.");
         return;
     }
 
-    effectText.innerText = mainProblem.value;
-});
-
-clearBtn.addEventListener("click", () => {
-
-    mainProblem.value = "";
-    effectText.innerText = "Problem";
-
-    const textareas = document.querySelectorAll("textarea");
-
-    textareas.forEach(area => {
-        area.value = "";
-    });
+    problemBox.innerText = problemInput.value;
 });
