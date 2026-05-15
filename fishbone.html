@@ -1,4 +1,4 @@
-<!-- FILE NAME: fishbone.html -->
+<!-- fishbone.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,87 +6,111 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fishbone Diagram</title>
-  <link rel="stylesheet" href="css/fishbone.css">
+  <link rel="stylesheet" href="fishbone.css">
 </head>
 <body>
 
-<div class="ocean"></div>
+<h1>FISHBONE ROOT CAUSE ANALYSIS</h1>
 
-<h1>CREATIVE FISHBONE DIAGRAM</h1>
+<div class="fishbone">
 
-<div class="fish-wrapper">
-
-    <!-- FISH TAIL -->
+    <!-- TAIL -->
     <div class="tail"></div>
 
-    <!-- FISH BODY -->
-    <div class="fish-body">
+    <!-- BODY -->
+    <div class="body">
 
-        <!-- MAIN SPINE -->
+        <!-- SPINE -->
         <div class="spine"></div>
 
-        <!-- TOP BONES -->
+        <!-- TOP -->
 
-        <div class="bone top bone1">
-            <div class="content">
-                <h3>Materials</h3>
-                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+        <div class="branch top b1">
+            <div class="card">
+                <h2>Materials</h2>
+                <ul contenteditable="true">
+                    <li>Low quality raw material</li>
+                    <li>Improper storage</li>
+                    <li>Contamination</li>
+                </ul>
             </div>
         </div>
 
-        <div class="bone top bone2">
-            <div class="content">
-                <h3>Methods</h3>
-                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+        <div class="branch top b2">
+            <div class="card">
+                <h2>Methods</h2>
+                <ul contenteditable="true">
+                    <li>No SOP</li>
+                    <li>Wrong sequence</li>
+                    <li>Poor planning</li>
+                </ul>
             </div>
         </div>
 
-        <div class="bone top bone3">
-            <div class="content">
-                <h3>Machines</h3>
-                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+        <div class="branch top b3">
+            <div class="card">
+                <h2>Machines</h2>
+                <ul contenteditable="true">
+                    <li>Burner issue</li>
+                    <li>Sensor failure</li>
+                    <li>Wear & tear</li>
+                </ul>
             </div>
         </div>
 
-        <!-- BOTTOM BONES -->
+        <!-- BOTTOM -->
 
-        <div class="bone bottom bone4">
-            <div class="content">
-                <h3>Measurement</h3>
-                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+        <div class="branch bottom b4">
+            <div class="card">
+                <h2>Measurement</h2>
+                <ul contenteditable="true">
+                    <li>Calibration error</li>
+                    <li>Wrong readings</li>
+                    <li>No monitoring</li>
+                </ul>
             </div>
         </div>
 
-        <div class="bone bottom bone5">
-            <div class="content">
-                <h3>Environment</h3>
-                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+        <div class="branch bottom b5">
+            <div class="card">
+                <h2>Environment</h2>
+                <ul contenteditable="true">
+                    <li>Dust</li>
+                    <li>Humidity</li>
+                    <li>Temperature</li>
+                </ul>
             </div>
         </div>
 
-        <div class="bone bottom bone6">
-            <div class="content">
-                <h3>People</h3>
-                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+        <div class="branch bottom b6">
+            <div class="card">
+                <h2>People</h2>
+                <ul contenteditable="true">
+                    <li>Lack of training</li>
+                    <li>Operator fatigue</li>
+                    <li>Communication gap</li>
+                </ul>
             </div>
         </div>
 
     </div>
 
-    <!-- FISH HEAD -->
-    <div class="fish-head">
+    <!-- HEAD -->
+    <div class="head">
 
         <div class="eye"></div>
 
-        <div class="problem-box">
-            <textarea id="problemText" placeholder="Problem Statement"></textarea>
+        <div class="problem">
+            <div contenteditable="true">
+                Furnace Temperature Variation
+            </div>
         </div>
 
     </div>
 
 </div>
 
-<script src="js/fishbone.js"></script>
+<script src="fishbone.js"></script>
 
 </body>
 </html>
