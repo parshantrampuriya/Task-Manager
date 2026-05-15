@@ -4,55 +4,51 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Segoe UI, sans-serif;
+    font-family:Segoe UI,sans-serif;
 }
 
 body{
-    background:linear-gradient(to bottom,#06749c,#022b44);
+    background:linear-gradient(to bottom,#067aa5,#02263b);
     min-height:100vh;
     overflow-x:auto;
+    position:relative;
     color:white;
-}
-
-/* CONTAINER */
-
-.container{
-    width:1500px;
-    margin:auto;
-    padding:30px;
 }
 
 /* TITLE */
 
 h1{
     text-align:center;
-    font-size:48px;
-    margin-bottom:50px;
+    margin-top:20px;
+    font-size:52px;
     letter-spacing:2px;
+    color:white;
 }
 
-/* FISH */
+/* WRAPPER */
 
-.fish{
+.fish-wrapper{
     position:relative;
-    width:1400px;
+    width:1450px;
     height:700px;
-    margin:auto;
+    margin:30px auto;
 }
 
 /* BODY */
 
-.body{
+.fish-body{
     position:absolute;
-    left:170px;
+    left:180px;
     top:110px;
 
     width:950px;
-    height:450px;
+    height:480px;
 
-    background:#001f3f;
+    background:#00152d;
 
     border-radius:50%;
+
+    box-shadow:0 0 50px rgba(0,0,0,0.4);
 }
 
 /* TAIL */
@@ -67,60 +63,66 @@ h1{
 
     border-top:130px solid transparent;
     border-bottom:130px solid transparent;
-    border-right:180px solid #001f3f;
+    border-right:180px solid #00152d;
 }
 
 /* HEAD */
 
-.head{
+.fish-head{
     position:absolute;
-    right:90px;
-    top:250px;
+    right:70px;
+    top:280px;
 
-    width:260px;
-    height:130px;
+    width:250px;
+    height:120px;
 
-    background:#003f73;
+    background:#003e73;
 
-    border-radius:80px;
+    border-radius:70px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 /* EYE */
 
 .eye{
     position:absolute;
-    left:-35px;
-    top:48px;
+    left:-28px;
+    width:26px;
+    height:26px;
 
-    width:30px;
-    height:30px;
-
+    border:4px solid #53d8ff;
     border-radius:50%;
-    border:5px solid #5ee7ff;
-    background:transparent;
+}
+
+.eye::after{
+    content:"";
+    position:absolute;
+    width:10px;
+    height:10px;
+    background:#53d8ff;
+    border-radius:50%;
+
+    top:4px;
+    left:4px;
 }
 
 /* PROBLEM */
 
-.problem{
-    width:100%;
-    height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.problem textarea{
-    width:180px;
-    height:70px;
+.problem-box textarea{
+    width:170px;
+    height:60px;
 
     background:transparent;
     border:none;
     outline:none;
     resize:none;
 
-    color:white;
     text-align:center;
+
+    color:white;
     font-size:24px;
     font-weight:bold;
 }
@@ -130,20 +132,20 @@ h1{
 .spine{
     position:absolute;
     width:700px;
-    height:5px;
+    height:4px;
 
     background:white;
 
+    top:240px;
     left:130px;
-    top:220px;
 }
 
 /* BONES */
 
 .bone{
     position:absolute;
-    width:180px;
-    height:4px;
+    width:170px;
+    height:3px;
     background:white;
 }
 
@@ -162,53 +164,53 @@ h1{
 /* POSITIONS */
 
 .bone1{
+    top:130px;
     left:180px;
-    top:120px;
 }
 
 .bone2{
-    left:390px;
-    top:120px;
+    top:130px;
+    left:410px;
 }
 
 .bone3{
-    left:600px;
-    top:120px;
+    top:130px;
+    left:640px;
 }
 
 .bone4{
+    top:350px;
     left:180px;
-    top:320px;
 }
 
 .bone5{
-    left:390px;
-    top:320px;
+    top:350px;
+    left:410px;
 }
 
 .bone6{
-    left:600px;
-    top:320px;
+    top:350px;
+    left:640px;
 }
 
-/* BOXES */
+/* CONTENT */
 
-.box{
+.content{
     position:absolute;
-    width:180px;
+    width:190px;
 }
 
-/* TOP BOX */
+/* TOP CONTENT */
 
-.top .box{
+.top .content{
     bottom:20px;
     left:-70px;
     transform:rotate(60deg);
 }
 
-/* BOTTOM BOX */
+/* BOTTOM CONTENT */
 
-.bottom .box{
+.bottom .content{
     top:20px;
     left:-70px;
     transform:rotate(-60deg);
@@ -216,44 +218,58 @@ h1{
 
 /* HEADINGS */
 
-.box h3{
+.content h3{
     text-align:center;
-    margin-bottom:8px;
-    font-size:22px;
     color:#ffd43b;
+    margin-bottom:10px;
+    font-size:24px;
 }
 
 /* TEXTAREA */
 
-.box textarea{
+.content textarea{
     width:100%;
-    height:90px;
+    height:110px;
 
     background:transparent;
 
     border:none;
-    border-top:2px solid rgba(255,255,255,0.3);
+    border-top:2px solid rgba(255,255,255,0.5);
 
     color:white;
+
+    text-align:center;
 
     resize:none;
     outline:none;
 
-    text-align:center;
+    padding-top:10px;
 
-    font-size:15px;
+    font-size:16px;
     line-height:1.8;
-
-    padding-top:8px;
 }
 
-/* SCROLL */
+/* WATER EFFECT */
+
+.ocean{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    height:120px;
+
+    background:rgba(0,0,0,0.1);
+
+    border-top-left-radius:50%;
+    border-top-right-radius:50%;
+}
+
+/* SCROLLBAR */
 
 textarea::-webkit-scrollbar{
-    width:5px;
+    width:6px;
 }
 
 textarea::-webkit-scrollbar-thumb{
-    background:#5ee7ff;
+    background:#53d8ff;
     border-radius:10px;
 }
