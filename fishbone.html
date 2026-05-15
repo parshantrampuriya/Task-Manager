@@ -1,207 +1,109 @@
-<!-- FILE NAME: fishbone.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fishbone Diagram</title>
-
-  <link rel="stylesheet" href="css/fishbone.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fishbone Diagram</title>
+<link rel="stylesheet" href="css/fishbone.css">
 </head>
 
 <body>
 
 <h1>Fishbone Diagram : Cause Analysis</h1>
 
-<div class="fishbone-container">
+<div class="fishbone">
 
-    <!-- MAIN BODY -->
-    <div class="main-body"></div>
+    <!-- BODY -->
+    <div class="body"></div>
 
-    <!-- FISH TAIL -->
+    <!-- TAIL -->
     <div class="tail"></div>
 
-    <!-- FISH HEAD -->
+    <!-- HEAD -->
     <div class="head">
-
         <div class="eye"></div>
-
         <div class="mouth"></div>
-
     </div>
 
-    <!-- ========================= -->
-    <!-- TOP BRANCH 1 -->
-    <!-- ========================= -->
+    <!-- TOP 1 -->
+    <div class="branch top t1"></div>
 
-    <div class="branch-line top-line line1">
-
-        <div class="category top-category">
-            Materials
-        </div>
-
-        <div class="points top-points">
-
-            <div contenteditable="true">
-                Low Quality Material
-            </div>
-
-            <div contenteditable="true">
-                Material Contamination
-            </div>
-
-            <div contenteditable="true">
-                Improper Storage
-            </div>
-
-        </div>
-
+    <div class="label top-label l1">
+        Materials
     </div>
 
-    <!-- ========================= -->
-    <!-- TOP BRANCH 2 -->
-    <!-- ========================= -->
-
-    <div class="branch-line top-line line2">
-
-        <div class="category top-category">
-            Methods
-        </div>
-
-        <div class="points top-points">
-
-            <div contenteditable="true">
-                No SOP Available
-            </div>
-
-            <div contenteditable="true">
-                Wrong Sequence
-            </div>
-
-            <div contenteditable="true">
-                Poor Planning
-            </div>
-
-        </div>
-
+    <div class="text top-text tx1">
+        <div contenteditable="true">Low Quality Material</div>
+        <div contenteditable="true">Material Contamination</div>
+        <div contenteditable="true">Improper Storage</div>
     </div>
 
-    <!-- ========================= -->
-    <!-- TOP BRANCH 3 -->
-    <!-- ========================= -->
+    <!-- TOP 2 -->
+    <div class="branch top t2"></div>
 
-    <div class="branch-line top-line line3">
-
-        <div class="category top-category">
-            Machines
-        </div>
-
-        <div class="points top-points">
-
-            <div contenteditable="true">
-                Burner Failure
-            </div>
-
-            <div contenteditable="true">
-                Sensor Error
-            </div>
-
-            <div contenteditable="true">
-                Worn Components
-            </div>
-
-        </div>
-
+    <div class="label top-label l2">
+        Methods
     </div>
 
-    <!-- ========================= -->
-    <!-- BOTTOM BRANCH 1 -->
-    <!-- ========================= -->
-
-    <div class="branch-line bottom-line line4">
-
-        <div class="category bottom-category">
-            Measurement
-        </div>
-
-        <div class="points bottom-points">
-
-            <div contenteditable="true">
-                Calibration Error
-            </div>
-
-            <div contenteditable="true">
-                Wrong Readings
-            </div>
-
-            <div contenteditable="true">
-                Monitoring Issue
-            </div>
-
-        </div>
-
+    <div class="text top-text tx2">
+        <div contenteditable="true">No SOP Available</div>
+        <div contenteditable="true">Wrong Sequence</div>
+        <div contenteditable="true">Poor Planning</div>
     </div>
 
-    <!-- ========================= -->
-    <!-- BOTTOM BRANCH 2 -->
-    <!-- ========================= -->
+    <!-- TOP 3 -->
+    <div class="branch top t3"></div>
 
-    <div class="branch-line bottom-line line5">
-
-        <div class="category bottom-category">
-            Environment
-        </div>
-
-        <div class="points bottom-points">
-
-            <div contenteditable="true">
-                High Temperature
-            </div>
-
-            <div contenteditable="true">
-                Dust Presence
-            </div>
-
-            <div contenteditable="true">
-                Humidity
-            </div>
-
-        </div>
-
+    <div class="label top-label l3">
+        Machines
     </div>
 
-    <!-- ========================= -->
-    <!-- BOTTOM BRANCH 3 -->
-    <!-- ========================= -->
+    <div class="text top-text tx3">
+        <div contenteditable="true">Burner Failure</div>
+        <div contenteditable="true">Sensor Error</div>
+        <div contenteditable="true">Worn Components</div>
+    </div>
 
-    <div class="branch-line bottom-line line6">
+    <!-- BOTTOM 1 -->
+    <div class="branch bottom b1"></div>
 
-        <div class="category bottom-category">
-            People
-        </div>
+    <div class="label bottom-label bl1">
+        Measurement
+    </div>
 
-        <div class="points bottom-points">
+    <div class="text bottom-text btx1">
+        <div contenteditable="true">Calibration Error</div>
+        <div contenteditable="true">Wrong Readings</div>
+        <div contenteditable="true">Monitoring Issue</div>
+    </div>
 
-            <div contenteditable="true">
-                Lack of Training
-            </div>
+    <!-- BOTTOM 2 -->
+    <div class="branch bottom b2"></div>
 
-            <div contenteditable="true">
-                Communication Gap
-            </div>
+    <div class="label bottom-label bl2">
+        Environment
+    </div>
 
-            <div contenteditable="true">
-                Operator Fatigue
-            </div>
+    <div class="text bottom-text btx2">
+        <div contenteditable="true">High Temperature</div>
+        <div contenteditable="true">Dust Presence</div>
+        <div contenteditable="true">Humidity</div>
+    </div>
 
-        </div>
+    <!-- BOTTOM 3 -->
+    <div class="branch bottom b3"></div>
 
+    <div class="label bottom-label bl3">
+        People
+    </div>
+
+    <div class="text bottom-text btx3">
+        <div contenteditable="true">Lack of Training</div>
+        <div contenteditable="true">Communication Gap</div>
+        <div contenteditable="true">Operator Fatigue</div>
     </div>
 
 </div>
-
-<script src="js/fishbone.js"></script>
 
 </body>
 </html>
