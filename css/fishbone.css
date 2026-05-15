@@ -1,103 +1,261 @@
-/* REPLACE ONLY THE CARD + LIST CSS WITH THIS */
+/* FILE NAME: fishbone.css */
 
-/* BRANCH BOX */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
 
-.card{
+body{
+    background:#ececec;
+    min-height:100vh;
+    overflow-x:auto;
+    padding:20px;
+}
+
+h1{
+    font-size:55px;
+    margin-bottom:40px;
+    color:#111;
+}
+
+/* CONTAINER */
+
+.fishbone-container{
+    position:relative;
+    width:1700px;
+    height:900px;
+    margin:auto;
+}
+
+/* MAIN BODY */
+
+.main-body{
     position:absolute;
+    top:380px;
+    left:200px;
 
-    width:220px;
+    width:1100px;
+    height:70px;
 
-    background:#f8fafc;
-
-    border:2px solid #cbd5e1;
+    background:linear-gradient(to bottom,#7f7f7f,#2c2c2c,#7f7f7f);
 
     border-radius:10px;
 
-    padding:10px;
-
-    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    box-shadow:0 0 15px rgba(0,0,0,0.4);
 }
 
-/* TOP POSITION */
+/* TAIL */
 
-.top .card{
-    bottom:25px;
-    left:-95px;
+.tail{
+    position:absolute;
+    left:80px;
+    top:310px;
 
-    transform:rotate(60deg);
+    width:0;
+    height:0;
+
+    border-top:130px solid transparent;
+    border-bottom:130px solid transparent;
+    border-right:140px solid #00a2df;
+
+    filter:drop-shadow(0 0 8px rgba(0,0,0,0.3));
 }
 
-/* BOTTOM POSITION */
+/* HEAD */
 
-.bottom .card{
-    top:25px;
-    left:-95px;
+.head{
+    position:absolute;
+    right:170px;
+    top:290px;
 
+    width:180px;
+    height:250px;
+
+    background:linear-gradient(135deg,#0076d6,#35d3ff);
+
+    border-radius:50% 45% 45% 50%;
+
+    transform:rotate(-10deg);
+
+    box-shadow:0 0 12px rgba(0,0,0,0.3);
+}
+
+/* EYE */
+
+.eye{
+    position:absolute;
+    width:40px;
+    height:40px;
+
+    background:white;
+
+    border-radius:50%;
+
+    top:60px;
+    left:45px;
+}
+
+/* MOUTH */
+
+.mouth{
+    position:absolute;
+    width:70px;
+    height:120px;
+
+    border-left:12px solid white;
+
+    border-radius:50%;
+
+    bottom:30px;
+    right:30px;
+
+    transform:rotate(20deg);
+}
+
+/* BRANCHES */
+
+.branch{
+    position:absolute;
+    width:180px;
+    height:4px;
+
+    background:#222;
+}
+
+/* TOP */
+
+.top{
     transform:rotate(-60deg);
 }
 
-/* CATEGORY TITLE */
+/* BOTTOM */
 
-.card h2{
-    background:#7dd3fc;
-
-    color:#0f172a;
-
-    padding:8px;
-
-    border-radius:6px;
-
-    text-align:center;
-
-    font-size:22px;
-
-    margin-bottom:10px;
+.bottom{
+    transform:rotate(60deg);
 }
 
-/* BOXED LIST */
+/* POSITIONS */
 
-.card ul{
-    list-style:none;
-
-    display:flex;
-    flex-direction:column;
-
-    gap:8px;
+.branch1{
+    left:350px;
+    top:160px;
 }
 
-/* EACH POINT BOX */
+.branch2{
+    left:650px;
+    top:160px;
+}
 
-.card li{
-    background:white;
+.branch3{
+    left:950px;
+    top:160px;
+}
 
-    border:1px solid #cbd5e1;
+.branch4{
+    left:350px;
+    top:470px;
+}
 
-    border-radius:5px;
+.branch5{
+    left:650px;
+    top:470px;
+}
 
-    padding:8px;
+.branch6{
+    left:950px;
+    top:470px;
+}
 
-    font-size:15px;
+/* CATEGORY */
 
-    color:#0f172a;
+.category{
+    position:absolute;
 
-    text-align:center;
+    width:140px;
+    height:60px;
 
-    min-height:38px;
+    background:linear-gradient(to bottom,#38bdf8,#0062b8);
+
+    border-radius:50%;
+
+    color:white;
 
     display:flex;
     align-items:center;
     justify-content:center;
+
+    font-size:20px;
+    font-weight:bold;
+
+    box-shadow:0 0 10px rgba(0,0,0,0.3);
 }
 
-/* EDIT MODE */
+/* TOP CATEGORY */
 
-.card li:focus{
-    border:2px solid #38bdf8;
+.top .category{
+    top:-70px;
+    left:-10px;
+
+    transform:rotate(60deg);
+}
+
+/* BOTTOM CATEGORY */
+
+.bottom .category{
+    bottom:-70px;
+    left:-10px;
+
+    transform:rotate(-60deg);
+}
+
+/* POINTS */
+
+.points{
+    position:absolute;
+
+    width:220px;
+}
+
+/* TOP POINTS */
+
+.top .points{
+    top:60px;
+    left:-120px;
+
+    transform:rotate(60deg);
+}
+
+/* BOTTOM POINTS */
+
+.bottom .points{
+    bottom:60px;
+    left:-120px;
+
+    transform:rotate(-60deg);
+}
+
+/* TEXT LINES */
+
+.points div{
+    margin:18px 0;
+
+    border-bottom:2px solid #555;
+
+    padding-bottom:5px;
+
+    min-height:30px;
+
+    font-size:18px;
+    font-weight:bold;
+    color:#111;
+
     outline:none;
 }
 
-/* EDITABLE */
+/* EDITABLE HOVER */
 
-[contenteditable="true"]{
-    outline:none;
+.points div:focus{
+    border-bottom:2px solid #0077ff;
 }
