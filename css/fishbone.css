@@ -1,0 +1,226 @@
+/* File: fishbone.css */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f3f5f9;
+    padding:30px;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+header h1{
+    font-size:40px;
+    color:#1d3557;
+}
+
+header p{
+    color:#555;
+    margin-top:10px;
+}
+
+.problem-box{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.problem-box label{
+    display:block;
+    font-size:20px;
+    margin-bottom:10px;
+    font-weight:bold;
+}
+
+.problem-box input{
+    width:60%;
+    padding:12px;
+    border-radius:10px;
+    border:2px solid #ccc;
+    font-size:18px;
+}
+
+.fishbone-area{
+    position:relative;
+    margin-top:50px;
+    min-height:600px;
+}
+
+.spine{
+    position:absolute;
+    top:50%;
+    left:10%;
+    width:80%;
+    height:8px;
+    background:#222;
+    transform:translateY(-50%);
+}
+
+.arrow{
+    position:absolute;
+    right:-2px;
+    top:-8px;
+    width:0;
+    height:0;
+    border-top:12px solid transparent;
+    border-bottom:12px solid transparent;
+    border-left:25px solid #222;
+}
+
+.effect-box{
+    position:absolute;
+    right:-250px;
+    top:-35px;
+    width:220px;
+    background:#e63946;
+    color:white;
+    padding:20px;
+    border-radius:12px;
+    font-weight:bold;
+    text-align:center;
+    font-size:20px;
+}
+
+.bone{
+    display:flex;
+    justify-content:space-around;
+    position:relative;
+}
+
+.top{
+    margin-bottom:180px;
+}
+
+.bottom{
+    margin-top:180px;
+}
+
+.category{
+    width:260px;
+    position:relative;
+}
+
+.top .category{
+    transform:rotate(-20deg);
+}
+
+.bottom .category{
+    transform:rotate(20deg);
+}
+
+.category::before{
+    content:"";
+    position:absolute;
+    width:170px;
+    height:4px;
+    background:#333;
+    top:50%;
+    left:-100px;
+}
+
+.top .category::before{
+    transform:rotate(20deg);
+}
+
+.bottom .category::before{
+    transform:rotate(-20deg);
+}
+
+.category h3{
+    background:#1d3557;
+    color:white;
+    padding:10px;
+    border-radius:10px 10px 0 0;
+    text-align:center;
+}
+
+.category textarea{
+    width:100%;
+    height:140px;
+    border:none;
+    padding:15px;
+    resize:none;
+    border-radius:0 0 10px 10px;
+    font-size:15px;
+    background:white;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn-area{
+    margin-top:50px;
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+button{
+    padding:14px 25px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:#1d3557;
+    color:white;
+    font-size:16px;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#457b9d;
+}
+
+@media(max-width:1100px){
+
+    .fishbone-area{
+        display:flex;
+        flex-direction:column;
+        gap:30px;
+    }
+
+    .spine{
+        position:relative;
+        width:100%;
+        left:0;
+        margin:50px 0;
+    }
+
+    .effect-box{
+        right:0;
+    }
+
+    .bone{
+        flex-direction:column;
+        align-items:center;
+        gap:30px;
+    }
+
+    .top,
+    .bottom{
+        margin:0;
+    }
+
+    .top .category,
+    .bottom .category{
+        transform:none;
+    }
+
+    .category::before{
+        display:none;
+    }
+
+    .problem-box input{
+        width:90%;
+    }
+}
