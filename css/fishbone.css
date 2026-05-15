@@ -1,3 +1,7 @@
+/* ========================= */
+/* COMPLETE CORRECTED CSS */
+/* ========================= */
+
 *{
     margin:0;
     padding:0;
@@ -11,74 +15,101 @@ body{
     padding:20px;
 }
 
+/* TITLE */
+
 h1{
     font-size:58px;
     margin-bottom:40px;
+    color:#111;
 }
+
+/* MAIN CONTAINER */
 
 .fishbone{
     position:relative;
     width:1800px;
-    height:850px;
+    height:900px;
     margin:auto;
 }
 
-/* MAIN BODY */
+/* ========================= */
+/* FISH BODY */
+/* ========================= */
 
 .body{
     position:absolute;
+
     left:250px;
     top:390px;
 
-    width:1100px;
-    height:70px;
+    width:1120px;
+    height:72px;
 
-    border-radius:10px;
+    border-radius:12px;
 
     background:
     linear-gradient(
         to bottom,
-        #999,
-        #222,
-        #666
+        #9c9c9c 0%,
+        #2a2a2a 45%,
+        #0f0f0f 50%,
+        #6f6f6f 100%
     );
 
-    box-shadow:0 0 15px rgba(0,0,0,0.4);
+    box-shadow:
+    0 0 18px rgba(0,0,0,0.35),
+    inset 0 0 12px rgba(255,255,255,0.15);
 }
 
-/* TAIL */
+/* ========================= */
+/* FISH TAIL */
+/* ========================= */
 
 .tail{
     position:absolute;
-    left:110px;
-    top:300px;
+
+    left:90px;
+    top:280px;
 
     width:0;
     height:0;
 
-    border-top:150px solid transparent;
-    border-bottom:150px solid transparent;
-    border-right:180px solid #149cd4;
+    border-top:180px solid transparent;
+    border-bottom:180px solid transparent;
+    border-right:210px solid #149cd4;
+
+    filter:drop-shadow(0 0 8px rgba(0,0,0,0.25));
 }
 
-/* HEAD */
+/* ========================= */
+/* FISH HEAD */
+/* ========================= */
 
 .head{
     position:absolute;
-    right:100px;
+
+    right:210px;
     top:250px;
 
     width:190px;
     height:300px;
 
-    background:linear-gradient(135deg,#0076d8,#39d5ff);
+    background:linear-gradient(
+        135deg,
+        #0076d8,
+        #39d5ff
+    );
 
     border-radius:50% 45% 50% 45%;
 
     transform:rotate(-8deg);
+
+    box-shadow:0 0 15px rgba(0,0,0,0.25);
 }
 
+/* ========================= */
 /* EYE */
+/* ========================= */
 
 .eye{
     position:absolute;
@@ -94,7 +125,9 @@ h1{
     left:45px;
 }
 
+/* ========================= */
 /* MOUTH */
+/* ========================= */
 
 .mouth{
     position:absolute;
@@ -112,7 +145,9 @@ h1{
     transform:rotate(18deg);
 }
 
-/* BRANCH */
+/* ========================= */
+/* BRANCH LINES */
+/* ========================= */
 
 .branch{
     position:absolute;
@@ -123,27 +158,59 @@ h1{
     background:#222;
 }
 
+/* TOP BRANCH */
+
 .top{
     transform:rotate(-60deg);
 }
+
+/* BOTTOM BRANCH */
 
 .bottom{
     transform:rotate(60deg);
 }
 
-/* TOP POSITIONS */
+/* ========================= */
+/* TOP BRANCH POSITIONS */
+/* ========================= */
 
-.t1{ left:520px; top:220px; }
-.t2{ left:820px; top:220px; }
-.t3{ left:1120px; top:220px; }
+.t1{
+    left:520px;
+    top:200px;
+}
 
-/* BOTTOM POSITIONS */
+.t2{
+    left:820px;
+    top:200px;
+}
 
-.b1{ left:520px; top:470px; }
-.b2{ left:820px; top:470px; }
-.b3{ left:1120px; top:470px; }
+.t3{
+    left:1120px;
+    top:200px;
+}
 
-/* LABEL */
+/* ========================= */
+/* BOTTOM BRANCH POSITIONS */
+/* ========================= */
+
+.b1{
+    left:520px;
+    top:440px;
+}
+
+.b2{
+    left:820px;
+    top:440px;
+}
+
+.b3{
+    left:1120px;
+    top:440px;
+}
+
+/* ========================= */
+/* CATEGORY OVALS */
+/* ========================= */
 
 .label{
     position:absolute;
@@ -153,59 +220,134 @@ h1{
 
     border-radius:50%;
 
-    background:linear-gradient(to bottom,#43c8ff,#0067c0);
+    background:
+    linear-gradient(
+        to bottom,
+        #45ccff,
+        #0069c4
+    );
 
     display:flex;
     align-items:center;
     justify-content:center;
 
     color:white;
+
     font-size:20px;
     font-weight:bold;
 
-    box-shadow:0 0 10px rgba(0,0,0,0.3);
+    box-shadow:
+    0 0 12px rgba(0,0,0,0.25),
+    inset 0 2px 10px rgba(255,255,255,0.25);
 }
 
+/* ========================= */
 /* TOP LABELS */
+/* ========================= */
 
-.l1{ left:450px; top:130px; }
-.l2{ left:750px; top:130px; }
-.l3{ left:1050px; top:130px; }
+.l1{
+    left:470px;
+    top:120px;
+}
 
+.l2{
+    left:770px;
+    top:120px;
+}
+
+.l3{
+    left:1070px;
+    top:120px;
+}
+
+/* ========================= */
 /* BOTTOM LABELS */
+/* ========================= */
 
-.bl1{ left:450px; top:530px; }
-.bl2{ left:750px; top:530px; }
-.bl3{ left:1050px; top:530px; }
+.bl1{
+    left:470px;
+    top:540px;
+}
 
-/* TEXT */
+.bl2{
+    left:770px;
+    top:540px;
+}
+
+.bl3{
+    left:1070px;
+    top:540px;
+}
+
+/* ========================= */
+/* TEXT CONTAINERS */
+/* ========================= */
 
 .text{
     position:absolute;
     width:250px;
 }
 
+/* ========================= */
+/* TEXT LINES */
+/* ========================= */
+
 .text div{
+
     margin:18px 0;
 
-    border-bottom:2px solid #666;
+    padding-bottom:6px;
 
-    padding-bottom:5px;
+    border-bottom:2px solid #6b6b6b;
 
     font-size:18px;
     font-weight:bold;
 
+    color:#111;
+
     outline:none;
 }
 
+/* ACTIVE EDIT */
+
+.text div:focus{
+    border-bottom:2px solid #0077ff;
+}
+
+/* ========================= */
 /* TOP TEXT */
+/* ========================= */
 
-.tx1{ left:430px; top:230px; }
-.tx2{ left:730px; top:230px; }
-.tx3{ left:1030px; top:230px; }
+.tx1{
+    left:440px;
+    top:235px;
+}
 
+.tx2{
+    left:740px;
+    top:235px;
+}
+
+.tx3{
+    left:1040px;
+    top:235px;
+}
+
+/* ========================= */
 /* BOTTOM TEXT */
+/* ========================= */
 
-.btx1{ left:430px; top:470px; }
-.btx2{ left:730px; top:470px; }
-.btx3{ left:1030px; top:470px; }
+.btx1{
+    left:440px;
+    top:500px;
+}
+
+.btx2{
+    left:740px;
+    top:500px;
+}
+
+.btx3{
+    left:1040px;
+    top:500px;
+}
