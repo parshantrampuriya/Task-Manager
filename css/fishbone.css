@@ -1,201 +1,99 @@
-/* fishbone.css */
+/* REPLACE ONLY THE CARD + LIST CSS WITH THIS */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Segoe UI,sans-serif;
+/* BRANCH BOX */
+
+.card{
+    position:absolute;
+
+    width:220px;
+
+    background:#f8fafc;
+
+    border:2px solid #cbd5e1;
+
+    border-radius:10px;
+
+    padding:10px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
 }
 
-body{
-    background:#0d6e91;
-    overflow:auto;
-    color:white;
-    min-height:100vh;
-    padding:30px;
+/* TOP POSITION */
+
+.top .card{
+    bottom:25px;
+    left:-95px;
+
+    transform:rotate(60deg);
 }
 
-h1{
+/* BOTTOM POSITION */
+
+.bottom .card{
+    top:25px;
+    left:-95px;
+
+    transform:rotate(-60deg);
+}
+
+/* CATEGORY TITLE */
+
+.card h2{
+    background:#7dd3fc;
+
+    color:#0f172a;
+
+    padding:8px;
+
+    border-radius:6px;
+
     text-align:center;
-    margin-bottom:40px;
-    font-size:48px;
-    letter-spacing:2px;
+
+    font-size:22px;
+
+    margin-bottom:10px;
 }
 
-.fishbone{
-    position:relative;
-    width:1700px;
-    height:850px;
-    margin:auto;
+/* BOXED LIST */
+
+.card ul{
+    list-style:none;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
 }
 
-/* BODY */
+/* EACH POINT BOX */
 
-.body{
-    position:absolute;
-    left:220px;
-    top:80px;
-
-    width:1150px;
-    height:650px;
-
-    background:#00152b;
-
-    border-radius:50%;
-}
-
-/* SPINE */
-
-.spine{
-    position:absolute;
-    width:760px;
-    height:5px;
-
+.card li{
     background:white;
 
-    top:50%;
-    left:180px;
-}
+    border:1px solid #cbd5e1;
 
-/* TAIL */
+    border-radius:5px;
 
-.tail{
-    position:absolute;
-    top:280px;
-    left:70px;
+    padding:8px;
 
-    width:0;
-    height:0;
+    font-size:15px;
 
-    border-top:150px solid transparent;
-    border-bottom:150px solid transparent;
-    border-right:220px solid #00152b;
-}
+    color:#0f172a;
 
-/* HEAD */
+    text-align:center;
 
-.head{
-    position:absolute;
-    right:70px;
-    top:320px;
-
-    width:260px;
-    height:140px;
-
-    background:#003f73;
-
-    border-radius:90px;
+    min-height:38px;
 
     display:flex;
     align-items:center;
     justify-content:center;
 }
 
-.eye{
-    position:absolute;
-    left:-28px;
+/* EDIT MODE */
 
-    width:28px;
-    height:28px;
-
-    border:4px solid #53d8ff;
-    border-radius:50%;
-}
-
-.eye::after{
-    content:"";
-
-    position:absolute;
-    top:5px;
-    left:5px;
-
-    width:10px;
-    height:10px;
-
-    background:#53d8ff;
-
-    border-radius:50%;
-}
-
-/* PROBLEM */
-
-.problem{
-    width:180px;
-    text-align:center;
-    font-size:28px;
-    font-weight:bold;
-}
-
-/* BRANCHES */
-
-.branch{
-    position:absolute;
-    width:180px;
-    height:4px;
-    background:white;
-}
-
-.top{
-    transform:rotate(-60deg);
-}
-
-.bottom{
-    transform:rotate(60deg);
-}
-
-/* POSITIONS */
-
-.b1{ top:140px; left:230px; }
-.b2{ top:140px; left:520px; }
-.b3{ top:140px; left:810px; }
-
-.b4{ top:420px; left:230px; }
-.b5{ top:420px; left:520px; }
-.b6{ top:420px; left:810px; }
-
-/* CARDS */
-
-.card{
-    position:absolute;
-    width:240px;
-}
-
-.top .card{
-    bottom:30px;
-    left:-90px;
-    transform:rotate(60deg);
-}
-
-.bottom .card{
-    top:30px;
-    left:-90px;
-    transform:rotate(-60deg);
-}
-
-.card h2{
-    color:#ffd43b;
-    margin-bottom:10px;
-    text-align:center;
-    font-size:30px;
-}
-
-/* LIST */
-
-.card ul{
-    list-style:none;
-
-    border-top:2px solid rgba(255,255,255,0.5);
-
-    padding-top:12px;
-
-    min-height:150px;
-}
-
-.card li{
-    margin:14px 0;
-    text-align:center;
-    font-size:22px;
-    color:#f1f5f9;
+.card li:focus{
+    border:2px solid #38bdf8;
+    outline:none;
 }
 
 /* EDITABLE */
