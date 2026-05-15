@@ -5,83 +5,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creative Fishbone Diagram</title>
+  <title>Fishbone Diagram</title>
   <link rel="stylesheet" href="fishbone.css">
 </head>
 <body>
 
-<div class="container">
+<div class="ocean"></div>
 
-    <h1>CREATIVE FISHBONE DIAGRAM</h1>
+<h1>CREATIVE FISHBONE DIAGRAM</h1>
 
-    <div class="fish">
+<div class="fish-wrapper">
 
-        <!-- TAIL -->
-        <div class="tail"></div>
+    <!-- FISH TAIL -->
+    <div class="tail"></div>
 
-        <!-- BODY -->
-        <div class="body">
+    <!-- FISH BODY -->
+    <div class="fish-body">
 
-            <!-- TOP BONES -->
+        <!-- MAIN SPINE -->
+        <div class="spine"></div>
 
-            <div class="bone top bone1">
-                <div class="box">
-                    <h3>Materials</h3>
-                    <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
-                </div>
+        <!-- TOP BONES -->
+
+        <div class="bone top bone1">
+            <div class="content">
+                <h3>Materials</h3>
+                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
             </div>
-
-            <div class="bone top bone2">
-                <div class="box">
-                    <h3>Methods</h3>
-                    <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
-                </div>
-            </div>
-
-            <div class="bone top bone3">
-                <div class="box">
-                    <h3>Machines</h3>
-                    <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
-                </div>
-            </div>
-
-            <!-- BOTTOM BONES -->
-
-            <div class="bone bottom bone4">
-                <div class="box">
-                    <h3>Measurement</h3>
-                    <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
-                </div>
-            </div>
-
-            <div class="bone bottom bone5">
-                <div class="box">
-                    <h3>Environment</h3>
-                    <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
-                </div>
-            </div>
-
-            <div class="bone bottom bone6">
-                <div class="box">
-                    <h3>People</h3>
-                    <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
-                </div>
-            </div>
-
-            <!-- SPINE -->
-            <div class="spine"></div>
-
         </div>
 
-        <!-- HEAD -->
-        <div class="head">
-
-            <div class="eye"></div>
-
-            <div class="problem">
-                <textarea id="problemText" placeholder="Problem Statement"></textarea>
+        <div class="bone top bone2">
+            <div class="content">
+                <h3>Methods</h3>
+                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
             </div>
+        </div>
 
+        <div class="bone top bone3">
+            <div class="content">
+                <h3>Machines</h3>
+                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+            </div>
+        </div>
+
+        <!-- BOTTOM BONES -->
+
+        <div class="bone bottom bone4">
+            <div class="content">
+                <h3>Measurement</h3>
+                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+            </div>
+        </div>
+
+        <div class="bone bottom bone5">
+            <div class="content">
+                <h3>Environment</h3>
+                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+            </div>
+        </div>
+
+        <div class="bone bottom bone6">
+            <div class="content">
+                <h3>People</h3>
+                <textarea placeholder="Cause 1&#10;Cause 2&#10;Cause 3"></textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FISH HEAD -->
+    <div class="fish-head">
+
+        <div class="eye"></div>
+
+        <div class="problem-box">
+            <textarea id="problemText" placeholder="Problem Statement"></textarea>
         </div>
 
     </div>
