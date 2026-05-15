@@ -1,3 +1,3 @@
-// fishbone.js
+// FILE NAME: fishbone.js
 
-console.log("Professional Fishbone Loaded");
+console.log("Fishbone Diagram Ready");
