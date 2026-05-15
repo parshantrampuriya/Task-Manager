@@ -1,0 +1,79 @@
+<!-- File: fishbone.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fishbone Analysis Tool</title>
+  <link rel="stylesheet" href="fishbone.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <header>
+      <h1>Fishbone Analysis</h1>
+      <p>Cause & Effect Diagram Generator</p>
+    </header>
+
+    <section class="problem-box">
+      <label>Main Problem / Effect</label>
+      <input type="text" id="mainProblem" placeholder="Example: Furnace Temperature Variation">
+    </section>
+
+    <section class="fishbone-area">
+
+      <div class="bone top">
+        <div class="category">
+          <h3>Man</h3>
+          <textarea placeholder="Operator error&#10;Lack of training"></textarea>
+        </div>
+
+        <div class="category">
+          <h3>Machine</h3>
+          <textarea placeholder="Burner issue&#10;Sensor failure"></textarea>
+        </div>
+
+        <div class="category">
+          <h3>Method</h3>
+          <textarea placeholder="Improper SOP&#10;Wrong sequence"></textarea>
+        </div>
+      </div>
+
+      <div class="spine">
+        <div class="arrow"></div>
+        <div class="effect-box" id="effectText">
+          Problem
+        </div>
+      </div>
+
+      <div class="bone bottom">
+        <div class="category">
+          <h3>Material</h3>
+          <textarea placeholder="Poor refractory&#10;Low gas quality"></textarea>
+        </div>
+
+        <div class="category">
+          <h3>Measurement</h3>
+          <textarea placeholder="Calibration error&#10;Wrong readings"></textarea>
+        </div>
+
+        <div class="category">
+          <h3>Environment</h3>
+          <textarea placeholder="Humidity&#10;Dust"></textarea>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="btn-area">
+      <button id="updateBtn">Update Problem</button>
+      <button onclick="window.print()">Print / Save PDF</button>
+      <button id="clearBtn">Clear All</button>
+    </div>
+
+  </div>
+
+  <script src="fishbone.js"></script>
+</body>
+</html>
