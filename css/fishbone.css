@@ -1,4 +1,4 @@
-/* FILE NAME: fishbone.css */
+/* REPLACE YOUR COMPLETE fishbone.css WITH THIS FIXED VERSION */
 
 *{
     margin:0;
@@ -9,23 +9,22 @@
 
 body{
     background:#ececec;
-    min-height:100vh;
     overflow-x:auto;
     padding:20px;
 }
 
 h1{
-    font-size:55px;
+    font-size:60px;
     margin-bottom:40px;
     color:#111;
 }
 
-/* CONTAINER */
+/* MAIN CONTAINER */
 
 .fishbone-container{
     position:relative;
-    width:1700px;
-    height:900px;
+    width:1800px;
+    height:850px;
     margin:auto;
 }
 
@@ -33,67 +32,65 @@ h1{
 
 .main-body{
     position:absolute;
-    top:380px;
-    left:200px;
+    left:250px;
+    top:370px;
 
-    width:1100px;
+    width:1150px;
     height:70px;
 
-    background:linear-gradient(to bottom,#7f7f7f,#2c2c2c,#7f7f7f);
+    background:linear-gradient(to bottom,#8a8a8a,#2b2b2b,#8a8a8a);
 
-    border-radius:10px;
+    border-radius:12px;
 
-    box-shadow:0 0 15px rgba(0,0,0,0.4);
+    box-shadow:0 0 18px rgba(0,0,0,0.4);
 }
 
 /* TAIL */
 
 .tail{
     position:absolute;
-    left:80px;
-    top:310px;
+    left:120px;
+    top:285px;
 
     width:0;
     height:0;
 
-    border-top:130px solid transparent;
-    border-bottom:130px solid transparent;
-    border-right:140px solid #00a2df;
-
-    filter:drop-shadow(0 0 8px rgba(0,0,0,0.3));
+    border-top:155px solid transparent;
+    border-bottom:155px solid transparent;
+    border-right:170px solid #139dd4;
 }
 
 /* HEAD */
 
 .head{
     position:absolute;
-    right:170px;
-    top:290px;
+    right:120px;
+    top:250px;
 
-    width:180px;
-    height:250px;
+    width:190px;
+    height:290px;
 
-    background:linear-gradient(135deg,#0076d6,#35d3ff);
+    background:linear-gradient(135deg,#0076d8,#39d5ff);
 
-    border-radius:50% 45% 45% 50%;
+    border-radius:48% 52% 45% 55%;
 
-    transform:rotate(-10deg);
+    transform:rotate(-8deg);
 
-    box-shadow:0 0 12px rgba(0,0,0,0.3);
+    box-shadow:0 0 15px rgba(0,0,0,0.3);
 }
 
 /* EYE */
 
 .eye{
     position:absolute;
-    width:40px;
-    height:40px;
+    width:42px;
+    height:42px;
 
     background:white;
 
     border-radius:50%;
 
-    top:60px;
+    top:70px;
     left:45px;
 }
 
@@ -108,13 +105,13 @@ h1{
 
     border-radius:50%;
 
-    bottom:30px;
-    right:30px;
+    right:35px;
+    bottom:35px;
 
-    transform:rotate(20deg);
+    transform:rotate(18deg);
 }
 
-/* BRANCHES */
+/* BRANCH LINE */
 
 .branch{
     position:absolute;
@@ -124,78 +121,77 @@ h1{
     background:#222;
 }
 
-/* TOP */
+/* TOP BRANCH */
 
 .top{
     transform:rotate(-60deg);
 }
 
-/* BOTTOM */
+/* BOTTOM BRANCH */
 
 .bottom{
     transform:rotate(60deg);
 }
 
-/* POSITIONS */
+/* PERFECT POSITIONS */
 
 .branch1{
-    left:350px;
-    top:160px;
+    left:500px;
+    top:200px;
 }
 
 .branch2{
-    left:650px;
-    top:160px;
+    left:800px;
+    top:200px;
 }
 
 .branch3{
-    left:950px;
-    top:160px;
+    left:1100px;
+    top:200px;
 }
 
 .branch4{
-    left:350px;
-    top:470px;
+    left:500px;
+    top:460px;
 }
 
 .branch5{
-    left:650px;
-    top:470px;
+    left:800px;
+    top:460px;
 }
 
 .branch6{
-    left:950px;
-    top:470px;
+    left:1100px;
+    top:460px;
 }
 
-/* CATEGORY */
+/* CATEGORY OVAL */
 
 .category{
     position:absolute;
 
-    width:140px;
-    height:60px;
+    width:150px;
+    height:65px;
 
-    background:linear-gradient(to bottom,#38bdf8,#0062b8);
+    background:linear-gradient(to bottom,#42c6ff,#0067c0);
 
     border-radius:50%;
-
-    color:white;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
+    color:white;
     font-size:20px;
     font-weight:bold;
 
-    box-shadow:0 0 10px rgba(0,0,0,0.3);
+    box-shadow:0 0 12px rgba(0,0,0,0.3);
 }
 
 /* TOP CATEGORY */
 
 .top .category{
-    top:-70px;
+    top:-78px;
     left:-10px;
 
     transform:rotate(60deg);
@@ -204,34 +200,33 @@ h1{
 /* BOTTOM CATEGORY */
 
 .bottom .category{
-    bottom:-70px;
+    bottom:-78px;
     left:-10px;
 
     transform:rotate(-60deg);
 }
 
-/* POINTS */
+/* POINTS AREA */
 
 .points{
     position:absolute;
-
-    width:220px;
+    width:240px;
 }
 
-/* TOP POINTS */
+/* TOP TEXT */
 
 .top .points{
-    top:60px;
-    left:-120px;
+    top:70px;
+    left:-130px;
 
     transform:rotate(60deg);
 }
 
-/* BOTTOM POINTS */
+/* BOTTOM TEXT */
 
 .bottom .points{
-    bottom:60px;
-    left:-120px;
+    bottom:70px;
+    left:-130px;
 
     transform:rotate(-60deg);
 }
@@ -239,22 +234,23 @@ h1{
 /* TEXT LINES */
 
 .points div{
+    width:220px;
+
     margin:18px 0;
 
-    border-bottom:2px solid #555;
+    padding-bottom:6px;
 
-    padding-bottom:5px;
+    border-bottom:2px solid #666;
 
-    min-height:30px;
-
-    font-size:18px;
+    font-size:20px;
     font-weight:bold;
+
     color:#111;
 
     outline:none;
 }
 
-/* EDITABLE HOVER */
+/* ACTIVE EDIT */
 
 .points div:focus{
     border-bottom:2px solid #0077ff;
