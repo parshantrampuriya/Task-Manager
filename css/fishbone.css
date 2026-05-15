@@ -1,4 +1,5 @@
-/* REPLACE YOUR COMPLETE fishbone.css WITH THIS FIXED VERSION */
+/* COMPLETE FIXED STRUCTURE CSS */
+/* REPLACE ENTIRE fishbone.css */
 
 *{
     margin:0;
@@ -10,65 +11,75 @@
 body{
     background:#ececec;
     overflow-x:auto;
-    padding:20px;
+    padding:30px;
 }
 
 h1{
-    font-size:60px;
+    font-size:58px;
     margin-bottom:40px;
     color:#111;
 }
 
-/* MAIN CONTAINER */
+/* MAIN AREA */
 
 .fishbone-container{
     position:relative;
     width:1800px;
-    height:850px;
+    height:900px;
     margin:auto;
 }
 
-/* MAIN BODY */
+/* FISH BODY */
 
 .main-body{
     position:absolute;
-    left:250px;
-    top:370px;
 
-    width:1150px;
+    left:260px;
+    top:390px;
+
+    width:1100px;
     height:70px;
-
-    background:linear-gradient(to bottom,#8a8a8a,#2b2b2b,#8a8a8a);
 
     border-radius:12px;
 
-    box-shadow:0 0 18px rgba(0,0,0,0.4);
+    background:
+    linear-gradient(
+        to bottom,
+        #9e9e9e 0%,
+        #2e2e2e 45%,
+        #111 50%,
+        #555 100%
+    );
+
+    box-shadow:0 0 18px rgba(0,0,0,0.35);
 }
 
 /* TAIL */
 
 .tail{
     position:absolute;
+
     left:120px;
-    top:285px;
+    top:300px;
 
     width:0;
     height:0;
 
-    border-top:155px solid transparent;
-    border-bottom:155px solid transparent;
-    border-right:170px solid #139dd4;
+    border-top:150px solid transparent;
+    border-bottom:150px solid transparent;
+    border-right:180px solid #1699d1;
 }
 
 /* HEAD */
 
 .head{
     position:absolute;
-    right:120px;
+
+    right:110px;
     top:250px;
 
     width:190px;
-    height:290px;
+    height:300px;
 
     background:linear-gradient(135deg,#0076d8,#39d5ff);
 
@@ -83,6 +94,7 @@ h1{
 
 .eye{
     position:absolute;
+
     width:42px;
     height:42px;
 
@@ -98,6 +110,7 @@ h1{
 
 .mouth{
     position:absolute;
+
     width:70px;
     height:120px;
 
@@ -113,56 +126,59 @@ h1{
 
 /* BRANCH LINE */
 
-.branch{
+.branch-line{
     position:absolute;
-    width:180px;
+
+    width:190px;
     height:4px;
 
     background:#222;
 }
 
-/* TOP BRANCH */
+/* TOP */
 
-.top{
+.top-line{
     transform:rotate(-60deg);
 }
 
-/* BOTTOM BRANCH */
+/* BOTTOM */
 
-.bottom{
+.bottom-line{
     transform:rotate(60deg);
 }
 
-/* PERFECT POSITIONS */
+/* TOP POSITIONS */
 
-.branch1{
-    left:500px;
-    top:200px;
+.line1{
+    left:520px;
+    top:210px;
 }
 
-.branch2{
-    left:800px;
-    top:200px;
+.line2{
+    left:820px;
+    top:210px;
 }
 
-.branch3{
-    left:1100px;
-    top:200px;
+.line3{
+    left:1120px;
+    top:210px;
 }
 
-.branch4{
-    left:500px;
-    top:460px;
+/* BOTTOM POSITIONS */
+
+.line4{
+    left:520px;
+    top:470px;
 }
 
-.branch5{
-    left:800px;
-    top:460px;
+.line5{
+    left:820px;
+    top:470px;
 }
 
-.branch6{
-    left:1100px;
-    top:460px;
+.line6{
+    left:1120px;
+    top:470px;
 }
 
 /* CATEGORY OVAL */
@@ -173,7 +189,7 @@ h1{
     width:150px;
     height:65px;
 
-    background:linear-gradient(to bottom,#42c6ff,#0067c0);
+    background:linear-gradient(to bottom,#45c9ff,#006bc2);
 
     border-radius:50%;
 
@@ -182,6 +198,7 @@ h1{
     justify-content:center;
 
     color:white;
+
     font-size:20px;
     font-weight:bold;
 
@@ -190,8 +207,8 @@ h1{
 
 /* TOP CATEGORY */
 
-.top .category{
-    top:-78px;
+.top-category{
+    top:-80px;
     left:-10px;
 
     transform:rotate(60deg);
@@ -199,50 +216,51 @@ h1{
 
 /* BOTTOM CATEGORY */
 
-.bottom .category{
-    bottom:-78px;
+.bottom-category{
+    bottom:-80px;
     left:-10px;
 
     transform:rotate(-60deg);
 }
 
-/* POINTS AREA */
+/* POINTS */
 
 .points{
     position:absolute;
-    width:240px;
+
+    width:230px;
 }
 
-/* TOP TEXT */
+/* TOP POINTS */
 
-.top .points{
+.top-points{
     top:70px;
-    left:-130px;
+    left:-140px;
 
     transform:rotate(60deg);
 }
 
-/* BOTTOM TEXT */
+/* BOTTOM POINTS */
 
-.bottom .points{
+.bottom-points{
     bottom:70px;
-    left:-130px;
+    left:-140px;
 
     transform:rotate(-60deg);
 }
 
-/* TEXT LINES */
+/* TEXT ITEMS */
 
 .points div{
     width:220px;
 
-    margin:18px 0;
+    margin:14px 0;
 
-    padding-bottom:6px;
+    padding-bottom:5px;
 
-    border-bottom:2px solid #666;
+    border-bottom:2px solid #777;
 
-    font-size:20px;
+    font-size:18px;
     font-weight:bold;
 
     color:#111;
@@ -250,7 +268,7 @@ h1{
     outline:none;
 }
 
-/* ACTIVE EDIT */
+/* ACTIVE */
 
 .points div:focus{
     border-bottom:2px solid #0077ff;
