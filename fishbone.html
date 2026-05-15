@@ -1,79 +1,90 @@
-<!-- File: fishbone.html -->
+<!-- FILE NAME: fishbone.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fishbone Analysis Tool</title>
-  <link rel="stylesheet" href="fishbone.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fishbone Analysis Diagram</title>
+  <link rel="stylesheet" href="fishbone.css">
 </head>
 <body>
 
-  <div class="container">
+<div class="page">
 
-    <header>
-      <h1>Fishbone Analysis</h1>
-      <p>Cause & Effect Diagram Generator</p>
-    </header>
+  <div class="top-section">
+    <h1>Fishbone Analysis</h1>
 
-    <section class="problem-box">
-      <label>Main Problem / Effect</label>
-      <input type="text" id="mainProblem" placeholder="Example: Furnace Temperature Variation">
-    </section>
+    <div class="problem-input">
+      <input type="text" id="problemInput" placeholder="Enter Main Problem">
+      <button id="updateBtn">Update Diagram</button>
+    </div>
+  </div>
 
-    <section class="fishbone-area">
+  <div class="diagram-container">
 
-      <div class="bone top">
-        <div class="category">
-          <h3>Man</h3>
-          <textarea placeholder="Operator error&#10;Lack of training"></textarea>
-        </div>
-
-        <div class="category">
-          <h3>Machine</h3>
-          <textarea placeholder="Burner issue&#10;Sensor failure"></textarea>
-        </div>
-
-        <div class="category">
-          <h3>Method</h3>
-          <textarea placeholder="Improper SOP&#10;Wrong sequence"></textarea>
-        </div>
+    <!-- TOP BONES -->
+    <div class="bone bone1 top">
+      <div class="card">
+        <h3>Man</h3>
+        <textarea id="man">Operator error
+Lack of training</textarea>
       </div>
+    </div>
 
-      <div class="spine">
-        <div class="arrow"></div>
-        <div class="effect-box" id="effectText">
-          Problem
-        </div>
+    <div class="bone bone2 top">
+      <div class="card">
+        <h3>Machine</h3>
+        <textarea id="machine">Burner issue
+Sensor failure</textarea>
       </div>
+    </div>
 
-      <div class="bone bottom">
-        <div class="category">
-          <h3>Material</h3>
-          <textarea placeholder="Poor refractory&#10;Low gas quality"></textarea>
-        </div>
-
-        <div class="category">
-          <h3>Measurement</h3>
-          <textarea placeholder="Calibration error&#10;Wrong readings"></textarea>
-        </div>
-
-        <div class="category">
-          <h3>Environment</h3>
-          <textarea placeholder="Humidity&#10;Dust"></textarea>
-        </div>
+    <div class="bone bone3 top">
+      <div class="card">
+        <h3>Method</h3>
+        <textarea id="method">Improper SOP
+Wrong sequence</textarea>
       </div>
+    </div>
 
-    </section>
+    <!-- MAIN SPINE -->
+    <div class="main-line"></div>
 
-    <div class="btn-area">
-      <button id="updateBtn">Update Problem</button>
-      <button onclick="window.print()">Print / Save PDF</button>
-      <button id="clearBtn">Clear All</button>
+    <!-- PROBLEM BOX -->
+    <div class="problem-box" id="problemBox">
+      Furnace Temperature Variation
+    </div>
+
+    <!-- BOTTOM BONES -->
+    <div class="bone bone4 bottom">
+      <div class="card">
+        <h3>Material</h3>
+        <textarea id="material">Poor refractory
+Low gas quality</textarea>
+      </div>
+    </div>
+
+    <div class="bone bone5 bottom">
+      <div class="card">
+        <h3>Measurement</h3>
+        <textarea id="measurement">Calibration error
+Wrong readings</textarea>
+      </div>
+    </div>
+
+    <div class="bone bone6 bottom">
+      <div class="card">
+        <h3>Environment</h3>
+        <textarea id="environment">Humidity
+Dust</textarea>
+      </div>
     </div>
 
   </div>
 
-  <script src="fishbone.js"></script>
+</div>
+
+<script src="fishbone.js"></script>
+
 </body>
 </html>
