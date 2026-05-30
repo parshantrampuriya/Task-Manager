@@ -170,7 +170,7 @@ html+=`
 
 <div
 class="goal-card"
-onclick="openGoal('${g.id}')">
+data-id="${g.id}">
 
 <h3>
 ${g.name}
@@ -585,6 +585,26 @@ container.innerHTML = html;
 
 }
 
+
+document
+.querySelectorAll(".goal-card")
+.forEach(card=>{
+
+card.addEventListener(
+"click",
+()=>{
+
+const id =
+card.dataset.id;
+
+location.href =
+`goal-details.html?id=${id}`;
+
+}
+
+);
+
+});
 /* ================= AI INSIGHTS ================= */
 
 function generateInsights(){
