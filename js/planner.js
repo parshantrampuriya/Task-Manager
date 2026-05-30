@@ -168,7 +168,9 @@ goals.forEach(g=>{
 
 html+=`
 
-<div class="goal-card">
+<div
+class="goal-card"
+onclick="openGoal('${g.id}')">
 
 <h3>
 ${g.name}
