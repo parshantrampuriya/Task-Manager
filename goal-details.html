@@ -4,77 +4,183 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Goal Details</title>
 
-<style>
-
-body{
-background:#111827;
-color:white;
-font-family:Arial;
-padding:20px;
-}
-
-.card{
-background:#1f2937;
-padding:15px;
-border-radius:15px;
-margin-bottom:15px;
-}
-
-input{
-width:100%;
-padding:12px;
-margin:8px 0;
-border:none;
-border-radius:10px;
-}
-
-button{
-padding:12px;
-background:#00ff99;
-border:none;
-border-radius:10px;
-cursor:pointer;
-}
-
-</style>
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/goal-details.css">
 
 </head>
 
 <body>
 
-<h1 id="goalName">
-Goal
-</h1>
+<div class="container">
+
+<!-- GOAL HEADER -->
+
+<div class="goal-header">
+
+<h1 id="goalName">Loading...</h1>
+
+<p id="goalCategory"></p>
+
+<p id="goalDescription"></p>
+
+<p>
+🎯 Priority:
+<span id="goalPriority"></span>
+</p>
+
+<p>
+📅 Target:
+<span id="goalTarget"></span>
+</p>
+
+</div>
+
+<!-- PROGRESS -->
 
 <div class="card">
 
-<h2>Add Milestone</h2>
+<h3>Overall Progress</h3>
+
+<div class="progress-bar">
+
+<div id="goalProgressFill"
+class="progress-fill">
+
+</div>
+
+</div>
+
+<p id="goalProgressText">
+0%
+</p>
+
+</div>
+
+<!-- STATS -->
+
+<div class="card">
+
+<h3>Statistics</h3>
+
+<div class="stats-grid">
+
+<div>
+<h2 id="totalMilestones">0</h2>
+<p>Milestones</p>
+</div>
+
+<div>
+<h2 id="completedMilestones">0</h2>
+<p>Completed</p>
+</div>
+
+<div>
+<h2 id="remainingMilestones">0</h2>
+<p>Remaining</p>
+</div>
+
+</div>
+
+</div>
+
+<!-- HEALTH -->
+
+<div class="card">
+
+<h3>Goal Health</h3>
+
+<h2 id="goalHealth">
+
+🟢 On Track
+
+</h2>
+
+</div>
+
+<!-- ADD MILESTONE -->
+
+<div class="card">
+
+<h3>Add Milestone</h3>
 
 <input
 id="milestoneName"
 placeholder="Milestone Name">
 
-<button
-onclick="addMilestone()">
+<input
+type="date"
+id="milestoneDate">
 
-Add Milestone
+<input
+type="number"
+id="milestoneProgress"
+placeholder="Progress %">
+
+<select id="milestoneStatus">
+
+<option>Not Started</option>
+<option>In Progress</option>
+<option>Completed</option>
+<option>Blocked</option>
+
+</select>
+
+<button onclick="addMilestone()">
+
+➕ Add Milestone
 
 </button>
 
 </div>
 
-<div id="milestoneContainer">
+<!-- TIMELINE -->
+
+<div class="card">
+
+<h3>Roadmap Timeline</h3>
+
+<div id="timelineContainer"></div>
+
+</div>
+
+<!-- MILESTONES -->
+
+<div class="card">
+
+<h3>Milestones</h3>
+
+<div id="milestoneContainer"></div>
+
+</div>
+
+<!-- NOTES -->
+
+<div class="card">
+
+<h3>Goal Notes</h3>
+
+<textarea
+id="goalNotes"
+placeholder="Write notes">
+
+</textarea>
+
+<button onclick="saveNotes()">
+
+💾 Save Notes
+
+</button>
+
+</div>
 
 </div>
 
 <script type="module"
-src="js/goal-details.js">
-</script>
+src="js/goal-details.js"></script>
 
 </body>
-
 </html>
