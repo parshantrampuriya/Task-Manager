@@ -1200,20 +1200,3 @@ editProgressModal.style.display =
 ========================= */
 
 
-milestoneModal.style.display =
-"none";
-
-await loadMilestones();
-
-}catch(error){
-
-console.error(error);
-
-alert(
-"Error saving milestone"
-);
-
-}
-
-};
-
