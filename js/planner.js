@@ -1,254 +1,438 @@
-/* ================= IMPORTS ================= */
-
 import { auth, db } from "./firebase.js";
-
-import {
-onAuthStateChanged
-}
-from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
 collection,
 addDoc,
-onSnapshot
+getDocs,
+deleteDoc,
+updateDoc,
+doc,
+query,
+where
 }
-from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GLOBAL ================= */
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const goalContainer =
+document.getElementById("goalContainer");
+
+const createGoalBtn =
+document.getElementById("createGoalBtn");
+
+const goalModal =
+document.getElementById("goalModal");
+
+const saveGoalBtn =
+document.getElementById("saveGoalBtn");
+
+const cancelGoalBtn =
+document.getElementById("cancelGoalBtn");
+
+const searchInput =
+document.getElementById("searchInput");
+
+/* =========================
+   STATE
+========================= */
 
 let currentUser = null;
-
 let goals = [];
+let editGoalId = null;
 
-let visions = [];
+/* =========================
+   AUTH
+========================= */
 
-let reviews = [];
+onAuthStateChanged(auth, async (user) => {
 
-/* ================= AUTH ================= */
+if (!user) {
 
-onAuthStateChanged(auth,(user)=>{
+window.location.href =
+"index.html";
 
-if(!user){
-
-location.href="index.html";
 return;
 
 }
 
 currentUser = user;
 
-loadGoals();
+await loadGoals();
 
 });
 
-/* ================= LOAD GOALS ================= */
+/* =========================
+   MODAL
+========================= */
 
-function loadGoals(){
+createGoalBtn.onclick = () => {
 
-onSnapshot(
+editGoalId = null;
 
-collection(db,"plannerGoals"),
+document.getElementById("goalName").value = "";
+document.getElementById("startDate").value = "";
+document.getElementById("endDate").value = "";
+document.getElementById("goalDescription").value = "";
 
-(snapshot)=>{
+goalModal.style.display = "flex";
 
-goals=[];
+};
 
-snapshot.forEach(doc=>{
+cancelGoalBtn.onclick = () => {
 
-const g = doc.data();
+goalModal.style.display = "none";
 
-if(g.uid===currentUser.uid){
+};
 
-goals.push({
+/* =========================
+   SAVE GOAL
+========================= */
 
-id:doc.id,
-...g
-
-});
-
-}
-
-});
-
-renderGoals();
-
-updateDashboard();
-
-generateRoadmap();
-
-generateGantt();
-
-generateHealth();
-
-generateInsights();
-
-}
-
-);
-
-}
-
-/* ================= CREATE GOAL ================= */
-
-window.createGoal = async()=>{
+saveGoalBtn.onclick = async () => {
 
 const name =
-document.getElementById("goalName").value;
-
-const category =
-document.getElementById("goalCategory").value;
-
-const priority =
-document.getElementById("goalPriority").value;
+document.getElementById("goalName").value.trim();
 
 const startDate =
-document.getElementById("goalStartDate").value;
+document.getElementById("startDate").value;
 
-const targetDate =
-document.getElementById("goalTargetDate").value;
+const endDate =
+document.getElementById("endDate").value;
 
 const description =
 document.getElementById("goalDescription").value;
 
-if(!name){
+if (!name) {
 
-alert("Enter Goal Name");
+alert("Goal name required");
+
 return;
 
 }
 
-await addDoc(
+try {
 
-collection(db,"plannerGoals"),
+if (editGoalId) {
+
+await updateDoc(
+
+doc(db, "goals", editGoalId),
 
 {
-
-uid:currentUser.uid,
-
 name,
-category,
-priority,
-
 startDate,
-targetDate,
-
-description,
-
-progress:0,
-
-status:"On Track",
-
-createdAt:Date.now()
-
+endDate,
+description
 }
 
 );
 
-/* clear */
+} else {
 
-document.getElementById("goalName").value="";
-document.getElementById("goalDescription").value="";
+await addDoc(
+
+collection(db, "goals"),
+
+{
+uid: currentUser.uid,
+name,
+startDate,
+endDate,
+description,
+progress: 0,
+status: "active",
+createdAt: Date.now()
+}
+
+);
+
+}
+
+goalModal.style.display = "none";
+
+await loadGoals();
+
+} catch (error) {
+
+console.error(error);
+
+alert("Error saving goal");
+
+}
 
 };
 
-/* ================= GOALS ================= */
+/* =========================
+   LOAD GOALS
+========================= */
 
-function renderGoals(){
+async function loadGoals() {
 
-const container =
-document.getElementById("goalContainer");
+const q = query(
+collection(db, "goals"),
+where("uid", "==", currentUser.uid)
+);
 
-if(!container) return;
+const snapshot =
+await getDocs(q);
 
-let html="";
+goals = [];
 
-goals.forEach(g=>{
+snapshot.forEach((docSnap) => {
 
-html+=`
+goals.push({
+id: docSnap.id,
+...docSnap.data()
+});
 
-<div
-class="goal-card"
-data-id="${g.id}">
+});
+
+renderGoals();
+updateStats();
+
+}
+
+/* =========================
+   RENDER GOALS
+========================= */
+
+function renderGoals() {
+
+const searchText =
+searchInput.value.toLowerCase();
+
+goalContainer.innerHTML = "";
+
+const filteredGoals =
+goals.filter(goal =>
+goal.name
+.toLowerCase()
+.includes(searchText)
+);
+
+if (filteredGoals.length === 0) {
+
+goalContainer.innerHTML = `
+
+<div class="goal-card">
 
 <h3>
-${g.name}
+🎯 No Goals Found
 </h3>
 
 <p>
-📂 ${g.category}
-</p>
-
-<p>
-🎯 ${g.priority}
-</p>
-
-<p>
-📅 ${g.targetDate}
-</p>
-
-<div class="goal-progress">
-
-<div
-class="goal-progress-fill"
-style="width:${g.progress || 0}%">
-
-</div>
-
-</div>
-
-<p>
-${g.progress || 0}% Complete
+Create your first goal.
 </p>
 
 </div>
 
 `;
 
-});
-
-container.innerHTML =
-html || "<p>No Goals Yet</p>";
+return;
 
 }
 
-/* ================= DASHBOARD ================= */
+filteredGoals.forEach(goal => {
 
-function updateDashboard(){
+const card =
+document.createElement("div");
 
-let active =
-goals.length;
+card.className =
+"goal-card";
 
-let completed =
-goals.filter(
-g=>g.progress>=100
-).length;
+card.innerHTML = `
 
-let progress=0;
+<div class="goal-title">
 
-goals.forEach(g=>{
+${goal.name}
 
-progress +=
-(g.progress || 0);
+</div>
+
+<div class="goal-info">
+
+📅 Start:
+${goal.startDate || "-"}
+
+</div>
+
+<div class="goal-info">
+
+🏁 End:
+${goal.endDate || "-"}
+
+</div>
+
+<div class="goal-progress">
+
+<div class="goal-progress-bar">
+
+<div
+class="goal-progress-fill"
+style="width:${goal.progress || 0}%">
+
+</div>
+
+</div>
+
+</div>
+
+<div class="goal-info">
+
+Progress:
+${goal.progress || 0}%
+
+</div>
+
+<div class="goal-status status-active">
+
+${goal.status || "active"}
+
+</div>
+
+<div class="goal-actions">
+
+<button
+class="edit-btn">
+
+✏ Edit
+
+</button>
+
+<button
+class="delete-btn">
+
+🗑 Delete
+
+</button>
+
+</div>
+
+`;
+
+card.addEventListener("click", () => {
+
+window.location.href =
+`goal-details.html?id=${goal.id}`;
 
 });
 
-let avg = active
-? Math.round(progress/active)
-: 0;
+card.querySelector(".edit-btn")
+.addEventListener("click",
+(e) => {
 
-/* life score */
+e.stopPropagation();
 
-let lifeScore =
-Math.min(
-100,
-Math.round(avg*1.1)
+editGoal(goal);
+
+});
+
+card.querySelector(".delete-btn")
+.addEventListener("click",
+async (e) => {
+
+e.stopPropagation();
+
+const ok =
+confirm(
+"Delete this goal?"
 );
 
-document.getElementById(
-"lifeScore"
-).innerText = lifeScore;
+if (!ok) return;
+
+await deleteDoc(
+doc(
+db,
+"goals",
+goal.id
+)
+);
+
+await loadGoals();
+
+});
+
+goalContainer.appendChild(card);
+
+});
+
+}
+
+/* =========================
+   EDIT
+========================= */
+
+function editGoal(goal) {
+
+editGoalId = goal.id;
+
+document.getElementById("goalName").value =
+goal.name || "";
+
+document.getElementById("startDate").value =
+goal.startDate || "";
+
+document.getElementById("endDate").value =
+goal.endDate || "";
+
+document.getElementById("goalDescription").value =
+goal.description || "";
+
+goalModal.style.display =
+"flex";
+
+}
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats() {
+
+const active =
+goals.filter(
+g => g.status !== "completed"
+).length;
+
+const completed =
+goals.filter(
+g => g.status === "completed"
+).length;
+
+const overdue =
+goals.filter(g => {
+
+if (!g.endDate)
+return false;
+
+return (
+new Date(g.endDate)
+< new Date()
+&& g.progress < 100
+);
+
+}).length;
+
+const overall =
+goals.length
+?
+Math.round(
+
+goals.reduce(
+(sum, g) =>
+sum + (g.progress || 0),
+0
+)
+/ goals.length
+
+)
+: 0;
 
 document.getElementById(
 "activeGoals"
@@ -259,397 +443,31 @@ document.getElementById(
 ).innerText = completed;
 
 document.getElementById(
+"overdueGoals"
+).innerText = overdue;
+
+document.getElementById(
 "overallProgress"
-).innerText = avg+"%";
-
-/* XP */
-
-let xp =
-completed*100 +
-active*20;
-
-let level =
-Math.floor(xp/100)+1;
-
-let current =
-xp%100;
-
-document.getElementById(
-"levelText"
 ).innerText =
-`Level ${level}`;
+overall + "%";
 
 document.getElementById(
-"xpText"
+"progressText"
 ).innerText =
-`${current}/100 XP`;
+overall + "%";
 
 document.getElementById(
-"xpFill"
+"progressFill"
 ).style.width =
-current+"%";
+overall + "%";
 
 }
 
-/* ================= ROADMAP ================= */
+/* =========================
+   SEARCH
+========================= */
 
-function generateRoadmap(){
-
-const container =
-document.getElementById(
-"roadmapContainer"
+searchInput.addEventListener(
+"input",
+renderGoals
 );
-
-if(!container) return;
-
-let html="";
-
-goals.forEach(g=>{
-
-html+=`
-
-<div class="road-item">
-
-<h4>
-${g.name}
-</h4>
-
-<p>
-📅 ${g.targetDate}
-</p>
-
-<p>
-${g.category}
-</p>
-
-</div>
-
-`;
-
-});
-
-container.innerHTML = html;
-
-}
-
-/* ================= GANTT ================= */
-
-function generateGantt(){
-
-const container =
-document.getElementById(
-"ganttContainer"
-);
-
-if(!container) return;
-
-let html="";
-
-goals.forEach(g=>{
-
-let width =
-Math.max(
-(g.progress || 10),
-10
-);
-
-html+=`
-
-<div class="gantt-row">
-
-<div class="gantt-name">
-
-${g.name}
-
-</div>
-
-<div
-class="gantt-bar"
-style="width:${width}%">
-
-</div>
-
-</div>
-
-`;
-
-});
-
-container.innerHTML = html;
-
-}
-
-/* ================= HEALTH ================= */
-
-function generateHealth(){
-
-const container =
-document.getElementById(
-"healthContainer"
-);
-
-if(!container) return;
-
-let html="";
-
-goals.forEach(g=>{
-
-let cls =
-"health-good";
-
-let status =
-"🟢 On Track";
-
-if(g.progress < 30){
-
-cls="health-danger";
-
-status="🔴 Delayed";
-
-}else if(
-g.progress < 60
-){
-
-cls="health-warning";
-
-status="🟡 At Risk";
-
-}
-
-html+=`
-
-<div class="health-card ${cls}">
-
-<h4>
-${g.name}
-</h4>
-
-<p>
-${status}
-</p>
-
-<p>
-${g.progress || 0}% Complete
-</p>
-
-</div>
-
-`;
-
-});
-
-container.innerHTML = html;
-
-}
-
-/* ================= VISION BOARD ================= */
-
-window.addVision = ()=>{
-
-const title =
-document.getElementById(
-"visionTitle"
-).value;
-
-const image =
-document.getElementById(
-"visionImage"
-).value;
-
-if(!title || !image){
-
-alert("Enter title & image");
-return;
-
-}
-
-visions.push({
-title,
-image
-});
-
-renderVision();
-
-};
-
-function renderVision(){
-
-const board =
-document.getElementById(
-"visionBoard"
-);
-
-if(!board) return;
-
-let html="";
-
-visions.forEach(v=>{
-
-html+=`
-
-<div class="vision-card">
-
-<img src="${v.image}">
-
-<h4>
-${v.title}
-</h4>
-
-</div>
-
-`;
-
-});
-
-board.innerHTML = html;
-
-}
-
-/* ================= REVIEWS ================= */
-
-window.saveReview = ()=>{
-
-const month =
-document.getElementById(
-"reviewMonth"
-).value;
-
-const achievement =
-document.getElementById(
-"reviewAchievement"
-).value;
-
-const lesson =
-document.getElementById(
-"reviewLesson"
-).value;
-
-const focus =
-document.getElementById(
-"reviewFocus"
-).value;
-
-reviews.push({
-
-month,
-achievement,
-lesson,
-focus
-
-});
-
-renderReviews();
-
-};
-
-function renderReviews(){
-
-const container =
-document.getElementById(
-"reviewContainer"
-);
-
-if(!container) return;
-
-let html="";
-
-reviews.forEach(r=>{
-
-html+=`
-
-<div class="goal-card">
-
-<h3>
-${r.month}
-</h3>
-
-<p>
-✅ ${r.achievement}
-</p>
-
-<p>
-📚 ${r.lesson}
-</p>
-
-<p>
-🎯 ${r.focus}
-</p>
-
-</div>
-
-`;
-
-});
-
-container.innerHTML = html;
-
-}
-
-
-document
-.querySelectorAll(".goal-card")
-.forEach(card=>{
-
-card.addEventListener(
-"click",
-()=>{
-
-const id =
-card.dataset.id;
-
-location.href =
-`goal-details.html?id=${id}`;
-
-}
-
-);
-
-});
-/* ================= AI INSIGHTS ================= */
-
-function generateInsights(){
-
-const box =
-document.getElementById(
-"insightsBox"
-);
-
-if(!box) return;
-
-if(goals.length===0){
-
-box.innerHTML =
-"Create goals to receive insights.";
-
-return;
-
-}
-
-let highPriority =
-goals.filter(
-g=>g.priority==="High"
-).length;
-
-box.innerHTML = `
-
-🎯 Active Goals:
-${goals.length}
-
-🔥 High Priority Goals:
-${highPriority}
-
-📈 Average Progress:
-${document.getElementById("overallProgress").innerText}
-
-💡 Recommendation:
-Focus on goals below 50% completion.
-
-`;
-
-}
-window.openGoal=(id)=>{
-
-location.href =
-`goal-details.html?id=${id}`;
-
-};
