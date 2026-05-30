@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Habit Analytics</title>
+
+<link rel="stylesheet"
+href="css/sidebar.css">
+
+<link rel="stylesheet"
+href="css/habit-analytics.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="main">
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<button onclick="history.back()">
+⬅ Back
+</button>
+
+<h2>📊 Habit Analytics</h2>
+
+</div>
+
+<!-- STATS -->
+
+<div class="stats-grid">
+
+<div class="stat-card">
+
+<h3 id="totalHabits">0</h3>
+
+<p>Total Habits</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="totalCompletions">0</h3>
+
+<p>Completions</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="avgSuccess">0%</h3>
+
+<p>Success Rate</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="bestStreak">0</h3>
+
+<p>Best Streak</p>
+
+</div>
+
+</div>
+
+<!-- WEEKLY -->
+
+<div class="card">
+
+<h3>📅 Weekly Performance</h3>
+
+<canvas id="weeklyChart"></canvas>
+
+</div>
+
+<!-- MONTHLY -->
+
+<div class="card">
+
+<h3>📈 Monthly Trend</h3>
+
+<canvas id="monthlyChart"></canvas>
+
+</div>
+
+<!-- CATEGORY -->
+
+<div class="card">
+
+<h3>📚 Category Analysis</h3>
+
+<canvas id="categoryChart"></canvas>
+
+</div>
+
+<!-- XP -->
+
+<div class="card">
+
+<h3>⚡ XP Growth</h3>
+
+<canvas id="xpChart"></canvas>
+
+</div>
+
+<!-- TOP HABITS -->
+
+<div class="card">
+
+<h3>🏆 Top Performing Habits</h3>
+
+<div id="topHabits">
+
+</div>
+
+</div>
+
+<!-- STREAK TABLE -->
+
+<div class="card">
+
+<h3>🔥 Habit Rankings</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Habit</th>
+<th>Streak</th>
+<th>Completed</th>
+
+</tr>
+
+</thead>
+
+<tbody id="rankingTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- HEATMAP -->
+
+<div class="card">
+
+<h3>📊 Consistency Heatmap</h3>
+
+<div class="heat-grid">
+
+</div>
+
+</div>
+
+<!-- AI -->
+
+<div class="card">
+
+<h3>🤖 AI Recommendations</h3>
+
+<div id="aiSuggestions">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module"
+src="js/habit-analytics.js">
+</script>
+
+</body>
+</html>
