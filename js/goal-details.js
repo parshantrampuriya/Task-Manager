@@ -1198,7 +1198,7 @@ editProgressModal.style.display =
 /* =========================
    END
 ========================= */
-}
+
 
 milestoneModal.style.display =
 "none";
