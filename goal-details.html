@@ -1,177 +1,306 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>Goal Details</title>
 
-<link rel="stylesheet" href="css/sidebar.css">
-<link rel="stylesheet" href="css/goal-details.css">
+<link rel="stylesheet"
+href="css/goal-details.css">
+
+<link rel="stylesheet"
+href="css/sidebar.css">
 
 </head>
 
 <body>
 
-<div class="container">
+<!-- ================= SIDEBAR ================= -->
 
-<!-- GOAL HEADER -->
+<div id="sidebar" class="sidebar">
 
-<div class="goal-header">
+<h2>⚡ Menu</h2>
 
-<h1 id="goalName">Loading...</h1>
+<button onclick="goHome()">🏠 Home</button>
 
-<p id="goalCategory"></p>
+<button onclick="goTasks()">📋 Tasks</button>
 
-<p id="goalDescription"></p>
+<button onclick="goGoals()">🎯 Goals</button>
 
-<p>
-🎯 Priority:
-<span id="goalPriority"></span>
-</p>
+<button onclick="goFriends()">👥 Friends</button>
 
-<p>
-📅 Target:
-<span id="goalTarget"></span>
-</p>
+<button onclick="goQuestionBank()">📚 Question Bank</button>
 
-</div>
+<button onclick="goTests()">📝 Tests</button>
 
-<!-- PROGRESS -->
+<button onclick="goGrowth()">🌱 Growth Hub</button>
 
-<div class="card">
+<button onclick="goProfile()">👤 Profile</button>
 
-<h3>Overall Progress</h3>
-
-<div class="progress-bar">
-
-<div id="goalProgressFill"
-class="progress-fill">
+<button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
-</div>
+<!-- ================= MAIN ================= -->
 
-<p id="goalProgressText">
-0%
-</p>
+<div class="main">
 
-</div>
+<!-- ================= NAVBAR ================= -->
 
-<!-- STATS -->
+<div class="navbar">
 
-<div class="card">
+<button
+class="menu-btn"
+onclick="toggleSidebar()">
 
-<h3>Statistics</h3>
+☰
 
-<div class="stats-grid">
+</button>
 
-<div>
-<h2 id="totalMilestones">0</h2>
-<p>Milestones</p>
-</div>
+<h2>
 
-<div>
-<h2 id="completedMilestones">0</h2>
-<p>Completed</p>
-</div>
-
-<div>
-<h2 id="remainingMilestones">0</h2>
-<p>Remaining</p>
-</div>
-
-</div>
-
-</div>
-
-<!-- HEALTH -->
-
-<div class="card">
-
-<h3>Goal Health</h3>
-
-<h2 id="goalHealth">
-
-🟢 On Track
+🎯 Goal Details
 
 </h2>
 
 </div>
 
-<!-- ADD MILESTONE -->
+<!-- ================= CONTAINER ================= -->
 
-<div class="card">
+<div class="container">
 
-<h3>Add Milestone</h3>
+<!-- ================= GOAL HEADER ================= -->
+
+<div class="goal-header">
+
+<h1 id="goalTitle">
+
+Loading Goal...
+
+</h1>
+
+<p id="goalDescription">
+
+Goal Description
+
+</p>
+
+</div>
+
+<!-- ================= STATS ================= -->
+
+<div class="stats-grid">
+
+<div class="stat-card">
+
+<h3 id="activeMilestones">
+
+0
+
+</h3>
+
+<p>
+
+🎯 Active
+
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="completedMilestones">
+
+0
+
+</h3>
+
+<p>
+
+✅ Completed
+
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="overdueMilestones">
+
+0
+
+</h3>
+
+<p>
+
+⏰ Overdue
+
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="goalProgress">
+
+0%
+
+</h3>
+
+<p>
+
+📊 Goal Progress
+
+</p>
+
+</div>
+
+</div>
+
+<!-- ================= GOAL PROGRESS ================= -->
+
+<div class="progress-section">
+
+<div class="progress-header">
+
+<span>
+
+📈 Overall Progress
+
+</span>
+
+<span id="progressText">
+
+0%
+
+</span>
+
+</div>
+
+<div class="progress-bar">
+
+<div
+class="progress-fill"
+id="progressFill">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= ACTIONS ================= -->
+
+<div class="top-actions">
+
+<button
+id="createMilestoneBtn"
+class="create-btn">
+
+➕ Create Milestone
+
+</button>
+
+</div>
+
+<!-- ================= SEARCH ================= -->
+
+<input
+id="searchInput"
+placeholder="🔍 Search milestones...">
+
+<!-- ================= MILESTONES ================= -->
+
+<div
+id="milestoneContainer"
+class="milestone-grid">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= CREATE / EDIT MILESTONE MODAL ================= -->
+
+<div
+id="milestoneModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3 id="modalTitle">
+
+➕ Create Milestone
+
+</h3>
 
 <input
 id="milestoneName"
 placeholder="Milestone Name">
 
 <input
-type="date"
-id="milestoneDate">
-
-<input
 type="number"
-id="milestoneProgress"
-placeholder="Progress %">
+id="targetValue"
+placeholder="Target Value">
 
-<select id="milestoneStatus">
+<select id="unitType">
 
-<option>Not Started</option>
-<option>In Progress</option>
-<option>Completed</option>
-<option>Blocked</option>
+<option value="Pages">
+Pages
+</option>
+
+<option value="Hours">
+Hours
+</option>
+
+<option value="Days">
+Days
+</option>
+
+<option value="Tasks">
+Tasks
+</option>
+
+<option value="Chapters">
+Chapters
+</option>
+
+<option value="Exercises">
+Exercises
+</option>
+
+<option value="Custom">
+Custom
+</option>
 
 </select>
 
-<button onclick="addMilestone()">
+<input
+type="date"
+id="startDate">
 
-➕ Add Milestone
+<input
+type="date"
+id="endDate">
+
+<div class="modal-actions">
+
+<button
+id="saveMilestoneBtn">
+
+💾 Save
 
 </button>
 
-</div>
+<button
+id="cancelMilestoneBtn">
 
-<!-- TIMELINE -->
-
-<div class="card">
-
-<h3>Roadmap Timeline</h3>
-
-<div id="timelineContainer"></div>
-
-</div>
-
-<!-- MILESTONES -->
-
-<div class="card">
-
-<h3>Milestones</h3>
-
-<div id="milestoneContainer"></div>
-
-</div>
-
-<!-- NOTES -->
-
-<div class="card">
-
-<h3>Goal Notes</h3>
-
-<textarea
-id="goalNotes"
-placeholder="Write notes">
-
-</textarea>
-
-<button onclick="saveNotes()">
-
-💾 Save Notes
+❌ Cancel
 
 </button>
 
@@ -179,8 +308,111 @@ placeholder="Write notes">
 
 </div>
 
-<script type="module"
-src="js/goal-details.js"></script>
+</div>
+
+<!-- ================= UPDATE PROGRESS MODAL ================= -->
+
+<div
+id="progressModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3>
+
+➕ Update Progress
+
+</h3>
+
+<p>
+
+Current Progress:
+<span id="currentProgressText">
+0
+</span>
+
+</p>
+
+<input
+type="number"
+id="progressInput"
+placeholder="Add Progress">
+
+<div class="modal-actions">
+
+<button
+id="saveProgressBtn">
+
+💾 Update
+
+</button>
+
+<button
+id="cancelProgressBtn">
+
+❌ Cancel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= EDIT PROGRESS MODAL ================= -->
+
+<div
+id="editProgressModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3>
+
+✏️ Edit Progress
+
+</h3>
+
+<input
+type="number"
+id="editProgressInput"
+placeholder="New Progress">
+
+<div class="modal-actions">
+
+<button
+id="saveEditProgressBtn">
+
+💾 Save
+
+</button>
+
+<button
+id="cancelEditProgressBtn">
+
+❌ Cancel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+
+<script
+type="module"
+src="js/menu.js">
+</script>
+
+<script
+type="module"
+src="js/goal-details.js">
+</script>
 
 </body>
+
 </html>
