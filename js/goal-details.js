@@ -723,3 +723,268 @@ alert(
 
 };
 
+/* =========================
+   EDIT PROGRESS
+========================= */
+
+function openEditProgress(m){
+
+selectedProgressId = m.id;
+
+document.getElementById(
+"editProgressInput"
+).value =
+m.current || 0;
+
+editProgressModal.style.display =
+"flex";
+
+}
+
+document.getElementById(
+"cancelEditProgressBtn"
+).onclick = ()=>{
+
+editProgressModal.style.display =
+"none";
+
+};
+
+document.getElementById(
+"saveEditProgressBtn"
+).onclick =
+async()=>{
+
+const newCurrent =
+Number(
+document.getElementById(
+"editProgressInput"
+).value
+);
+
+const milestone =
+milestones.find(
+m => m.id === selectedProgressId
+);
+
+const progress =
+Math.min(
+100,
+Math.round(
+(newCurrent /
+milestone.target)
+*100
+)
+);
+
+await updateDoc(
+
+doc(
+db,
+"milestones",
+milestone.id
+),
+
+{
+current:newCurrent,
+progress
+}
+
+);
+
+editProgressModal.style.display =
+"none";
+
+await loadMilestones();
+
+};
+
+/* =========================
+   STATS
+========================= */
+
+async function updateStats(){
+
+const active =
+milestones.filter(m =>
+(m.progress || 0) < 100
+).length;
+
+const completed =
+milestones.filter(m =>
+(m.progress || 0) >= 100
+).length;
+
+const overdue =
+milestones.filter(m => {
+
+if(!m.endDate)
+return false;
+
+return (
+new Date(m.endDate)
+< new Date()
+&&
+(m.progress || 0) < 100
+);
+
+}).length;
+
+/* GOAL PROGRESS */
+
+let goalProgress = 0;
+
+if(milestones.length){
+
+goalProgress = Math.round(
+
+milestones.reduce(
+(sum,m)=>
+sum + (m.progress || 0),
+0
+)
+/
+milestones.length
+
+);
+
+}
+
+document.getElementById(
+"activeMilestones"
+).innerText =
+active;
+
+document.getElementById(
+"completedMilestones"
+).innerText =
+completed;
+
+document.getElementById(
+"overdueMilestones"
+).innerText =
+overdue;
+
+document.getElementById(
+"goalProgress"
+).innerText =
+goalProgress + "%";
+
+document.getElementById(
+"progressText"
+).innerText =
+goalProgress + "%";
+
+document.getElementById(
+"progressFill"
+).style.width =
+goalProgress + "%";
+
+/* =========================
+   UPDATE GOAL IN FIRESTORE
+========================= */
+
+if(currentGoal){
+
+let goalStatus =
+"active";
+
+if(goalProgress >= 100){
+
+goalStatus =
+"completed";
+
+}
+
+await updateDoc(
+
+doc(
+db,
+"goals",
+goalId
+),
+
+{
+progress:goalProgress,
+status:goalStatus
+}
+
+);
+
+}
+
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+searchInput.addEventListener(
+"input",
+renderMilestones
+);
+
+/* =========================
+   CLOSE MODAL ON OUTSIDE CLICK
+========================= */
+
+window.addEventListener(
+"click",
+(e)=>{
+
+if(
+e.target === milestoneModal
+){
+
+milestoneModal.style.display =
+"none";
+
+}
+
+if(
+e.target === progressModal
+){
+
+progressModal.style.display =
+"none";
+
+}
+
+if(
+e.target === editProgressModal
+){
+
+editProgressModal.style.display =
+"none";
+
+}
+
+}
+);
+
+/* =========================
+   OPTIONAL:
+   PROGRESS HISTORY READY
+========================= */
+
+/*
+
+Future Collection:
+
+milestoneHistory
+
+{
+ milestoneId:"",
+ change:+10,
+ date:Date.now()
+}
+
+You can add this later
+without changing
+current structure.
+
+*/
+
+/* =========================
+   END
+========================= */
