@@ -5,6 +5,7 @@ doc,
 getDoc,
 updateDoc,
 addDoc,
+deleteDoc,
 collection,
 getDocs
 }
