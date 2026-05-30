@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Habit Tracker</title>
+
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/habit.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div id="sidebar" class="sidebar">
+
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goHabit()">🔥 Habits</button>
+<button onclick="goGrowth()">🌱 Growth</button>
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">
+
+☰
+
+</button>
+
+<h2>🔥 Habit Tracker</h2>
+
+<div class="nav-actions">
+
+<button
+onclick="location.href='habit-create.html'">
+
+➕
+
+</button>
+
+<button
+onclick="location.href='habit-analytics.html'">
+
+📊
+
+</button>
+
+</div>
+
+</div>
+
+<!-- CONTAINER -->
+
+<div class="container">
+
+<!-- OVERVIEW -->
+
+<div class="overview-grid">
+
+<div class="overview-card streak">
+
+<h3 id="currentStreak">0</h3>
+
+<p>🔥 Current Streak</p>
+
+</div>
+
+<div class="overview-card longest">
+
+<h3 id="longestStreak">0</h3>
+
+<p>🏆 Longest Streak</p>
+
+</div>
+
+<div class="overview-card success">
+
+<h3 id="successRate">0%</h3>
+
+<p>📈 Success Rate</p>
+
+</div>
+
+<div class="overview-card score">
+
+<h3 id="todayScore">0%</h3>
+
+<p>⚡ Today Score</p>
+
+</div>
+
+</div>
+
+<!-- XP -->
+
+<div class="xp-box">
+
+<div class="xp-header">
+
+<span id="levelText">
+
+Level 1 Beginner
+
+</span>
+
+<span id="xpText">
+
+0 / 100 XP
+
+</span>
+
+</div>
+
+<div class="xp-bar">
+
+<div
+class="xp-fill"
+id="xpFill">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- CATEGORY FILTER -->
+
+<div class="category-filter">
+
+<button class="cat active">
+📋 All
+</button>
+
+<button class="cat">
+📚 Study
+</button>
+
+<button class="cat">
+💪 Fitness
+</button>
+
+<button class="cat">
+🧘 Health
+</button>
+
+<button class="cat">
+💰 Finance
+</button>
+
+<button class="cat">
+❤️ Personal
+</button>
+
+<button class="cat">
+👨‍💻 Career
+</button>
+
+</div>
+
+<!-- TODAY HABITS -->
+
+<div class="section">
+
+<div class="section-header">
+
+<h3>📅 Today's Habits</h3>
+
+<button
+onclick="location.href='habit-create.html'">
+
+➕ Add Habit
+
+</button>
+
+</div>
+
+<div id="habitContainer">
+
+<!-- JS -->
+
+</div>
+
+</div>
+
+<!-- HEATMAP -->
+
+<div class="section">
+
+<h3>📊 Monthly Consistency</h3>
+
+<div id="heatmap">
+
+<div class="heat-grid">
+
+<!-- JS -->
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ACHIEVEMENTS -->
+
+<div class="section">
+
+<h3>🏆 Achievements</h3>
+
+<div class="achievement-grid">
+
+<div class="achievement">
+
+🔥 7 Day Streak
+
+</div>
+
+<div class="achievement">
+
+🏆 30 Day Streak
+
+</div>
+
+<div class="achievement">
+
+💎 100 Habits
+
+</div>
+
+<div class="achievement">
+
+⚡ Discipline Master
+
+</div>
+
+</div>
+
+</div>
+
+<!-- CHALLENGES -->
+
+<div class="section">
+
+<div class="section-header">
+
+<h3>👥 Challenges</h3>
+
+<button>
+
+Create Challenge
+
+</button>
+
+</div>
+
+<div class="challenge-card">
+
+<h4>
+
+30 Day Reading Challenge
+
+</h4>
+
+<p>
+
+Participants: 12
+
+</p>
+
+</div>
+
+</div>
+
+<!-- INSIGHTS -->
+
+<div class="section">
+
+<h3>🤖 AI Insights</h3>
+
+<div id="insightsBox">
+
+You complete Study habits
+most consistently.
+
+Best performance time:
+7 PM - 9 PM.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module"
+src="js/menu.js">
+
+</script>
+
+<script type="module"
+src="js/habit.js">
+
+</script>
+
+</body>
+</html>
