@@ -1,53 +1,91 @@
-<header>
-    <div>
-        <h1>🎯 Planner</h1>
-        <p>Track and manage your goals</p>
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner</title><link rel="stylesheet" href="planner.css">
+
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head><body><div class="container">
+
+    <!-- Header -->
+    <header>
+        <div>
+            <h1>🎯 Planner</h1>
+            <p>Track and manage your goals</p>
+        </div>
+
+        <button id="addGoalBtn">
+            <i class="fas fa-plus"></i>
+            Create Goal
+        </button>
+    </header>
+
+    <!-- Statistics -->
+    <div class="stats">
+        <div class="stat-card">
+            <h3 id="totalGoals">0</h3>
+            <p>Total Goals</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="activeGoals">0</h3>
+            <p>Active</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="completedGoals">0</h3>
+            <p>Completed</p>
+        </div>
     </div>
 
-    <button id="addGoalBtn">
-        <i class="fas fa-plus"></i>
-        Create Goal
-    </button>
-</header>
-
-<div class="stats">
-    <div class="stat-card">
-        <h3 id="totalGoals">0</h3>
-        <p>Total Goals</p>
+    <!-- Search -->
+    <div class="toolbar">
+        <input type="text"
+               id="searchInput"
+               placeholder="🔍 Search goals...">
     </div>
 
-    <div class="stat-card">
-        <h3 id="activeGoals">0</h3>
-        <p>Active</p>
+    <!-- Goals -->
+    <div id="goalContainer" class="goal-grid">
     </div>
 
-    <div class="stat-card">
-        <h3 id="completedGoals">0</h3>
-        <p>Completed</p>
-    </div>
 </div>
 
-<div class="toolbar">
-    <input type="text" id="searchInput" placeholder="Search goals...">
-</div>
+<!-- Modal -->
+<div class="modal" id="goalModal">
 
-<div id="goalContainer" class="goal-grid"></div>
+    <div class="modal-content">
 
-    <h2>Create Goal</h2>
+        <h2>Create Goal</h2>
 
-    <input type="text" id="goalName" placeholder="Goal Name">
+        <input type="text"
+               id="goalName"
+               placeholder="Goal Name">
 
-    <label>Start Date</label>
-    <input type="date" id="startDate">
+        <label>Start Date</label>
+        <input type="date" id="startDate">
 
-    <label>End Date</label>
-    <input type="date" id="endDate">
+        <label>End Date</label>
+        <input type="date" id="endDate">
 
-    <textarea id="goalDescription" placeholder="Description (Optional)"></textarea>
+        <textarea id="goalDescription"
+                  placeholder="Description (Optional)"></textarea>
 
-    <div class="modal-actions">
-        <button id="cancelBtn">Cancel</button>
-        <button id="saveGoalBtn">Save Goal</button>
+        <div class="modal-actions">
+            <button id="cancelBtn">
+                Cancel
+            </button>
+
+            <button id="saveGoalBtn">
+                Save Goal
+            </button>
+        </div>
+
     </div>
 
 </div>
+
+<script src="planner.js"></script>
+
+</body></html>
