@@ -1,91 +1,274 @@
-<!DOCTYPE html><html lang="en"><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner</title><link rel="stylesheet" href="css/planner.css">
+<!DOCTYPE html>
+<html lang="en">
 
-<link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<head>
 
-</head><body><div class="container">
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-    <!-- Header -->
-    <header>
-        <div>
-            <h1>🎯 Planner</h1>
-            <p>Track and manage your goals</p>
-        </div>
+<title>Planner</title>
 
-        <button id="addGoalBtn">
-            <i class="fas fa-plus"></i>
-            Create Goal
-        </button>
-    </header>
+<link rel="stylesheet" href="css/planner.css">
+<link rel="stylesheet" href="css/sidebar.css">
 
-    <!-- Statistics -->
-    <div class="stats">
-        <div class="stat-card">
-            <h3 id="totalGoals">0</h3>
-            <p>Total Goals</p>
-        </div>
+</head>
 
-        <div class="stat-card">
-            <h3 id="activeGoals">0</h3>
-            <p>Active</p>
-        </div>
+<body>
 
-        <div class="stat-card">
-            <h3 id="completedGoals">0</h3>
-            <p>Completed</p>
-        </div>
-    </div>
+<!-- ================= SIDEBAR ================= -->
 
-    <!-- Search -->
-    <div class="toolbar">
-        <input type="text"
-               id="searchInput"
-               placeholder="🔍 Search goals...">
-    </div>
+<div id="sidebar" class="sidebar">
 
-    <!-- Goals -->
-    <div id="goalContainer" class="goal-grid">
-    </div>
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+
+<button onclick="goTasks()">📋 Tasks</button>
+
+<button onclick="goGoals()">🎯 Goals</button>
+
+<button onclick="goFriends()">👥 Friends</button>
+
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+
+<button onclick="goTests()">📝 Tests</button>
+
+<button onclick="goGrowth()">🌱 Growth Hub</button>
+
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
-<!-- Modal -->
-<div class="modal" id="goalModal">
+<!-- ================= MAIN ================= -->
 
-    <div class="modal-content">
+<div class="main">
 
-        <h2>Create Goal</h2>
+<!-- ================= NAVBAR ================= -->
 
-        <input type="text"
-               id="goalName"
-               placeholder="Goal Name">
+<div class="navbar">
 
-        <label>Start Date</label>
-        <input type="date" id="startDate">
+<button
+class="menu-btn"
+onclick="toggleSidebar()">
 
-        <label>End Date</label>
-        <input type="date" id="endDate">
+☰
 
-        <textarea id="goalDescription"
-                  placeholder="Description (Optional)"></textarea>
+</button>
 
-        <div class="modal-actions">
-            <button id="cancelBtn">
-                Cancel
-            </button>
+<h2 id="username">
 
-            <button id="saveGoalBtn">
-                Save Goal
-            </button>
-        </div>
+🎯 Planner Dashboard
 
-    </div>
+</h2>
 
 </div>
 
-<script type="module" src="js/planner.js"></script>
+<!-- ================= CONTAINER ================= -->
 
-</body></html>
+<div class="container">
+
+<!-- ================= STATS ================= -->
+
+<div class="stats-grid">
+
+<div class="stat-card active-card">
+
+<h3 id="activeGoals">
+
+0
+
+</h3>
+
+<p>
+
+🎯 Active Goals
+
+</p>
+
+</div>
+
+<div class="stat-card completed-card">
+
+<h3 id="completedGoals">
+
+0
+
+</h3>
+
+<p>
+
+✅ Completed Goals
+
+</p>
+
+</div>
+
+<div class="stat-card overdue-card">
+
+<h3 id="overdueGoals">
+
+0
+
+</h3>
+
+<p>
+
+⏰ Overdue Goals
+
+</p>
+
+</div>
+
+<div class="stat-card progress-card">
+
+<h3 id="overallProgress">
+
+0%
+
+</h3>
+
+<p>
+
+📊 Overall Progress
+
+</p>
+
+</div>
+
+</div>
+
+<!-- ================= PROGRESS BOX ================= -->
+
+<div class="planner-progress-box">
+
+<div class="planner-progress-head">
+
+<span>
+
+📈 Goal Progress
+
+</span>
+
+<span id="progressText">
+
+0%
+
+</span>
+
+</div>
+
+<div class="progress-bar">
+
+<div
+class="progress-fill"
+id="progressFill">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= SEARCH ================= -->
+
+<input
+id="searchInput"
+placeholder="🔍 Search goals...">
+
+<!-- ================= TOP ACTION ================= -->
+
+<div class="top-actions">
+
+<button
+class="create-goal-btn"
+id="createGoalBtn">
+
+➕ Create Goal
+
+</button>
+
+</div>
+
+<!-- ================= GOAL CARDS ================= -->
+
+<div
+id="goalContainer"
+class="goal-grid">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= CREATE GOAL MODAL ================= -->
+
+<div
+id="goalModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3>
+
+🎯 Create Goal
+
+</h3>
+
+<input
+id="goalName"
+placeholder="Goal Name">
+
+<input
+type="date"
+id="startDate">
+
+<input
+type="date"
+id="endDate">
+
+<textarea
+id="goalDescription"
+placeholder="Description (Optional)">
+</textarea>
+
+<div class="modal-actions">
+
+<button
+id="saveGoalBtn">
+
+💾 Save
+
+</button>
+
+<button
+id="cancelGoalBtn">
+
+❌ Cancel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+
+<script
+type="module"
+src="js/menu.js">
+</script>
+
+<script
+type="module"
+src="js/planner.js">
+</script>
+
+</body>
+
+</html>
