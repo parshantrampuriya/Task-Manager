@@ -1205,7 +1205,7 @@ milestoneModal.style.display =
 
 await loadMilestones();
 
-catch(error){
+}catch(error){
 
 console.error(error);
 
