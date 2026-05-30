@@ -627,3 +627,9 @@ Focus on goals below 50% completion.
 `;
 
 }
+window.openGoal=(id)=>{
+
+location.href =
+`goal-details.html?id=${id}`;
+
+};
