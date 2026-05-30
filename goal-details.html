@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Goal Details</title>
+
+<style>
+
+body{
+background:#111827;
+color:white;
+font-family:Arial;
+padding:20px;
+}
+
+.card{
+background:#1f2937;
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+}
+
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:10px;
+}
+
+button{
+padding:12px;
+background:#00ff99;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1 id="goalName">
+Goal
+</h1>
+
+<div class="card">
+
+<h2>Add Milestone</h2>
+
+<input
+id="milestoneName"
+placeholder="Milestone Name">
+
+<button
+onclick="addMilestone()">
+
+Add Milestone
+
+</button>
+
+</div>
+
+<div id="milestoneContainer">
+
+</div>
+
+<script type="module"
+src="js/goal-details.js">
+</script>
+
+</body>
+
+</html>
