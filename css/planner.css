@@ -1,51 +1,96 @@
-*{margin:0;padding:0;box-sizing;font-family:'Segoe UI',sans-serif;}
+let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-body{background:#0f172a;color;min-height:100vh;padding:30px;}
+const modal = document.getElementById("goalModal");const addBtn = document.getElementById("addGoalBtn");const cancelBtn = document.getElementById("cancelBtn");const saveBtn = document.getElementById("saveGoalBtn");const goalContainer = document.getElementById("goalContainer");
 
-.container{max-width:1200px;margin;}
+addBtn.onclick = () => {modal.style.display = "flex";};
 
-header{display;justify-content;align-items;margin-bottom:30px;}
+cancelBtn.onclick = () => {modal.style.display = "none";};
 
-header h1{font-size:2rem;}
+saveBtn.onclick = () => {
 
-header p{color:#94a3b8;}
+const goal = {
+    id: Date.now(),
+    name: document.getElementById("goalName").value,
+    startDate: document.getElementById("startDate").value,
+    endDate: document.getElementById("endDate").value,
+    description: document.getElementById("goalDescription").value,
+    progress: 0
+};
 
-#addGoalBtn{background(135deg,#6366f1,#8b5cf6);border;padding:12px 20px;border-radius:12px;color;cursor;font-weight:600;}
+goals.push(goal);
 
-.stats{display;grid-template-columns(3,1fr);gap:20px;margin-bottom:25px;}
+localStorage.setItem("goals", JSON.stringify(goals));
 
-.stat-card{background:#1e293b;padding:20px;border-radius:18px;text-align;}
+modal.style.display = "none";
 
-.stat-card h3{font-size:2rem;}
+renderGoals();
 
-.toolbar{margin-bottom:25px;}
+};
 
-.toolbar input{width:100%;padding:14px;border;border-radius:12px;background:#1e293b;color;}
+function renderGoals(){
 
-.goal-grid{display;grid-template-columns(auto-fill,minmax(300px,1fr));gap:20px;}
+goalContainer.innerHTML = "";
 
-.goal-card{background:#1e293b;padding:20px;border-radius:20px;cursor;transition:0.3s;}
+goals.forEach(goal=>{
 
-.goal-card{transform(-6px);}
+    const card = document.createElement("div");
 
-.progress{height:10px;background:#334155;border-radius:20px;overflow;margin:15px 0;}
+    card.className = "goal-card";
 
-.progress-bar{height:100%;width:0%;background(135deg,#6366f1,#8b5cf6);}
+    card.innerHTML = `
+        <h2>${goal.name}</h2>
 
-.card-actions{display;justify-content;gap:10px;margin-top:15px;}
+        <div class="progress">
+            <div class="progress-bar"
+            style="width:${goal.progress}%"></div>
+        </div>
 
-.card-actions button{padding:8px 12px;border;border-radius:10px;cursor;}
+        <p>Progress: ${goal.progress}%</p>
 
-.edit-btn{background:#f59e0b;color;}
+        <p>📅 ${goal.startDate}</p>
+        <p>🏁 ${goal.endDate}</p>
 
-.delete-btn{background:#ef4444;color;}
+        <div class="card-actions">
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
+        </div>
+    `;
 
-.modal{display;position;inset:0;background(0,0,0,0.6);justify-content;align-items;}
+    card.addEventListener("click",()=>{
 
-.modal-content{background:#1e293b;padding:25px;border-radius:20px;width:400px;display;flex-direction;gap:12px;}
+        window.location.href =
+        `goal-details.html?id=${goal.id}`;
 
-.modal-content input,.modal-content textarea{padding:12px;border;border-radius:10px;background:#334155;color;}
+    });
 
-.modal-actions{display;justify-content;gap:10px;}
+    card.querySelector(".delete-btn")
+    .addEventListener("click",(e)=>{
 
-.modal-actions button{padding:10px 16px;border;border-radius:10px;cursor;}
+        e.stopPropagation();
+
+        goals = goals.filter(g=>g.id!==goal.id);
+
+        localStorage.setItem(
+            "goals",
+            JSON.stringify(goals)
+        );
+
+        renderGoals();
+    });
+
+    goalContainer.appendChild(card);
+
+});
+
+document.getElementById("totalGoals").innerText =
+goals.length;
+
+document.getElementById("activeGoals").innerText =
+goals.length;
+
+document.getElementById("completedGoals").innerText =
+goals.filter(g=>g.progress===100).length;
+
+}
+
+renderGoals();
