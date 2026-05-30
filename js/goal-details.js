@@ -5,11 +5,8 @@ doc,
 getDoc,
 updateDoc,
 addDoc,
-deleteDoc,
 collection,
-getDocs,
-query,
-where
+getDocs
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -74,29 +71,17 @@ document.getElementById(
 "searchInput"
 );
 
-const progressModal =
-document.getElementById(
-"progressModal"
-);
-
-const editProgressModal =
-document.getElementById(
-"editProgressModal"
-);
-
 /* =========================
    STATE
 ========================= */
 
 let currentUser = null;
 
-let milestones = [];
-
 let currentGoal = null;
 
-let editMilestoneId = null;
+let milestones = [];
 
-let selectedProgressId = null;
+let editMilestoneId = null;
 
 /* =========================
    AUTH
@@ -130,6 +115,8 @@ await loadMilestones();
 
 async function loadGoal(){
 
+try{
+
 const goalRef =
 doc(
 db,
@@ -137,12 +124,12 @@ db,
 goalId
 );
 
-const snap =
+const goalSnap =
 await getDoc(
 goalRef
 );
 
-if(!snap.exists()){
+if(!goalSnap.exists()){
 
 alert(
 "Goal not found"
@@ -154,23 +141,76 @@ return;
 
 currentGoal = {
 
-id:snap.id,
+id:goalSnap.id,
 
-...snap.data()
+...goalSnap.data()
 
 };
 
 goalTitle.innerText =
-currentGoal.name;
+currentGoal.name || "";
 
 goalDescription.innerText =
 currentGoal.description ||
 "No description";
 
+}catch(error){
+
+console.error(error);
+
+}
+
 }
 
 /* =========================
-   CREATE MILESTONE
+   LOAD MILESTONES
+========================= */
+
+async function loadMilestones(){
+
+try{
+
+const milestoneRef =
+collection(
+db,
+"goals",
+goalId,
+"milestones"
+);
+
+const snapshot =
+await getDocs(
+milestoneRef
+);
+
+milestones = [];
+
+snapshot.forEach(docSnap=>{
+
+milestones.push({
+
+id:docSnap.id,
+
+...docSnap.data()
+
+});
+
+});
+
+renderMilestones();
+
+updateGoalStats();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+/* =========================
+   OPEN MODAL
 ========================= */
 
 createMilestoneBtn.onclick =
@@ -207,6 +247,10 @@ milestoneModal.style.display =
 "flex";
 
 };
+
+/* =========================
+   CLOSE MODAL
+========================= */
 
 cancelMilestoneBtn.onclick =
 ()=>{
@@ -260,10 +304,10 @@ return;
 
 }
 
-if(!target){
+if(target <= 0){
 
 alert(
-"Target required"
+"Target must be greater than 0"
 );
 
 return;
@@ -278,6 +322,8 @@ await updateDoc(
 
 doc(
 db,
+"goals",
+goalId,
 "milestones",
 editMilestoneId
 ),
@@ -298,81 +344,45 @@ await addDoc(
 
 collection(
 db,
+"goals",
+goalId,
 "milestones"
 ),
 
 {
-uid:
-currentUser.uid,
-
-goalId,
-
 name,
-
 target,
-
 current:0,
-
 unit,
-
 progress:0,
-
+status:"active",
 startDate,
-
 endDate,
-
 createdAt:
 Date.now()
-
 }
 
 );
-/* =========================
-   LOAD MILESTONES
-========================= */
 
-async function loadMilestones(){
-
-const q = query(
-collection(db,"milestones"),
-where("goalId","==",goalId)
-);
-
-const snapshot =
-await getDocs(q);
-
-milestones = [];
-
-snapshot.forEach(docSnap=>{
-
-milestones.push({
-id:docSnap.id,
-...docSnap.data()
-});
-
-});
-
-renderMilestones();
-
-updateStats();
-
-}
 
 /* =========================
-   RENDER
+   RENDER MILESTONES
 ========================= */
 
 function renderMilestones(){
 
-const searchText =
-searchInput.value.toLowerCase();
+const search =
+searchInput.value
+.toLowerCase();
 
-milestoneContainer.innerHTML = "";
+milestoneContainer.innerHTML =
+"";
 
 const filtered =
 milestones.filter(m =>
-m.name.toLowerCase()
-.includes(searchText)
+m.name
+.toLowerCase()
+.includes(search)
 );
 
 if(filtered.length === 0){
@@ -382,7 +392,7 @@ milestoneContainer.innerHTML = `
 <div class="milestone-card">
 
 <h3>
-No Milestones Found
+No Milestones Yet
 </h3>
 
 <p>
@@ -408,7 +418,9 @@ status = "completed";
 }
 else if(
 m.endDate &&
-new Date(m.endDate) < new Date()
+new Date(m.endDate)
+<
+new Date()
 ){
 
 status = "overdue";
@@ -430,26 +442,39 @@ ${m.name}
 </div>
 
 <div class="milestone-info">
+
 🎯 Target:
-${m.target} ${m.unit}
+${m.target}
+${m.unit}
+
 </div>
 
 <div class="milestone-info">
+
 📈 Current:
-${m.current || 0} ${m.unit}
+${m.current || 0}
+${m.unit}
+
 </div>
 
 <div class="milestone-info">
-📅 ${m.startDate || "-"}
+
+📅 Start:
+${m.startDate || "-"}
+
 </div>
 
 <div class="milestone-info">
-🏁 ${m.endDate || "-"}
+
+🏁 End:
+${m.endDate || "-"}
+
 </div>
 
 <div class="milestone-progress">
 
-<div class="milestone-progress-bar">
+<div
+class="milestone-progress-bar">
 
 <div
 class="milestone-progress-fill"
@@ -480,28 +505,32 @@ ${status}
 <div class="milestone-actions">
 
 <button
-class="update-btn">
+class="update-btn"
+data-id="${m.id}">
 
 ➕ Update
 
 </button>
 
 <button
-class="edit-progress-btn">
+class="edit-progress-btn"
+data-id="${m.id}">
 
 ✏ Progress
 
 </button>
 
 <button
-class="edit-btn">
+class="edit-btn"
+data-id="${m.id}">
 
 ⚙ Edit
 
 </button>
 
 <button
-class="delete-btn">
+class="delete-btn"
+data-id="${m.id}">
 
 🗑 Delete
 
@@ -511,48 +540,82 @@ class="delete-btn">
 
 `;
 
-/* UPDATE */
-
-card.querySelector(
-".update-btn"
-)
-.addEventListener(
-"click",
-()=>openUpdateProgress(m)
-);
-
-/* EDIT PROGRESS */
-
-card.querySelector(
-".edit-progress-btn"
-)
-.addEventListener(
-"click",
-()=>openEditProgress(m)
-);
-
-/* EDIT */
-
-card.querySelector(
-".edit-btn"
-)
-.addEventListener(
-"click",
-()=>editMilestone(m)
-);
-
-/* DELETE */
-
-card.querySelector(
-".delete-btn"
-)
-.addEventListener(
-"click",
-()=>deleteMilestone(m.id)
-);
-
 milestoneContainer
 .appendChild(card);
+
+});
+
+/* =========================
+   BUTTON EVENTS
+========================= */
+
+document
+.querySelectorAll(
+".edit-btn"
+)
+.forEach(btn=>{
+
+btn.onclick = ()=>{
+
+const milestone =
+milestones.find(
+m => m.id ===
+btn.dataset.id
+);
+
+openEditMilestone(
+milestone
+);
+
+};
+
+});
+
+document
+.querySelectorAll(
+".delete-btn"
+)
+.forEach(btn=>{
+
+btn.onclick = ()=>{
+
+deleteMilestone(
+btn.dataset.id
+);
+
+};
+
+});
+
+document
+.querySelectorAll(
+".update-btn"
+)
+.forEach(btn=>{
+
+btn.onclick = ()=>{
+
+openUpdateProgress(
+btn.dataset.id
+);
+
+};
+
+});
+
+document
+.querySelectorAll(
+".edit-progress-btn"
+)
+.forEach(btn=>{
+
+btn.onclick = ()=>{
+
+openEditProgress(
+btn.dataset.id
+);
+
+};
 
 });
 
@@ -562,9 +625,12 @@ milestoneContainer
    EDIT MILESTONE
 ========================= */
 
-function editMilestone(m){
+function openEditMilestone(
+milestone
+){
 
-editMilestoneId = m.id;
+editMilestoneId =
+milestone.id;
 
 document.getElementById(
 "modalTitle"
@@ -573,23 +639,28 @@ document.getElementById(
 
 document.getElementById(
 "milestoneName"
-).value = m.name;
+).value =
+milestone.name;
 
 document.getElementById(
 "targetValue"
-).value = m.target;
+).value =
+milestone.target;
 
 document.getElementById(
 "unitType"
-).value = m.unit;
+).value =
+milestone.unit;
 
 document.getElementById(
 "startDate"
-).value = m.startDate;
+).value =
+milestone.startDate || "";
 
 document.getElementById(
 "endDate"
-).value = m.endDate;
+).value =
+milestone.endDate || "";
 
 milestoneModal.style.display =
 "flex";
@@ -597,10 +668,12 @@ milestoneModal.style.display =
 }
 
 /* =========================
-   DELETE
+   DELETE MILESTONE
 ========================= */
 
-async function deleteMilestone(id){
+async function deleteMilestone(
+id
+){
 
 const ok =
 confirm(
@@ -609,105 +682,19 @@ confirm(
 
 if(!ok) return;
 
+try{
+
 await deleteDoc(
+
 doc(
 db,
+"goals",
+goalId,
 "milestones",
 id
 )
-);
-
-await loadMilestones();
-
-}
-
-/* =========================
-   UPDATE PROGRESS
-========================= */
-
-function openUpdateProgress(m){
-
-selectedProgressId = m.id;
-
-document.getElementById(
-"currentProgressText"
-).innerText =
-m.current || 0;
-
-document.getElementById(
-"progressInput"
-).value = "";
-
-progressModal.style.display =
-"flex";
-
-}
-
-document.getElementById(
-"cancelProgressBtn"
-).onclick = ()=>{
-
-progressModal.style.display =
-"none";
-
-};
-
-document.getElementById(
-"saveProgressBtn"
-).onclick =
-async()=>{
-
-const value =
-Number(
-document.getElementById(
-"progressInput"
-).value
-);
-
-const milestone =
-milestones.find(
-m => m.id === selectedProgressId
-);
-
-const newCurrent =
-(milestone.current || 0)
-+ value;
-
-const progress =
-Math.min(
-100,
-Math.round(
-(newCurrent /
-milestone.target)
-*100
-)
-);
-
-await updateDoc(
-
-doc(
-db,
-"milestones",
-milestone.id
-),
-
-{
-current:newCurrent,
-progress
-}
 
 );
-
-progressModal.style.display =
-"none";
-
-await loadMilestones();
-
-};
-}
-
-milestoneModal.style.display =
-"none";
 
 await loadMilestones();
 
@@ -715,136 +702,70 @@ await loadMilestones();
 
 console.error(error);
 
-alert(
-"Error saving milestone"
-);
-
 }
 
-};
+}
 
 /* =========================
-   EDIT PROGRESS
+   SEARCH
 ========================= */
 
-function openEditProgress(m){
-
-selectedProgressId = m.id;
-
-document.getElementById(
-"editProgressInput"
-).value =
-m.current || 0;
-
-editProgressModal.style.display =
-"flex";
-
-}
-
-document.getElementById(
-"cancelEditProgressBtn"
-).onclick = ()=>{
-
-editProgressModal.style.display =
-"none";
-
-};
-
-document.getElementById(
-"saveEditProgressBtn"
-).onclick =
-async()=>{
-
-const newCurrent =
-Number(
-document.getElementById(
-"editProgressInput"
-).value
+searchInput.addEventListener(
+"input",
+renderMilestones
 );
-
-const milestone =
-milestones.find(
-m => m.id === selectedProgressId
-);
-
-const progress =
-Math.min(
-100,
-Math.round(
-(newCurrent /
-milestone.target)
-*100
-)
-);
-
-await updateDoc(
-
-doc(
-db,
-"milestones",
-milestone.id
-),
-
-{
-current:newCurrent,
-progress
-}
-
-);
-
-editProgressModal.style.display =
-"none";
-
-await loadMilestones();
-
-};
 
 /* =========================
-   STATS
+   GOAL STATS
 ========================= */
 
-async function updateStats(){
+function updateGoalStats(){
 
 const active =
-milestones.filter(m =>
-(m.progress || 0) < 100
+milestones.filter(
+m => (m.progress || 0)
+< 100
 ).length;
 
 const completed =
-milestones.filter(m =>
-(m.progress || 0) >= 100
+milestones.filter(
+m => (m.progress || 0)
+>= 100
 ).length;
 
 const overdue =
-milestones.filter(m => {
+milestones.filter(m=>{
 
 if(!m.endDate)
 return false;
 
 return (
 new Date(m.endDate)
-< new Date()
+<
+new Date()
 &&
-(m.progress || 0) < 100
+(m.progress || 0)
+< 100
 );
 
 }).length;
 
-/* GOAL PROGRESS */
-
 let goalProgress = 0;
 
-if(milestones.length){
+if(
+milestones.length > 0
+){
 
-goalProgress = Math.round(
+goalProgress =
+Math.round(
 
 milestones.reduce(
 (sum,m)=>
-sum + (m.progress || 0),
+sum +
+(m.progress || 0),
 0
 )
-/
-milestones.length
+/ milestones.length
 
 );
 
@@ -880,18 +801,308 @@ document.getElementById(
 ).style.width =
 goalProgress + "%";
 
+}
+
 /* =========================
-   UPDATE GOAL IN FIRESTORE
+   PROGRESS MODALS
 ========================= */
 
-if(currentGoal){
+let selectedMilestoneId = null;
 
-let goalStatus =
+/* =========================
+   UPDATE PROGRESS (+/-)
+========================= */
+
+function openUpdateProgress(id){
+
+selectedMilestoneId = id;
+
+const milestone =
+milestones.find(
+m => m.id === id
+);
+
+document.getElementById(
+"currentProgressText"
+).innerText =
+`${milestone.current || 0} ${milestone.unit}`;
+
+document.getElementById(
+"progressInput"
+).value = "";
+
+progressModal.style.display =
+"flex";
+
+}
+
+document.getElementById(
+"cancelProgressBtn"
+).onclick = ()=>{
+
+progressModal.style.display =
+"none";
+
+};
+
+document.getElementById(
+"saveProgressBtn"
+).onclick =
+async()=>{
+
+try{
+
+const change =
+Number(
+document.getElementById(
+"progressInput"
+).value
+);
+
+const milestone =
+milestones.find(
+m => m.id === selectedMilestoneId
+);
+
+if(!milestone) return;
+
+let newCurrent =
+(milestone.current || 0)
++ change;
+
+/* Prevent negative progress */
+
+if(newCurrent < 0){
+
+newCurrent = 0;
+
+}
+
+const progress =
+Math.min(
+100,
+Math.round(
+(newCurrent /
+milestone.target)
+* 100
+)
+);
+
+/* Update milestone */
+
+await updateDoc(
+
+doc(
+db,
+"goals",
+goalId,
+"milestones",
+selectedMilestoneId
+),
+
+{
+current:newCurrent,
+progress
+}
+
+);
+
+/* History */
+
+await addDoc(
+
+collection(
+db,
+"goals",
+goalId,
+"milestones",
+selectedMilestoneId,
+"history"
+),
+
+{
+type:"update",
+change,
+oldValue:
+milestone.current || 0,
+newValue:
+newCurrent,
+date:
+Date.now()
+}
+
+);
+
+progressModal.style.display =
+"none";
+
+await loadMilestones();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+};
+
+/* =========================
+   EDIT PROGRESS
+========================= */
+
+function openEditProgress(id){
+
+selectedMilestoneId = id;
+
+const milestone =
+milestones.find(
+m => m.id === id
+);
+
+document.getElementById(
+"editProgressInput"
+).value =
+milestone.current || 0;
+
+editProgressModal.style.display =
+"flex";
+
+}
+
+document.getElementById(
+"cancelEditProgressBtn"
+).onclick = ()=>{
+
+editProgressModal.style.display =
+"none";
+
+};
+
+document.getElementById(
+"saveEditProgressBtn"
+).onclick =
+async()=>{
+
+try{
+
+const milestone =
+milestones.find(
+m => m.id === selectedMilestoneId
+);
+
+if(!milestone) return;
+
+let newCurrent =
+Number(
+document.getElementById(
+"editProgressInput"
+).value
+);
+
+if(newCurrent < 0){
+
+newCurrent = 0;
+
+}
+
+const progress =
+Math.min(
+100,
+Math.round(
+(newCurrent /
+milestone.target)
+*100
+)
+);
+
+await updateDoc(
+
+doc(
+db,
+"goals",
+goalId,
+"milestones",
+selectedMilestoneId
+),
+
+{
+current:newCurrent,
+progress
+}
+
+);
+
+/* History */
+
+await addDoc(
+
+collection(
+db,
+"goals",
+goalId,
+"milestones",
+selectedMilestoneId,
+"history"
+),
+
+{
+type:"edit",
+oldValue:
+milestone.current || 0,
+newValue:
+newCurrent,
+date:
+Date.now()
+}
+
+);
+
+editProgressModal.style.display =
+"none";
+
+await loadMilestones();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+};
+
+/* =========================
+   GOAL SYNC
+========================= */
+
+async function syncGoalProgress(){
+
+if(!currentGoal)
+return;
+
+let goalProgress = 0;
+
+if(milestones.length){
+
+goalProgress =
+Math.round(
+
+milestones.reduce(
+(sum,m)=>
+sum + (m.progress || 0),
+0
+)
+/ milestones.length
+
+);
+
+}
+
+let status =
 "active";
 
 if(goalProgress >= 100){
 
-goalStatus =
+status =
 "completed";
 
 }
@@ -905,27 +1116,33 @@ goalId
 ),
 
 {
-progress:goalProgress,
-status:goalStatus
+progress:
+goalProgress,
+status
 }
 
 );
 
 }
 
-}
-
 /* =========================
-   SEARCH
+   OVERRIDE STATS
 ========================= */
 
-searchInput.addEventListener(
-"input",
-renderMilestones
-);
+const oldUpdateGoalStats =
+updateGoalStats;
+
+updateGoalStats =
+async function(){
+
+oldUpdateGoalStats();
+
+await syncGoalProgress();
+
+};
 
 /* =========================
-   CLOSE MODAL ON OUTSIDE CLICK
+   CLOSE MODALS
 ========================= */
 
 window.addEventListener(
@@ -963,28 +1180,24 @@ editProgressModal.style.display =
 );
 
 /* =========================
-   OPTIONAL:
-   PROGRESS HISTORY READY
-========================= */
-
-/*
-
-Future Collection:
-
-milestoneHistory
-
-{
- milestoneId:"",
- change:+10,
- date:Date.now()
-}
-
-You can add this later
-without changing
-current structure.
-
-*/
-
-/* =========================
    END
 ========================= */
+}
+
+milestoneModal.style.display =
+"none";
+
+await loadMilestones();
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Error saving milestone"
+);
+
+}
+
+};
+
