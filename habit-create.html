@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Create Habit</title>
+
+<link rel="stylesheet"
+href="css/sidebar.css">
+
+<link rel="stylesheet"
+href="css/habit-create.css">
+
+</head>
+
+<body>
+
+<div class="main">
+
+<div class="navbar">
+
+<button onclick="history.back()">
+⬅ Back
+</button>
+
+<h2>➕ Create Habit</h2>
+
+</div>
+
+<div class="create-container">
+
+<!-- HABIT NAME -->
+
+<div class="card">
+
+<label>Habit Name</label>
+
+<input
+type="text"
+id="habitName"
+placeholder="Read Book">
+
+</div>
+
+<!-- ICON -->
+
+<div class="card">
+
+<label>Habit Icon</label>
+
+<select id="habitIcon">
+
+<option>📚</option>
+<option>💪</option>
+<option>🏃</option>
+<option>💧</option>
+<option>🧘</option>
+<option>💰</option>
+<option>🎯</option>
+<option>❤️</option>
+<option>💻</option>
+
+</select>
+
+</div>
+
+<!-- CATEGORY -->
+
+<div class="card">
+
+<label>Category</label>
+
+<select id="habitCategory">
+
+<option>Study</option>
+<option>Fitness</option>
+<option>Health</option>
+<option>Finance</option>
+<option>Career</option>
+<option>Personal</option>
+
+</select>
+
+</div>
+
+<!-- FREQUENCY -->
+
+<div class="card">
+
+<label>Frequency</label>
+
+<select id="habitFrequency">
+
+<option>Daily</option>
+<option>Weekly</option>
+<option>Monthly</option>
+
+</select>
+
+</div>
+
+<!-- TARGET -->
+
+<div class="card">
+
+<label>Target Count</label>
+
+<input
+type="number"
+id="habitTarget"
+value="1">
+
+</div>
+
+<!-- REMINDER -->
+
+<div class="card">
+
+<label>Reminder Time</label>
+
+<input
+type="time"
+id="habitReminder">
+
+</div>
+
+<!-- COLOR -->
+
+<div class="card">
+
+<label>Color Theme</label>
+
+<select id="habitColor">
+
+<option value="#00e5ff">
+Blue
+</option>
+
+<option value="#4caf50">
+Green
+</option>
+
+<option value="#ff9800">
+Orange
+</option>
+
+<option value="#ff5252">
+Red
+</option>
+
+<option value="#9c27b0">
+Purple
+</option>
+
+</select>
+
+</div>
+
+<!-- DIFFICULTY -->
+
+<div class="card">
+
+<label>Difficulty</label>
+
+<select id="habitDifficulty">
+
+<option>Easy</option>
+<option>Medium</option>
+<option>Hard</option>
+
+</select>
+
+</div>
+
+<!-- XP -->
+
+<div class="card">
+
+<label>XP Reward</label>
+
+<input
+type="number"
+id="habitXP"
+value="10">
+
+</div>
+
+<!-- NOTES -->
+
+<div class="card">
+
+<label>Notes</label>
+
+<textarea
+id="habitNotes"
+rows="4"
+placeholder="Any notes...">
+</textarea>
+
+</div>
+
+<!-- SAVE -->
+
+<button
+class="save-btn"
+onclick="saveHabit()">
+
+💾 Save Habit
+
+</button>
+
+</div>
+
+</div>
+
+<script type="module"
+src="js/habit-create.js">
+</script>
+
+</body>
+</html>
