@@ -202,12 +202,61 @@ placeholder="Any notes...">
 </textarea>
 
 </div>
+<!-- TEMPLATES -->
+
+<div class="card">
+
+<label>Quick Templates</label>
+
+<div class="template-row">
+
+<button type="button"
+onclick="loadTemplate('reading')">
+📚 Reading
+</button>
+
+<button type="button"
+onclick="loadTemplate('gym')">
+💪 Gym
+</button>
+
+<button type="button"
+onclick="loadTemplate('water')">
+💧 Water
+</button>
+
+<button type="button"
+onclick="loadTemplate('meditation')">
+🧘 Meditation
+</button>
+
+<button type="button"
+onclick="loadTemplate('coding')">
+💻 Coding
+</button>
+
+</div>
+
+</div>
+
+<!-- LIVE PREVIEW -->
+
+<div class="preview-box">
+
+<div class="preview-title">
+👀 Live Preview
+</div>
+
+<div id="previewContainer"></div>
+
+</div>
 
 <!-- SAVE -->
 
 <button
 class="save-btn"
 onclick="saveHabit()">
+
 
 💾 Save Habit
 
