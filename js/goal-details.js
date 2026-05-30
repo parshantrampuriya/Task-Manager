@@ -359,12 +359,31 @@ progress:0,
 status:"active",
 startDate,
 endDate,
-createdAt:
-Date.now()
+createdAt:Date.now()
 }
 
 );
 
+}
+
+/* close if-else */
+
+milestoneModal.style.display =
+"none";
+
+await loadMilestones();
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Error saving milestone"
+);
+
+}
+
+};
 
 /* =========================
    RENDER MILESTONES
@@ -392,13 +411,9 @@ milestoneContainer.innerHTML = `
 
 <div class="milestone-card">
 
-<h3>
-No Milestones Yet
-</h3>
+<h3>No Milestones Yet</h3>
 
-<p>
-Create your first milestone
-</p>
+<p>Create your first milestone</p>
 
 </div>
 
