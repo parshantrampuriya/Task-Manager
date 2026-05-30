@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mission Planner</title>
+
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/planner.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div id="sidebar" class="sidebar">
+
+<h2>⚡ Menu</h2>
+
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="goTasks()">📋 Tasks</button>
+<button onclick="goGoals()">🎯 Goals</button>
+<button onclick="goHabit()">🔥 Habits</button>
+<button onclick="goGrowth()">🌱 Growth</button>
+<button onclick="goPlanner()">🚀 Planner</button>
+<button onclick="goProfile()">👤 Profile</button>
+
+<button id="logoutBtn">🚪 Logout</button>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">
+
+☰
+
+</button>
+
+<h2>🚀 Mission Planner</h2>
+
+<div class="nav-actions">
+
+<button onclick="openGoalModal()">
+➕ Goal
+</button>
+
+</div>
+
+</div>
+
+<!-- CONTAINER -->
+
+<div class="container">
+
+<!-- DASHBOARD -->
+
+<div class="stats-grid">
+
+<div class="stat-card">
+
+<h3 id="lifeScore">
+0
+</h3>
+
+<p>🌟 Life Score</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="activeGoals">
+0
+</h3>
+
+<p>🎯 Active Goals</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="completedGoals">
+0
+</h3>
+
+<p>✅ Completed Goals</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="overallProgress">
+0%
+</h3>
+
+<p>📈 Progress</p>
+
+</div>
+
+</div>
+
+<!-- XP SYSTEM -->
+
+<div class="xp-box">
+
+<div class="xp-header">
+
+<span id="levelText">
+
+Level 1 Beginner
+
+</span>
+
+<span id="xpText">
+
+0 / 100 XP
+
+</span>
+
+</div>
+
+<div class="xp-bar">
+
+<div
+class="xp-fill"
+id="xpFill">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- GOAL CREATION -->
+
+<div class="section">
+
+<div class="section-header">
+
+<h3>🎯 Create Goal</h3>
+
+</div>
+
+<div class="goal-form">
+
+<input
+id="goalName"
+placeholder="Goal Name">
+
+<select id="goalCategory">
+
+<option>Career</option>
+<option>Learning</option>
+<option>Health</option>
+<option>Finance</option>
+<option>Relationship</option>
+<option>Spiritual</option>
+
+</select>
+
+<select id="goalPriority">
+
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+
+</select>
+
+<input
+type="date"
+id="goalStartDate">
+
+<input
+type="date"
+id="goalTargetDate">
+
+<textarea
+id="goalDescription"
+placeholder="Goal Description">
+
+</textarea>
+
+<button
+onclick="createGoal()">
+
+➕ Create Goal
+
+</button>
+
+</div>
+
+</div>
+
+<!-- ACTIVE GOALS -->
+
+<div class="section">
+
+<div class="section-header">
+
+<h3>🎯 Active Goals</h3>
+
+</div>
+
+<div
+id="goalContainer"
+class="goal-grid">
+
+</div>
+
+</div>
+
+<!-- MILESTONES -->
+
+<div class="section">
+
+<div class="section-header">
+
+<h3>🏁 Milestones</h3>
+
+</div>
+
+<div
+id="milestoneContainer">
+
+</div>
+
+</div>
+
+<!-- ROADMAP -->
+
+<div class="section">
+
+<h3>🛣 Roadmap Timeline</h3>
+
+<div
+id="roadmapContainer"
+class="roadmap">
+
+</div>
+
+</div>
+
+<!-- GANTT -->
+
+<div class="section">
+
+<h3>📊 Gantt Chart</h3>
+
+<div
+id="ganttContainer"
+class="gantt-chart">
+
+</div>
+
+</div>
+
+<!-- GOAL HEALTH -->
+
+<div class="section">
+
+<h3>❤️ Goal Health</h3>
+
+<div
+id="healthContainer"
+class="health-grid">
+
+</div>
+
+</div>
+
+<!-- VISION BOARD -->
+
+<div class="section">
+
+<h3>🖼 Vision Board</h3>
+
+<div class="vision-upload">
+
+<input
+type="text"
+id="visionTitle"
+placeholder="Dream Title">
+
+<input
+type="url"
+id="visionImage"
+placeholder="Image URL">
+
+<button
+onclick="addVision()">
+
+Add Vision
+
+</button>
+
+</div>
+
+<div
+id="visionBoard"
+class="vision-grid">
+
+</div>
+
+</div>
+
+<!-- MONTHLY REVIEWS -->
+
+<div class="section">
+
+<h3>📝 Monthly Review</h3>
+
+<div class="review-form">
+
+<input
+id="reviewMonth"
+placeholder="Month">
+
+<textarea
+id="reviewAchievement"
+placeholder="Achievements">
+
+</textarea>
+
+<textarea
+id="reviewLesson"
+placeholder="Lessons Learned">
+
+</textarea>
+
+<textarea
+id="reviewFocus"
+placeholder="Next Month Focus">
+
+</textarea>
+
+<button
+onclick="saveReview()">
+
+Save Review
+
+</button>
+
+</div>
+
+<div
+id="reviewContainer">
+
+</div>
+
+</div>
+
+<!-- ANALYTICS -->
+
+<div class="section">
+
+<h3>📈 Analytics</h3>
+
+<div class="analytics-grid">
+
+<div class="analytic-card">
+
+<h4>Career</h4>
+
+<span id="careerScore">
+0%
+</span>
+
+</div>
+
+<div class="analytic-card">
+
+<h4>Health</h4>
+
+<span id="healthScore">
+0%
+</span>
+
+</div>
+
+<div class="analytic-card">
+
+<h4>Learning</h4>
+
+<span id="learningScore">
+0%
+</span>
+
+</div>
+
+<div class="analytic-card">
+
+<h4>Finance</h4>
+
+<span id="financeScore">
+0%
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ACHIEVEMENTS -->
+
+<div class="section">
+
+<h3>🏆 Achievements</h3>
+
+<div class="achievement-grid">
+
+<div class="achievement">
+🥉 Goal Starter
+</div>
+
+<div class="achievement">
+🥈 Consistent Planner
+</div>
+
+<div class="achievement">
+🥇 Mission Master
+</div>
+
+<div class="achievement">
+🏆 Life Architect
+</div>
+
+</div>
+
+</div>
+
+<!-- AI INSIGHTS -->
+
+<div class="section">
+
+<h3>🤖 AI Insights</h3>
+
+<div id="insightsBox">
+
+Create goals to receive insights.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module"
+src="js/menu.js">
+</script>
+
+<script type="module"
+src="js/planner.js">
+</script>
+
+</body>
+</html>
