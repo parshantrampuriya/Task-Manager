@@ -273,3 +273,259 @@ document
 percent + "%";
 
 }
+
+/* ================= DASHBOARD ================= */
+
+function updateDashboard(){
+
+updateLevel();
+
+updateStats();
+
+generateHeatmap();
+
+generateInsights();
+
+checkAchievements();
+
+}
+
+/* ================= STATS ================= */
+
+function updateStats(){
+
+let totalHabits = habits.length;
+
+let completedToday = 0;
+
+let currentStreak = 0;
+
+let longestStreak = 0;
+
+const today = getToday();
+
+habits.forEach(h=>{
+
+if(
+h.completedDates?.includes(today)
+){
+
+completedToday++;
+
+}
+
+currentStreak +=
+(h.streak || 0);
+
+if(
+(h.longestStreak || 0)
+>
+longestStreak
+){
+
+longestStreak =
+h.longestStreak;
+
+}
+
+});
+
+/* success rate */
+
+let successRate = 0;
+
+if(totalHabits > 0){
+
+successRate = Math.round(
+(completedToday/totalHabits)*100
+);
+
+}
+
+/* update ui */
+
+const streakEl =
+document.getElementById(
+"currentStreak"
+);
+
+if(streakEl){
+
+streakEl.innerText =
+currentStreak;
+
+}
+
+const longestEl =
+document.getElementById(
+"longestStreak"
+);
+
+if(longestEl){
+
+longestEl.innerText =
+longestStreak;
+
+}
+
+const successEl =
+document.getElementById(
+"successRate"
+);
+
+if(successEl){
+
+successEl.innerText =
+successRate + "%";
+
+}
+
+const scoreEl =
+document.getElementById(
+"todayScore"
+);
+
+if(scoreEl){
+
+scoreEl.innerText =
+successRate + "%";
+
+}
+
+}
+
+/* ================= HEATMAP ================= */
+
+function generateHeatmap(){
+
+const grid =
+document.querySelector(
+".heat-grid"
+);
+
+if(!grid) return;
+
+grid.innerHTML="";
+
+let completedMap = {};
+
+habits.forEach(h=>{
+
+(h.completedDates || [])
+.forEach(date=>{
+
+completedMap[date] =
+(completedMap[date] || 0)+1;
+
+});
+
+});
+
+/* last 42 days */
+
+for(let i=41;i>=0;i--){
+
+let d = new Date();
+
+d.setDate(
+d.getDate()-i
+);
+
+let key =
+d.toISOString()
+.split("T")[0];
+
+let count =
+completedMap[key] || 0;
+
+let level = 0;
+
+if(count>=1) level=1;
+if(count>=3) level=2;
+if(count>=5) level=3;
+if(count>=8) level=4;
+
+grid.innerHTML +=
+
+`
+<div
+class="heat-cell level${level}"
+title="${key}">
+</div>
+`;
+
+}
+
+}
+
+/* ================= ACHIEVEMENTS ================= */
+
+function checkAchievements(){
+
+const achievements =
+document.querySelectorAll(
+".achievement"
+);
+
+if(!achievements.length)
+return;
+
+let totalCompleted = 0;
+
+let longest = 0;
+
+habits.forEach(h=>{
+
+totalCompleted +=
+(h.completedDates?.length || 0);
+
+if(
+(h.longestStreak||0)
+>
+longest
+){
+
+longest =
+h.longestStreak;
+
+}
+
+});
+
+/* unlock style */
+
+if(longest>=7){
+
+achievements[0]
+.style.border =
+"2px solid #00ff95";
+
+}
+
+if(longest>=30){
+
+achievements[1]
+.style.border =
+"2px solid gold";
+
+}
+
+if(totalCompleted>=100){
+
+achievements[2]
+.style.border =
+"2px solid cyan";
+
+}
+
+if(totalCompleted>=365){
+
+achievements[3]
+.style.border =
+"2px solid orange";
+
+}
+
+}
+
+/* ================= AI INSIGHTS ================= */
