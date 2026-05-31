@@ -4,305 +4,200 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<title>Habit Tracker</title>
+<title>Habits</title>
 
+<link rel="stylesheet" href="css/habits.css">
 <link rel="stylesheet" href="css/sidebar.css">
-<link rel="stylesheet" href="css/habit.css">
 
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- ================= SIDEBAR ================= -->
 
 <div id="sidebar" class="sidebar">
 
 <h2>⚡ Menu</h2>
 
 <button onclick="goHome()">🏠 Home</button>
+
 <button onclick="goTasks()">📋 Tasks</button>
+
 <button onclick="goGoals()">🎯 Goals</button>
-<button onclick="goHabit()">🔥 Habits</button>
-<button onclick="goGrowth()">🌱 Growth</button>
+
+<button onclick="goHabits()">🔥 Habits</button>
+
+<button onclick="goFriends()">👥 Friends</button>
+
+<button onclick="goQuestionBank()">📚 Question Bank</button>
+
+<button onclick="goTests()">📝 Tests</button>
+
+<button onclick="goGrowth()">🌱 Growth Hub</button>
+
 <button onclick="goProfile()">👤 Profile</button>
 
 <button id="logoutBtn">🚪 Logout</button>
 
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 
 <div class="main">
 
-<!-- NAVBAR -->
+<!-- ================= NAVBAR ================= -->
 
 <div class="navbar">
 
-<button class="menu-btn"
+<button
+class="menu-btn"
 onclick="toggleSidebar()">
 
 ☰
 
 </button>
 
-<h2>🔥 Habit Tracker</h2>
-
-<div class="nav-actions">
-
-<button
-onclick="location.href='habit-create.html'">
-
-➕
-
-</button>
-
-<button
-onclick="location.href='habit-analytics.html'">
-
-📊
-
-</button>
+<h2>
+🔥 Habit Tracker
+</h2>
 
 </div>
 
-</div>
-
-<!-- CONTAINER -->
+<!-- ================= CONTAINER ================= -->
 
 <div class="container">
 
-<!-- OVERVIEW -->
+<!-- ================= STATS ================= -->
 
-<div class="overview-grid">
+<div class="stats-grid">
 
-<div class="overview-card streak">
+<div class="stat-card">
 
-<h3 id="currentStreak">0</h3>
-
-<p>🔥 Current Streak</p>
-
-</div>
-
-<div class="overview-card longest">
-
-<h3 id="longestStreak">0</h3>
-
-<p>🏆 Longest Streak</p>
-
-</div>
-
-<div class="overview-card success">
-
-<h3 id="successRate">0%</h3>
-
-<p>📈 Success Rate</p>
-
-</div>
-
-<div class="overview-card score">
-
-<h3 id="todayScore">0%</h3>
-
-<p>⚡ Today Score</p>
-
-</div>
-
-</div>
-
-<!-- XP -->
-
-<div class="xp-box">
-
-<div class="xp-header">
-
-<span id="levelText">
-
-Level 1 Beginner
-
-</span>
-
-<span id="xpText">
-
-0 / 100 XP
-
-</span>
-
-</div>
-
-<div class="xp-bar">
-
-<div
-class="xp-fill"
-id="xpFill">
-
-</div>
-
-</div>
-
-</div>
-
-<!-- CATEGORY FILTER -->
-
-<div class="category-filter">
-
-<button class="cat active">
-📋 All
-</button>
-
-<button class="cat">
-📚 Study
-</button>
-
-<button class="cat">
-💪 Fitness
-</button>
-
-<button class="cat">
-🧘 Health
-</button>
-
-<button class="cat">
-💰 Finance
-</button>
-
-<button class="cat">
-❤️ Personal
-</button>
-
-<button class="cat">
-👨‍💻 Career
-</button>
-
-</div>
-
-<!-- TODAY HABITS -->
-
-<div class="section">
-
-<div class="section-header">
-
-<h3>📅 Today's Habits</h3>
-
-<button
-onclick="location.href='habit-create.html'">
-
-➕ Add Habit
-
-</button>
-
-</div>
-
-<div id="habitContainer">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- HEATMAP -->
-
-<div class="section">
-
-<h3>📊 Monthly Consistency</h3>
-
-<div id="heatmap">
-
-<div class="heat-grid">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ACHIEVEMENTS -->
-
-<div class="section">
-
-<h3>🏆 Achievements</h3>
-
-<div class="achievement-grid">
-
-<div class="achievement">
-
-🔥 7 Day Streak
-
-</div>
-
-<div class="achievement">
-
-🏆 30 Day Streak
-
-</div>
-
-<div class="achievement">
-
-💎 100 Habits
-
-</div>
-
-<div class="achievement">
-
-⚡ Discipline Master
-
-</div>
-
-</div>
-
-</div>
-
-<!-- CHALLENGES -->
-
-<div class="section">
-
-<div class="section-header">
-
-<h3>👥 Challenges</h3>
-
-<button>
-
-Create Challenge
-
-</button>
-
-</div>
-
-<div class="challenge-card">
-
-<h4>
-
-30 Day Reading Challenge
-
-</h4>
+<h3 id="totalHabits">
+0
+</h3>
 
 <p>
+Total Habits
+</p>
 
-Participants: 12
+</div>
 
+<div class="stat-card">
+
+<h3 id="completedToday">
+0
+</h3>
+
+<p>
+Completed Today
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="currentStreak">
+0
+</h3>
+
+<p>
+Current Streak
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="successRate">
+0%
+</h3>
+
+<p>
+Success Rate
 </p>
 
 </div>
 
 </div>
 
-<!-- INSIGHTS -->
+<!-- ================= TOP BAR ================= -->
 
-<div class="section">
+<div class="top-bar">
 
-<h3>🤖 AI Insights</h3>
+<input
+type="text"
+id="searchInput"
+placeholder="🔍 Search habits...">
 
-<div id="insightsBox">
+<button
+id="createHabitBtn">
 
-You complete Study habits
-most consistently.
+➕ Create Habit
 
-Best performance time:
-7 PM - 9 PM.
+</button>
+
+</div>
+
+<!-- ================= HABIT GRID ================= -->
+
+<div class="habit-table-wrapper">
+
+<table
+class="habit-table">
+
+<thead>
+
+<tr>
+
+<th>
+Habit
+</th>
+
+<th id="day1">
+-
+</th>
+
+<th id="day2">
+-
+</th>
+
+<th id="day3">
+-
+</th>
+
+<th id="day4">
+-
+</th>
+
+<th id="day5">
+-
+</th>
+
+<th id="day6">
+-
+</th>
+
+<th id="day7">
+Today
+</th>
+
+<th>
+Actions
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="habitTableBody">
+
+</tbody>
+
+</table>
 
 </div>
 
@@ -310,17 +205,213 @@ Best performance time:
 
 </div>
 
+<!-- ================= CREATE HABIT MODAL ================= -->
+
+<div
+id="habitModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3 id="habitModalTitle">
+
+➕ Create Habit
+
+</h3>
+
+<select id="habitType">
+
+<option value="yesno">
+Yes / No Habit
+</option>
+
+<option value="measurable">
+Measurable Habit
+</option>
+
+</select>
+
+<input
+type="text"
+id="habitName"
+placeholder="Habit Name">
+
+<textarea
+id="habitDescription"
+placeholder="Description">
+
+</textarea>
+
+<input
+type="color"
+id="habitColor"
+value="#00cfff">
+
+<!-- ================= MEASURABLE ONLY ================= -->
+
+<div id="measurableFields">
+
+<input
+type="text"
+id="habitUnit"
+placeholder="Unit (Pages, Hours, KM...)">
+
+<input
+type="number"
+id="habitTarget"
+placeholder="Daily Target">
+
 </div>
 
-<script type="module"
+<div class="modal-actions">
+
+<button
+id="saveHabitBtn">
+
+💾 Save
+
+</button>
+
+<button
+id="cancelHabitBtn">
+
+❌ Cancel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= UPDATE ENTRY MODAL ================= -->
+
+<div
+id="entryModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3 id="entryTitle">
+
+Update Habit
+
+</h3>
+
+<!-- YES NO -->
+
+<div id="yesNoSection">
+
+<button
+class="done-btn"
+id="doneBtn">
+
+✅ Done
+
+</button>
+
+<button
+class="miss-btn"
+id="missBtn">
+
+❌ Missed
+
+</button>
+
+</div>
+
+<!-- MEASURABLE -->
+
+<div id="measureSection">
+
+<input
+type="number"
+id="entryValue"
+placeholder="Enter value">
+
+<button
+id="saveEntryBtn">
+
+💾 Save Progress
+
+</button>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+id="closeEntryBtn">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= DELETE MODAL ================= -->
+
+<div
+id="deleteModal"
+class="modal">
+
+<div class="modal-box">
+
+<h3>
+
+Delete Habit?
+
+</h3>
+
+<p>
+
+This action cannot be undone.
+
+</p>
+
+<div class="modal-actions">
+
+<button
+id="confirmDeleteBtn">
+
+🗑 Delete
+
+</button>
+
+<button
+id="cancelDeleteBtn">
+
+Cancel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+
+<script
+type="module"
 src="js/menu.js">
 
 </script>
 
-<script type="module"
-src="js/habit.js">
+<script
+type="module"
+src="js/habits.js">
 
 </script>
 
 </body>
+
 </html>
+
+
