@@ -1,41 +1,18 @@
-/* ================= ROOT ================= */
-
-:root{
-
---bg:#0f1117;
---card:#171b24;
---card2:#1e2430;
-
---primary:#00e5ff;
---primary2:#00bcd4;
-
---success:#4caf50;
---warning:#ff9800;
---danger:#ff5252;
-
---text:#ffffff;
---text2:#b0b8c5;
-
---radius:18px;
-
-}
-
-/* ================= BODY ================= */
+/* =========================
+   GLOBAL
+========================= */
 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
+font-family:"Segoe UI",sans-serif;
 }
 
 body{
-background:var(--bg);
-color:var(--text);
-overflow-x:hidden;
+background:#0f172a;
+color:white;
 }
-
-/* ================= MAIN ================= */
 
 .main{
 margin-left:260px;
@@ -43,577 +20,364 @@ padding:20px;
 min-height:100vh;
 }
 
-/* ================= NAVBAR ================= */
+/* =========================
+   NAVBAR
+========================= */
 
 .navbar{
-
 display:flex;
-justify-content:space-between;
 align-items:center;
-
-padding:18px;
-
-background:var(--card);
-
-border-radius:18px;
-
+gap:15px;
 margin-bottom:25px;
-
 }
 
 .menu-btn{
-
-background:none;
+background:#06b6d4;
 border:none;
-
-font-size:24px;
-
 color:white;
-
-cursor:pointer;
-
-}
-
-.nav-actions{
-
-display:flex;
-gap:10px;
-
-}
-
-.nav-actions button{
-
-background:linear-gradient(
-135deg,
-var(--primary),
-var(--primary2)
-);
-
-border:none;
-
-color:black;
-
-font-size:18px;
-
-font-weight:700;
-
 padding:10px 14px;
-
-border-radius:12px;
-
+border-radius:10px;
 cursor:pointer;
-
-}
-
-/* ================= CONTAINER ================= */
-
-.container{
-
-display:flex;
-flex-direction:column;
-gap:25px;
-
-}
-
-/* ================= OVERVIEW ================= */
-
-.overview-grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(220px,1fr));
-
-gap:20px;
-
-}
-
-.overview-card{
-
-background:var(--card);
-
-padding:25px;
-
-border-radius:20px;
-
-text-align:center;
-
-transition:.3s;
-
-}
-
-.overview-card:hover{
-
-transform:translateY(-5px);
-
-}
-
-.overview-card h3{
-
-font-size:32px;
-margin-bottom:10px;
-
-}
-
-.overview-card p{
-
-color:var(--text2);
-
-}
-
-.streak{
-border-top:4px solid orange;
-}
-
-.longest{
-border-top:4px solid gold;
-}
-
-.success{
-border-top:4px solid #00e676;
-}
-
-.score{
-border-top:4px solid #00e5ff;
-}
-
-/* ================= XP ================= */
-
-.xp-box{
-
-background:var(--card);
-
-padding:20px;
-
-border-radius:20px;
-
-}
-
-.xp-header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-margin-bottom:12px;
-
-}
-
-.xp-bar{
-
-height:18px;
-
-background:#0a0c10;
-
-border-radius:50px;
-
-overflow:hidden;
-
-}
-
-.xp-fill{
-
-height:100%;
-
-width:0%;
-
-background:linear-gradient(
-90deg,
-#00e5ff,
-#00ff95
-);
-
-border-radius:50px;
-
-transition:.5s;
-
-}
-
-/* ================= CATEGORY ================= */
-
-.category-filter{
-
-display:flex;
-gap:10px;
-
-overflow-x:auto;
-
-padding-bottom:10px;
-
-}
-
-.cat{
-
-border:none;
-
-padding:12px 18px;
-
-background:var(--card);
-
-color:white;
-
-border-radius:50px;
-
-cursor:pointer;
-
-white-space:nowrap;
-
-}
-
-.cat.active{
-
-background:var(--primary);
-color:black;
-
-font-weight:700;
-
-}
-
-/* ================= SECTION ================= */
-
-.section{
-
-background:var(--card);
-
-padding:22px;
-
-border-radius:20px;
-
-}
-
-.section-header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-margin-bottom:20px;
-
-}
-
-.section-header button{
-
-background:var(--primary);
-
-border:none;
-
-padding:10px 18px;
-
-border-radius:12px;
-
-font-weight:700;
-
-cursor:pointer;
-
-}
-
-/* ================= HABITS ================= */
-
-#habitContainer{
-
-display:flex;
-flex-direction:column;
-gap:15px;
-
-}
-
-.habit-card{
-
-background:var(--card2);
-
-padding:18px;
-
-border-radius:16px;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-}
-
-.habit-left{
-
-display:flex;
-flex-direction:column;
-gap:6px;
-
-}
-
-.habit-name{
-
 font-size:18px;
-font-weight:600;
-
 }
 
-.habit-meta{
-
-font-size:13px;
-
-color:var(--text2);
-
+.navbar h2{
+font-size:28px;
 }
 
-.complete-btn{
+/* =========================
+   STATS
+========================= */
 
-border:none;
-
-padding:10px 15px;
-
-border-radius:12px;
-
-background:#00e676;
-
-font-weight:700;
-
-cursor:pointer;
-
-}
-
-/* ================= HEATMAP ================= */
-
-.heat-grid{
-
+.stats-grid{
 display:grid;
-
-grid-template-columns:
-repeat(7,1fr);
-
-gap:8px;
-
-margin-top:20px;
-
-}
-
-.heat-cell{
-
-height:35px;
-
-border-radius:8px;
-
-}
-
-.level0{
-background:#232833;
-}
-
-.level1{
-background:#004d40;
-}
-
-.level2{
-background:#00796b;
-}
-
-.level3{
-background:#00bfa5;
-}
-
-.level4{
-background:#1de9b6;
-}
-
-/* ================= ACHIEVEMENTS ================= */
-
-.achievement-grid{
-
-display:grid;
-
 grid-template-columns:
 repeat(auto-fit,minmax(180px,1fr));
-
-gap:15px;
-
+gap:20px;
+margin-bottom:25px;
 }
 
-.achievement{
-
-background:var(--card2);
-
-padding:18px;
-
+.stat-card{
+background:#1e293b;
+padding:20px;
 border-radius:16px;
-
 text-align:center;
+border:1px solid #334155;
+}
 
+.stat-card h3{
+font-size:30px;
+color:#22d3ee;
+margin-bottom:8px;
+}
+
+.stat-card p{
+color:#cbd5e1;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+.top-bar{
+display:flex;
+gap:15px;
+margin-bottom:20px;
+flex-wrap:wrap;
+}
+
+#searchInput{
+flex:1;
+padding:12px;
+border:none;
+border-radius:12px;
+background:#1e293b;
+color:white;
+font-size:15px;
+}
+
+#createHabitBtn{
+background:#22c55e;
+border:none;
+padding:12px 18px;
+border-radius:12px;
+cursor:pointer;
 font-weight:600;
-
+color:white;
 }
 
-/* ================= CHALLENGE ================= */
+/* =========================
+   TABLE
+========================= */
 
-.challenge-card{
-
-background:var(--card2);
-
-padding:20px;
-
-border-radius:16px;
-
+.habit-table-wrapper{
+overflow:auto;
+background:#1e293b;
+border-radius:18px;
+padding:15px;
 }
 
-.challenge-card h4{
+.habit-table{
+width:100%;
+border-collapse:collapse;
+min-width:1000px;
+}
 
+.habit-table th{
+background:#0f172a;
+padding:14px;
+border:1px solid #334155;
+}
+
+.habit-table td{
+padding:12px;
+text-align:center;
+border:1px solid #334155;
+}
+
+.habit-table tr:hover{
+background:#273449;
+}
+
+/* =========================
+   HABIT NAME
+========================= */
+
+.habit-name{
+text-align:left;
+font-weight:700;
+min-width:220px;
+}
+
+.habit-sub{
+font-size:12px;
+opacity:.7;
+margin-top:5px;
+}
+
+/* =========================
+   DATE CELLS
+========================= */
+
+.day-cell{
+cursor:pointer;
+font-weight:bold;
+transition:.2s;
+}
+
+.day-cell:hover{
+transform:scale(1.08);
+}
+
+.done{
+background:#16a34a;
+color:white;
+}
+
+.missed{
+background:#dc2626;
+color:white;
+}
+
+.partial{
+background:#f59e0b;
+color:white;
+}
+
+.empty{
+background:#1e293b;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.action-btn{
+border:none;
+padding:8px 10px;
+margin:2px;
+border-radius:8px;
+cursor:pointer;
+font-size:13px;
+}
+
+.edit-btn{
+background:#0ea5e9;
+color:white;
+}
+
+.delete-btn{
+background:#ef4444;
+color:white;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+display:none;
+position:fixed;
+left:0;
+top:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.7);
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.modal-box{
+background:#1e293b;
+width:95%;
+max-width:500px;
+padding:25px;
+border-radius:18px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.modal-box h3{
+text-align:center;
 margin-bottom:10px;
-
 }
 
-/* ================= AI INSIGHT ================= */
-
-#insightsBox{
-
-background:var(--card2);
-
-padding:20px;
-
-border-radius:16px;
-
-line-height:1.8;
-
-color:#dce6f5;
-
+.modal-box input,
+.modal-box textarea,
+.modal-box select{
+padding:12px;
+border:none;
+border-radius:10px;
+background:#0f172a;
+color:white;
 }
 
-/* ================= MOBILE ================= */
+.modal-box textarea{
+resize:none;
+height:90px;
+}
+
+/* =========================
+   MODAL BUTTONS
+========================= */
+
+.modal-actions{
+display:flex;
+gap:10px;
+justify-content:flex-end;
+}
+
+.modal-actions button{
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+#saveHabitBtn,
+#saveEntryBtn{
+background:#22c55e;
+color:white;
+}
+
+#cancelHabitBtn,
+#closeEntryBtn,
+#cancelDeleteBtn{
+background:#475569;
+color:white;
+}
+
+#confirmDeleteBtn{
+background:#ef4444;
+color:white;
+}
+
+/* =========================
+   YES NO BUTTONS
+========================= */
+
+.done-btn{
+background:#22c55e;
+border:none;
+padding:12px;
+border-radius:10px;
+cursor:pointer;
+color:white;
+margin-bottom:10px;
+}
+
+.miss-btn{
+background:#ef4444;
+border:none;
+padding:12px;
+border-radius:10px;
+cursor:pointer;
+color:white;
+}
+
+/* =========================
+   PROGRESS COLORS
+========================= */
+
+.progress-low{
+background:#ef4444;
+color:white;
+}
+
+.progress-mid{
+background:#f59e0b;
+color:white;
+}
+
+.progress-high{
+background:#22c55e;
+color:white;
+}
+
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:900px){
 
 .main{
-
 margin-left:0;
 padding:15px;
-
 }
 
-.navbar{
-
-padding:15px;
-
+.stats-grid{
+grid-template-columns:
+repeat(2,1fr);
 }
 
-.overview-grid{
-
-grid-template-columns:1fr 1fr;
-
-}
-
-.section-header{
-
+.top-bar{
 flex-direction:column;
-gap:10px;
-align-items:flex-start;
+}
 
+#createHabitBtn{
+width:100%;
 }
 
 }
 
 @media(max-width:600px){
 
-.overview-grid{
-
+.stats-grid{
 grid-template-columns:1fr;
-
 }
 
 .navbar h2{
-
-font-size:20px;
-
+font-size:22px;
 }
 
-.habit-card{
-
-flex-direction:column;
-align-items:flex-start;
-gap:15px;
-
+.habit-table{
+min-width:800px;
 }
 
-.complete-btn{
-
-width:100%;
-
+.modal-box{
+width:95%;
 }
-
-}
-
-.calendar-header{
-
-display:grid;
-grid-template-columns:
-repeat(7,1fr);
-
-margin-bottom:10px;
-
-font-weight:600;
-
-text-align:center;
-
-}
-
-.heat-grid{
-
-display:grid;
-grid-template-columns:
-repeat(7,1fr);
-
-gap:8px;
-
-}
-
-.heat-cell{
-
-height:42px;
-
-border-radius:12px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:12px;
-
-cursor:pointer;
-
-background:#1f2435;
-
-color:white;
-
-}
-
-.level0{
-background:#1f2435;
-}
-
-.level1{
-background:#00695c;
-}
-
-.level2{
-background:#00a67d;
-}
-
-.level3{
-background:#00d48f;
-}
-
-.level4{
-background:#00ff99;
-color:black;
-}
-
-#selectedDate{
-
-margin-top:15px;
-
-padding:12px;
-
-background:#151d33;
-
-border-radius:12px;
 
 }
