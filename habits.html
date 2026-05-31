@@ -7,10 +7,16 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Habits</title>
+<title>Habit Tracker</title>
 
-<link rel="stylesheet" href="css/habits.css">
-<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet"
+href="css/habits.css">
+
+<link rel="stylesheet"
+href="css/sidebar.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 </head>
 
@@ -18,7 +24,8 @@ content="width=device-width, initial-scale=1.0">
 
 <!-- ================= SIDEBAR ================= -->
 
-<div id="sidebar" class="sidebar">
+<div id="sidebar"
+class="sidebar">
 
 <h2>⚡ Menu</h2>
 
@@ -28,7 +35,7 @@ content="width=device-width, initial-scale=1.0">
 
 <button onclick="goGoals()">🎯 Goals</button>
 
-<button onclick="goHabits()">🔥 Habits</button>
+<button onclick="goHabits()">📅 Habits</button>
 
 <button onclick="goFriends()">👥 Friends</button>
 
@@ -48,7 +55,7 @@ content="width=device-width, initial-scale=1.0">
 
 <div class="main">
 
-<!-- ================= NAVBAR ================= -->
+<!-- NAVBAR -->
 
 <div class="navbar">
 
@@ -61,42 +68,22 @@ onclick="toggleSidebar()">
 </button>
 
 <h2>
-🔥 Habit Tracker
+📅 Habit Tracker
 </h2>
 
-</div>
+<button
+id="createHabitBtn"
+class="create-btn">
 
-<!-- ================= CONTAINER ================= -->
+➕ Habit
 
-<div class="container">
-
-<!-- ================= STATS ================= -->
-
-<div class="stats-grid">
-
-<div class="stat-card">
-
-<h3 id="totalHabits">
-0
-</h3>
-
-<p>
-Total Habits
-</p>
+</button>
 
 </div>
 
-<div class="stat-card">
+<!-- DASHBOARD -->
 
-<h3 id="completedToday">
-0
-</h3>
-
-<p>
-Completed Today
-</p>
-
-</div>
+<div class="dashboard">
 
 <div class="stat-card">
 
@@ -105,99 +92,67 @@ Completed Today
 </h3>
 
 <p>
-Current Streak
+🔥 Current Streak
 </p>
 
 </div>
 
 <div class="stat-card">
 
-<h3 id="successRate">
+<h3 id="bestStreak">
+0
+</h3>
+
+<p>
+🏆 Best Streak
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="completionRate">
 0%
 </h3>
 
 <p>
-Success Rate
+📊 Completion
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="todayDone">
+0
+</h3>
+
+<p>
+✅ Today
 </p>
 
 </div>
 
 </div>
 
-<!-- ================= TOP BAR ================= -->
+<!-- SEARCH -->
 
-<div class="top-bar">
+<div class="search-box">
 
 <input
 type="text"
 id="searchInput"
-placeholder="🔍 Search habits...">
-
-<button
-id="createHabitBtn">
-
-➕ Create Habit
-
-</button>
+placeholder="🔍 Search habits">
 
 </div>
 
-<!-- ================= HABIT GRID ================= -->
+<!-- HABIT TABLE -->
 
-<div class="habit-table-wrapper">
+<div class="table-wrapper">
 
-<table
-class="habit-table">
+<div id="habitTable">
 
-<thead>
-
-<tr>
-
-<th>
-Habit
-</th>
-
-<th id="day1">
--
-</th>
-
-<th id="day2">
--
-</th>
-
-<th id="day3">
--
-</th>
-
-<th id="day4">
--
-</th>
-
-<th id="day5">
--
-</th>
-
-<th id="day6">
--
-</th>
-
-<th id="day7">
-Today
-</th>
-
-<th>
-Actions
-</th>
-
-</tr>
-
-</thead>
-
-<tbody id="habitTableBody">
-
-</tbody>
-
-</table>
+<!-- JS WILL RENDER -->
 
 </div>
 
@@ -205,7 +160,9 @@ Actions
 
 </div>
 
-<!-- ================= CREATE HABIT MODAL ================= -->
+<!-- ================================================= -->
+<!-- CREATE HABIT MODAL -->
+<!-- ================================================= -->
 
 <div
 id="habitModal"
@@ -213,11 +170,15 @@ class="modal">
 
 <div class="modal-box">
 
-<h3 id="habitModalTitle">
-
+<h2>
 ➕ Create Habit
+</h2>
 
-</h3>
+<!-- TYPE -->
+
+<label>
+Habit Type
+</label>
 
 <select id="habitType">
 
@@ -229,38 +190,176 @@ Yes / No Habit
 Measurable Habit
 </option>
 
+<option value="template">
+Custom Template
+</option>
+
 </select>
 
+<!-- TEMPLATE -->
+
+<div id="templateBox">
+
+<label>
+Template
+</label>
+
+<select id="templateType">
+
+<option value="">
+Select Template
+</option>
+
+<option>
+📚 Reading
+</option>
+
+<option>
+💪 Exercise
+</option>
+
+<option>
+🚰 Water
+</option>
+
+<option>
+😴 Sleep
+</option>
+
+<option>
+🏃 Running
+</option>
+
+<option>
+🧘 Meditation
+</option>
+
+<option>
+💰 Savings
+</option>
+
+<option>
+📝 Study
+</option>
+
+<option>
+📖 Revision
+</option>
+
+<option>
+🗣 English Speaking
+</option>
+
+</select>
+
+</div>
+
+<!-- NAME -->
+
+<label>
+Habit Name
+</label>
+
 <input
-type="text"
 id="habitName"
 placeholder="Habit Name">
 
-<textarea
-id="habitDescription"
-placeholder="Description">
-</textarea>
+<!-- QUESTION -->
+
+<label>
+Question
+</label>
 
 <input
-type="color"
-id="habitColor"
-value="#00cfff">
+id="habitQuestion"
+placeholder="Question">
 
-<!-- ================= MEASURABLE ONLY ================= -->
+<!-- MEASURABLE SECTION -->
 
 <div id="measurableFields">
 
+<label>
+Unit
+</label>
+
 <input
-type="text"
 id="habitUnit"
-placeholder="Unit (Pages, Hours, KM...)">
+placeholder="Pages / Hours / KM">
+
+<label>
+Target
+</label>
 
 <input
 type="number"
-id="habitTarget"
-placeholder="Daily Target">
+id="habitTarget">
+
+<label>
+Target Type
+</label>
+
+<select id="targetType">
+
+<option value="atleast">
+At Least
+</option>
+
+<option value="exactly">
+Exactly
+</option>
+
+<option value="atmost">
+At Most
+</option>
+
+</select>
 
 </div>
+
+<!-- COLOR -->
+
+<label>
+Color
+</label>
+
+<select id="habitColor">
+
+<option value="#00cfff">
+Blue
+</option>
+
+<option value="#00ff99">
+Green
+</option>
+
+<option value="#ff9800">
+Orange
+</option>
+
+<option value="#a855f7">
+Purple
+</option>
+
+<option value="#ff4d4d">
+Red
+</option>
+
+<option value="#ff66cc">
+Pink
+</option>
+
+</select>
+
+<!-- NOTES -->
+
+<label>
+Notes
+</label>
+
+<textarea
+id="habitNotes">
+
+</textarea>
 
 <div class="modal-actions">
 
@@ -272,7 +371,7 @@ id="saveHabitBtn">
 </button>
 
 <button
-id="cancelHabitBtn">
+id="closeHabitBtn">
 
 ❌ Cancel
 
@@ -284,37 +383,47 @@ id="cancelHabitBtn">
 
 </div>
 
-<!-- ================= UPDATE ENTRY MODAL ================= -->
+<!-- ================================================= -->
+<!-- DAILY UPDATE MODAL -->
+<!-- ================================================= -->
 
 <div
-id="entryModal"
+id="updateModal"
 class="modal">
 
 <div class="modal-box">
 
-<h3 id="entryTitle">
+<h2 id="updateTitle">
 
 Update Habit
 
-</h3>
+</h2>
 
 <!-- YES NO -->
 
 <div id="yesNoSection">
 
 <button
-class="done-btn"
-id="doneBtn">
+id="doneBtn"
+class="success-btn">
 
-✅ Done
+✅ Completed
 
 </button>
 
 <button
-class="miss-btn"
-id="missBtn">
+id="missedBtn"
+class="danger-btn">
 
 ❌ Missed
+
+</button>
+
+<button
+id="skipBtn"
+class="warning-btn">
+
+⏭ Skip
 
 </button>
 
@@ -324,13 +433,24 @@ id="missBtn">
 
 <div id="measureSection">
 
+<label>
+
+Today's Value
+
+</label>
+
 <input
 type="number"
-id="entryValue"
-placeholder="Enter value">
+id="todayValue">
+
+<div id="todayProgress">
+
+0%
+
+</div>
 
 <button
-id="saveEntryBtn">
+id="saveProgressBtn">
 
 💾 Save Progress
 
@@ -341,7 +461,7 @@ id="saveEntryBtn">
 <div class="modal-actions">
 
 <button
-id="closeEntryBtn">
+id="closeUpdateBtn">
 
 Close
 
@@ -353,7 +473,9 @@ Close
 
 </div>
 
-<!-- ================= DELETE MODAL ================= -->
+<!-- ================================================= -->
+<!-- DELETE MODAL -->
+<!-- ================================================= -->
 
 <div
 id="deleteModal"
@@ -361,11 +483,13 @@ class="modal">
 
 <div class="modal-box">
 
-<h3>
+<h2>
+🗑 Delete Habit
+</h2>
 
-Delete Habit?
+<p id="deleteHabitName">
 
-</h3>
+</p>
 
 <p>
 
@@ -376,9 +500,10 @@ This action cannot be undone.
 <div class="modal-actions">
 
 <button
-id="confirmDeleteBtn">
+id="confirmDeleteBtn"
+class="danger-btn">
 
-🗑 Delete
+Delete
 
 </button>
 
@@ -395,8 +520,6 @@ Cancel
 
 </div>
 
-<!-- ================= SCRIPTS ================= -->
-
 <script
 type="module"
 src="js/menu.js">
@@ -410,7 +533,4 @@ src="js/habits.js">
 </script>
 
 </body>
-
 </html>
-
-
