@@ -1,7 +1,3 @@
-// =========================
-// FIREBASE
-// =========================
-
 import { auth, db }
 from "./firebase.js";
 
@@ -29,14 +25,13 @@ onAuthStateChanged
 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+/* =========================
+   ELEMENTS
+========================= */
 
-// =========================
-// ELEMENTS
-// =========================
-
-const habitTableBody =
+const habitTable =
 document.getElementById(
-"habitTableBody"
+"habitTable"
 );
 
 const searchInput =
@@ -59,9 +54,9 @@ document.getElementById(
 "saveHabitBtn"
 );
 
-const cancelHabitBtn =
+const closeHabitBtn =
 document.getElementById(
-"cancelHabitBtn"
+"closeHabitBtn"
 );
 
 const habitType =
@@ -74,20 +69,9 @@ document.getElementById(
 "measurableFields"
 );
 
-const entryModal =
-document.getElementById(
-"entryModal"
-);
-
-const deleteModal =
-document.getElementById(
-"deleteModal"
-);
-
-
-// =========================
-// STATE
-// =========================
+/* =========================
+   STATE
+========================= */
 
 let currentUser = null;
 
@@ -95,14 +79,13 @@ let habits = [];
 
 let selectedHabit = null;
 
-let deleteHabitId = null;
-
 let editingHabitId = null;
 
+let deletingHabitId = null;
 
-// =========================
-// AUTH
-// =========================
+/* =========================
+   AUTH
+========================= */
 
 onAuthStateChanged(
 auth,
@@ -124,16 +107,15 @@ await loadHabits();
 }
 );
 
+/* =========================
+   DATE HELPERS
+========================= */
 
-// =========================
-// DATE HELPERS
-// =========================
-
-function getLast7Days(){
+function getLast30Days(){
 
 const dates = [];
 
-for(let i=6;i>=0;i--){
+for(let i=29;i>=0;i--){
 
 const d =
 new Date();
@@ -150,42 +132,29 @@ return dates;
 
 }
 
+function formatDate(date){
 
-// =========================
-// HEADER DATES
-// =========================
-
-function renderDates(){
-
-const dates =
-getLast7Days();
-
-dates.forEach(
-(date,index)=>{
-
-const el =
-document.getElementById(
-`day${index+1}`
-);
-
-if(el){
-
-el.innerText =
-date.getDate();
+return date
+.toISOString()
+.split("T")[0];
 
 }
 
+function shortMonth(date){
+
+return date
+.toLocaleString(
+"en-US",
+{
+month:"short"
 }
 );
 
 }
 
-renderDates();
-
-
-// =========================
-// HABIT TYPE CHANGE
-// =========================
+/* =========================
+   HABIT TYPE
+========================= */
 
 habitType.onchange =
 ()=>{
@@ -209,15 +178,49 @@ measurableFields
 
 };
 
-// =========================
-// LOAD HABITS
-// =========================
+/* =========================
+   MODAL OPEN
+========================= */
+
+createHabitBtn.onclick =
+()=>{
+
+editingHabitId = null;
+
+document.getElementById(
+"habitName"
+).value = "";
+
+document.getElementById(
+"habitQuestion"
+).value = "";
+
+document.getElementById(
+"habitUnit"
+).value = "";
+
+document.getElementById(
+"habitTarget"
+).value = "";
+
+document.getElementById(
+"habitNotes"
+).value = "";
+
+habitModal.style.display =
+"flex";
+
+};
+/* =========================
+   LOAD HABITS
+========================= */
 
 async function loadHabits(){
 
 try{
 
-const q = query(
+const q =
+query(
 collection(db,"habits"),
 where(
 "uid",
@@ -245,7 +248,7 @@ id:docSnap.id,
 
 renderHabits();
 
-updateStats();
+updateDashboard();
 
 }catch(error){
 
@@ -255,55 +258,11 @@ console.error(error);
 
 }
 
+/* =========================
+   CLOSE MODAL
+========================= */
 
-// =========================
-// OPEN CREATE MODAL
-// =========================
-
-createHabitBtn.onclick =
-()=>{
-
-editingHabitId = null;
-
-document.getElementById(
-"habitModalTitle"
-).innerText =
-"➕ Create Habit";
-
-document.getElementById(
-"habitName"
-).value = "";
-
-document.getElementById(
-"habitDescription"
-).value = "";
-
-document.getElementById(
-"habitUnit"
-).value = "";
-
-document.getElementById(
-"habitTarget"
-).value = "";
-
-habitType.value =
-"yesno";
-
-measurableFields
-.style.display =
-"none";
-
-habitModal.style.display =
-"flex";
-
-};
-
-
-// =========================
-// CLOSE MODAL
-// =========================
-
-cancelHabitBtn.onclick =
+closeHabitBtn.onclick =
 ()=>{
 
 habitModal.style.display =
@@ -311,10 +270,9 @@ habitModal.style.display =
 
 };
 
-
-// =========================
-// SAVE HABIT
-// =========================
+/* =========================
+   SAVE HABIT
+========================= */
 
 saveHabitBtn.onclick =
 async()=>{
@@ -324,18 +282,13 @@ document.getElementById(
 "habitName"
 ).value.trim();
 
-const description =
+const question =
 document.getElementById(
-"habitDescription"
+"habitQuestion"
 ).value.trim();
 
 const type =
 habitType.value;
-
-const color =
-document.getElementById(
-"habitColor"
-).value;
 
 const unit =
 document.getElementById(
@@ -348,6 +301,21 @@ document.getElementById(
 "habitTarget"
 ).value
 );
+
+const targetType =
+document.getElementById(
+"targetType"
+).value;
+
+const color =
+document.getElementById(
+"habitColor"
+).value;
+
+const notes =
+document.getElementById(
+"habitNotes"
+).value;
 
 if(!name){
 
@@ -373,11 +341,13 @@ editingHabitId
 
 {
 name,
-description,
+question,
 type,
-color,
 unit,
-target
+target,
+targetType,
+color,
+notes
 }
 
 );
@@ -397,21 +367,19 @@ currentUser.uid,
 
 name,
 
-description,
+question,
 
 type,
 
+unit,
+
+target,
+
+targetType,
+
 color,
 
-unit:
-type === "measurable"
-? unit
-: "",
-
-target:
-type === "measurable"
-? target
-: 0,
+notes,
 
 streak:0,
 
@@ -419,6 +387,7 @@ bestStreak:0,
 
 createdAt:
 Date.now()
+
 }
 
 );
@@ -434,64 +403,13 @@ await loadHabits();
 
 console.error(error);
 
-alert(
-"Error saving habit"
-);
-
 }
 
 };
 
-
-// =========================
-// SEARCH
-// =========================
-
-searchInput.addEventListener(
-"input",
-renderHabits
-);
-
-
-// =========================
-// DELETE HABIT
-// =========================
-
-async function deleteHabit(id){
-
-const ok =
-confirm(
-"Delete this habit?"
-);
-
-if(!ok) return;
-
-try{
-
-await deleteDoc(
-
-doc(
-db,
-"habits",
-id
-)
-
-);
-
-await loadHabits();
-
-}catch(error){
-
-console.error(error);
-
-}
-
-}
-
-
-// =========================
-// EDIT HABIT
-// =========================
+/* =========================
+   EDIT HABIT
+========================= */
 
 function editHabit(habit){
 
@@ -499,24 +417,14 @@ editingHabitId =
 habit.id;
 
 document.getElementById(
-"habitModalTitle"
-).innerText =
-"✏ Edit Habit";
-
-document.getElementById(
 "habitName"
 ).value =
 habit.name || "";
 
 document.getElementById(
-"habitDescription"
+"habitQuestion"
 ).value =
-habit.description || "";
-
-document.getElementById(
-"habitColor"
-).value =
-habit.color || "#00cfff";
+habit.question || "";
 
 habitType.value =
 habit.type || "yesno";
@@ -530,6 +438,23 @@ document.getElementById(
 "habitTarget"
 ).value =
 habit.target || "";
+
+document.getElementById(
+"targetType"
+).value =
+habit.targetType ||
+"atleast";
+
+document.getElementById(
+"habitColor"
+).value =
+habit.color ||
+"#00cfff";
+
+document.getElementById(
+"habitNotes"
+).value =
+habit.notes || "";
 
 if(
 habit.type ===
@@ -553,9 +478,91 @@ habitModal.style.display =
 
 }
 
-// =========================
-// RENDER HABITS
-// =========================
+/* =========================
+   DELETE HABIT
+========================= */
+
+function askDeleteHabit(id){
+
+deletingHabitId =
+id;
+
+const habit =
+habits.find(
+h=>h.id===id
+);
+
+document.getElementById(
+"deleteHabitName"
+).innerText =
+habit.name;
+
+document.getElementById(
+"deleteModal"
+).style.display =
+"flex";
+
+}
+
+document.getElementById(
+"cancelDeleteBtn"
+).onclick =
+()=>{
+
+document.getElementById(
+"deleteModal"
+).style.display =
+"none";
+
+};
+
+document.getElementById(
+"confirmDeleteBtn"
+).onclick =
+async()=>{
+
+try{
+
+await deleteDoc(
+
+doc(
+db,
+"habits",
+deletingHabitId
+)
+
+);
+
+document.getElementById(
+"deleteModal"
+).style.display =
+"none";
+
+await loadHabits();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+};
+
+/* =========================
+   SEARCH
+========================= */
+
+searchInput.addEventListener(
+"input",
+()=>{
+
+renderHabits();
+
+}
+);
+/* =========================
+   RENDER HABITS
+========================= */
 
 async function renderHabits(){
 
@@ -563,52 +570,178 @@ const search =
 searchInput.value
 .toLowerCase();
 
-habitTableBody.innerHTML =
+habitTable.innerHTML =
 "";
 
+const dates =
+getLast30Days();
+
+/* =========================
+   MONTH HEADER
+========================= */
+
+let monthRow = `
+
+<div class="month-row">
+
+<div class="month-cell month-left">
+
+Habits
+
+</div>
+
+`;
+
+dates.forEach(date=>{
+
+monthRow += `
+
+<div class="month-cell">
+
+${shortMonth(date)}
+
+</div>
+
+`;
+
+});
+
+monthRow += `
+
+</div>
+
+`;
+
+habitTable.innerHTML +=
+monthRow;
+
+/* =========================
+   DATE HEADER
+========================= */
+
+let dateHeader = `
+
+<div class="date-header">
+
+<div class="habit-header">
+
+Habit
+
+</div>
+
+`;
+
+dates.forEach((date,index)=>{
+
+const today =
+index === dates.length-1;
+
+dateHeader += `
+
+<div class="
+date-cell
+${today ? "today-column" : ""}
+">
+
+${date.getDate()}
+
+<span>
+
+${shortMonth(date)}
+
+</span>
+
+</div>
+
+`;
+
+});
+
+dateHeader += `
+
+</div>
+
+`;
+
+habitTable.innerHTML +=
+dateHeader;
+
+/* =========================
+   FILTER
+========================= */
+
 const filtered =
-habits.filter(h =>
-h.name
+habits.filter(h=>{
+
+return h.name
 .toLowerCase()
-.includes(search)
-);
+.includes(search);
+
+});
+
+/* =========================
+   HABIT ROWS
+========================= */
 
 for(const habit of filtered){
 
-const tr =
-document.createElement("tr");
-
 let rowHTML = `
 
-<td class="habit-name">
+<div class="habit-row">
 
-<div>
+<div
+class="habit-info"
+style="
+border-left:
+6px solid
+${habit.color};
+">
+
+<div class="habit-name">
 
 ${habit.name}
 
 </div>
 
-<div class="habit-sub">
+<div class="habit-meta">
 
 ${habit.type === "measurable"
-? `${habit.target} ${habit.unit}/day`
+
+? `${habit.target}
+${habit.unit}`
+
 : "Yes / No Habit"}
 
 </div>
 
-</td>
+<div class="habit-actions">
+
+<button
+class="edit-btn"
+data-id="${habit.id}">
+
+✏
+
+</button>
+
+<button
+class="delete-btn"
+data-id="${habit.id}">
+
+🗑
+
+</button>
+
+</div>
+
+</div>
 
 `;
 
-const dates =
-getLast7Days();
-
-for(const dateObj of dates){
+for(const date of dates){
 
 const dateKey =
-dateObj
-.toISOString()
-.split("T")[0];
+formatDate(date);
 
 const entry =
 await getHabitEntry(
@@ -616,10 +749,10 @@ habit.id,
 dateKey
 );
 
-let display = "";
+let text = "";
 
-let cellClass =
-"empty";
+let statusClass =
+"status-empty";
 
 if(entry){
 
@@ -633,54 +766,43 @@ entry.status ===
 "done"
 ){
 
-display = "✓";
+text = "✓";
 
-cellClass =
-"done";
-
-}else{
-
-display = "✗";
-
-cellClass =
-"missed";
+statusClass =
+"status-done";
 
 }
 
-}else{
-
-display =
-entry.value || 0;
-
-const percent =
-habit.target
-?
-(
-entry.value /
-habit.target
-)*100
-:0;
-
-if(percent >= 100){
-
-cellClass =
-"progress-high";
-
-}
 else if(
-percent >= 50
+entry.status ===
+"missed"
 ){
 
-cellClass =
-"progress-mid";
+text = "✗";
+
+statusClass =
+"status-missed";
 
 }
+
 else{
 
-cellClass =
-"progress-low";
+text = "⏭";
+
+statusClass =
+"status-skip";
 
 }
+
+}
+
+else{
+
+text =
+entry.value || 0;
+
+statusClass =
+"status-progress";
 
 }
 
@@ -688,14 +810,17 @@ cellClass =
 
 rowHTML += `
 
-<td
-class="day-cell ${cellClass}"
+<div
+class="
+track-cell
+${statusClass}
+"
 data-habit="${habit.id}"
 data-date="${dateKey}">
 
-${display}
+${text}
 
-</td>
+</div>
 
 `;
 
@@ -703,37 +828,43 @@ ${display}
 
 rowHTML += `
 
-<td>
-
-<button
-class="action-btn edit-btn"
-data-id="${habit.id}">
-
-✏
-
-</button>
-
-<button
-class="action-btn delete-btn"
-data-id="${habit.id}">
-
-🗑
-
-</button>
-
-</td>
+</div>
 
 `;
 
-tr.innerHTML =
+habitTable.innerHTML +=
 rowHTML;
-
-habitTableBody
-.appendChild(tr);
 
 }
 
-/* EDIT */
+/* =========================
+   CELL EVENTS
+========================= */
+
+document
+.querySelectorAll(
+".track-cell"
+)
+.forEach(cell=>{
+
+cell.onclick =
+()=>{
+
+openUpdateModal(
+
+cell.dataset.habit,
+
+cell.dataset.date
+
+);
+
+};
+
+});
+
+/* =========================
+   EDIT EVENTS
+========================= */
 
 document
 .querySelectorAll(
@@ -741,11 +872,12 @@ document
 )
 .forEach(btn=>{
 
-btn.onclick = ()=>{
+btn.onclick =
+()=>{
 
 const habit =
 habits.find(
-h =>
+h=>
 h.id ===
 btn.dataset.id
 );
@@ -758,7 +890,9 @@ habit
 
 });
 
-/* DELETE */
+/* =========================
+   DELETE EVENTS
+========================= */
 
 document
 .querySelectorAll(
@@ -766,29 +900,11 @@ document
 )
 .forEach(btn=>{
 
-btn.onclick = ()=>{
+btn.onclick =
+()=>{
 
-deleteHabit(
+askDeleteHabit(
 btn.dataset.id
-);
-
-};
-
-});
-
-/* CELL CLICK */
-
-document
-.querySelectorAll(
-".day-cell"
-)
-.forEach(cell=>{
-
-cell.onclick = ()=>{
-
-openEntryModal(
-cell.dataset.habit,
-cell.dataset.date
 );
 
 };
@@ -797,10 +913,9 @@ cell.dataset.date
 
 }
 
-
-// =========================
-// GET ENTRY
-// =========================
+/* =========================
+   ENTRY HELPER
+========================= */
 
 async function getHabitEntry(
 habitId,
@@ -848,42 +963,31 @@ return result;
 
 }
 
+/* =========================
+   UPDATE MODAL
+========================= */
 
-// =========================
-// ENTRY STATE
-// =========================
+let currentHabitId = null;
+let currentDate = null;
 
-let currentHabitId =
-null;
-
-let currentDateKey =
-null;
-
-
-// =========================
-// OPEN ENTRY MODAL
-// =========================
-
-function openEntryModal(
+function openUpdateModal(
 habitId,
-dateKey
+date
 ){
 
 currentHabitId =
 habitId;
 
-currentDateKey =
-dateKey;
+currentDate =
+date;
 
 const habit =
 habits.find(
-h =>
-h.id ===
-habitId
+h=>h.id===habitId
 );
 
 document.getElementById(
-"entryTitle"
+"updateTitle"
 ).innerText =
 habit.name;
 
@@ -914,57 +1018,92 @@ document.getElementById(
 ).style.display =
 "block";
 
+document.getElementById(
+"todayValue"
+).value = "";
+
+document.getElementById(
+"todayProgress"
+).innerText =
+`Target:
+${habit.target}
+${habit.unit}`;
+
 }
 
-entryModal.style.display =
+document.getElementById(
+"updateModal"
+).style.display =
 "flex";
 
 }
 
-// =========================
-// YES / NO BUTTONS
-// =========================
+/* =========================
+   CLOSE UPDATE MODAL
+========================= */
+
+document.getElementById(
+"closeUpdateBtn"
+).onclick =
+()=>{
+
+document.getElementById(
+"updateModal"
+).style.display =
+"none";
+
+};
+
+/* =========================
+   YES NO SAVE
+========================= */
 
 document.getElementById(
 "doneBtn"
 ).onclick =
 ()=>{
 
-saveYesNoEntry(
+saveYesNo(
 "done"
 );
 
 };
 
 document.getElementById(
-"missBtn"
+"missedBtn"
 ).onclick =
 ()=>{
 
-saveYesNoEntry(
+saveYesNo(
 "missed"
 );
 
 };
 
+document.getElementById(
+"skipBtn"
+).onclick =
+()=>{
 
-// =========================
-// SAVE YES NO ENTRY
-// =========================
+saveYesNo(
+"skip"
+);
 
-async function saveYesNoEntry(
+};
+
+async function saveYesNo(
 status
 ){
 
 try{
 
-const entry =
+const existing =
 await getHabitEntry(
 currentHabitId,
-currentDateKey
+currentDate
 );
 
-if(entry){
+if(existing){
 
 await updateDoc(
 
@@ -973,10 +1112,12 @@ db,
 "habits",
 currentHabitId,
 "entries",
-entry.id
+existing.id
 ),
 
 {
+date:
+currentDate,
 status
 }
 
@@ -995,8 +1136,7 @@ currentHabitId,
 
 {
 date:
-currentDateKey,
-
+currentDate,
 status
 }
 
@@ -1004,7 +1144,9 @@ status
 
 }
 
-entryModal.style.display =
+document.getElementById(
+"updateModal"
+).style.display =
 "none";
 
 await loadHabits();
@@ -1017,13 +1159,12 @@ console.error(error);
 
 }
 
-
-// =========================
-// SAVE MEASURABLE ENTRY
-// =========================
+/* =========================
+   SAVE MEASURABLE
+========================= */
 
 document.getElementById(
-"saveEntryBtn"
+"saveProgressBtn"
 ).onclick =
 async()=>{
 
@@ -1033,18 +1174,18 @@ const value =
 Number(
 
 document.getElementById(
-"entryValue"
+"todayValue"
 ).value
 
 );
 
-const entry =
+const existing =
 await getHabitEntry(
 currentHabitId,
-currentDateKey
+currentDate
 );
 
-if(entry){
+if(existing){
 
 await updateDoc(
 
@@ -1053,10 +1194,12 @@ db,
 "habits",
 currentHabitId,
 "entries",
-entry.id
+existing.id
 ),
 
 {
+date:
+currentDate,
 value
 }
 
@@ -1075,8 +1218,7 @@ currentHabitId,
 
 {
 date:
-currentDateKey,
-
+currentDate,
 value
 }
 
@@ -1084,7 +1226,9 @@ value
 
 }
 
-entryModal.style.display =
+document.getElementById(
+"updateModal"
+).style.display =
 "none";
 
 await loadHabits();
@@ -1097,42 +1241,99 @@ console.error(error);
 
 };
 
+/* =========================
+   STREAK
+========================= */
 
-// =========================
-// CLOSE ENTRY MODAL
-// =========================
+async function calculateStreak(
+habitId
+){
 
-document.getElementById(
-"closeEntryBtn"
-).onclick =
-()=>{
+const snapshot =
+await getDocs(
 
-entryModal.style.display =
-"none";
+collection(
+db,
+"habits",
+habitId,
+"entries"
+)
 
-};
+);
 
+let dates = [];
 
-// =========================
-// STATS
-// =========================
+snapshot.forEach(docSnap=>{
 
-async function updateStats(){
+const data =
+docSnap.data();
 
-let completedToday = 0;
+if(
+data.status === "done"
+||
+data.value > 0
+){
 
-let totalEntries = 0;
+dates.push(
+data.date
+);
 
-let successEntries = 0;
+}
+
+});
+
+dates.sort();
+
+let streak = 0;
+
+for(
+let i=
+dates.length-1;
+i>=0;
+i--
+){
+
+streak++;
+
+}
+
+return streak;
+
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function updateDashboard(){
+
+let completed = 0;
+
+let total = 0;
 
 let bestStreak = 0;
 
 const today =
+formatDate(
 new Date()
-.toISOString()
-.split("T")[0];
+);
 
 for(const habit of habits){
+
+const streak =
+await calculateStreak(
+habit.id
+);
+
+if(
+streak >
+bestStreak
+){
+
+bestStreak =
+streak;
+
+}
 
 const snapshot =
 await getDocs(
@@ -1146,14 +1347,12 @@ habit.id,
 
 );
 
-let streak = 0;
-
 snapshot.forEach(docSnap=>{
 
 const data =
 docSnap.data();
 
-totalEntries++;
+total++;
 
 if(
 habit.type ===
@@ -1165,18 +1364,7 @@ data.status ===
 "done"
 ){
 
-successEntries++;
-
-}
-
-if(
-data.date ===
-today &&
-data.status ===
-"done"
-){
-
-completedToday++;
+completed++;
 
 }
 
@@ -1187,18 +1375,7 @@ data.value >=
 habit.target
 ){
 
-successEntries++;
-
-}
-
-if(
-data.date ===
-today &&
-data.value >=
-habit.target
-){
-
-completedToday++;
+completed++;
 
 }
 
@@ -1206,33 +1383,40 @@ completedToday++;
 
 });
 
-bestStreak =
-Math.max(
-bestStreak,
-habit.streak || 0
+const todayEntry =
+await getHabitEntry(
+habit.id,
+today
 );
+
+if(todayEntry){
+
+document.getElementById(
+"todayDone"
+).innerText =
+Number(
+document.getElementById(
+"todayDone"
+).innerText
+) + 1;
 
 }
 
-const successRate =
-totalEntries
+}
+
+const percent =
+total
 ?
 Math.round(
-(successEntries /
-totalEntries)
+(completed/total)
 *100
 )
 :0;
 
 document.getElementById(
-"totalHabits"
+"bestStreak"
 ).innerText =
-habits.length;
-
-document.getElementById(
-"completedToday"
-).innerText =
-completedToday;
+bestStreak;
 
 document.getElementById(
 "currentStreak"
@@ -1240,23 +1424,22 @@ document.getElementById(
 bestStreak;
 
 document.getElementById(
-"successRate"
+"completionRate"
 ).innerText =
-successRate + "%";
+percent + "%";
 
 }
 
+/* =========================
+   MODAL CLOSE
+========================= */
 
-// =========================
-// CLOSE MODAL ON OUTSIDE CLICK
-// =========================
-
-window.addEventListener(
-"click",
+window.onclick =
 (e)=>{
 
 if(
-e.target === habitModal
+e.target ===
+habitModal
 ){
 
 habitModal.style.display =
@@ -1265,36 +1448,31 @@ habitModal.style.display =
 }
 
 if(
-e.target === entryModal
+e.target ===
+document.getElementById(
+"updateModal"
+)
 ){
 
-entryModal.style.display =
+document.getElementById(
+"updateModal"
+).style.display =
 "none";
 
 }
 
 if(
-e.target === deleteModal
+e.target ===
+document.getElementById(
+"deleteModal"
+)
 ){
 
-deleteModal.style.display =
+document.getElementById(
+"deleteModal"
+).style.display =
 "none";
 
 }
 
-}
-);
-
-
-// =========================
-// INITIAL UI
-// =========================
-
-measurableFields
-.style.display =
-"none";
-
-
-// =========================
-// END
-// =========================
+};
