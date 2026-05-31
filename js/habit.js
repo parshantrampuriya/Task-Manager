@@ -1,531 +1,1300 @@
-/* ================= IMPORTS ================= */
+// =========================
+// FIREBASE
+// =========================
 
-import { auth, db } from "./firebase.js";
-
-import {
-onAuthStateChanged
-}
-from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { auth, db }
+from "./firebase.js";
 
 import {
+
 collection,
-doc,
 addDoc,
+getDocs,
+getDoc,
+doc,
 updateDoc,
 deleteDoc,
-onSnapshot
+query,
+where
+
 }
-from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= GLOBAL ================= */
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let habits = [];
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+
+// =========================
+// ELEMENTS
+// =========================
+
+const habitTableBody =
+document.getElementById(
+"habitTableBody"
+);
+
+const searchInput =
+document.getElementById(
+"searchInput"
+);
+
+const createHabitBtn =
+document.getElementById(
+"createHabitBtn"
+);
+
+const habitModal =
+document.getElementById(
+"habitModal"
+);
+
+const saveHabitBtn =
+document.getElementById(
+"saveHabitBtn"
+);
+
+const cancelHabitBtn =
+document.getElementById(
+"cancelHabitBtn"
+);
+
+const habitType =
+document.getElementById(
+"habitType"
+);
+
+const measurableFields =
+document.getElementById(
+"measurableFields"
+);
+
+const entryModal =
+document.getElementById(
+"entryModal"
+);
+
+const deleteModal =
+document.getElementById(
+"deleteModal"
+);
+
+
+// =========================
+// STATE
+// =========================
 
 let currentUser = null;
 
-let totalXP = 0;
+let habits = [];
 
-/* ================= AUTH ================= */
+let selectedHabit = null;
 
-onAuthStateChanged(auth,(user)=>{
+let deleteHabitId = null;
+
+let editingHabitId = null;
+
+
+// =========================
+// AUTH
+// =========================
+
+onAuthStateChanged(
+auth,
+async(user)=>{
 
 if(!user){
 
-location.href="index.html";
+location.href =
+"index.html";
+
 return;
 
 }
 
-currentUser=user;
+currentUser = user;
 
-loadHabits();
+await loadHabits();
 
-});
+}
+);
 
-/* ================= TODAY ================= */
 
-function getToday(){
+// =========================
+// DATE HELPERS
+// =========================
 
-return new Date()
-.toISOString()
-.split("T")[0];
+function getLast7Days(){
+
+const dates = [];
+
+for(let i=6;i>=0;i--){
+
+const d =
+new Date();
+
+d.setDate(
+d.getDate()-i
+);
+
+dates.push(d);
 
 }
 
-/* ================= LOAD ================= */
+return dates;
 
-function loadHabits(){
+}
 
-onSnapshot(
+
+// =========================
+// HEADER DATES
+// =========================
+
+function renderDates(){
+
+const dates =
+getLast7Days();
+
+dates.forEach(
+(date,index)=>{
+
+const el =
+document.getElementById(
+`day${index+1}`
+);
+
+if(el){
+
+el.innerText =
+date.getDate();
+
+}
+
+}
+);
+
+}
+
+renderDates();
+
+
+// =========================
+// HABIT TYPE CHANGE
+// =========================
+
+habitType.onchange =
+()=>{
+
+if(
+habitType.value ===
+"measurable"
+){
+
+measurableFields
+.style.display =
+"block";
+
+}else{
+
+measurableFields
+.style.display =
+"none";
+
+}
+
+};
+
+// =========================
+// LOAD HABITS
+// =========================
+
+async function loadHabits(){
+
+try{
+
+const q = query(
 collection(db,"habits"),
+where(
+"uid",
+"==",
+currentUser.uid
+)
+);
 
-(snapshot)=>{
+const snapshot =
+await getDocs(q);
 
-habits=[];
+habits = [];
 
-snapshot.forEach(docu=>{
-
-const h = docu.data();
-
-if(h.uid===currentUser.uid){
+snapshot.forEach(docSnap=>{
 
 habits.push({
 
-id:docu.id,
-...h
+id:docSnap.id,
+
+...docSnap.data()
 
 });
-
-}
 
 });
 
 renderHabits();
 
-updateDashboard();
+updateStats();
+
+}catch(error){
+
+console.error(error);
 
 }
 
-);
-
 }
 
-/* ================= RENDER ================= */
 
-function renderHabits(){
+// =========================
+// OPEN CREATE MODAL
+// =========================
 
-const container =
+createHabitBtn.onclick =
+()=>{
+
+editingHabitId = null;
+
 document.getElementById(
-"habitContainer"
+"habitModalTitle"
+).innerText =
+"➕ Create Habit";
+
+document.getElementById(
+"habitName"
+).value = "";
+
+document.getElementById(
+"habitDescription"
+).value = "";
+
+document.getElementById(
+"habitUnit"
+).value = "";
+
+document.getElementById(
+"habitTarget"
+).value = "";
+
+habitType.value =
+"yesno";
+
+measurableFields
+.style.display =
+"none";
+
+habitModal.style.display =
+"flex";
+
+};
+
+
+// =========================
+// CLOSE MODAL
+// =========================
+
+cancelHabitBtn.onclick =
+()=>{
+
+habitModal.style.display =
+"none";
+
+};
+
+
+// =========================
+// SAVE HABIT
+// =========================
+
+saveHabitBtn.onclick =
+async()=>{
+
+const name =
+document.getElementById(
+"habitName"
+).value.trim();
+
+const description =
+document.getElementById(
+"habitDescription"
+).value.trim();
+
+const type =
+habitType.value;
+
+const color =
+document.getElementById(
+"habitColor"
+).value;
+
+const unit =
+document.getElementById(
+"habitUnit"
+).value;
+
+const target =
+Number(
+document.getElementById(
+"habitTarget"
+).value
 );
 
-if(!container) return;
+if(!name){
 
-let html="";
+alert(
+"Habit name required"
+);
 
-habits.forEach(h=>{
-
-const today =
-getToday();
-
-const doneToday =
-h.completedDates?.includes(today);
-
-html+=`
-
-<div class="habit-card">
-
-<div class="habit-left">
-
-<div class="habit-name">
-
-${h.name}
-
-</div>
-
-<div class="habit-meta">
-
-📂 ${h.category}
-•
-🔥 ${h.streak || 0} Day Streak
-
-</div>
-
-</div>
-
-<button
-class="complete-btn"
-onclick="completeHabit('${h.id}')"
-
-${doneToday ? "disabled" : ""}
-
->
-
-${doneToday ? "✅ Done" : "✔ Complete"}
-
-</button>
-
-</div>
-
-`;
-
-});
-
-container.innerHTML=
-html || "<p>No habits yet</p>";
-
-}
-
-/* ================= COMPLETE ================= */
-
-window.completeHabit =
-async(id)=>{
-
-const habit =
-habits.find(h=>h.id===id);
-
-if(!habit) return;
-
-const today =
-getToday();
-
-let completedDates =
-habit.completedDates || [];
-
-if(
-completedDates.includes(today)
-){
 return;
-}
-
-completedDates.push(today);
-
-/* STREAK */
-
-let streak =
-habit.streak || 0;
-
-streak++;
-
-let longest =
-habit.longestStreak || 0;
-
-if(streak > longest){
-
-longest = streak;
 
 }
 
-/* UPDATE */
+try{
+
+if(editingHabitId){
 
 await updateDoc(
 
-doc(db,"habits",id),
+doc(
+db,
+"habits",
+editingHabitId
+),
 
 {
+name,
+description,
+type,
+color,
+unit,
+target
+}
 
-completedDates,
+);
 
-streak,
+}else{
 
-longestStreak:longest
+await addDoc(
+
+collection(
+db,
+"habits"
+),
+
+{
+uid:
+currentUser.uid,
+
+name,
+
+description,
+
+type,
+
+color,
+
+unit:
+type === "measurable"
+? unit
+: "",
+
+target:
+type === "measurable"
+? target
+: 0,
+
+streak:0,
+
+bestStreak:0,
+
+createdAt:
+Date.now()
+}
+
+);
 
 }
 
+habitModal.style.display =
+"none";
+
+await loadHabits();
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Error saving habit"
+);
+
+}
+
+};
+
+
+// =========================
+// SEARCH
+// =========================
+
+searchInput.addEventListener(
+"input",
+renderHabits
+);
+
+
+// =========================
+// DELETE HABIT
+// =========================
+
+async function deleteHabit(id){
+
+const ok =
+confirm(
+"Delete this habit?"
+);
+
+if(!ok) return;
+
+try{
+
+await deleteDoc(
+
+doc(
+db,
+"habits",
+id
+)
+
+);
+
+await loadHabits();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+
+// =========================
+// EDIT HABIT
+// =========================
+
+function editHabit(habit){
+
+editingHabitId =
+habit.id;
+
+document.getElementById(
+"habitModalTitle"
+).innerText =
+"✏ Edit Habit";
+
+document.getElementById(
+"habitName"
+).value =
+habit.name || "";
+
+document.getElementById(
+"habitDescription"
+).value =
+habit.description || "";
+
+document.getElementById(
+"habitColor"
+).value =
+habit.color || "#00cfff";
+
+habitType.value =
+habit.type || "yesno";
+
+document.getElementById(
+"habitUnit"
+).value =
+habit.unit || "";
+
+document.getElementById(
+"habitTarget"
+).value =
+habit.target || "";
+
+if(
+habit.type ===
+"measurable"
+){
+
+measurableFields
+.style.display =
+"block";
+
+}else{
+
+measurableFields
+.style.display =
+"none";
+
+}
+
+habitModal.style.display =
+"flex";
+
+}
+
+// =========================
+// RENDER HABITS
+// =========================
+
+async function renderHabits(){
+
+const search =
+searchInput.value
+.toLowerCase();
+
+habitTableBody.innerHTML =
+"";
+
+const filtered =
+habits.filter(h =>
+h.name
+.toLowerCase()
+.includes(search)
+);
+
+for(const habit of filtered){
+
+const tr =
+document.createElement("tr");
+
+let rowHTML = `
+
+<td class="habit-name">
+
+<div>
+
+${habit.name}
+
+</div>
+
+<div class="habit-sub">
+
+${habit.type === "measurable"
+? `${habit.target} ${habit.unit}/day`
+: "Yes / No Habit"}
+
+</div>
+
+</td>
+
+`;
+
+const dates =
+getLast7Days();
+
+for(const dateObj of dates){
+
+const dateKey =
+dateObj
+.toISOString()
+.split("T")[0];
+
+const entry =
+await getHabitEntry(
+habit.id,
+dateKey
+);
+
+let display = "";
+
+let cellClass =
+"empty";
+
+if(entry){
+
+if(
+habit.type ===
+"yesno"
+){
+
+if(
+entry.status ===
+"done"
+){
+
+display = "✓";
+
+cellClass =
+"done";
+
+}else{
+
+display = "✗";
+
+cellClass =
+"missed";
+
+}
+
+}else{
+
+display =
+entry.value || 0;
+
+const percent =
+habit.target
+?
+(
+entry.value /
+habit.target
+)*100
+:0;
+
+if(percent >= 100){
+
+cellClass =
+"progress-high";
+
+}
+else if(
+percent >= 50
+){
+
+cellClass =
+"progress-mid";
+
+}
+else{
+
+cellClass =
+"progress-low";
+
+}
+
+}
+
+}
+
+rowHTML += `
+
+<td
+class="day-cell ${cellClass}"
+data-habit="${habit.id}"
+data-date="${dateKey}">
+
+${display}
+
+</td>
+
+`;
+
+}
+
+rowHTML += `
+
+<td>
+
+<button
+class="action-btn edit-btn"
+data-id="${habit.id}">
+
+✏
+
+</button>
+
+<button
+class="action-btn delete-btn"
+data-id="${habit.id}">
+
+🗑
+
+</button>
+
+</td>
+
+`;
+
+tr.innerHTML =
+rowHTML;
+
+habitTableBody
+.appendChild(tr);
+
+}
+
+/* EDIT */
+
+document
+.querySelectorAll(
+".edit-btn"
+)
+.forEach(btn=>{
+
+btn.onclick = ()=>{
+
+const habit =
+habits.find(
+h =>
+h.id ===
+btn.dataset.id
+);
+
+editHabit(
+habit
 );
 
 };
 
-/* ================= XP ================= */
+});
 
-function calculateXP(){
+/* DELETE */
 
-let xp=0;
+document
+.querySelectorAll(
+".delete-btn"
+)
+.forEach(btn=>{
 
-habits.forEach(h=>{
+btn.onclick = ()=>{
 
-xp +=
-(h.completedDates?.length || 0)
-*10;
+deleteHabit(
+btn.dataset.id
+);
+
+};
 
 });
 
-return xp;
+/* CELL CLICK */
+
+document
+.querySelectorAll(
+".day-cell"
+)
+.forEach(cell=>{
+
+cell.onclick = ()=>{
+
+openEntryModal(
+cell.dataset.habit,
+cell.dataset.date
+);
+
+};
+
+});
 
 }
 
-/* ================= LEVEL ================= */
 
-function updateLevel(){
+// =========================
+// GET ENTRY
+// =========================
 
-const xp =
-calculateXP();
+async function getHabitEntry(
+habitId,
+dateKey
+){
 
-totalXP = xp;
+const snapshot =
+await getDocs(
 
-const level =
-Math.floor(xp/100)+1;
+collection(
+db,
+"habits",
+habitId,
+"entries"
+)
 
-const current =
-xp % 100;
+);
 
-const percent =
-current;
+let result =
+null;
 
-document
-.getElementById("xpText")
-.innerText =
+snapshot.forEach(docSnap=>{
 
-`${current}/100 XP`;
+const data =
+docSnap.data();
 
-document
-.getElementById("levelText")
-.innerText =
+if(
+data.date ===
+dateKey
+){
 
-`Level ${level}`;
+result = {
 
-document
-.getElementById("xpFill")
-.style.width =
+id:docSnap.id,
 
-percent + "%";
+...data
 
-}
-
-/* ================= DASHBOARD ================= */
-
-function updateDashboard(){
-
-updateLevel();
-
-updateStats();
-
-generateHeatmap();
-
-generateInsights();
-
-checkAchievements();
+};
 
 }
 
-/* ================= STATS ================= */
+});
 
-function updateStats(){
+return result;
 
-let totalHabits = habits.length;
+}
+
+
+// =========================
+// ENTRY STATE
+// =========================
+
+let currentHabitId =
+null;
+
+let currentDateKey =
+null;
+
+
+// =========================
+// OPEN ENTRY MODAL
+// =========================
+
+function openEntryModal(
+habitId,
+dateKey
+){
+
+currentHabitId =
+habitId;
+
+currentDateKey =
+dateKey;
+
+const habit =
+habits.find(
+h =>
+h.id ===
+habitId
+);
+
+document.getElementById(
+"entryTitle"
+).innerText =
+habit.name;
+
+if(
+habit.type ===
+"yesno"
+){
+
+document.getElementById(
+"yesNoSection"
+).style.display =
+"block";
+
+document.getElementById(
+"measureSection"
+).style.display =
+"none";
+
+}else{
+
+document.getElementById(
+"yesNoSection"
+).style.display =
+"none";
+
+document.getElementById(
+"measureSection"
+).style.display =
+"block";
+
+}
+
+entryModal.style.display =
+"flex";
+
+}
+
+// =========================
+// YES / NO BUTTONS
+// =========================
+
+document.getElementById(
+"doneBtn"
+).onclick =
+()=>{
+
+saveYesNoEntry(
+"done"
+);
+
+};
+
+document.getElementById(
+"missBtn"
+).onclick =
+()=>{
+
+saveYesNoEntry(
+"missed"
+);
+
+};
+
+
+// =========================
+// SAVE YES NO ENTRY
+// =========================
+
+async function saveYesNoEntry(
+status
+){
+
+try{
+
+const entry =
+await getHabitEntry(
+currentHabitId,
+currentDateKey
+);
+
+if(entry){
+
+await updateDoc(
+
+doc(
+db,
+"habits",
+currentHabitId,
+"entries",
+entry.id
+),
+
+{
+status
+}
+
+);
+
+}else{
+
+await addDoc(
+
+collection(
+db,
+"habits",
+currentHabitId,
+"entries"
+),
+
+{
+date:
+currentDateKey,
+
+status
+}
+
+);
+
+}
+
+entryModal.style.display =
+"none";
+
+await loadHabits();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+
+// =========================
+// SAVE MEASURABLE ENTRY
+// =========================
+
+document.getElementById(
+"saveEntryBtn"
+).onclick =
+async()=>{
+
+try{
+
+const value =
+Number(
+
+document.getElementById(
+"entryValue"
+).value
+
+);
+
+const entry =
+await getHabitEntry(
+currentHabitId,
+currentDateKey
+);
+
+if(entry){
+
+await updateDoc(
+
+doc(
+db,
+"habits",
+currentHabitId,
+"entries",
+entry.id
+),
+
+{
+value
+}
+
+);
+
+}else{
+
+await addDoc(
+
+collection(
+db,
+"habits",
+currentHabitId,
+"entries"
+),
+
+{
+date:
+currentDateKey,
+
+value
+}
+
+);
+
+}
+
+entryModal.style.display =
+"none";
+
+await loadHabits();
+
+}catch(error){
+
+console.error(error);
+
+}
+
+};
+
+
+// =========================
+// CLOSE ENTRY MODAL
+// =========================
+
+document.getElementById(
+"closeEntryBtn"
+).onclick =
+()=>{
+
+entryModal.style.display =
+"none";
+
+};
+
+
+// =========================
+// STATS
+// =========================
+
+async function updateStats(){
 
 let completedToday = 0;
 
-let currentStreak = 0;
+let totalEntries = 0;
 
-let longestStreak = 0;
+let successEntries = 0;
 
-const today = getToday();
+let bestStreak = 0;
 
-habits.forEach(h=>{
+const today =
+new Date()
+.toISOString()
+.split("T")[0];
+
+for(const habit of habits){
+
+const snapshot =
+await getDocs(
+
+collection(
+db,
+"habits",
+habit.id,
+"entries"
+)
+
+);
+
+let streak = 0;
+
+snapshot.forEach(docSnap=>{
+
+const data =
+docSnap.data();
+
+totalEntries++;
 
 if(
-h.completedDates?.includes(today)
+habit.type ===
+"yesno"
+){
+
+if(
+data.status ===
+"done"
+){
+
+successEntries++;
+
+}
+
+if(
+data.date ===
+today &&
+data.status ===
+"done"
 ){
 
 completedToday++;
 
 }
 
-currentStreak +=
-(h.streak || 0);
+}else{
 
 if(
-(h.longestStreak || 0)
->
-longestStreak
+data.value >=
+habit.target
 ){
 
-longestStreak =
-h.longestStreak;
+successEntries++;
+
+}
+
+if(
+data.date ===
+today &&
+data.value >=
+habit.target
+){
+
+completedToday++;
+
+}
 
 }
 
 });
 
-/* success rate */
-
-let successRate = 0;
-
-if(totalHabits > 0){
-
-successRate = Math.round(
-(completedToday/totalHabits)*100
+bestStreak =
+Math.max(
+bestStreak,
+habit.streak || 0
 );
 
 }
 
-/* update ui */
+const successRate =
+totalEntries
+?
+Math.round(
+(successEntries /
+totalEntries)
+*100
+)
+:0;
 
-const streakEl =
+document.getElementById(
+"totalHabits"
+).innerText =
+habits.length;
+
+document.getElementById(
+"completedToday"
+).innerText =
+completedToday;
+
 document.getElementById(
 "currentStreak"
-);
+).innerText =
+bestStreak;
 
-if(streakEl){
-
-streakEl.innerText =
-currentStreak;
-
-}
-
-const longestEl =
-document.getElementById(
-"longestStreak"
-);
-
-if(longestEl){
-
-longestEl.innerText =
-longestStreak;
-
-}
-
-const successEl =
 document.getElementById(
 "successRate"
-);
-
-if(successEl){
-
-successEl.innerText =
+).innerText =
 successRate + "%";
 
 }
 
-const scoreEl =
-document.getElementById(
-"todayScore"
-);
 
-if(scoreEl){
+// =========================
+// CLOSE MODAL ON OUTSIDE CLICK
+// =========================
 
-scoreEl.innerText =
-successRate + "%";
-
-}
-
-}
-
-/* ================= HEATMAP ================= */
-
-function generateHeatmap(){
-
-const grid =
-document.querySelector(
-".heat-grid"
-);
-
-if(!grid) return;
-
-grid.innerHTML="";
-
-let completedMap = {};
-
-habits.forEach(h=>{
-
-(h.completedDates || [])
-.forEach(date=>{
-
-completedMap[date] =
-(completedMap[date] || 0)+1;
-
-});
-
-});
-
-/* last 42 days */
-
-for(let i=41;i>=0;i--){
-
-let d = new Date();
-
-d.setDate(
-d.getDate()-i
-);
-
-let key =
-d.toISOString()
-.split("T")[0];
-
-let count =
-completedMap[key] || 0;
-
-let level = 0;
-
-if(count>=1) level=1;
-if(count>=3) level=2;
-if(count>=5) level=3;
-if(count>=8) level=4;
-
-grid.innerHTML +=
-
-`
-<div
-class="heat-cell level${level}"
-title="${key}">
-</div>
-`;
-
-}
-
-}
-
-/* ================= ACHIEVEMENTS ================= */
-
-function checkAchievements(){
-
-const achievements =
-document.querySelectorAll(
-".achievement"
-);
-
-if(!achievements.length)
-return;
-
-let totalCompleted = 0;
-
-let longest = 0;
-
-habits.forEach(h=>{
-
-totalCompleted +=
-(h.completedDates?.length || 0);
+window.addEventListener(
+"click",
+(e)=>{
 
 if(
-(h.longestStreak||0)
->
-longest
+e.target === habitModal
 ){
 
-longest =
-h.longestStreak;
+habitModal.style.display =
+"none";
 
 }
 
-});
+if(
+e.target === entryModal
+){
 
-/* unlock style */
-
-if(longest>=7){
-
-achievements[0]
-.style.border =
-"2px solid #00ff95";
+entryModal.style.display =
+"none";
 
 }
 
-if(longest>=30){
+if(
+e.target === deleteModal
+){
 
-achievements[1]
-.style.border =
-"2px solid gold";
-
-}
-
-if(totalCompleted>=100){
-
-achievements[2]
-.style.border =
-"2px solid cyan";
-
-}
-
-if(totalCompleted>=365){
-
-achievements[3]
-.style.border =
-"2px solid orange";
+deleteModal.style.display =
+"none";
 
 }
 
 }
+);
 
-/* ================= AI INSIGHTS ================= */
+
+// =========================
+// INITIAL UI
+// =========================
+
+measurableFields
+.style.display =
+"none";
+
+
+// =========================
+// END
+// =========================
