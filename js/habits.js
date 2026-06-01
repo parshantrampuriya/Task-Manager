@@ -278,13 +278,15 @@ habitModal.style.display =
    CLOSE MODAL
 ===================================== */
 
-cancelHabitBtn.onclick =
-()=>{
+const cancelHabitBtn =
+document.getElementById(
+"cancelHabitBtn"
+);
 
-habitModal.style.display =
-"none";
-
-};
+console.log(
+"cancelHabitBtn =",
+cancelHabitBtn
+);
 
 /* =====================================
    HABIT TYPE
