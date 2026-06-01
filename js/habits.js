@@ -4,10 +4,9 @@ import {
 collection,
 doc,
 addDoc,
-getDocs,
-getDoc,
 updateDoc,
 deleteDoc,
+getDocs,
 query,
 where
 }
@@ -18,9 +17,9 @@ onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ==================================
+/* =====================================
    ELEMENTS
-================================== */
+===================================== */
 
 const habitsGrid =
 document.getElementById("habitsGrid");
@@ -37,21 +36,12 @@ document.getElementById("saveHabitBtn");
 const cancelHabitBtn =
 document.getElementById("cancelHabitBtn");
 
-const habitType =
-document.getElementById("habitType");
-
-const templateSelect =
-document.getElementById("templateSelect");
-
-const measurableFields =
-document.getElementById("measurableFields");
-
 const searchInput =
 document.getElementById("searchInput");
 
-/* ==================================
+/* =====================================
    STATE
-================================== */
+===================================== */
 
 let currentUser = null;
 
@@ -61,9 +51,9 @@ let habitLogs = [];
 
 let editingHabitId = null;
 
-/* ==================================
+/* =====================================
    TEMPLATES
-================================== */
+===================================== */
 
 const templates = {
 
@@ -101,62 +91,13 @@ english:{
 name:"English Speaking",
 question:"Did you speak English today?",
 type:"yesno"
-},
-
-study:{
-name:"Study",
-question:"How many hours studied?",
-unit:"Hours",
-target:2,
-type:"measurable"
 }
 
 };
 
-/* ==================================
-   LAST 30 DAYS
-================================== */
-
-function getLast30Days(){
-
-const days = [];
-
-for(let i=29;i>=0;i--){
-
-const d = new Date();
-
-d.setDate(
-d.getDate() - i
-);
-
-days.push({
-
-date:d.toISOString()
-.split("T")[0],
-
-day:d.getDate(),
-
-month:d.toLocaleString(
-"default",
-{
-month:"short"
-}
-)
-
-});
-
-}
-
-return days;
-
-}
-
-const timelineDays =
-getLast30Days();
-
-/* ==================================
+/* =====================================
    AUTH
-================================== */
+===================================== */
 
 onAuthStateChanged(
 auth,
@@ -175,36 +116,167 @@ currentUser = user;
 
 await loadHabits();
 
-await loadHabitLogs();
+await loadLogs();
 
 renderGrid();
-
-updateDashboard();
 
 }
 );
 
-/* ==================================
-   MODAL OPEN
-================================== */
+/* =====================================
+   LAST 30 DAYS
+===================================== */
+
+function getLast30Days(){
+
+const days = [];
+
+for(let i=29;i>=0;i--){
+
+const d = new Date();
+
+d.setDate(
+d.getDate()-i
+);
+
+days.push({
+
+date:
+d.toISOString()
+.split("T")[0],
+
+day:
+d.getDate(),
+
+month:
+d.toLocaleString(
+"default",
+{
+month:"short"
+}
+)
+
+});
+
+}
+
+return days;
+
+}
+
+const timelineDays =
+getLast30Days();
+
+/* =====================================
+   LOAD HABITS
+===================================== */
+
+async function loadHabits(){
+
+try{
+
+const q = query(
+collection(db,"habits"),
+where(
+"uid",
+"==",
+currentUser.uid
+)
+);
+
+const snapshot =
+await getDocs(q);
+
+habits = [];
+
+snapshot.forEach(docSnap=>{
+
+habits.push({
+
+id:docSnap.id,
+
+...docSnap.data()
+
+});
+
+});
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+/* =====================================
+   LOAD LOGS
+===================================== */
+
+async function loadLogs(){
+
+try{
+
+const q = query(
+collection(db,"habitLogs"),
+where(
+"uid",
+"==",
+currentUser.uid
+)
+);
+
+const snapshot =
+await getDocs(q);
+
+habitLogs = [];
+
+snapshot.forEach(docSnap=>{
+
+habitLogs.push({
+
+id:docSnap.id,
+
+...docSnap.data()
+
+});
+
+});
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+/* =====================================
+   OPEN CREATE MODAL
+===================================== */
 
 createHabitBtn.onclick =
 ()=>{
 
 editingHabitId = null;
 
-habitModal.style.display =
-"flex";
-
 document.getElementById(
 "habitForm"
 ).reset();
 
+document.getElementById(
+"modalTitle"
+).innerText =
+"➕ Create Habit";
+
+habitModal.style.display =
+"flex";
+
 };
 
-/* ==================================
-   MODAL CLOSE
-================================== */
+/* =====================================
+   CLOSE MODAL
+===================================== */
 
 cancelHabitBtn.onclick =
 ()=>{
@@ -214,27 +286,37 @@ habitModal.style.display =
 
 };
 
-/* ==================================
-   HABIT TYPE CHANGE
-================================== */
+/* =====================================
+   HABIT TYPE
+===================================== */
 
-habitType.addEventListener(
+document.getElementById(
+"habitType"
+).addEventListener(
 "change",
 ()=>{
 
+const type =
+document.getElementById(
+"habitType"
+).value;
+
+const measurableBox =
+document.getElementById(
+"measurableFields"
+);
+
 if(
-habitType.value ===
+type ===
 "measurable"
 ){
 
-measurableFields
-.style.display =
+measurableBox.style.display =
 "block";
 
 }else{
 
-measurableFields
-.style.display =
+measurableBox.style.display =
 "none";
 
 }
@@ -242,20 +324,26 @@ measurableFields
 }
 );
 
-/* ==================================
-   TEMPLATE CHANGE
-================================== */
+/* =====================================
+   TEMPLATE SELECT
+===================================== */
 
-templateSelect.addEventListener(
+document.getElementById(
+"templateSelect"
+).addEventListener(
 "change",
 ()=>{
 
-const template =
-templates[
-templateSelect.value
-];
+const key =
+document.getElementById(
+"templateSelect"
+).value;
 
-if(!template) return;
+if(!templates[key])
+return;
+
+const template =
+templates[key];
 
 document.getElementById(
 "habitName"
@@ -272,11 +360,14 @@ template.type ===
 "measurable"
 ){
 
-habitType.value =
+document.getElementById(
+"habitType"
+).value =
 "measurable";
 
-measurableFields
-.style.display =
+document.getElementById(
+"measurableFields"
+).style.display =
 "block";
 
 document.getElementById(
@@ -291,20 +382,24 @@ template.target;
 
 }else{
 
-habitType.value =
+document.getElementById(
+"habitType"
+).value =
 "yesno";
 
-measurableFields
-.style.display =
+document.getElementById(
+"measurableFields"
+).style.display =
 "none";
 
 }
 
-});
+}
+);
 
-/* ==================================
+/* =====================================
    SAVE HABIT
-================================== */
+===================================== */
 
 saveHabitBtn.onclick =
 async()=>{
@@ -337,14 +432,12 @@ document.getElementById(
 if(!name){
 
 alert(
-"Habit name required"
+"Habit Name Required"
 );
 
 return;
 
 }
-
-try{
 
 const habitData = {
 
@@ -366,12 +459,15 @@ Date.now()
 
 };
 
-if(type==="measurable"){
+if(
+type ===
+"measurable"
+){
 
 habitData.unit =
 document.getElementById(
 "habitUnit"
-).value.trim();
+).value;
 
 habitData.target =
 Number(
@@ -386,6 +482,8 @@ document.getElementById(
 ).value;
 
 }
+
+try{
 
 if(editingHabitId){
 
@@ -430,119 +528,22 @@ updateDashboard();
 console.error(error);
 
 alert(
-"Error saving habit"
+"Error Saving Habit"
 );
 
 }
 
 };
-
-/* ==================================
-   LOAD HABITS
-================================== */
-
-async function loadHabits(){
-
-try{
-
-const q = query(
-
-collection(
-db,
-"habits"
-),
-
-where(
-"uid",
-"==",
-currentUser.uid
-)
-
-);
-
-const snapshot =
-await getDocs(q);
-
-habits = [];
-
-snapshot.forEach(docSnap=>{
-
-habits.push({
-
-id:docSnap.id,
-
-...docSnap.data()
-
-});
-
-});
-
-}catch(error){
-
-console.error(error);
-
-}
-
-}
-
-/* ==================================
-   LOAD LOGS
-================================== */
-
-async function loadHabitLogs(){
-
-try{
-
-const q = query(
-
-collection(
-db,
-"habitLogs"
-),
-
-where(
-"uid",
-"==",
-currentUser.uid
-)
-
-);
-
-const snapshot =
-await getDocs(q);
-
-habitLogs = [];
-
-snapshot.forEach(docSnap=>{
-
-habitLogs.push({
-
-id:docSnap.id,
-
-...docSnap.data()
-
-});
-
-});
-
-}catch(error){
-
-console.error(error);
-
-}
-
-}
-
-/* ==================================
+/* =====================================
    EDIT HABIT
-================================== */
+===================================== */
 
 window.editHabit =
-async(id)=>{
+(habitId)=>{
 
 const habit =
 habits.find(
-h=>h.id===id
+h=>h.id===habitId
 );
 
 if(!habit) return;
@@ -550,8 +551,10 @@ if(!habit) return;
 editingHabitId =
 habit.id;
 
-habitModal.style.display =
-"flex";
+document.getElementById(
+"modalTitle"
+).innerText =
+"✏ Edit Habit";
 
 document.getElementById(
 "habitType"
@@ -571,7 +574,7 @@ habit.question || "";
 document.getElementById(
 "habitColor"
 ).value =
-habit.color || "blue";
+habit.color || "#00cfff";
 
 document.getElementById(
 "habitNotes"
@@ -583,8 +586,9 @@ habit.type ===
 "measurable"
 ){
 
-measurableFields
-.style.display =
+document.getElementById(
+"measurableFields"
+).style.display =
 "block";
 
 document.getElementById(
@@ -603,50 +607,50 @@ document.getElementById(
 habit.targetType ||
 "atleast";
 
-}else{
+}
+else{
 
-measurableFields
-.style.display =
+document.getElementById(
+"measurableFields"
+).style.display =
 "none";
 
 }
 
+habitModal.style.display =
+"flex";
+
 };
 
-/* ==================================
+/* =====================================
    DELETE HABIT
-================================== */
+===================================== */
 
 window.deleteHabit =
-async(id)=>{
+async(habitId)=>{
 
 const habit =
 habits.find(
-h=>h.id===id
+h=>h.id===habitId
 );
 
 if(!habit) return;
 
-const confirmDelete =
+const ok =
 confirm(
-
 `Delete "${habit.name}" ?`
-
 );
 
-if(!confirmDelete)
-return;
+if(!ok) return;
 
 try{
 
 await deleteDoc(
-
 doc(
 db,
 "habits",
-id
+habitId
 )
-
 );
 
 await loadHabits();
@@ -663,9 +667,9 @@ console.error(error);
 
 };
 
-/* ==================================
+/* =====================================
    SEARCH
-================================== */
+===================================== */
 
 searchInput.addEventListener(
 "input",
@@ -676,9 +680,9 @@ renderGrid();
 }
 );
 
-/* ==================================
+/* =====================================
    GET LOG
-================================== */
+===================================== */
 
 function getLog(
 habitId,
@@ -686,26 +690,22 @@ date
 ){
 
 return habitLogs.find(
-
-log =>
-
-log.habitId === habitId
-
+log=>
+log.habitId===habitId
 &&
-
-log.date === date
-
+log.date===date
 );
 
 }
 
-/* ==================================
+/* =====================================
    RENDER GRID
-================================== */
+===================================== */
 
 function renderGrid(){
 
-if(!habitsGrid) return;
+if(!habitsGrid)
+return;
 
 const search =
 searchInput.value
@@ -734,16 +734,16 @@ let lastMonth = "";
 
 timelineDays.forEach(day=>{
 
-const monthText =
+const showMonth =
 
-day.month !== lastMonth
+day.month !== lastMonth;
 
-? day.month
-
-: "";
+if(showMonth){
 
 lastMonth =
 day.month;
+
+}
 
 header += `
 
@@ -751,7 +751,7 @@ header += `
 
 <div class="month-name">
 
-${monthText}
+${showMonth ? day.month : ""}
 
 </div>
 
@@ -791,7 +791,7 @@ return h.name
 });
 
 /* ==========================
-   HABITS
+   RENDER HABITS
 ========================== */
 
 filteredHabits.forEach(habit=>{
@@ -804,23 +804,22 @@ let row = `
 class="habit-info"
 style="
 border-left:
-6px solid
-${habit.color};
+5px solid ${habit.color};
 ">
 
-<div class="habit-title">
+<div class="habit-name">
 
 ${habit.name}
 
 </div>
 
-<div class="habit-sub">
+<div class="habit-small">
 
-${habit.type==="measurable"
+${habit.type==="yesno"
 
-? `🎯 ${habit.target} ${habit.unit}`
+? "✅ Yes / No"
 
-: "✅ Yes / No Habit"}
+: `🎯 ${habit.target} ${habit.unit}`}
 
 </div>
 
@@ -854,52 +853,39 @@ habit.id,
 day.date
 );
 
-let cellText = "";
+let value = "";
 
-let cellClass =
+let className =
 "empty-cell";
 
-/* ===================
-   YES NO
-=================== */
+/* YES NO */
 
 if(
-habit.type ===
-"yesno"
+habit.type==="yesno"
 ){
 
 if(log){
 
 if(
-log.status ===
-"done"
+log.status==="done"
 ){
 
-cellText = "✓";
-
-cellClass =
-"done-cell";
+value="✓";
+className="done-cell";
 
 }
-
 else if(
-log.status ===
-"missed"
+log.status==="missed"
 ){
 
-cellText = "✗";
-
-cellClass =
-"missed-cell";
+value="✗";
+className="missed-cell";
 
 }
-
 else{
 
-cellText = "⏭";
-
-cellClass =
-"skip-cell";
+value="•";
+className="skip-cell";
 
 }
 
@@ -907,21 +893,18 @@ cellClass =
 
 }
 
-/* ===================
-   MEASURABLE
-=================== */
+/* MEASURABLE */
 
 else{
 
 if(log){
 
-cellText =
+value =
 log.value || "";
 
 const percent =
 
 habit.target
-
 ?
 
 (log.value /
@@ -931,23 +914,21 @@ habit.target) * 100
 
 if(percent >= 100){
 
-cellClass =
+className =
 "success-cell";
 
 }
-
 else if(
 percent >= 50
 ){
 
-cellClass =
+className =
 "warning-cell";
 
 }
-
 else{
 
-cellClass =
+className =
 "danger-cell";
 
 }
@@ -961,7 +942,7 @@ row += `
 <div
 class="
 habit-day
-${cellClass}
+${className}
 "
 onclick="
 openUpdateModal(
@@ -970,7 +951,7 @@ openUpdateModal(
 )
 ">
 
-${cellText}
+${value}
 
 </div>
 
@@ -990,10 +971,9 @@ row;
 });
 
 }
-
-/* ==================================
-   UPDATE MODAL ELEMENTS
-================================== */
+/* =====================================
+   UPDATE MODAL
+===================================== */
 
 const updateModal =
 document.getElementById(
@@ -1015,28 +995,18 @@ document.getElementById(
 "measureSection"
 );
 
-const todayValue =
-document.getElementById(
-"todayValue"
-);
-
-const todayProgress =
-document.getElementById(
-"todayProgress"
-);
-
 let selectedHabitId =
 null;
 
 let selectedDate =
 null;
 
-/* ==================================
+/* =====================================
    OPEN UPDATE MODAL
-================================== */
+===================================== */
 
 window.openUpdateModal =
-async(
+(
 habitId,
 date
 )=>{
@@ -1060,8 +1030,6 @@ habit.name;
 updateModal.style.display =
 "flex";
 
-/* YES / NO */
-
 if(
 habit.type ===
 "yesno"
@@ -1076,9 +1044,6 @@ measureSection
 "none";
 
 }
-
-/* MEASURABLE */
-
 else{
 
 yesNoSection
@@ -1089,21 +1054,25 @@ measureSection
 .style.display =
 "block";
 
-const existingLog =
+const log =
 getLog(
-habit.id,
+habitId,
 date
 );
 
-todayValue.value =
+document.getElementById(
+"todayValue"
+).value =
 
-existingLog
-? existingLog.value
+log
+? log.value
 : "";
 
-todayProgress.innerHTML =
+document.getElementById(
+"todayProgress"
+).innerText =
 
-`🎯 Target:
+`Target:
 ${habit.target}
 ${habit.unit}`;
 
@@ -1111,15 +1080,13 @@ ${habit.unit}`;
 
 };
 
-/* ==================================
+/* =====================================
    CLOSE UPDATE MODAL
-================================== */
+===================================== */
 
-document
-.getElementById(
+document.getElementById(
 "closeUpdateBtn"
-)
-.onclick =
+).onclick =
 ()=>{
 
 updateModal.style.display =
@@ -1127,9 +1094,9 @@ updateModal.style.display =
 
 };
 
-/* ==================================
-   SAVE YES / NO
-================================== */
+/* =====================================
+   SAVE YES NO
+===================================== */
 
 async function saveYesNoLog(
 status
@@ -1159,7 +1126,8 @@ status
 
 );
 
-}else{
+}
+else{
 
 await addDoc(
 
@@ -1185,7 +1153,7 @@ status
 
 }
 
-await loadHabitLogs();
+await loadLogs();
 
 renderGrid();
 
@@ -1202,15 +1170,13 @@ console.error(error);
 
 }
 
-/* ==================================
-   DONE BUTTON
-================================== */
+/* =====================================
+   DONE
+===================================== */
 
-document
-.getElementById(
+document.getElementById(
 "doneBtn"
-)
-.onclick =
+).onclick =
 ()=>{
 
 saveYesNoLog(
@@ -1219,15 +1185,13 @@ saveYesNoLog(
 
 };
 
-/* ==================================
-   MISSED BUTTON
-================================== */
+/* =====================================
+   MISSED
+===================================== */
 
-document
-.getElementById(
+document.getElementById(
 "missedBtn"
-)
-.onclick =
+).onclick =
 ()=>{
 
 saveYesNoLog(
@@ -1236,15 +1200,13 @@ saveYesNoLog(
 
 };
 
-/* ==================================
-   SKIP BUTTON
-================================== */
+/* =====================================
+   SKIP
+===================================== */
 
-document
-.getElementById(
+document.getElementById(
 "skipBtn"
-)
-.onclick =
+).onclick =
 ()=>{
 
 saveYesNoLog(
@@ -1253,20 +1215,20 @@ saveYesNoLog(
 
 };
 
-/* ==================================
+/* =====================================
    SAVE MEASURABLE
-================================== */
+===================================== */
 
-document
-.getElementById(
+document.getElementById(
 "saveProgressBtn"
-)
-.onclick =
+).onclick =
 async()=>{
 
 const value =
 Number(
-todayValue.value
+document.getElementById(
+"todayValue"
+).value
 );
 
 if(
@@ -1274,7 +1236,7 @@ isNaN(value)
 ){
 
 alert(
-"Enter value"
+"Enter Value"
 );
 
 return;
@@ -1305,7 +1267,8 @@ value
 
 );
 
-}else{
+}
+else{
 
 await addDoc(
 
@@ -1331,7 +1294,7 @@ value
 
 }
 
-await loadHabitLogs();
+await loadLogs();
 
 renderGrid();
 
@@ -1348,121 +1311,100 @@ console.error(error);
 
 };
 
-/* ==================================
-   STREAK CALCULATION
-================================== */
+/* =====================================
+   STREAK
+===================================== */
 
-function calculateHabitStreak(
+function calculateStreak(
 habitId
 ){
 
 const logs =
 
-habitLogs
-.filter(
+habitLogs.filter(
 log=>
-log.habitId === habitId
-)
-.sort(
-(a,b)=>
-new Date(b.date)
--
-new Date(a.date)
+log.habitId===habitId
 );
 
 let streak = 0;
 
-for(const log of logs){
-
-let success = false;
+logs.forEach(log=>{
 
 const habit =
 habits.find(
 h=>h.id===habitId
 );
 
-if(!habit) continue;
-
-/* YES NO */
+if(!habit) return;
 
 if(
-habit.type ===
-"yesno"
+habit.type==="yesno"
 ){
 
-success =
-log.status ===
-"done";
-
-}
-
-/* MEASURABLE */
-
-else{
-
-success =
-Number(log.value) >=
-Number(habit.target);
-
-}
-
-if(success){
+if(
+log.status==="done"
+){
 
 streak++;
 
-}else{
-
-break;
-
 }
 
 }
+else{
 
-return streak;
+if(
+log.value >=
+habit.target
+){
+
+streak++;
 
 }
-
-/* ==================================
-   BEST STREAK
-================================== */
-
-function calculateBestStreak(){
-
-let best = 0;
-
-habits.forEach(habit=>{
-
-const streak =
-calculateHabitStreak(
-habit.id
-);
-
-if(streak > best){
-
-best = streak;
 
 }
 
 });
 
-return best;
+return streak;
 
 }
 
-/* ==================================
+/* =====================================
    DASHBOARD
-================================== */
+===================================== */
 
 function updateDashboard(){
 
-/* TOTAL HABITS */
-
+const totalHabitsEl =
 document.getElementById(
 "totalHabits"
-).innerText =
-habits.length;
+);
 
-/* TODAY */
+const currentStreakEl =
+document.getElementById(
+"currentStreak"
+);
+
+const bestStreakEl =
+document.getElementById(
+"bestStreak"
+);
+
+const completionRateEl =
+document.getElementById(
+"completionRate"
+);
+
+const todayDoneEl =
+document.getElementById(
+"todayDone"
+);
+
+let completed = 0;
+
+let total = 0;
+
+let bestStreak = 0;
 
 const today =
 new Date()
@@ -1471,67 +1413,53 @@ new Date()
 
 let todayDone = 0;
 
-let completed = 0;
-
-let total = 0;
-
-let currentBest = 0;
-
 habits.forEach(habit=>{
 
 const streak =
-calculateHabitStreak(
+calculateStreak(
 habit.id
 );
 
-if(streak > currentBest){
+if(
+streak >
+bestStreak
+){
 
-currentBest =
+bestStreak =
 streak;
 
 }
 
 });
 
-/* LOGS */
-
 habitLogs.forEach(log=>{
 
 const habit =
 habits.find(
-h=>
-h.id ===
-log.habitId
+h=>h.id===log.habitId
 );
 
-if(!habit) return;
+if(!habit)
+return;
 
 total++;
 
 let success =
 false;
 
-/* YES NO */
-
 if(
-habit.type ===
-"yesno"
+habit.type==="yesno"
 ){
 
 success =
-log.status ===
-"done";
+log.status==="done";
 
 }
-
-/* MEASURABLE */
-
 else{
 
 success =
-Number(log.value)
->=
-Number(habit.target);
+log.value >=
+habit.target;
 
 }
 
@@ -1541,12 +1469,9 @@ completed++;
 
 }
 
-/* TODAY */
-
 if(
-log.date === today
-&&
-success
+success &&
+log.date===today
 ){
 
 todayDone++;
@@ -1555,58 +1480,50 @@ todayDone++;
 
 });
 
-/* COMPLETION */
-
 const completionRate =
 
-total > 0
+total>0
 
 ?
 
 Math.round(
-
-(completed/total)
-*100
-
+(completed/total)*100
 )
 
-: 0;
+:0;
 
-/* UPDATE UI */
+if(totalHabitsEl)
+totalHabitsEl.innerText =
+habits.length;
 
-document.getElementById(
-"todayDone"
-).innerText =
-todayDone;
+if(currentStreakEl)
+currentStreakEl.innerText =
+bestStreak;
 
-document.getElementById(
-"completionRate"
-).innerText =
+if(bestStreakEl)
+bestStreakEl.innerText =
+bestStreak;
+
+if(completionRateEl)
+completionRateEl.innerText =
 completionRate + "%";
 
-document.getElementById(
-"currentStreak"
-).innerText =
-currentBest;
-
-document.getElementById(
-"bestStreak"
-).innerText =
-calculateBestStreak();
+if(todayDoneEl)
+todayDoneEl.innerText =
+todayDone;
 
 }
 
-/* ==================================
+/* =====================================
    CLOSE MODALS
-================================== */
+===================================== */
 
 window.addEventListener(
 "click",
 (e)=>{
 
 if(
-e.target ===
-habitModal
+e.target===habitModal
 ){
 
 habitModal.style.display =
@@ -1615,8 +1532,7 @@ habitModal.style.display =
 }
 
 if(
-e.target ===
-updateModal
+e.target===updateModal
 ){
 
 updateModal.style.display =
@@ -1624,97 +1540,17 @@ updateModal.style.display =
 
 }
 
-const deleteModal =
-document.getElementById(
-"deleteModal"
-);
-
-if(
-deleteModal &&
-e.target ===
-deleteModal
-){
-
-deleteModal.style.display =
-"none";
-
-}
-
 }
 );
 
-/* ==================================
-   ESC KEY CLOSE
-================================== */
+/* =====================================
+   INITIAL LOAD
+===================================== */
 
-document.addEventListener(
-"keydown",
-(e)=>{
-
-if(
-e.key ===
-"Escape"
-){
-
-habitModal.style.display =
-"none";
-
-updateModal.style.display =
-"none";
-
-const deleteModal =
-document.getElementById(
-"deleteModal"
-);
-
-if(deleteModal){
-
-deleteModal.style.display =
-"none";
-
-}
-
-}
-
-}
-);
-
-/* ==================================
-   STARTUP
-================================== */
-
-async function initializeHabits(){
-
-if(!currentUser)
-return;
-
-await loadHabits();
-
-await loadHabitLogs();
+setTimeout(()=>{
 
 renderGrid();
 
 updateDashboard();
 
-}
-
-/* ==================================
-   REFRESH
-================================== */
-
-window.refreshHabits =
-async()=>{
-
-await loadHabits();
-
-await loadHabitLogs();
-
-renderGrid();
-
-updateDashboard();
-
-};
-
-/* ==================================
-   END
-================================== */
+},500);
