@@ -344,28 +344,9 @@ templateSelect.addEventListener(
 const key =
 templateSelect.value;
 
-if(!templates[key])
+if(!templates[key]){
 return;
-
-const template =
-templates[key];
-
-document.getElementById(
-"habitName"
-).value =
-template.name;
-
-});
-
 }
-
-const key =
-document.getElementById(
-"templateSelect"
-).value;
-
-if(!templates[key])
-return;
 
 const template =
 templates[key];
@@ -398,14 +379,15 @@ document.getElementById(
 document.getElementById(
 "habitUnit"
 ).value =
-template.unit;
+template.unit || "";
 
 document.getElementById(
 "habitTarget"
 ).value =
-template.target;
+template.target || "";
 
-}else{
+}
+else{
 
 document.getElementById(
 "habitType"
@@ -421,6 +403,8 @@ document.getElementById(
 
 }
 );
+
+}
 
 /* =====================================
    SAVE HABIT
