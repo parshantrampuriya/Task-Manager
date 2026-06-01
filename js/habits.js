@@ -330,11 +330,34 @@ measurableBox.style.display =
    TEMPLATE SELECT
 ===================================== */
 
+const templateSelect =
 document.getElementById(
 "templateSelect"
-).addEventListener(
+);
+
+if(templateSelect){
+
+templateSelect.addEventListener(
 "change",
 ()=>{
+
+const key =
+templateSelect.value;
+
+if(!templates[key])
+return;
+
+const template =
+templates[key];
+
+document.getElementById(
+"habitName"
+).value =
+template.name;
+
+});
+
+}
 
 const key =
 document.getElementById(
