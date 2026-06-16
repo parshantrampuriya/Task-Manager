@@ -2,7 +2,7 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Segoe UI,sans-serif;
+font-family:'Segoe UI',sans-serif;
 }
 
 body{
@@ -11,21 +11,27 @@ color:white;
 overflow:hidden;
 }
 
+/* =========================
+   MAIN
+========================= */
+
 .main{
 height:100vh;
-overflow:hidden;
 display:flex;
 flex-direction:column;
+overflow:hidden;
 }
 
-/* ================= NAVBAR ================= */
+/* =========================
+   NAVBAR
+========================= */
 
 .navbar{
 height:70px;
+padding:0 20px;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:0 20px;
 background:#111827;
 border-bottom:1px solid #1f2937;
 }
@@ -35,44 +41,45 @@ font-size:24px;
 font-weight:700;
 }
 
-.menu-btn,
-.create-btn{
-border:none;
-cursor:pointer;
-border-radius:12px;
-}
-
 .menu-btn{
 background:none;
-color:white;
+border:none;
 font-size:28px;
+color:white;
+cursor:pointer;
 }
 
 .create-btn{
-padding:10px 18px;
-background:linear-gradient(
+border:none;
+padding:12px 20px;
+border-radius:12px;
+font-weight:700;
+cursor:pointer;
+background:
+linear-gradient(
 135deg,
 #00cfff,
 #00ff99
 );
-font-weight:700;
 color:black;
 }
 
-/* ================= DASHBOARD ================= */
+/* =========================
+   DASHBOARD
+========================= */
 
-.dashboard{
+.stats-grid{
+padding:20px;
 display:grid;
 grid-template-columns:
 repeat(auto-fit,minmax(180px,1fr));
 gap:15px;
-padding:20px;
 }
 
 .stat-card{
 background:#1e293b;
 border-radius:18px;
-padding:18px;
+padding:20px;
 text-align:center;
 box-shadow:
 0 0 15px rgba(0,0,0,.25);
@@ -87,7 +94,9 @@ margin-bottom:10px;
 color:#cbd5e1;
 }
 
-/* ================= SEARCH ================= */
+/* =========================
+   SEARCH
+========================= */
 
 .search-box{
 padding:0 20px 15px;
@@ -104,192 +113,225 @@ color:white;
 font-size:15px;
 }
 
-/* ================= TABLE ================= */
+/* =========================
+   WEEK NAVIGATION
+========================= */
 
-.table-wrapper{
+.week-nav{
+padding:0 20px 15px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+
+.week-nav button{
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+background:#1e293b;
+color:white;
+font-weight:600;
+}
+
+.week-nav h3{
+font-size:18px;
+}
+/* =========================
+   HABIT TABLE
+========================= */
+
+.habit-table-wrapper{
 flex:1;
 overflow:auto;
 padding:0 20px 20px;
 }
 
 #habitTable{
-min-width:1600px;
+min-width:1200px;
 }
 
-/* ================= MONTH ROW ================= */
+/* =========================
+   HEADER
+========================= */
 
-.month-row{
-display:flex;
+.header-row{
 position:sticky;
 top:0;
-z-index:30;
+z-index:50;
 background:#0f172a;
 }
-
-.month-cell{
-height:45px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:700;
-font-size:15px;
-color:#00cfff;
-border:1px solid #1f2937;
-background:#111827;
-}
-
-.month-left{
-width:260px;
-min-width:260px;
-position:sticky;
-left:0;
-z-index:40;
-background:#111827;
-}
-
-/* ================= DATE HEADER ================= */
-
-.date-header{
-display:flex;
-position:sticky;
-top:45px;
-z-index:25;
-background:#0f172a;
-}
-
-.habit-header{
-width:260px;
-min-width:260px;
-padding:15px;
-font-weight:700;
-position:sticky;
-left:0;
-z-index:30;
-background:#111827;
-border:1px solid #1f2937;
-}
-
-.date-cell{
-width:55px;
-min-width:55px;
-height:70px;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-border:1px solid #1f2937;
-background:#111827;
-font-weight:700;
-}
-
-.date-cell span{
-font-size:11px;
-color:#94a3b8;
-margin-top:5px;
-}
-
-/* ================= HABIT ROW ================= */
 
 .habit-row{
 display:flex;
-min-height:75px;
+min-height:70px;
 }
 
 .habit-info{
 width:260px;
 min-width:260px;
 padding:12px;
+background:#1e293b;
+border:1px solid #334155;
 position:sticky;
 left:0;
 z-index:20;
-background:#1e293b;
-border:1px solid #334155;
 display:flex;
 flex-direction:column;
+justify-content:center;
+}
+
+.header-cell{
+font-size:18px;
+font-weight:700;
+background:#111827;
 justify-content:center;
 }
 
 .habit-name{
 font-size:16px;
 font-weight:700;
+margin-bottom:5px;
 }
 
-.habit-meta{
+.habit-small{
 font-size:12px;
 color:#94a3b8;
-margin-top:4px;
 }
+
+/* =========================
+   ACTIONS
+========================= */
 
 .habit-actions{
 margin-top:8px;
 display:flex;
-gap:6px;
-flex-wrap:wrap;
+gap:8px;
 }
 
 .habit-actions button{
+width:32px;
+height:32px;
 border:none;
-padding:4px 8px;
 border-radius:8px;
 cursor:pointer;
-font-size:11px;
+font-size:14px;
 font-weight:700;
 }
 
-.edit-btn{
-background:#00cfff;
-color:black;
-}
-
-.delete-btn{
-background:#ef4444;
-color:white;
-}
-
-/* ================= TRACK CELLS ================= */
-
-.track-cell{
-width:55px;
-min-width:55px;
-height:75px;
-border:1px solid #1f2937;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-transition:.2s;
-font-weight:700;
-}
-
-.track-cell:hover{
-transform:scale(1.05);
-}
-
-.status-empty{
-background:#111827;
-}
-
-.status-done{
-background:#10b981;
-color:white;
-}
-
-.status-missed{
-background:#ef4444;
-color:white;
-}
-
-.status-skip{
-background:#f59e0b;
-color:black;
-}
-
-.status-progress{
+.habit-actions button:first-child{
 background:#3b82f6;
 color:white;
 }
 
-/* ================= MODAL ================= */
+.habit-actions button:last-child{
+background:#ef4444;
+color:white;
+}
+
+/* =========================
+   DATE HEADER
+========================= */
+
+.day-wrapper{
+width:65px;
+min-width:65px;
+display:flex;
+flex-direction:column;
+}
+
+.month-name{
+height:28px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:700;
+color:#00cfff;
+background:#111827;
+border:1px solid #1f2937;
+}
+
+.date-header-cell{
+height:42px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+background:#1e293b;
+border:1px solid #334155;
+}
+
+/* =========================
+   HABIT DAY CELL
+========================= */
+
+.habit-day{
+width:65px;
+min-width:65px;
+height:70px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+font-weight:700;
+border:1px solid #1f2937;
+transition:.2s;
+}
+
+.habit-day:hover{
+transform:scale(1.05);
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty-cell{
+background:#111827;
+color:#64748b;
+}
+
+/* =========================
+   YES/NO COLORS
+========================= */
+
+.done-cell{
+background:#22c55e;
+color:white;
+}
+
+.missed-cell{
+background:#ef4444;
+color:white;
+}
+
+.skip-cell{
+background:#f59e0b;
+color:black;
+}
+
+/* =========================
+   MEASURABLE COLORS
+========================= */
+
+.success-cell{
+background:#16a34a;
+color:white;
+}
+
+.warning-cell{
+background:#eab308;
+color:black;
+}
+
+.danger-cell{
+background:#dc2626;
+color:white;
+}
+/* =========================
+   MODAL
+========================= */
 
 .modal{
 display:none;
@@ -298,7 +340,7 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,.7);
+background:rgba(0,0,0,.75);
 backdrop-filter:blur(6px);
 justify-content:center;
 align-items:center;
@@ -308,9 +350,9 @@ padding:20px;
 
 .modal-box{
 width:100%;
-max-width:520px;
+max-width:500px;
 background:#1e293b;
-border-radius:24px;
+border-radius:20px;
 padding:25px;
 box-shadow:
 0 0 40px rgba(0,0,0,.4);
@@ -333,18 +375,12 @@ transform:scale(1);
 
 .modal-box h2{
 margin-bottom:20px;
-font-size:24px;
 text-align:center;
 }
 
-.modal-box label{
-display:block;
-margin-top:12px;
-margin-bottom:6px;
-font-size:14px;
-font-weight:600;
-color:#cbd5e1;
-}
+/* =========================
+   FORM ELEMENTS
+========================= */
 
 .modal-box input,
 .modal-box select,
@@ -352,85 +388,99 @@ color:#cbd5e1;
 
 width:100%;
 padding:12px;
+margin-top:8px;
+margin-bottom:15px;
 border:none;
 outline:none;
 border-radius:12px;
 background:#111827;
 color:white;
-font-size:14px;
 
 }
 
 .modal-box textarea{
-height:90px;
 resize:none;
+height:90px;
 }
 
-/* ================= MEASURABLE SECTION ================= */
-
-#measurableFields{
-margin-top:10px;
-padding:15px;
-border-radius:15px;
-background:#0f172a;
+.modal-box label{
+font-size:14px;
+font-weight:600;
+color:#cbd5e1;
 }
 
-/* ================= BUTTONS ================= */
+/* =========================
+   BUTTONS
+========================= */
 
 .modal-actions{
 display:flex;
 justify-content:flex-end;
 gap:10px;
-margin-top:20px;
+margin-top:15px;
 }
 
 .modal-actions button{
-border:none;
+
 padding:12px 18px;
+border:none;
 border-radius:12px;
 cursor:pointer;
 font-weight:700;
+
 }
 
-#saveHabitBtn,
-#saveProgressBtn{
+#saveYesNoHabitBtn,
+#saveMeasureHabitBtn,
+#saveMeasureProgressBtn{
+
 background:
 linear-gradient(
 135deg,
 #00cfff,
 #00ff99
 );
+
 color:black;
+
 }
 
-#closeHabitBtn,
-#closeUpdateBtn,
-#cancelDeleteBtn{
+#cancelYesNoBtn,
+#cancelMeasureBtn,
+#closeUpdateModalBtn,
+#closeStatsBtn,
+#cancelDeleteBtn,
+#closeHabitMenuBtn,
+#closeTypeModalBtn{
+
 background:#334155;
 color:white;
+
 }
+
+/* =========================
+   YES / NO UPDATE BUTTONS
+========================= */
 
 .success-btn{
 width:100%;
 padding:14px;
-margin-top:10px;
+margin-bottom:10px;
 border:none;
 border-radius:14px;
 cursor:pointer;
-font-size:16px;
 font-weight:700;
-background:#10b981;
+background:#22c55e;
 color:white;
 }
 
 .danger-btn{
 width:100%;
 padding:14px;
-margin-top:10px;
+margin-bottom:10px;
 border:none;
 border-radius:14px;
 cursor:pointer;
-font-size:16px;
 font-weight:700;
 background:#ef4444;
 color:white;
@@ -439,115 +489,216 @@ color:white;
 .warning-btn{
 width:100%;
 padding:14px;
-margin-top:10px;
+margin-bottom:10px;
 border:none;
 border-radius:14px;
 cursor:pointer;
-font-size:16px;
 font-weight:700;
 background:#f59e0b;
 color:black;
 }
 
-/* ================= UPDATE MODAL ================= */
+/* =========================
+   HABIT TYPE MODAL
+========================= */
 
-#todayProgress{
-margin-top:15px;
-margin-bottom:15px;
+.habit-type-buttons{
+display:flex;
+flex-direction:column;
+gap:12px;
+margin:20px 0;
+}
+
+.habit-type-buttons button{
+
 padding:15px;
-text-align:center;
-font-size:28px;
+border:none;
+border-radius:14px;
+cursor:pointer;
+font-size:16px;
 font-weight:700;
-border-radius:15px;
-background:#0f172a;
-color:#00ff99;
+background:#111827;
+color:white;
+
 }
 
-/* ================= COLOR THEMES ================= */
+.habit-type-buttons button:hover{
 
-.color-blue{
-border-left:6px solid #00cfff;
+background:#00cfff;
+color:black;
+
 }
 
-.color-green{
-border-left:6px solid #00ff99;
+/* =========================
+   HABIT MENU
+========================= */
+
+#habitMenuModal button{
+
+width:100%;
+padding:14px;
+margin-bottom:10px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
+
 }
 
-.color-orange{
-border-left:6px solid #ff9800;
+#editHabitBtn{
+background:#3b82f6;
+color:white;
 }
 
-.color-purple{
-border-left:6px solid #a855f7;
+#deleteHabitBtn{
+background:#ef4444;
+color:white;
 }
 
-.color-red{
-border-left:6px solid #ef4444;
+#statsHabitBtn{
+background:#8b5cf6;
+color:white;
 }
 
-.color-pink{
-border-left:6px solid #ff66cc;
+/* =========================
+   STATS MODAL
+========================= */
+
+.stats-list{
+display:flex;
+flex-direction:column;
+gap:12px;
+margin-top:15px;
 }
 
-/* ================= TODAY COLUMN ================= */
+.stat-item{
 
-.today-column{
-background:
-rgba(0,255,153,.15);
+display:flex;
+justify-content:space-between;
+padding:12px;
+border-radius:12px;
+background:#111827;
+
 }
 
-/* ================= MOBILE ================= */
+/* =========================
+   DELETE MODAL
+========================= */
+
+#deleteHabitText{
+text-align:center;
+margin:15px 0;
+color:#cbd5e1;
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.loading-overlay{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.8);
+z-index:2000;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+gap:15px;
+}
+
+.loader{
+
+width:50px;
+height:50px;
+border:5px solid #334155;
+border-top:5px solid #00cfff;
+border-radius:50%;
+animation:spin 1s linear infinite;
+
+}
+
+@keyframes spin{
+
+100%{
+transform:rotate(360deg);
+}
+
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+
+position:fixed;
+bottom:20px;
+right:20px;
+background:#22c55e;
+color:white;
+padding:12px 18px;
+border-radius:12px;
+font-weight:700;
+opacity:0;
+pointer-events:none;
+transition:.3s;
+z-index:3000;
+
+}
+
+.toast.show{
+opacity:1;
+}
+
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:900px){
-
-.dashboard{
-grid-template-columns:
-repeat(2,1fr);
-}
-
-.navbar h2{
-font-size:20px;
-}
 
 .habit-info{
 width:220px;
 min-width:220px;
 }
 
-.habit-header{
+.header-cell{
 width:220px;
 min-width:220px;
 }
 
-.month-left{
-width:220px;
-min-width:220px;
+.day-wrapper{
+width:55px;
+min-width:55px;
+}
+
+.habit-day{
+width:55px;
+min-width:55px;
 }
 
 }
 
 @media(max-width:600px){
 
-.dashboard{
-grid-template-columns:1fr;
+.stats-grid{
+grid-template-columns:1fr 1fr;
+}
+
+.navbar h2{
+font-size:18px;
+}
+
+.create-btn{
+padding:10px 14px;
+font-size:13px;
 }
 
 .modal-box{
 padding:18px;
-}
-
-.modal-box h2{
-font-size:20px;
-}
-
-.track-cell{
-width:50px;
-min-width:50px;
-}
-
-.date-cell{
-width:50px;
-min-width:50px;
 }
 
 }
