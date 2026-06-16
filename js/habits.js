@@ -753,7 +753,15 @@ html += `
 
 <div class="month-name">
 
-${day.day}
+${new Date(day.date)
+.toLocaleDateString(
+"en-US",
+{
+month:"short"
+}
+)}
+
+</div>
 
 </div>
 
