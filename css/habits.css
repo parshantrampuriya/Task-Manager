@@ -136,13 +136,14 @@ color:#fff;
 ========================= */
 
 .habit-table-wrapper{
-flex:1;
+width:100%;
+height:100%;
 overflow:auto;
-padding:0 20px 20px;
 }
 
 #habitTable{
-min-width:1200px;
+width:max-content;
+min-width:100%;
 }
 
 /* =========================
