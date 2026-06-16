@@ -181,15 +181,27 @@ return dates;
 function updateWeekTitle(){
 
 const week =
-getWeekDates(
-currentWeekOffset
+getWeekDates(currentWeekOffset);
+
+const first =
+new Date(week[0].date);
+
+const last =
+new Date(week[6].date);
+
+const month =
+first.toLocaleDateString(
+"en-US",
+{
+month:"long"
+}
 );
 
-weekTitle.innerText =
+const year =
+first.getFullYear();
 
-`${week[0].day} ${week[0].number}
--
-${week[6].day} ${week[6].number}`;
+weekTitle.innerText =
+`${month} ${year} | ${week[0].number} - ${week[6].number}`;
 
 }
 
