@@ -116,26 +116,20 @@ font-size:15px;
 /* =========================
    WEEK NAVIGATION
 ========================= */
-
 .week-nav{
-padding:0 20px 15px;
 display:flex;
 align-items:center;
 justify-content:space-between;
-}
-
-.week-nav button{
-border:none;
-padding:10px 15px;
-border-radius:10px;
-cursor:pointer;
-background:#1e293b;
-color:white;
-font-weight:600;
+margin:20px;
+gap:20px;
 }
 
 .week-nav h3{
-font-size:18px;
+flex:1;
+text-align:center;
+font-size:24px;
+font-weight:700;
+color:#fff;
 }
 /* =========================
    HABIT TABLE
