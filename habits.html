@@ -1,620 +1,857 @@
-<!DOCTYPE html>
-<html lang="en">
+import { auth, db } from "./firebase.js";
 
-<head>
+import {
+collection,
+addDoc,
+getDocs,
+updateDoc,
+deleteDoc,
+doc,
+query,
+where
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<meta charset="UTF-8">
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+/* =========================
+   ELEMENTS
+========================= */
 
-<title>Habit Tracker</title>
+const habitTable =
+document.getElementById("habitTable");
 
-<link rel="stylesheet"
-href="css/habits.css">
+const searchInput =
+document.getElementById("searchInput");
 
-<link rel="stylesheet"
-href="css/sidebar.css">
+const createHabitBtn =
+document.getElementById("createHabitBtn");
 
-</head>
+const weekTitle =
+document.getElementById("weekTitle");
 
-<body>
+const prevWeekBtn =
+document.getElementById("prevWeekBtn");
 
-<!-- SIDEBAR -->
+const nextWeekBtn =
+document.getElementById("nextWeekBtn");
 
-<div id="sidebar"
-class="sidebar">
+/* =========================
+   MODALS
+========================= */
 
-<h2>⚡ Menu</h2>
+const habitTypeModal =
+document.getElementById("habitTypeModal");
 
-<button onclick="goHome()">🏠 Home</button>
+const yesNoModal =
+document.getElementById("yesNoModal");
 
-<button onclick="goTasks()">📋 Tasks</button>
+const measurableModal =
+document.getElementById("measurableModal");
 
-<button onclick="goGoals()">🎯 Goals</button>
+const updateModal =
+document.getElementById("updateModal");
 
-<button onclick="goHabits()">📅 Habits</button>
+const habitMenuModal =
+document.getElementById("habitMenuModal");
 
-<button onclick="goFriends()">👥 Friends</button>
+const statsModal =
+document.getElementById("statsModal");
 
-<button onclick="goQuestionBank()">📚 Question Bank</button>
+const deleteModal =
+document.getElementById("deleteModal");
 
-<button onclick="goTests()">📝 Tests</button>
+/* =========================
+   STATE
+========================= */
 
-<button onclick="goGrowth()">🌱 Growth Hub</button>
+let currentUser = null;
 
-<button onclick="goProfile()">👤 Profile</button>
+let habits = [];
 
-<button id="logoutBtn">
-🚪 Logout
-</button>
+let habitLogs = [];
 
-</div>
+let selectedHabit = null;
 
-<!-- MAIN -->
+let selectedDate = null;
 
-<div class="main">
+let currentWeekOffset = 0;
 
-<!-- NAVBAR -->
+/* =========================
+   AUTH
+========================= */
 
-<div class="navbar">
+onAuthStateChanged(
+auth,
+async (user) => {
 
-<button
-class="menu-btn"
-onclick="toggleSidebar()">
+if (!user) {
 
-☰
+window.location.href =
+"index.html";
 
-</button>
+return;
 
-<h2>
-📅 Habit Tracker
-</h2>
+}
 
-<button
-id="createHabitBtn"
-class="create-btn">
+currentUser = user;
 
-➕ Create Habit
+await loadHabits();
 
-</button>
+await loadLogs();
 
-</div>
+renderTable();
 
-<!-- STATS -->
+updateDashboard();
 
-<div class="stats-grid">
+}
+);
 
-<div class="stat-card">
+/* =========================
+   WEEK FUNCTIONS
+========================= */
 
-<h3 id="currentStreak">
-0
-</h3>
+function getWeekDates(
+offset = 0
+){
 
-<p>
-🔥 Current Streak
-</p>
+const today =
+new Date();
 
-</div>
+const currentDay =
+today.getDay();
 
-<div class="stat-card">
+const monday =
+new Date(today);
 
-<h3 id="bestStreak">
-0
-</h3>
+monday.setDate(
+today.getDate()
+-
+(currentDay === 0
+? 6
+: currentDay - 1)
++
+(offset * 7)
+);
 
-<p>
-🏆 Best Streak
-</p>
+const dates = [];
 
-</div>
+for(let i = 0; i < 7; i++){
 
-<div class="stat-card">
+const date =
+new Date(monday);
 
-<h3 id="completionRate">
-0%
-</h3>
+date.setDate(
+monday.getDate() + i
+);
 
-<p>
-📈 Completion
-</p>
+dates.push({
 
-</div>
+date:
+date
+.toISOString()
+.split("T")[0],
 
-<div class="stat-card">
+day:
+date.toLocaleDateString(
+"en-US",
+{
+weekday:"short"
+}
+),
 
-<h3 id="todayDone">
-0
-</h3>
+number:
+date.getDate()
 
-<p>
-✅ Today
-</p>
+});
 
-</div>
+}
 
-</div>
+return dates;
 
-<!-- SEARCH -->
+}
 
-<div class="search-box">
+/* =========================
+   WEEK TITLE
+========================= */
 
-<input
-type="text"
-id="searchInput"
-placeholder="🔍 Search habits">
+function updateWeekTitle(){
 
-</div>
+const week =
+getWeekDates(
+currentWeekOffset
+);
 
-<!-- WEEK NAVIGATION -->
+weekTitle.innerText =
 
-<div class="week-nav">
+`${week[0].day} ${week[0].number}
+-
+${week[6].day} ${week[6].number}`;
 
-<button id="prevWeekBtn">
+}
 
-⬅ Previous
+/* =========================
+   WEEK NAVIGATION
+========================= */
 
-</button>
+prevWeekBtn.addEventListener(
+"click",
+()=>{
 
-<h3 id="weekTitle">
+currentWeekOffset--;
 
-Current Week
+updateWeekTitle();
 
-</h3>
+renderTable();
 
-<button id="nextWeekBtn">
+}
+);
 
-Next ➡
+nextWeekBtn.addEventListener(
+"click",
+()=>{
 
-</button>
+currentWeekOffset++;
 
-</div>
+updateWeekTitle();
 
-<!-- HABIT TABLE -->
+renderTable();
 
-<div class="habit-table-wrapper">
+}
+);
 
-<div id="habitTable">
+/* =========================
+   CREATE BUTTON
+========================= */
 
-<!-- JS RENDER -->
+createHabitBtn.addEventListener(
+"click",
+()=>{
 
-</div>
+habitTypeModal.style.display =
+"flex";
 
-</div>
+}
+);
 
-</div>
-<!-- ===================================== -->
-<!-- CREATE HABIT MODAL -->
-<!-- ===================================== -->
+/* =========================
+   INITIAL
+========================= */
 
-<div
-id="habitTypeModal"
-class="modal">
+updateWeekTitle();
+  /* =========================
+   LOAD HABITS
+========================= */
 
-<div class="modal-box">
+async function loadHabits(){
 
-<h2>
+try{
 
-Create Habit
+const q = query(
+collection(db,"habits"),
+where(
+"uid",
+"==",
+currentUser.uid
+)
+);
 
-</h2>
+const snapshot =
+await getDocs(q);
 
-<p>
+habits = [];
 
-Select Habit Type
+snapshot.forEach((docSnap)=>{
 
-</p>
+habits.push({
 
-<div class="habit-type-buttons">
+id:docSnap.id,
 
-<button
-id="yesNoHabitBtn">
+...docSnap.data()
 
-✅ Yes / No Habit
+});
 
-</button>
+});
 
-<button
-id="measurableHabitBtn">
+}catch(error){
 
-📊 Measurable Habit
+console.error(
+"Load Habits Error:",
+error
+);
 
-</button>
+}
 
-</div>
+}
 
-<button
-id="closeTypeModalBtn"
-class="secondary-btn">
+/* =========================
+   LOAD LOGS
+========================= */
 
-Close
+async function loadLogs(){
 
-</button>
+try{
 
-</div>
+const q = query(
+collection(db,"habitLogs"),
+where(
+"uid",
+"==",
+currentUser.uid
+)
+);
 
-</div>
+const snapshot =
+await getDocs(q);
 
-<!-- ===================================== -->
-<!-- YES / NO HABIT MODAL -->
-<!-- ===================================== -->
+habitLogs = [];
 
-<div
-id="yesNoModal"
-class="modal">
+snapshot.forEach((docSnap)=>{
 
-<div class="modal-box">
+habitLogs.push({
 
-<h2>
+id:docSnap.id,
 
-✅ Create Yes / No Habit
+...docSnap.data()
 
-</h2>
+});
 
-<input
-id="yesNoName"
-placeholder="Habit Name">
+});
 
-<input
-id="yesNoQuestion"
-placeholder="Question">
+}catch(error){
 
-<select
-id="yesNoColor">
+console.error(
+"Load Logs Error:",
+error
+);
 
-<option value="#22c55e">
-Green
-</option>
+}
 
-<option value="#3b82f6">
-Blue
-</option>
+}
 
-<option value="#f97316">
-Orange
-</option>
+/* =========================
+   OPEN YES NO MODAL
+========================= */
 
-<option value="#a855f7">
-Purple
-</option>
+document
+.getElementById(
+"yesNoHabitBtn"
+)
+.addEventListener(
+"click",
+()=>{
 
-<option value="#ef4444">
-Red
-</option>
+habitTypeModal.style.display =
+"none";
 
-</select>
+yesNoModal.style.display =
+"flex";
 
-<textarea
-id="yesNoNotes"
-placeholder="Notes">
+}
+);
 
-</textarea>
+/* =========================
+   OPEN MEASURABLE MODAL
+========================= */
 
-<div class="modal-actions">
+document
+.getElementById(
+"measurableHabitBtn"
+)
+.addEventListener(
+"click",
+()=>{
 
-<button
-id="saveYesNoHabitBtn">
+habitTypeModal.style.display =
+"none";
 
-Create
+measurableModal.style.display =
+"flex";
 
-</button>
+}
+);
 
-<button
-id="cancelYesNoBtn">
+/* =========================
+   CLOSE TYPE MODAL
+========================= */
 
-Cancel
+document
+.getElementById(
+"closeTypeModalBtn"
+)
+.addEventListener(
+"click",
+()=>{
 
-</button>
+habitTypeModal.style.display =
+"none";
 
-</div>
+}
+);
 
-</div>
+/* =========================
+   CLOSE YES NO MODAL
+========================= */
 
-</div>
+document
+.getElementById(
+"cancelYesNoBtn"
+)
+.addEventListener(
+"click",
+()=>{
 
-<!-- ===================================== -->
-<!-- MEASURABLE HABIT MODAL -->
-<!-- ===================================== -->
+yesNoModal.style.display =
+"none";
 
-<div
-id="measurableModal"
-class="modal">
+}
+);
 
-<div class="modal-box">
+/* =========================
+   CLOSE MEASURABLE MODAL
+========================= */
 
-<h2>
+document
+.getElementById(
+"cancelMeasureBtn"
+)
+.addEventListener(
+"click",
+()=>{
 
-📊 Create Measurable Habit
+measurableModal.style.display =
+"none";
 
-</h2>
+}
+);
 
-<input
-id="measureName"
-placeholder="Habit Name">
+/* =========================
+   SAVE YES NO HABIT
+========================= */
 
-<input
-id="measureQuestion"
-placeholder="Question">
+document
+.getElementById(
+"saveYesNoHabitBtn"
+)
+.addEventListener(
+"click",
+async()=>{
 
-<input
-id="measureUnit"
-placeholder="Pages / Hours / KM">
+const name =
+document
+.getElementById(
+"yesNoName"
+)
+.value
+.trim();
 
-<input
-type="number"
-id="measureTarget"
-placeholder="Target">
+const question =
+document
+.getElementById(
+"yesNoQuestion"
+)
+.value
+.trim();
 
-<select
-id="measureTargetType">
+const color =
+document
+.getElementById(
+"yesNoColor"
+)
+.value;
 
-<option value="atleast">
-At Least
-</option>
+const notes =
+document
+.getElementById(
+"yesNoNotes"
+)
+.value
+.trim();
 
-<option value="exactly">
-Exactly
-</option>
+if(!name){
 
-<option value="atmost">
-At Most
-</option>
+alert(
+"Habit name required"
+);
 
-</select>
+return;
 
-<select
-id="measureColor">
+}
 
-<option value="#22c55e">
-Green
-</option>
+try{
 
-<option value="#3b82f6">
-Blue
-</option>
+await addDoc(
 
-<option value="#f97316">
-Orange
-</option>
+collection(
+db,
+"habits"
+),
 
-<option value="#a855f7">
-Purple
-</option>
+{
+uid:
+currentUser.uid,
 
-<option value="#ef4444">
-Red
-</option>
+name,
 
-</select>
+question,
 
-<textarea
-id="measureNotes"
-placeholder="Notes">
+color,
 
-</textarea>
+notes,
 
-<div class="modal-actions">
+type:
+"yesno",
 
-<button
-id="saveMeasureHabitBtn">
+createdAt:
+Date.now()
 
-Create
+}
 
-</button>
+);
 
-<button
-id="cancelMeasureBtn">
+yesNoModal.style.display =
+"none";
 
-Cancel
+await loadHabits();
 
-</button>
+renderTable();
 
-</div>
+updateDashboard();
 
-</div>
+}catch(error){
 
-</div>
+console.error(error);
 
-<!-- ===================================== -->
-<!-- UPDATE HABIT MODAL -->
-<!-- ===================================== -->
+}
 
-<div
-id="updateModal"
-class="modal">
+}
+);
 
-<div class="modal-box">
+/* =========================
+   SAVE MEASURABLE HABIT
+========================= */
 
-<h2 id="updateTitle">
+document
+.getElementById(
+"saveMeasureHabitBtn"
+)
+.addEventListener(
+"click",
+async()=>{
 
-Update Habit
+const name =
+document
+.getElementById(
+"measureName"
+)
+.value
+.trim();
 
-</h2>
+const question =
+document
+.getElementById(
+"measureQuestion"
+)
+.value
+.trim();
 
-<!-- YES / NO -->
+const unit =
+document
+.getElementById(
+"measureUnit"
+)
+.value
+.trim();
 
-<div id="updateYesNoSection">
+const target =
+Number(
+document
+.getElementById(
+"measureTarget"
+)
+.value
+);
 
-<button
-id="markDoneBtn"
-class="success-btn">
+const targetType =
+document
+.getElementById(
+"measureTargetType"
+)
+.value;
 
-✅ Done
+const color =
+document
+.getElementById(
+"measureColor"
+)
+.value;
 
-</button>
+const notes =
+document
+.getElementById(
+"measureNotes"
+)
+.value
+.trim();
 
-<button
-id="markMissedBtn"
-class="danger-btn">
+if(!name){
 
-❌ Missed
+alert(
+"Habit name required"
+);
 
-</button>
+return;
 
-<button
-id="markSkipBtn"
-class="warning-btn">
+}
 
-⏭ Skip
+try{
 
-</button>
+await addDoc(
 
-</div>
+collection(
+db,
+"habits"
+),
 
-<!-- MEASURABLE -->
+{
+uid:
+currentUser.uid,
 
-<div id="updateMeasureSection">
+type:
+"measurable",
 
-<input
-type="number"
-id="updateValue"
-placeholder="Today's Value">
+name,
 
-<button
-id="saveMeasureProgressBtn">
+question,
 
-💾 Save Progress
+unit,
 
-</button>
+target,
 
-</div>
+targetType,
 
-<div class="modal-actions">
+color,
 
-<button
-id="closeUpdateModalBtn">
+notes,
 
-Close
+createdAt:
+Date.now()
 
-</button>
+}
 
-</div>
+);
 
-</div>
+measurableModal.style.display =
+"none";
 
-</div>
+await loadHabits();
 
-<!-- ===================================== -->
-<!-- HABIT MENU MODAL -->
-<!-- ===================================== -->
+renderTable();
 
-<div
-id="habitMenuModal"
-class="modal">
+updateDashboard();
 
-<div class="modal-box">
+}catch(error){
 
-<h2 id="habitMenuTitle">
+console.error(error);
+
+}
+
+}
+);
+  /* =========================
+   SEARCH
+========================= */
+
+searchInput.addEventListener(
+"input",
+()=>{
+
+renderTable();
+
+}
+);
+
+/* =========================
+   GET LOG
+========================= */
+
+function getLog(
+habitId,
+date
+){
+
+return habitLogs.find(
+
+log =>
+
+log.habitId === habitId
+
+&&
+
+log.date === date
+
+);
+
+}
+
+/* =========================
+   RENDER TABLE
+========================= */
+
+function renderTable(){
+
+if(!habitTable) return;
+
+const weekDates =
+getWeekDates(
+currentWeekOffset
+);
+
+const search =
+searchInput.value
+.toLowerCase();
+
+habitTable.innerHTML =
+"";
+
+/* =========================
+   HEADER
+========================= */
+
+let html = `
+
+<div class="habit-row header-row">
+
+<div class="habit-info header-cell">
 
 Habit
 
-</h2>
+</div>
 
-<button
-id="editHabitBtn">
+`;
 
-✏ Edit Habit
+weekDates.forEach(day=>{
 
-</button>
+html += `
 
-<button
-id="deleteHabitBtn">
+<div class="day-wrapper">
 
-🗑 Delete Habit
+<div class="month-name">
 
-</button>
+${day.day}
 
-<button
-id="statsHabitBtn">
+</div>
 
-📊 Statistics
+<div class="date-header-cell">
 
-</button>
-
-<button
-id="closeHabitMenuBtn">
-
-Close
-
-</button>
+${day.number}
 
 </div>
 
 </div>
-<!-- ===================================== -->
-<!-- STATISTICS MODAL -->
-<!-- ===================================== -->
+
+`;
+
+});
+
+html += `
+
+</div>
+
+`;
+
+/* =========================
+   FILTER
+========================= */
+
+const filteredHabits =
+
+habits.filter(h=>{
+
+return h.name
+.toLowerCase()
+.includes(search);
+
+});
+
+/* =========================
+   EMPTY
+========================= */
+
+if(filteredHabits.length===0){
+
+html += `
+
+<div class="habit-row">
+
+<div class="habit-info">
+
+No Habits Found
+
+</div>
+
+</div>
+
+`;
+
+habitTable.innerHTML =
+html;
+
+return;
+
+}
+
+/* =========================
+   HABITS
+========================= */
+
+filteredHabits.forEach(habit=>{
+
+html += `
+
+<div class="habit-row">
 
 <div
-id="statsModal"
-class="modal">
+class="habit-info"
+style="
+border-left:
+5px solid
+${habit.color};
+">
 
-<div class="modal-box">
+<div class="habit-name">
 
-<h2>
-
-📊 Habit Statistics
-
-</h2>
-
-<div class="stats-list">
-
-<div class="stat-item">
-
-<span>
-🔥 Current Streak
-</span>
-
-<b id="statsCurrentStreak">
-0
-</b>
+${habit.name}
 
 </div>
 
-<div class="stat-item">
+<div class="habit-small">
 
-<span>
-🏆 Best Streak
-</span>
+${habit.type==="yesno"
 
-<b id="statsBestStreak">
-0
-</b>
+? "Yes / No Habit"
 
-</div>
-
-<div class="stat-item">
-
-<span>
-📈 Completion Rate
-</span>
-
-<b id="statsCompletion">
-0%
-</b>
+: `${habit.target}
+${habit.unit}`}
 
 </div>
 
-<div class="stat-item">
-
-<span>
-📅 Total Entries
-</span>
-
-<b id="statsEntries">
-0
-</b>
-
-</div>
-
-</div>
-
-<div class="modal-actions">
+<div class="habit-actions">
 
 <button
-id="closeStatsBtn">
+onclick="openHabitMenu('${habit.id}')">
 
-Close
+⚙
+
+</button>
+
+<button
+onclick="deleteHabit('${habit.id}')">
+
+🗑
 
 </button>
 
@@ -622,101 +859,1163 @@ Close
 
 </div>
 
-</div>
+`;
 
-<!-- ===================================== -->
-<!-- DELETE CONFIRM MODAL -->
-<!-- ===================================== -->
+weekDates.forEach(day=>{
+
+const log =
+getLog(
+habit.id,
+day.date
+);
+
+let value = "";
+
+let cellClass =
+"empty-cell";
+
+/* =====================
+   YES NO
+===================== */
+
+if(
+habit.type ===
+"yesno"
+){
+
+if(log){
+
+if(
+log.status ===
+"done"
+){
+
+value = "✓";
+
+cellClass =
+"done-cell";
+
+}
+else if(
+log.status ===
+"missed"
+){
+
+value = "✗";
+
+cellClass =
+"missed-cell";
+
+}
+else{
+
+value = "•";
+
+cellClass =
+"skip-cell";
+
+}
+
+}
+
+}
+
+/* =====================
+   MEASURABLE
+===================== */
+
+else{
+
+if(log){
+
+value =
+log.value || "";
+
+const percent =
+
+habit.target
+
+?
+
+(log.value /
+habit.target)
+*100
+
+: 0;
+
+if(percent>=100){
+
+cellClass =
+"success-cell";
+
+}
+else if(
+percent>=50
+){
+
+cellClass =
+"warning-cell";
+
+}
+else{
+
+cellClass =
+"danger-cell";
+
+}
+
+}
+
+}
+
+html += `
 
 <div
-id="deleteModal"
-class="modal">
+class="
+habit-day
+${cellClass}
+"
+onclick="
+openUpdateModal(
+'${habit.id}',
+'${day.date}'
+)
+">
 
-<div class="modal-box">
-
-<h2>
-
-🗑 Delete Habit
-
-</h2>
-
-<p id="deleteHabitText">
-
-Are you sure?
-
-</p>
-
-<div class="modal-actions">
-
-<button
-id="confirmDeleteBtn"
-class="danger-btn">
-
-Delete
-
-</button>
-
-<button
-id="cancelDeleteBtn">
-
-Cancel
-
-</button>
+${value}
 
 </div>
 
-</div>
+`;
+
+});
+
+html += `
 
 </div>
 
-<!-- ===================================== -->
-<!-- LOADING OVERLAY -->
-<!-- ===================================== -->
+`;
 
-<div
-id="loadingOverlay"
-class="loading-overlay">
+});
 
-<div class="loader">
+habitTable.innerHTML =
+html;
 
-</div>
+}
 
-<p>
+/* =========================
+   OPEN HABIT MENU
+========================= */
 
-Loading...
+window.openHabitMenu =
+(habitId)=>{
 
-</p>
+selectedHabit =
 
-</div>
+habits.find(
+h=>h.id===habitId
+);
 
-<!-- ===================================== -->
-<!-- TOAST -->
-<!-- ===================================== -->
+if(!selectedHabit)
+return;
 
-<div
-id="toast"
-class="toast">
+document
+.getElementById(
+"habitMenuTitle"
+)
+.innerText =
+selectedHabit.name;
 
-Success
+habitMenuModal
+.style.display =
+"flex";
 
-</div>
+};
 
-<!-- ===================================== -->
-<!-- SCRIPTS -->
-<!-- ===================================== -->
+/* =========================
+   CLOSE MENU
+========================= */
 
-<script
-type="module"
-src="js/menu.js">
+document
+.getElementById(
+"closeHabitMenuBtn"
+)
+.addEventListener(
+"click",
+()=>{
 
-</script>
+habitMenuModal
+.style.display =
+"none";
 
-<script
-type="module"
-src="js/habits.js">
+}
+);
 
-</script>
+/* =========================
+   DELETE HABIT
+========================= */
 
-</body>
+window.deleteHabit =
+(habitId)=>{
 
-</html>
+selectedHabit =
+
+habits.find(
+h=>h.id===habitId
+);
+
+if(!selectedHabit)
+return;
+
+document
+.getElementById(
+"deleteHabitText"
+)
+.innerText =
+
+`Delete "${selectedHabit.name}" ?`;
+
+deleteModal
+.style.display =
+"flex";
+
+};
+  /* =========================
+   OPEN UPDATE MODAL
+========================= */
+
+window.openUpdateModal =
+(
+habitId,
+date
+)=>{
+
+selectedHabit =
+habits.find(
+h=>h.id===habitId
+);
+
+selectedDate =
+date;
+
+if(!selectedHabit)
+return;
+
+document
+.getElementById(
+"updateTitle"
+)
+.innerText =
+
+selectedHabit.name;
+
+const yesNoSection =
+document.getElementById(
+"updateYesNoSection"
+);
+
+const measureSection =
+document.getElementById(
+"updateMeasureSection"
+);
+
+if(
+selectedHabit.type ===
+"yesno"
+){
+
+yesNoSection.style.display =
+"block";
+
+measureSection.style.display =
+"none";
+
+}
+else{
+
+yesNoSection.style.display =
+"none";
+
+measureSection.style.display =
+"block";
+
+const existingLog =
+getLog(
+habitId,
+date
+);
+
+document
+.getElementById(
+"updateValue"
+)
+.value =
+
+existingLog
+? existingLog.value
+: "";
+
+}
+
+updateModal.style.display =
+"flex";
+
+};
+
+/* =========================
+   CLOSE UPDATE
+========================= */
+
+document
+.getElementById(
+"closeUpdateModalBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+updateModal.style.display =
+"none";
+
+}
+);
+
+/* =========================
+   SAVE YES NO
+========================= */
+
+async function saveYesNoLog(
+status
+){
+
+if(
+!selectedHabit
+||
+!selectedDate
+){
+return;
+}
+
+try{
+
+const existingLog =
+getLog(
+selectedHabit.id,
+selectedDate
+);
+
+if(existingLog){
+
+await updateDoc(
+
+doc(
+db,
+"habitLogs",
+existingLog.id
+),
+
+{
+status
+}
+
+);
+
+}
+else{
+
+await addDoc(
+
+collection(
+db,
+"habitLogs"
+),
+
+{
+uid:
+currentUser.uid,
+
+habitId:
+selectedHabit.id,
+
+date:
+selectedDate,
+
+status,
+
+createdAt:
+Date.now()
+
+}
+
+);
+
+}
+
+await loadLogs();
+
+renderTable();
+
+updateDashboard();
+
+updateModal.style.display =
+"none";
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+/* =========================
+   DONE
+========================= */
+
+document
+.getElementById(
+"markDoneBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+saveYesNoLog(
+"done"
+);
+
+}
+);
+
+/* =========================
+   MISSED
+========================= */
+
+document
+.getElementById(
+"markMissedBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+saveYesNoLog(
+"missed"
+);
+
+}
+);
+
+/* =========================
+   SKIP
+========================= */
+
+document
+.getElementById(
+"markSkipBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+saveYesNoLog(
+"skip"
+);
+
+}
+);
+
+/* =========================
+   SAVE MEASURABLE
+========================= */
+
+document
+.getElementById(
+"saveMeasureProgressBtn"
+)
+.addEventListener(
+"click",
+async()=>{
+
+if(
+!selectedHabit
+||
+!selectedDate
+){
+return;
+}
+
+const value =
+Number(
+document
+.getElementById(
+"updateValue"
+)
+.value
+);
+
+if(
+isNaN(value)
+){
+
+alert(
+"Enter Value"
+);
+
+return;
+
+}
+
+try{
+
+const existingLog =
+getLog(
+selectedHabit.id,
+selectedDate
+);
+
+if(existingLog){
+
+await updateDoc(
+
+doc(
+db,
+"habitLogs",
+existingLog.id
+),
+
+{
+value
+}
+
+);
+
+}
+else{
+
+await addDoc(
+
+collection(
+db,
+"habitLogs"
+),
+
+{
+uid:
+currentUser.uid,
+
+habitId:
+selectedHabit.id,
+
+date:
+selectedDate,
+
+value,
+
+createdAt:
+Date.now()
+
+}
+
+);
+
+}
+
+await loadLogs();
+
+renderTable();
+
+updateDashboard();
+
+updateModal.style.display =
+"none";
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+);
+
+/* =========================
+   DELETE CONFIRM
+========================= */
+
+document
+.getElementById(
+"cancelDeleteBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+deleteModal.style.display =
+"none";
+
+}
+);
+
+document
+.getElementById(
+"confirmDeleteBtn"
+)
+.addEventListener(
+"click",
+async()=>{
+
+if(!selectedHabit)
+return;
+
+try{
+
+await deleteDoc(
+
+doc(
+db,
+"habits",
+selectedHabit.id
+)
+
+);
+
+await loadHabits();
+
+renderTable();
+
+updateDashboard();
+
+deleteModal.style.display =
+"none";
+
+habitMenuModal.style.display =
+"none";
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+);
+  /* =========================
+   STREAK CALCULATION
+========================= */
+
+function calculateStreak(
+habitId
+){
+
+const habit =
+habits.find(
+h=>h.id===habitId
+);
+
+if(!habit)
+return 0;
+
+const logs =
+
+habitLogs
+.filter(
+log=>
+log.habitId===habitId
+)
+.sort(
+(a,b)=>
+new Date(b.date)
+-
+new Date(a.date)
+);
+
+let streak = 0;
+
+for(const log of logs){
+
+let success = false;
+
+if(
+habit.type ===
+"yesno"
+){
+
+success =
+log.status ===
+"done";
+
+}
+else{
+
+success =
+
+Number(log.value || 0)
+
+>=
+
+Number(habit.target || 0);
+
+}
+
+if(success){
+
+streak++;
+
+}
+else{
+
+break;
+
+}
+
+}
+
+return streak;
+
+}
+
+/* =========================
+   COMPLETION %
+========================= */
+
+function getCompletionRate(){
+
+if(
+habitLogs.length === 0
+){
+return 0;
+}
+
+let completed = 0;
+
+habitLogs.forEach(log=>{
+
+const habit =
+habits.find(
+h=>h.id===log.habitId
+);
+
+if(!habit)
+return;
+
+if(
+habit.type==="yesno"
+){
+
+if(
+log.status==="done"
+){
+completed++;
+}
+
+}
+else{
+
+if(
+Number(log.value||0)
+>=
+Number(habit.target||0)
+){
+completed++;
+}
+
+}
+
+});
+
+return Math.round(
+
+(completed /
+habitLogs.length)
+
+*100
+
+);
+
+}
+
+/* =========================
+   TODAY DONE
+========================= */
+
+function getTodayDone(){
+
+const today =
+
+new Date()
+.toISOString()
+.split("T")[0];
+
+let count = 0;
+
+habitLogs.forEach(log=>{
+
+const habit =
+habits.find(
+h=>h.id===log.habitId
+);
+
+if(!habit)
+return;
+
+if(
+log.date !== today
+){
+return;
+}
+
+if(
+habit.type==="yesno"
+){
+
+if(
+log.status==="done"
+){
+count++;
+}
+
+}
+else{
+
+if(
+Number(log.value||0)
+>=
+Number(habit.target||0)
+){
+count++;
+}
+
+}
+
+});
+
+return count;
+
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function updateDashboard(){
+
+const totalHabits =
+habits.length;
+
+let bestStreak = 0;
+
+habits.forEach(habit=>{
+
+const streak =
+calculateStreak(
+habit.id
+);
+
+if(
+streak >
+bestStreak
+){
+
+bestStreak =
+streak;
+
+}
+
+});
+
+const currentStreak =
+bestStreak;
+
+document
+.getElementById(
+"currentStreak"
+)
+.innerText =
+currentStreak;
+
+document
+.getElementById(
+"bestStreak"
+)
+.innerText =
+bestStreak;
+
+document
+.getElementById(
+"completionRate"
+)
+.innerText =
+
+getCompletionRate()
++ "%";
+
+document
+.getElementById(
+"todayDone"
+)
+.innerText =
+getTodayDone();
+
+}
+
+/* =========================
+   HABIT STATS
+========================= */
+
+document
+.getElementById(
+"statsHabitBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+if(!selectedHabit)
+return;
+
+const habitLogsForHabit =
+
+habitLogs.filter(
+log=>
+log.habitId===
+selectedHabit.id
+);
+
+document
+.getElementById(
+"statsCurrentStreak"
+)
+.innerText =
+
+calculateStreak(
+selectedHabit.id
+);
+
+document
+.getElementById(
+"statsBestStreak"
+)
+.innerText =
+
+calculateStreak(
+selectedHabit.id
+);
+
+document
+.getElementById(
+"statsEntries"
+)
+.innerText =
+
+habitLogsForHabit.length;
+
+let success = 0;
+
+habitLogsForHabit.forEach(log=>{
+
+if(
+selectedHabit.type==="yesno"
+){
+
+if(
+log.status==="done"
+){
+success++;
+}
+
+}
+else{
+
+if(
+Number(log.value||0)
+>=
+Number(selectedHabit.target||0)
+){
+success++;
+}
+
+}
+
+});
+
+const completion =
+
+habitLogsForHabit.length
+
+?
+
+Math.round(
+
+(success /
+habitLogsForHabit.length)
+
+*100
+
+)
+
+:0;
+
+document
+.getElementById(
+"statsCompletion"
+)
+.innerText =
+
+completion + "%";
+
+habitMenuModal.style.display =
+"none";
+
+statsModal.style.display =
+"flex";
+
+}
+);
+
+/* =========================
+   CLOSE STATS
+========================= */
+
+document
+.getElementById(
+"closeStatsBtn"
+)
+.addEventListener(
+"click",
+()=>{
+
+statsModal.style.display =
+"none";
+
+}
+);
+
+/* =========================
+   OUTSIDE CLICK CLOSE
+========================= */
+
+window.addEventListener(
+"click",
+(e)=>{
+
+if(
+e.target ===
+habitTypeModal
+){
+habitTypeModal.style.display =
+"none";
+}
+
+if(
+e.target ===
+yesNoModal
+){
+yesNoModal.style.display =
+"none";
+}
+
+if(
+e.target ===
+measurableModal
+){
+measurableModal.style.display =
+"none";
+}
+
+if(
+e.target ===
+updateModal
+){
+updateModal.style.display =
+"none";
+}
+
+if(
+e.target ===
+habitMenuModal
+){
+habitMenuModal.style.display =
+"none";
+}
+
+if(
+e.target ===
+statsModal
+){
+statsModal.style.display =
+"none";
+}
+
+if(
+e.target ===
+deleteModal
+){
+deleteModal.style.display =
+"none";
+}
+
+}
+);
+
+/* =========================
+   ESC CLOSE
+========================= */
+
+document.addEventListener(
+"keydown",
+(e)=>{
+
+if(
+e.key ===
+"Escape"
+){
+
+habitTypeModal.style.display =
+"none";
+
+yesNoModal.style.display =
+"none";
+
+measurableModal.style.display =
+"none";
+
+updateModal.style.display =
+"none";
+
+habitMenuModal.style.display =
+"none";
+
+statsModal.style.display =
+"none";
+
+deleteModal.style.display =
+"none";
+
+}
+
+}
+);
+
+/* =========================
+   INITIAL REFRESH
+========================= */
+
+async function refreshPage(){
+
+await loadHabits();
+
+await loadLogs();
+
+renderTable();
+
+updateDashboard();
+
+}
+
+window.refreshHabits =
+refreshPage;
+
+/* =========================
+   END
+========================= */
